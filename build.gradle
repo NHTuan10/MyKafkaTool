@@ -1,0 +1,79 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'org.beryx.jlink' version '2.24.1'
+    id "io.freefair.lombok" version "6.4.3"
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    junitVersion = '5.8.1'
+}
+
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+application {
+//    mainModule = 'com.example.mytool'
+    mainClass = 'com.example.mytool.MyApplication'
+}
+
+javafx {
+    version = '17'
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+dependencies {
+// https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients
+    implementation 'org.apache.kafka:kafka-clients:3.2.0'
+    implementation 'org.apache.kafka:kafka-streams:3.2.0'
+// https://mvnrepository.com/artifact/org.apache.kafka/kafka
+    implementation 'org.apache.kafka:kafka_2.13:3.2.0'
+
+    implementation 'io.projectreactor:reactor-core:3.4.18'
+    implementation 'io.projectreactor:reactor-test:3.4.18'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.3'
+// https://mvnrepository.com/artifact/com.google.guava/guava
+    implementation 'com.google.guava:guava:31.1-jre'
+// https://mvnrepository.com/artifact/org.openjfx/javafx-controls
+//    implementation 'org.openjfx:javafx-controls:17'
+// https://mvnrepository.com/artifact/org.openjfx/javafx-fxml
+//    implementation 'org.openjfx:javafx-fxml:17'
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    implementation('no.tornado:tornadofx-controls:1.0.4')
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jlink {
+    imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = 'app'
+    }
+}
+
+jlinkZip {
+    group = 'distribution'
+}

@@ -1,0 +1,14 @@
+module com.example.mytool {
+    requires javafx.controls;
+    requires javafx.fxml;
+    requires static lombok;
+    requires com.fasterxml.jackson.annotation;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.core;
+    requires com.google.common;
+    requires static kafka.clients;
+    requires static kafka.streams;
+
+    opens com.example.mytool to javafx.fxml;
+    exports com.example.mytool;
+}
