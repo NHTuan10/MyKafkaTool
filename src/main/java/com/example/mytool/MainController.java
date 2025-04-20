@@ -82,6 +82,18 @@ public class MainController {
     @FXML
     private ComboBox<String> valueContentType;
 
+    @FXML
+    private ComboBox<MessagePollingPosition> msgPosition;
+
+    public enum MessagePollingPosition {
+        FIRST, LAST;
+
+        @Override
+        public String toString() {
+            return StringUtils.capitalize(this.name());
+        }
+    }
+
     public MainController() {
         this.kafkaConsumerService = new KafkaConsumerService();
     }
@@ -251,6 +263,9 @@ public class MainController {
         keyContentType.setValue(Util.SERDE_STRING);
         valueContentType.setItems(FXCollections.observableArrayList(Util.SERDE_STRING, Util.SERDE_AVRO));
         valueContentType.setValue(Util.SERDE_STRING);
+        msgPosition.setItems(FXCollections.observableArrayList(MessagePollingPosition.values()));
+        msgPosition.setValue(MessagePollingPosition.LAST);
+
     }
 
     @FXML
@@ -264,10 +279,10 @@ public class MainController {
         messageTable.setItems(list);
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
             KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-            list.addAll(kafkaConsumerService.consumeMessages(partition, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs));
+            list.addAll(kafkaConsumerService.consumeMessages(partition, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue()));
         } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
             KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-            list.addAll(kafkaConsumerService.consumeMessages(topic, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs));
+            list.addAll(kafkaConsumerService.consumeMessages(topic, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue()));
         }
         noMessages.setText(list.size() + " Messages");
     }
