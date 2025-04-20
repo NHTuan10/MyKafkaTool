@@ -1,11 +1,18 @@
 package com.example.mytool.manager;
 
 import com.example.mytool.model.kafka.KafkaCluster;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+import java.util.Objects;
 import java.util.Properties;
 
 import static com.example.mytool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
@@ -13,16 +20,16 @@ import static com.example.mytool.constant.AppConstant.OFFSET_RESET_EARLIER;
 
 public class ConsumerCreator {
     //    public static Consumer<Long,String> createConsumer(String consumerGroup){
-    public static Consumer<String, String> createConsumer(KafkaCluster cluster, Integer maxPollRecords) {
+    public static Consumer<String, String> createConsumer(ConsumerCreatorConfig consumerCreatorConfig) {
         Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServer());
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, consumerCreatorConfig.cluster.getBootstrapServer());
 //        properties.put(ConsumerConfig.GROUP_ID_CONFIG,"MyTool"+ UUID.randomUUID());
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "MyTool");
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, consumerCreatorConfig.groupId);
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, consumerCreatorConfig.keyDeserializer);
 //        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,  consumerCreatorConfig.valueDeserializer);
 
-        properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords != null ? maxPollRecords : DEFAULT_MAX_POLL_RECORDS);
+        properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, consumerCreatorConfig.maxPollRecords != null ? consumerCreatorConfig.maxPollRecords : DEFAULT_MAX_POLL_RECORDS);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_RESET_EARLIER);
 
@@ -30,5 +37,18 @@ public class ConsumerCreator {
         Consumer<String, String> consumer = new KafkaConsumer<>(properties);
 //        consumer.subscribe(Collections.singletonList(topic));
         return consumer;
+    }
+
+    @Builder
+    @EqualsAndHashCode
+    public static final class ConsumerCreatorConfig {
+        private final KafkaCluster cluster;
+        private final Integer maxPollRecords;
+        @Builder.Default
+        private String keyDeserializer = StringDeserializer.class.getName();
+        @Builder.Default
+        private String valueDeserializer = StringDeserializer.class.getName();
+        @Builder.Default
+        private String groupId=  "MyTool";
     }
 }

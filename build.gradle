@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
     id 'org.beryx.jlink' version '2.24.1'
     id "io.freefair.lombok" version "6.4.3"
 }
@@ -11,14 +11,17 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://packages.confluent.io/maven"
+    }
 }
 
 ext {
     junitVersion = '5.8.1'
 }
 
-sourceCompatibility = '17'
-targetCompatibility = '17'
+sourceCompatibility = '23'
+targetCompatibility = '23'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -30,7 +33,7 @@ application {
 }
 
 javafx {
-    version = '17'
+    version = '23.0.2'
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
@@ -43,17 +46,18 @@ dependencies {
 
     implementation 'io.projectreactor:reactor-core:3.4.18'
     implementation 'io.projectreactor:reactor-test:3.4.18'
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    compileOnly 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.3'
+    implementation 'io.confluent:kafka-avro-serializer:7.9.0'
 // https://mvnrepository.com/artifact/com.google.guava/guava
     implementation 'com.google.guava:guava:31.1-jre'
 // https://mvnrepository.com/artifact/org.openjfx/javafx-controls
-//    implementation 'org.openjfx:javafx-controls:17'
+//    implementation 'org.openjfx:javafx-controls:17.0.2'
 // https://mvnrepository.com/artifact/org.openjfx/javafx-fxml
-//    implementation 'org.openjfx:javafx-fxml:17'
+//    implementation 'org.openjfx:javafx-fxml:17.0.2'
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")

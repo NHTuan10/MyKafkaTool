@@ -8,6 +8,7 @@ import com.example.mytool.ui.ConsumerGroupOffsetTableItem;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
@@ -26,7 +27,7 @@ public class ClusterManager {
 
     private Map<String, Admin> adminMap;
     private Map<Tuple2<String, ConsumerType>, Consumer<String, String>> consumerMap;
-    private Map<String, Producer<String, String>> producerMap;
+    private Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap;
 
     private static class InstanceHolder {
         private static final ClusterManager INSTANCE = new ClusterManager(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
@@ -36,7 +37,7 @@ public class ClusterManager {
         return InstanceHolder.INSTANCE;
     }
 
-    public ClusterManager(Map<String, Admin> adminMap, Map<Tuple2<String, ConsumerType>, Consumer<String, String>> consumerMap, Map<String, Producer<String, String>> producerMap) {
+    public ClusterManager(Map<String, Admin> adminMap, Map<Tuple2<String, ConsumerType>, Consumer<String, String>> consumerMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
         this.adminMap = adminMap;
         this.consumerMap = consumerMap;
         this.producerMap = producerMap;
@@ -51,8 +52,9 @@ public class ClusterManager {
 //        Consumer<String, String> topicConsumer = ConsumerCreator.createConsumer(cluster, null);
 //        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.PARTITION), partitionConsumer);
 //        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.TOPIC), topicConsumer);
-        Producer<String, String> producer = ProducerCreator.createProducer(cluster);
-        producerMap.put(cluster.getName(), producer);
+        ProducerCreator.ProducerCreatorConfig producerCreatorConfig = ProducerCreator.ProducerCreatorConfig.builder().cluster(cluster).build();
+        KafkaProducer producer = ProducerCreator.createProducer(producerCreatorConfig);
+        producerMap.put(producerCreatorConfig, producer);
     }
 
     public Set<String> getAllTopics(String clusterName) throws ExecutionException, InterruptedException, TimeoutException {
@@ -87,12 +89,19 @@ public class ClusterManager {
 //        return consumerMap.get(Tuples.of(clusterName, consumerType));
 //    }
 
-    public Consumer<String, String> getConsumer(KafkaCluster cluster, ConsumerType consumerType) {
-        return ConsumerCreator.createConsumer(cluster, null);
+    public Consumer<String, String> getConsumer(KafkaCluster cluster) {
+        return ConsumerCreator.createConsumer( ConsumerCreator.ConsumerCreatorConfig.builder().cluster(cluster).maxPollRecords(null).build());
     }
 
-    public Producer<String, String> getProducer(String clusterName) {
-        return producerMap.get(clusterName);
+    public KafkaProducer getProducer(ProducerCreator.ProducerCreatorConfig producerCreatorConfig) {
+        if (producerMap.containsKey(producerCreatorConfig)) {
+            return producerMap.get(producerCreatorConfig);
+        }
+        else {
+            KafkaProducer producer = ProducerCreator.createProducer(producerCreatorConfig);
+            producerMap.put(producerCreatorConfig, producer);
+            return producer;
+        }
     }
 
     public DeleteTopicsResult deleteTopic(String clusterName, String topicName) {

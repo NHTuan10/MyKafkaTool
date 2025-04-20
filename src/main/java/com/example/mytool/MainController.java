@@ -2,11 +2,13 @@ package com.example.mytool;
 
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.manager.ClusterManager;
+import com.example.mytool.manager.ProducerCreator;
 import com.example.mytool.manager.UserPreferenceManager;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.model.kafka.KafkaTopicConfig;
+import com.example.mytool.serde.Util;
 import com.example.mytool.service.KafkaConsumerService;
 import com.example.mytool.ui.*;
 import com.example.mytool.ui.util.DateTimePicker;
@@ -23,13 +25,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.ConfigEntry;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
 import reactor.util.function.Tuple2;
+import reactor.util.function.Tuple3;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -42,6 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 public class MainController {
+    private final ClusterManager clusterManager = ClusterManager.getInstance();
     //    @FXML
 //    private Label welcomeText;
 //    private Tuple2<String, String> newMsg;
@@ -71,6 +75,12 @@ public class MainController {
 
     @FXML
     private DateTimePicker timestampPicker;
+
+    @FXML
+    private ComboBox<String> keyContentType;
+
+    @FXML
+    private ComboBox<String> valueContentType;
 
     public MainController() {
         this.kafkaConsumerService = new KafkaConsumerService();
@@ -111,7 +121,7 @@ public class MainController {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
                 if (ViewUtil.confirmAlert("Delete Topic", "Are you sure to delete " + topic.getName() + " ?", "Yes", "Cancel")) {
-                    ClusterManager.getInstance().deleteTopic(topic.getCluster().getName(), topic.getName());
+                    clusterManager.deleteTopic(topic.getCluster().getName(), topic.getName());
                 }
             }
         });
@@ -132,7 +142,7 @@ public class MainController {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
                 if (ViewUtil.confirmAlert("Purge Topic", "Are you sure to delete all data in the topic " + topic.getName() + " ?", "Yes", "Cancel")) {
                     try {
-                        ClusterManager.getInstance().purgeTopic(topic);
+                        clusterManager.purgeTopic(topic);
                     } catch (ExecutionException | InterruptedException | TimeoutException e) {
                         e.printStackTrace();
                     }
@@ -146,7 +156,7 @@ public class MainController {
                 KafkaPartition partition = (KafkaPartition) selectedPartitionTreeItem.getValue();
                 if (ViewUtil.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.getId() + " ?", "Yes", "Cancel")) {
                     try {
-                        ClusterManager.getInstance().purgePartition(partition);
+                        clusterManager.purgePartition(partition);
                     } catch (ExecutionException | InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -194,7 +204,7 @@ public class MainController {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 ObservableList<KafkaTopicConfig> list = FXCollections.observableArrayList();
                 try {
-                    Collection<ConfigEntry> configs = ClusterManager.getInstance().getTopicConfig(topic.getCluster().getName(), topic.getName());
+                    Collection<ConfigEntry> configs = clusterManager.getTopicConfig(topic.getCluster().getName(), topic.getName());
                     configs.forEach(entry -> list.add(new KafkaTopicConfig(entry.name(), entry.value())));
                     topicConfigTable.setItems(list);
                 } catch (ExecutionException | InterruptedException | TimeoutException e) {
@@ -205,13 +215,13 @@ public class MainController {
                 try {
                     String clusterName = partition.getTopic().getCluster().getName();
                     String topic = partition.getTopic().getName();
-                    Tuple2<Long, Long> partitionOffsetsInfo = ClusterManager.getInstance().getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.getId()));
+                    Tuple2<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.getId()));
                     ObservableList<KafkaTopicConfig> list = FXCollections.observableArrayList(
                             new KafkaTopicConfig("Start Offset", partitionOffsetsInfo.getT1().toString())
                             , new KafkaTopicConfig("End Offset", partitionOffsetsInfo.getT2().toString())
                             , new KafkaTopicConfig("Number of Messages", String.valueOf(partitionOffsetsInfo.getT2() - partitionOffsetsInfo.getT1())));
 
-                    TopicPartitionInfo partitionInfo = ClusterManager.getInstance().getTopicPartitionInfo(clusterName, topic, partition.getId());
+                    TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, partition.getId());
                     Node leader = partitionInfo.leader();
                     list.add(new KafkaTopicConfig(leader.host() + ":" + leader.port(), "Leader"));
                     list.addAll(partitionInfo.replicas().stream().filter(r -> r != leader).map(replica -> {
@@ -229,13 +239,18 @@ public class MainController {
 
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 try {
-                    consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(ClusterManager.getInstance().listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
+                    consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
 
             }
         });
+
+        keyContentType.setItems(FXCollections.observableArrayList(Util.SERDE_STRING));
+        keyContentType.setValue(Util.SERDE_STRING);
+        valueContentType.setItems(FXCollections.observableArrayList(Util.SERDE_STRING, Util.SERDE_AVRO));
+        valueContentType.setValue(Util.SERDE_STRING);
     }
 
     @FXML
@@ -264,7 +279,7 @@ public class MainController {
             AtomicReference modelRef = new AtomicReference<>();
             showAddModal("add-topic-modal.fxml", modelRef);
             NewTopic newTopic = (NewTopic) modelRef.get();
-            CreateTopicsResult result = ClusterManager.getInstance().addTopic(clusterName, newTopic);
+            CreateTopicsResult result = clusterManager.addTopic(clusterName, newTopic);
             result.all().get();
             topicListTreeItem.reloadChildren();
         }
@@ -274,40 +289,49 @@ public class MainController {
     protected void addMessage() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
             KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-            addMessage(null, partition);
+            addMessage(null, partition, keyContentType.getValue(), valueContentType.getValue());
         } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
             KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-            addMessage(topic, null);
+            addMessage(topic, null, keyContentType.getValue(), valueContentType.getValue());
         }
     }
 
 
-    public void addMessage(KafkaTopic kafkaTopic, KafkaPartition partition) throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    public void addMessage(KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType) throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (kafkaTopic == null && partition == null)
             return;
 //        Tuple2<String, String> newMsg = showAddModal();
         // TODO: don't send message with key to Kafka if it's empty
         AtomicReference ref = new AtomicReference<>();
         showAddModal("add-message-modal.fxml", ref);
-        Tuple2<String, String> newMsg = (Tuple2<String, String>) ref.get();
+        Tuple3<String, String, String> newMsg = (Tuple3<String, String, String>) ref.get();
         if (newMsg != null) {
-            Producer<String, String> producer;
-            ProducerRecord<String, String> record;
+            KafkaProducer producer;
+            ProducerRecord record;
             if (partition != null) {
-                producer = ClusterManager.getInstance().getProducer(partition.getTopic().getCluster().getName());
+                ProducerCreator.ProducerCreatorConfig producerConfig = ProducerCreator.ProducerCreatorConfig.builder()
+                        .cluster(partition.getTopic().getCluster())
+                        .keySerializer(Util.getSerdeClass(keyContentType))
+                        .valueSerializer(Util.getSerdeClass(valueContentType))
+                        .build();
+                producer = clusterManager.getProducer(producerConfig);
                 producer.flush();
-                record = StringUtils.isBlank(newMsg.getT1()) ?
-                        new ProducerRecord<>(partition.getTopic().getName(), partition.getId(), null, newMsg.getT2()) :
-                        new ProducerRecord<>(partition.getTopic().getName(), partition.getId(),
-                                newMsg.getT1(), newMsg.getT2());
+                String key = StringUtils.isBlank(newMsg.getT1()) ? null : newMsg.getT1();
+                Object value = Util.convert(valueContentType, newMsg.getT2(), newMsg.getT3());
+                record = new ProducerRecord<>(partition.getTopic().getName(), partition.getId(), key, value);
             } else {
-                producer = ClusterManager.getInstance().getProducer(kafkaTopic.getCluster().getName());
-                record = StringUtils.isBlank(newMsg.getT1()) ?
-                        new ProducerRecord<>(kafkaTopic.getName(), newMsg.getT2()) :
-                        new ProducerRecord<>(kafkaTopic.getName(), newMsg.getT1(), newMsg.getT2());
+                ProducerCreator.ProducerCreatorConfig producerConfig = ProducerCreator.ProducerCreatorConfig.builder()
+                        .cluster(kafkaTopic.getCluster())
+                        .keySerializer(Util.getSerdeClass(keyContentType))
+                        .valueSerializer(Util.getSerdeClass(valueContentType))
+                        .build();
+                producer = clusterManager.getProducer(producerConfig);
+                String key = StringUtils.isBlank(newMsg.getT1()) ? null : newMsg.getT1();
+                Object value = Util.convert(valueContentType, newMsg.getT2(), newMsg.getT3());
+                record = new ProducerRecord<>(kafkaTopic.getName(), key, value);
             }
             try {
-                RecordMetadata metadata = producer.send(record).get();
+                RecordMetadata metadata = (RecordMetadata) producer.send(record).get();
                 System.out.println("record sent with key " + newMsg.getT1() + " to partition " + metadata.partition()
                         + " with offset " + metadata.offset());
 
@@ -355,11 +379,11 @@ public class MainController {
         try {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                Tuple2<Long, Long> partitionInfo = ClusterManager.getInstance().getPartitionOffsetInfo(partition.getTopic().getCluster().getName(), new TopicPartition(partition.getTopic().getName(), partition.getId()));
+                Tuple2<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.getTopic().getCluster().getName(), new TopicPartition(partition.getTopic().getName(), partition.getId()));
                 noMessages.setText((partitionInfo.getT2() - partitionInfo.getT1()) + " Messages");
             } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                long count = ClusterManager.getInstance().getAllPartitionOffsetInfo(topic.getCluster().getName(), topic.getName()).values()
+                long count = clusterManager.getAllPartitionOffsetInfo(topic.getCluster().getName(), topic.getName()).values()
                         .stream().mapToLong(t -> t.getT2() - t.getT1()).sum();
                 noMessages.setText(count + " Messages");
             }

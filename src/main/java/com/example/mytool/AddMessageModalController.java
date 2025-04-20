@@ -19,9 +19,12 @@ public class AddMessageModalController extends ModalController {
     @FXML
     private TextArea value;
     @FXML
+    private TextArea avroSchema;
+    @FXML
     private Button addBtn;
     @FXML
     private Button cancelBtn;
+
 
 //    private AtomicReference<Tuple2<String, String>> newMsg;
 //
@@ -32,7 +35,7 @@ public class AddMessageModalController extends ModalController {
     @FXML
     protected void add() throws IOException {
 //        mainController.setNewMsg(Tuples.of(key.getText(),value.getText()));
-        modelRef.set(Tuples.of(key.getText(), value.getText()));
+        modelRef.set(Tuples.of(key.getText(), value.getText(), avroSchema.getText()));
         Stage stage = (Stage) addBtn.getScene().getWindow();
         stage.close();
     }
