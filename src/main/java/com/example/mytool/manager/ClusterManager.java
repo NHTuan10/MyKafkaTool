@@ -9,7 +9,6 @@ import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
 import org.apache.kafka.common.config.ConfigResource;
@@ -89,8 +88,8 @@ public class ClusterManager {
 //        return consumerMap.get(Tuples.of(clusterName, consumerType));
 //    }
 
-    public Consumer<String, String> getConsumer(KafkaCluster cluster) {
-        return ConsumerCreator.createConsumer( ConsumerCreator.ConsumerCreatorConfig.builder().cluster(cluster).maxPollRecords(null).build());
+    public Consumer getConsumer(ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig) {
+        return ConsumerCreator.createConsumer(consumerCreatorConfig);
     }
 
     public KafkaProducer getProducer(ProducerCreator.ProducerCreatorConfig producerCreatorConfig) {

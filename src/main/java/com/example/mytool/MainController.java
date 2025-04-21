@@ -8,7 +8,7 @@ import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.model.kafka.KafkaTopicConfig;
-import com.example.mytool.serde.Util;
+import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.service.KafkaConsumerService;
 import com.example.mytool.ui.*;
 import com.example.mytool.ui.util.DateTimePicker;
@@ -259,30 +259,37 @@ public class MainController {
             }
         });
 
-        keyContentType.setItems(FXCollections.observableArrayList(Util.SERDE_STRING));
-        keyContentType.setValue(Util.SERDE_STRING);
-        valueContentType.setItems(FXCollections.observableArrayList(Util.SERDE_STRING, Util.SERDE_AVRO));
-        valueContentType.setValue(Util.SERDE_STRING);
+        keyContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING));
+        keyContentType.setValue(SerdeUtil.SERDE_STRING);
+        valueContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING, SerdeUtil.SERDE_AVRO));
+        valueContentType.setValue(SerdeUtil.SERDE_STRING);
         msgPosition.setItems(FXCollections.observableArrayList(MessagePollingPosition.values()));
         msgPosition.setValue(MessagePollingPosition.LAST);
 
+        ViewUtil.copyDataFromTableToClipboard(messageTable);
     }
 
     @FXML
-    protected void retrieveMessages() throws ExecutionException, InterruptedException, TimeoutException {
+    protected void retrieveMessages() throws ExecutionException, InterruptedException, TimeoutException, IOException {
         Long timestampMs = null;
         if (timestampPicker.getValue() != null) {
             timestampMs = ZonedDateTime.of(timestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli();
         }
-
+        String valueContentTypeStr = valueContentType.getValue();
+        String schema = null;
+        if (SerdeUtil.SERDE_AVRO.equals(valueContentTypeStr)) {
+            AtomicReference<Object> modelRef = new AtomicReference<>();
+            showAddModal("add-schema-modal.fxml", modelRef);
+            schema = (String) modelRef.get();
+        }
         ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
         messageTable.setItems(list);
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
             KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-            list.addAll(kafkaConsumerService.consumeMessages(partition, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue()));
+            list.addAll(kafkaConsumerService.consumeMessages(partition, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue(), valueContentTypeStr, schema));
         } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
             KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-            list.addAll(kafkaConsumerService.consumeMessages(topic, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue()));
+            list.addAll(kafkaConsumerService.consumeMessages(topic, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue(), valueContentTypeStr, schema));
         }
         noMessages.setText(list.size() + " Messages");
     }
@@ -326,23 +333,23 @@ public class MainController {
             if (partition != null) {
                 ProducerCreator.ProducerCreatorConfig producerConfig = ProducerCreator.ProducerCreatorConfig.builder()
                         .cluster(partition.getTopic().getCluster())
-                        .keySerializer(Util.getSerdeClass(keyContentType))
-                        .valueSerializer(Util.getSerdeClass(valueContentType))
+                        .keySerializer(SerdeUtil.getSerializeClass(keyContentType))
+                        .valueSerializer(SerdeUtil.getSerializeClass(valueContentType))
                         .build();
                 producer = clusterManager.getProducer(producerConfig);
                 producer.flush();
                 String key = StringUtils.isBlank(newMsg.getT1()) ? null : newMsg.getT1();
-                Object value = Util.convert(valueContentType, newMsg.getT2(), newMsg.getT3());
+                Object value = SerdeUtil.convert(valueContentType, newMsg.getT2(), newMsg.getT3());
                 record = new ProducerRecord<>(partition.getTopic().getName(), partition.getId(), key, value);
             } else {
                 ProducerCreator.ProducerCreatorConfig producerConfig = ProducerCreator.ProducerCreatorConfig.builder()
                         .cluster(kafkaTopic.getCluster())
-                        .keySerializer(Util.getSerdeClass(keyContentType))
-                        .valueSerializer(Util.getSerdeClass(valueContentType))
+                        .keySerializer(SerdeUtil.getSerializeClass(keyContentType))
+                        .valueSerializer(SerdeUtil.getSerializeClass(valueContentType))
                         .build();
                 producer = clusterManager.getProducer(producerConfig);
                 String key = StringUtils.isBlank(newMsg.getT1()) ? null : newMsg.getT1();
-                Object value = Util.convert(valueContentType, newMsg.getT2(), newMsg.getT3());
+                Object value = SerdeUtil.convert(valueContentType, newMsg.getT2(), newMsg.getT3());
                 record = new ProducerRecord<>(kafkaTopic.getName(), key, value);
             }
             try {

@@ -2,12 +2,16 @@ package com.example.mytool.service;
 
 import com.example.mytool.MainController;
 import com.example.mytool.manager.ClusterManager;
+import com.example.mytool.manager.ConsumerCreator;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
+import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.ui.KafkaMessageTableItem;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -22,41 +26,40 @@ import java.util.stream.Collectors;
 
 import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME;
 
+//TODO: refactor this whole class, too many parameters in methods
 public class KafkaConsumerService {
-    public List<KafkaMessageTableItem> consumeMessages(KafkaPartition partition, Integer pollTime, Integer noMessages, Long timestamp, MainController.MessagePollingPosition pollingPosition) {
-        Consumer<String, String> consumer = ClusterManager.getInstance().getConsumer(partition.getTopic().getCluster());
-        TopicPartition partitionInfo = new TopicPartition(partition.getTopic().getName(), partition.getId());
-        Set<TopicPartition> topicPartitions = Set.of(partitionInfo);
-        consumer.assign(topicPartitions);
-        if (timestamp != null) {
-//            TopicPartition tp = new TopicPartition(partition.getTopic().getName(), partition.getId());
-//            OffsetAndTimestamp offsetAndTimestamp = consumer.offsetsForTimes(Map.of(tp, timestamp)).get(tp);
-//            if (offsetAndTimestamp != null) {
-//                consumer.seek(tp, offsetAndTimestamp.offset());
-//            } else return new ArrayList<>();
-            seekOffsetWithTimestamp(consumer, partition.getTopic().getName(), topicPartitions, timestamp);
-        } else {
-            seekOffset(consumer, topicPartitions, pollingPosition, noMessages);
-        }
-        List<KafkaMessageTableItem> list = pollMessages(consumer, pollTime, noMessages, pollingPosition);
-        consumer.close();
-        return list;
+    public List<KafkaMessageTableItem> consumeMessages(KafkaPartition partition, Integer pollTime, Integer noMessages, Long timestamp, MainController.MessagePollingPosition pollingPosition, String valueContentType, String schema) {
+        Set<TopicPartition> topicPartitions = Set.of(new TopicPartition(partition.getTopic().getName(), partition.getId()));
+        return consumeMessagesFromPartitions(partition.getTopic(), topicPartitions, pollTime, noMessages, timestamp, pollingPosition, valueContentType, schema);
+
+    }
+
+    public List<KafkaMessageTableItem> consumeMessages(KafkaTopic kafkaTopic, Integer pollTime, Integer noMessages, Long timestamp, MainController.MessagePollingPosition pollingPosition, String valueContentType, String schema) throws ExecutionException, InterruptedException, TimeoutException {
+        String topicName = kafkaTopic.getName();
+        Set<TopicPartition> topicPartitions = ClusterManager.getInstance().getTopicPartitions(kafkaTopic.getCluster().getName(), topicName)
+                .stream().map(p -> new TopicPartition(topicName, p.partition())).collect(Collectors.toSet());
+
+        return consumeMessagesFromPartitions(kafkaTopic, topicPartitions, pollTime, noMessages, timestamp, pollingPosition, valueContentType, schema);
     }
 
 
-    public List<KafkaMessageTableItem> consumeMessages(KafkaTopic kafkaTopic, Integer pollTime, Integer noMessages, Long timestamp, MainController.MessagePollingPosition pollingPosition) throws ExecutionException, InterruptedException, TimeoutException {
-        String topicName = kafkaTopic.getName();
+    private static Consumer getConsumer(KafkaTopic topic, String valueContentType) {
+        ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(topic.getCluster())
+                .keyDeserializer(StringDeserializer.class.getName())
+                .valueDeserializer(SerdeUtil.getDeserializeClass(valueContentType))
+                .build();
+        return ClusterManager.getInstance().getConsumer(consumerCreatorConfig);
+    }
 
-        Consumer<String, String> consumer = ClusterManager.getInstance().getConsumer(kafkaTopic.getCluster());
-        Set<TopicPartition> topicPartitions = ClusterManager.getInstance().getTopicPartitions(kafkaTopic.getCluster().getName(), topicName)
-                .stream().map(p -> new TopicPartition(topicName, p.partition())).collect(Collectors.toSet());
+    private List<KafkaMessageTableItem> consumeMessagesFromPartitions(KafkaTopic kafkaTopic, Set<TopicPartition> topicPartitions, Integer pollTime, Integer noMessages, Long timestamp, MainController.MessagePollingPosition pollingPosition, String valueContentType, String schema) {
+        Consumer consumer = getConsumer(kafkaTopic, valueContentType);
         consumer.assign(topicPartitions);
         if (timestamp != null) {
-            seekOffsetWithTimestamp(consumer, topicName, topicPartitions, timestamp);
+            seekOffsetWithTimestamp(consumer, kafkaTopic.getName(), topicPartitions, timestamp);
         } else {
             seekOffset(consumer, topicPartitions, pollingPosition, noMessages);
         }
-        List<KafkaMessageTableItem> list = pollMessages(consumer, pollTime, noMessages, pollingPosition);
+        List<KafkaMessageTableItem> list = pollMessages(consumer, pollTime, noMessages, pollingPosition, valueContentType, schema);
         consumer.close();
         return list;
     }
@@ -88,25 +91,39 @@ public class KafkaConsumerService {
         }
     }
 
-    public List<KafkaMessageTableItem> pollMessages(Consumer<String, String> consumer, Integer pollTime, Integer maxMessage, MainController.MessagePollingPosition pollingPosition) {
+    //    @SneakyThrows(IOException.class)
+    public List<KafkaMessageTableItem> pollMessages(Consumer consumer, Integer pollTime, Integer maxMessage, MainController.MessagePollingPosition pollingPosition, String valueContentType, String schema) {
         pollTime = pollTime != null ? pollTime : DEFAULT_POLL_TIME;
         List<KafkaMessageTableItem> list = new ArrayList<>();
-        int count = 0;
+//        int count = 0;
 //        int remainingRetry = 1;
         while (true) {
 //            ConsumerRecords<Long,String> consumerRecords = consumer.poll(1000);
 //                ConsumerRecords<String,String> consumerRecords = consumer.poll(Duration.ofMillis(150));
-            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofMillis(pollTime));
+            ConsumerRecords consumerRecords = consumer.poll(Duration.ofMillis(pollTime));
             if (consumerRecords.isEmpty()) break;
-            consumerRecords.forEach(record -> {
+            for (Object consumerRecord : consumerRecords) {
 //                    System.out.println("Record key " + record.key());
 //                    System.out.println("Record value " + record.value());
 //                    System.out.println("Record partition " + record.partition());
 //                    System.out.println("Record offset " + record.offset());
-                list.add(new KafkaMessageTableItem(record.partition(), record.offset(), record.key(), record.value(), Instant.ofEpochMilli(record.timestamp()).atZone(ZoneId.systemDefault()).toLocalDateTime().toString()));
-            });
+                try {
+                    ConsumerRecord record = (ConsumerRecord) consumerRecord;
+                    String key = record.key().toString();
+                    String value;
+                    if (SerdeUtil.SERDE_AVRO.equals(valueContentType)) {
+                        value = SerdeUtil.deserializeAsJsonString((byte[]) record.value(), schema);
+                    } else {
+                        value = (String) record.value();
+                    }
+
+                    list.add(new KafkaMessageTableItem(record.partition(), record.offset(), key, value, Instant.ofEpochMilli(record.timestamp()).atZone(ZoneId.systemDefault()).toLocalDateTime().toString()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 //            consumer.commitAsync();
-            count += consumerRecords.count();
+//            count += consumerRecords.count();
 //            if (maxMessage != null && count > maxMessage) break;
         }
         if (maxMessage != null) {

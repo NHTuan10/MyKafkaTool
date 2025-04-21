@@ -16,7 +16,7 @@ import static com.example.mytool.constant.AppConstant.OFFSET_RESET_EARLIER;
 
 public class ConsumerCreator {
     //    public static Consumer<Long,String> createConsumer(String consumerGroup){
-    public static Consumer<String, String> createConsumer(ConsumerCreatorConfig consumerCreatorConfig) {
+    public static Consumer createConsumer(ConsumerCreatorConfig consumerCreatorConfig) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, consumerCreatorConfig.cluster.getBootstrapServer());
 //        properties.put(ConsumerConfig.GROUP_ID_CONFIG,"MyTool"+ UUID.randomUUID());
@@ -30,14 +30,15 @@ public class ConsumerCreator {
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_RESET_EARLIER);
 
 //        Consumer<Long,String> consumer = new KafkaConsumer<Long, String>(properties);
-        Consumer<String, String> consumer = new KafkaConsumer<>(properties);
+        Consumer consumer = new KafkaConsumer<>(properties);
 //        consumer.subscribe(Collections.singletonList(topic));
         return consumer;
     }
 
-    @Builder
+    @Builder(builderMethodName = "")
     @EqualsAndHashCode
     public static final class ConsumerCreatorConfig {
+
         private final KafkaCluster cluster;
         private final Integer maxPollRecords;
         @Builder.Default
@@ -46,5 +47,9 @@ public class ConsumerCreator {
         private String valueDeserializer = StringDeserializer.class.getName();
         @Builder.Default
         private String groupId=  "MyTool";
+
+        public static ConsumerCreatorConfigBuilder builder(KafkaCluster cluster) {
+            return new ConsumerCreatorConfigBuilder().cluster(cluster);
+        }
     }
 }
