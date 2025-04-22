@@ -5,6 +5,7 @@ import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.ui.ConsumerGroupOffsetTableItem;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -12,8 +13,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
 import org.apache.kafka.common.config.ConfigResource;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 public class ClusterManager {
 
     private Map<String, Admin> adminMap;
-    private Map<Tuple2<String, ConsumerType>, Consumer<String, String>> consumerMap;
+    private Map<Pair<String, ConsumerType>, Consumer<String, String>> consumerMap;
     private Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap;
 
     private static class InstanceHolder {
@@ -36,7 +35,7 @@ public class ClusterManager {
         return InstanceHolder.INSTANCE;
     }
 
-    public ClusterManager(Map<String, Admin> adminMap, Map<Tuple2<String, ConsumerType>, Consumer<String, String>> consumerMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
+    public ClusterManager(Map<String, Admin> adminMap, Map<Pair<String, ConsumerType>, Consumer<String, String>> consumerMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
         this.adminMap = adminMap;
         this.consumerMap = consumerMap;
         this.producerMap = producerMap;
@@ -115,16 +114,16 @@ public class ClusterManager {
         return adminMap.get(clusterName).createTopics(Set.of(newTopic));
     }
 
-    public Tuple2<Long, Long> getPartitionOffsetInfo(String clusterName, TopicPartition topicPartition) throws ExecutionException, InterruptedException {
+    public Pair<Long, Long> getPartitionOffsetInfo(String clusterName, TopicPartition topicPartition) throws ExecutionException, InterruptedException {
         Admin adminClient = adminMap.get(clusterName);
         ListOffsetsResult.ListOffsetsResultInfo earliestOffsetsResultInfo = adminClient.listOffsets(Map.of(topicPartition, OffsetSpec.earliest()))
                 .partitionResult(topicPartition).get();
         ListOffsetsResult.ListOffsetsResultInfo latestOffsetsResultInfo = adminClient.listOffsets(Map.of(topicPartition, OffsetSpec.latest()))
                 .partitionResult(topicPartition).get();
-        return Tuples.of(earliestOffsetsResultInfo.offset(), latestOffsetsResultInfo.offset());
+        return Pair.of(earliestOffsetsResultInfo.offset(), latestOffsetsResultInfo.offset());
     }
 
-    public Map<TopicPartition, Tuple2<Long, Long>> getAllPartitionOffsetInfo(String clusterName, String topicName) throws ExecutionException, InterruptedException, TimeoutException {
+    public Map<TopicPartition, Pair<Long, Long>> getAllPartitionOffsetInfo(String clusterName, String topicName) throws ExecutionException, InterruptedException, TimeoutException {
         List<TopicPartitionInfo> partitionInfoList = getTopicPartitions(clusterName, topicName);
         return partitionInfoList.stream().collect(Collectors.toMap(p -> new TopicPartition(topicName, p.partition()), p -> {
             try {
@@ -151,9 +150,9 @@ public class ClusterManager {
             try {
                 TopicPartition tp = entry.getKey();
                 OffsetAndMetadata metadata = entry.getValue();
-                Tuple2<Long, Long> startAndEndOffset = getPartitionOffsetInfo(clusterName, tp);
+                Pair<Long, Long> startAndEndOffset = getPartitionOffsetInfo(clusterName, tp);
                 String leaderEpoch = metadata.leaderEpoch().orElse(0).toString();
-                return new ConsumerGroupOffsetTableItem(tp.topic(), tp.partition(), startAndEndOffset.getT1(), startAndEndOffset.getT2(), metadata.offset(), startAndEndOffset.getT2() - metadata.offset(), leaderEpoch);
+                return new ConsumerGroupOffsetTableItem(tp.topic(), tp.partition(), startAndEndOffset.getLeft(), startAndEndOffset.getRight(), metadata.offset(), startAndEndOffset.getRight() - metadata.offset(), leaderEpoch);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -164,7 +163,7 @@ public class ClusterManager {
     public void purgePartition(KafkaPartition kafkaPartition) throws ExecutionException, InterruptedException {
         String clusterName = kafkaPartition.getTopic().getCluster().getName();
         TopicPartition topicPartition = new TopicPartition(kafkaPartition.getTopic().getName(), kafkaPartition.getId());
-        long endOffset = getPartitionOffsetInfo(clusterName, topicPartition).getT2();
+        long endOffset = getPartitionOffsetInfo(clusterName, topicPartition).getRight();
         Map<TopicPartition, RecordsToDelete> map = Map.of(
                 topicPartition,
                 RecordsToDelete.beforeOffset(endOffset)
@@ -175,7 +174,7 @@ public class ClusterManager {
     public void purgeTopic(KafkaTopic kafkaTopic) throws ExecutionException, InterruptedException, TimeoutException {
         String clusterName = kafkaTopic.getCluster().getName();
         Map<TopicPartition, RecordsToDelete> map = getAllPartitionOffsetInfo(clusterName, kafkaTopic.getName()).entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, (entry) -> RecordsToDelete.beforeOffset(entry.getValue().getT2())));
+                .collect(Collectors.toMap(Map.Entry::getKey, (entry) -> RecordsToDelete.beforeOffset(entry.getValue().getRight())));
         adminMap.get(clusterName).deleteRecords(map).all().get();
     }
 }

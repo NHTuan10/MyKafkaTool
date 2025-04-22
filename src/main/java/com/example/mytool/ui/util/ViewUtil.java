@@ -36,9 +36,7 @@ public class ViewUtil {
         alert.setTitle(title);
         Optional<ButtonType> result = alert.showAndWait();
 
-        if (result.orElse(cancel) == yes) {
-            return true;
-        } else return false;
+        return result.orElse(cancel) == yes;
     }
 
     public static void copyDataFromTableToClipboard(TableView tableView) {

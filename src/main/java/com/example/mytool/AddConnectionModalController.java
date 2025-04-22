@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import reactor.util.function.Tuples;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 
@@ -26,7 +26,7 @@ public class AddConnectionModalController extends ModalController {
 
     @FXML
     protected void add() throws IOException {
-        mainController.setNewConnection(Tuples.of(clusterNameTextField.getText(), bootstrapServerTextField.getText()));
+        mainController.setNewConnection(Pair.of(clusterNameTextField.getText(), bootstrapServerTextField.getText()));
         Stage stage = (Stage) addBtn.getScene().getWindow();
         stage.close();
     }

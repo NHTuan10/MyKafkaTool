@@ -109,7 +109,7 @@ public class KafkaConsumerService {
 //                    System.out.println("Record offset " + record.offset());
                 try {
                     ConsumerRecord record = (ConsumerRecord) consumerRecord;
-                    String key = record.key().toString();
+                    String key = record.key() != null ? record.key().toString() : "";
                     String value;
                     if (SerdeUtil.SERDE_AVRO.equals(valueContentType)) {
                         value = SerdeUtil.deserializeAsJsonString((byte[]) record.value(), schema);

@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-import reactor.util.function.Tuples;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.io.IOException;
 
@@ -33,9 +33,16 @@ public class AddMessageModalController extends ModalController {
 //    }
 
     @FXML
+    public void initialize() {
+//        Object schemaText = ((Triple) modelRef.get()).getRight();
+//        if (schemaText != null) {
+//            avroSchema.setText(schemaText.toString());
+//        }
+    }
+    @FXML
     protected void add() throws IOException {
 //        mainController.setNewMsg(Tuples.of(key.getText(),value.getText()));
-        modelRef.set(Tuples.of(key.getText(), value.getText(), avroSchema.getText()));
+        modelRef.set(Triple.of(key.getText(), value.getText(), avroSchema.getText()));
         Stage stage = (Stage) addBtn.getScene().getWindow();
         stage.close();
     }

@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
-    id 'org.beryx.jlink' version '2.24.1'
+    id 'org.beryx.jlink' version '3.1.1'
     id "io.freefair.lombok" version "6.4.3"
 }
 
@@ -11,9 +11,9 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://packages.confluent.io/maven"
-    }
+//    maven {
+//        url "https://packages.confluent.io/maven"
+//    }
 }
 
 ext {
@@ -34,24 +34,24 @@ application {
 
 javafx {
     version = '23.0.2'
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.base']
 }
 
 dependencies {
 // https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients
-    implementation 'org.apache.kafka:kafka-clients:3.2.0'
-    implementation 'org.apache.kafka:kafka-streams:3.2.0'
+    implementation 'org.apache.kafka:kafka-clients:3.9.0'
+    implementation 'org.apache.kafka:kafka-streams:3.9.0'
 // https://mvnrepository.com/artifact/org.apache.kafka/kafka
     implementation 'org.apache.kafka:kafka_2.13:3.2.0'
-
+    implementation('org.apache.avro:avro:1.12.0')
     implementation 'io.projectreactor:reactor-core:3.4.18'
-    implementation 'io.projectreactor:reactor-test:3.4.18'
+//    implementation 'io.projectreactor:reactor-test:3.4.18'
     compileOnly 'org.projectlombok:lombok:1.18.36'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.3'
-    implementation 'io.confluent:kafka-avro-serializer:7.9.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.16.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.0'
+//    implementation 'io.confluent:kafka-avro-serializer:7.9.0'
 // https://mvnrepository.com/artifact/com.google.guava/guava
     implementation 'com.google.guava:guava:31.1-jre'
 // https://mvnrepository.com/artifact/org.openjfx/javafx-controls
@@ -62,7 +62,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     implementation('no.tornado:tornadofx-controls:1.0.4')
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
 
 }
 
@@ -76,6 +76,7 @@ jlink {
     launcher {
         name = 'app'
     }
+    addExtraDependencies("javafx")
 }
 
 jlinkZip {

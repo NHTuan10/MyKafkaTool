@@ -11,6 +11,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.TreeView?>
@@ -18,6 +19,7 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
 <SplitPane dividerPositions="0.29069767441860467" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="1279.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.MainController">
@@ -122,33 +124,33 @@
                                                         </FlowPane>
                                                     </children>
                                                 </AnchorPane>
-                                                <AnchorPane maxHeight="35.0" minHeight="15.0" minWidth="0.0" prefHeight="15.0" prefWidth="726.0">
+                                                <AnchorPane maxHeight="104.0" minHeight="15.0" minWidth="0.0" prefHeight="104.0" prefWidth="937.0">
                                                                                                     <children>
-                                                                                                        <GridPane prefHeight="40.0" prefWidth="420.0">
-                                                                                                                                                                            <columnConstraints>
-                                                                                                                                                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="63.0" />
-                                                                                                                                                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="150.0" />
-                                                <ColumnConstraints maxWidth="108.0" minWidth="31.0" prefWidth="92.0" />
-                                                <ColumnConstraints maxWidth="150.0" minWidth="129.0" prefWidth="129.0" />
-                                                                                                                                                                            </columnConstraints>
-                                                                                                                                                                            <rowConstraints>
-                                                                                                                                                                                <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="29.0" vgrow="SOMETIMES" />
-                                                                                                                                                                            </rowConstraints>
-                                                                                                                                                                            <children>
-                                                                                                                                                                                <Label prefHeight="17.0" prefWidth="58.0" text="Key Type" />
-                                                                                                                                                                                <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="151.0" GridPane.columnIndex="1" />
-                                                                                                                                                                                <Label text="Value Type" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                                                   <GridPane.margin>
-                                                      <Insets left="10.0" />
-                                                   </GridPane.margin></Label>
-                                                                                                                                                                                <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="191.0" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                                                                                                                                                                            </children>
-                                                                                                                                                                        </GridPane>
+                                          <HBox prefHeight="104.0" prefWidth="902.0">
+                                             <children>
+                                                                                                                                                                                <Label prefHeight="17.0" prefWidth="58.0" text="Key Type">
+                                                   <HBox.margin>
+                                                      <Insets right="10.0" />
+                                                   </HBox.margin></Label>
+                                                                                                                                                                                <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="151.0" />
+                                                                                                                                                                                <Label prefHeight="17.0" prefWidth="72.0" text="Value Type">
+                                                   <HBox.margin>
+                                                      <Insets left="10.0" right="10.0" />
+                                                   </HBox.margin></Label>
+                                                                                                                                                                                <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="191.0" />
+                                                <Label prefHeight="17.0" prefWidth="87.0" text="Avro Schema">
+                                                   <HBox.margin>
+                                                      <Insets left="10.0" right="10.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <TextArea fx:id="schemaTextArea" prefHeight="104.0" prefWidth="329.0" />
+                                             </children>
+                                          </HBox>
                                                                                                     </children>
                                                                                                 </AnchorPane>
-                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="355.0" prefWidth="726.0">
+                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="378.0" prefWidth="937.0">
                                                     <children>
-                                                        <TableView fx:id="messageTable" prefHeight="416.0" prefWidth="791.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="0.0">
+                                                        <TableView fx:id="messageTable" layoutY="-1.0" prefHeight="425.0" prefWidth="931.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="-1.0">
                                                             <columns>
                                                                 <TableColumn prefWidth="75.0" text="Partition" />
                                                                 <TableColumn prefWidth="75.0" text="Offset" />
