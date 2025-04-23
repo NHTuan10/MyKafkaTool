@@ -15,6 +15,7 @@ import com.example.mytool.ui.util.DateTimePicker;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -89,6 +90,9 @@ public class MainController {
     @FXML
     private TextArea schemaTextArea;
 
+    @FXML
+    private ProgressIndicator msgTableProgressInd;
+
     public enum MessagePollingPosition {
         FIRST, LAST;
 
@@ -104,6 +108,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        msgTableProgressInd.setVisible(false);
         timestampPicker.setDayCellFactory(param -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -274,29 +279,58 @@ public class MainController {
     }
 
     @FXML
-    protected void retrieveMessages() throws ExecutionException, InterruptedException, TimeoutException, IOException {
-        Long timestampMs = null;
-        if (timestampPicker.getValue() != null) {
-            timestampMs = ZonedDateTime.of(timestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli();
+    protected void retrieveMessages() {
+        if (!(clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?>)
+                && !(clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?>)) {
+            new Alert(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", ButtonType.OK)
+                    .show();
+            return;
         }
         String valueContentTypeStr = valueContentType.getValue();
-        String schema = null;
-        if (SerdeUtil.SERDE_AVRO.equals(valueContentTypeStr)) {
-            AtomicReference<Object> modelRef = new AtomicReference<>();
+        Long timestampMs = timestampPicker.getValue() != null ? ZonedDateTime.of(timestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
+
+//        if (SerdeUtil.SERDE_AVRO.equals(valueContentTypeStr)) {
+//            AtomicReference<Object> modelRef = new AtomicReference<>();
 //            showAddModal("add-schema-modal.fxml", modelRef);
 //            schema = (String) modelRef.get();
-            schema = schemaTextArea.getText();
+        String schema = schemaTextArea.getText();
+//        }
+        if (!validateSchema(valueContentTypeStr, schema)) {
+            return;
         }
         ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
         messageTable.setItems(list);
-        if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
-            KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-            list.addAll(kafkaConsumerService.consumeMessages(partition, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue(), valueContentTypeStr, schema));
-        } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
-            KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-            list.addAll(kafkaConsumerService.consumeMessages(topic, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue(), valueContentTypeStr, schema));
-        }
+        msgTableProgressInd.setVisible(true);
+
+        Task<Void> pollMsgTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
+                    KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
+                    list.addAll(kafkaConsumerService.consumeMessages(partition, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue(), valueContentTypeStr, schema));
+                } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
+                    KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
+                    try {
+                        list.addAll(kafkaConsumerService.consumeMessages(topic, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue(), valueContentTypeStr, schema));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                return null;
+            }
+        };
+        pollMsgTask.setOnSucceeded(_ -> {
+            msgTableProgressInd.setVisible(false);
+        });
+        pollMsgTask.setOnFailed(_ -> {
+            msgTableProgressInd.setVisible(false);
+        });
+
+        new Thread(pollMsgTask).start();
+
         noMessages.setText(list.size() + " Messages");
+
     }
 
     @FXML
@@ -320,13 +354,20 @@ public class MainController {
         } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
             KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
             addMessage(topic, null, keyContentType.getValue(), valueContentType.getValue(), schemaTextArea.getText());
+        } else {
+            new Alert(Alert.AlertType.WARNING, "Please choose a topic or partition to add messages", ButtonType.OK)
+                    .show();
         }
     }
 
 
     public void addMessage(KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        if (kafkaTopic == null && partition == null)
+        if (kafkaTopic == null && partition == null) {
+            new Alert(Alert.AlertType.WARNING, "Please choose a topic or partition to add messages", ButtonType.OK)
+                    .show();
             return;
+        }
+        if (!validateSchema(valueContentType, schema)) return;
 //        Tuple2<String, String> newMsg = showAddModal();
         // TODO: don't send message with key to Kafka if it's empty
 
@@ -368,18 +409,25 @@ public class MainController {
                 System.out.println("Error in sending record");
                 e.printStackTrace();
             }
-            new Thread(() -> {
-                try {
-                    retrieveMessages();
-                } catch (ExecutionException | InterruptedException | TimeoutException | IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).start();
+            //                try {
+            //                } catch (Exception e) {
+            //                    throw new RuntimeException(e);
+            //                }
+            retrieveMessages();
             newMsg = null;
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Added message successfully! Please try \"Retrieve Messages\" to pull the new message", ButtonType.OK);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", ButtonType.OK);
             alert.setTitle("Added message successfully!");
             alert.show();
         }
+    }
+
+    private static boolean validateSchema(String valueContentType, String schema) {
+        if (StringUtils.isBlank(schema) && !SerdeUtil.SERDE_STRING.equals(valueContentType)) {
+            new Alert(Alert.AlertType.WARNING, "Please enter the schema", ButtonType.OK)
+                    .show();
+            return false;
+        }
+        return true;
     }
 
     //    private Tuple2<String, String> showAddMsgModalAndGetResult() throws IOException {

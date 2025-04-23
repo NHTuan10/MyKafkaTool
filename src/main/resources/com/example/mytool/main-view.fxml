@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -22,247 +23,255 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<SplitPane dividerPositions="0.29069767441860467" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="1279.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.MainController">
-    <items>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-            <children>
-                <GridPane layoutX="14.0" layoutY="14.0" prefHeight="482.0" prefWidth="289.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <!--              <columnConstraints>-->
-                    <!--                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
-                    <!--                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
-                    <!--              </columnConstraints>-->
-                    <!--              <rowConstraints>-->
-                    <!--                <RowConstraints maxHeight="236.0" minHeight="10.0" prefHeight="36.0" vgrow="SOMETIMES" />-->
-                    <!--                <RowConstraints maxHeight="446.0" minHeight="10.0" prefHeight="446.0" vgrow="SOMETIMES" />-->
-                    <!--              </rowConstraints>-->
-                    <children>
-                        <!--                  <TreeView fx:id="clusterTree" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2"GridPane.rowIndex="1" />-->
-                        <TreeView fx:id="clusterTree" prefHeight="600.0" prefWidth="345.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
-                        <!--                  <ComboBox fx:id="clusterComboBox"   prefWidth="150.0" GridPane.halignment="LEFT" GridPane.valignment="TOP" />-->
-                        <!--                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">-->
-                        <!--                     <children>-->
-                        <!--                        <Button fx:id="connectBtn" mnemonicParsing="false" text="Connect" />-->
-                        <!--                        <Button fx:id="disconnectBtn" mnemonicParsing="false" text="Disconnect" />-->
-                        <!--                     </children>-->
-                        <!--                  </HBox>-->
-                    </children>
-                    <columnConstraints>
-                        <ColumnConstraints />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints />
-                    </rowConstraints>
-                </GridPane>
-            </children>
-        </AnchorPane>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="601.0" prefWidth="857.0">
-            <children>
-                <TabPane prefHeight="600.0" prefWidth="820.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-29.0" AnchorPane.topAnchor="0.0">
-                    <tabs>
-                        <Tab text="Data">
-                            <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                    <children>
-                                        <SplitPane dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-8.0" AnchorPane.topAnchor="0.0">
-                                            <items>
-                                                <AnchorPane maxHeight="100.0" minHeight="30.0" minWidth="0.0" prefHeight="69.0" prefWidth="427.0">
-                                                    <children>
-                                                        <FlowPane prefHeight="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                            <children>
-                                                                <Button mnemonicParsing="false" onAction="#retrieveMessages" prefHeight="26.0" prefWidth="122.0" text="Retrieve Messages">
-                                                                    <FlowPane.margin>
-                                                                        <Insets left="10.0" top="5.0" />
-                                                                    </FlowPane.margin>
-                                                                </Button>
-                                                                <Button mnemonicParsing="false" onAction="#addMessage" text="Add Message">
-                                                                    <FlowPane.margin>
-                                                                        <Insets left="10.0" top="5.0" />
-                                                                    </FlowPane.margin>
-                                                                </Button>
-                                                                <Label text="Poll Time">
-                                                                    <FlowPane.margin>
-                                                                        <Insets left="10.0" top="5.0" />
-                                                                    </FlowPane.margin>
-                                                                </Label>
-                                                                <TextField fx:id="pollTimeTextField" prefHeight="26.0" prefWidth="51.0" text="500">
-                                                                    <FlowPane.margin>
-                                                                        <Insets top="5.0" />
-                                                                    </FlowPane.margin>
-                                                                </TextField>
-                                                                <Label text="No Messages">
-                                                                    <FlowPane.margin>
-                                                                        <Insets left="10.0" top="5.0" />
-                                                                    </FlowPane.margin>
-                                                                </Label>
-                                                <ComboBox fx:id="msgPosition" prefHeight="26.0" prefWidth="83.0" promptText="LAST" />
-                                                                <TextField fx:id="maxMessagesTextField" prefHeight="26.0" prefWidth="45.0" text="100">
-                                                                    <FlowPane.margin>
-                                                                        <Insets left="10.0" />
-                                                                    </FlowPane.margin>
-                                                                </TextField>
-                                                                <Label text="AfterTimestamp">
-                                                                    <FlowPane.margin>
-                                                                        <Insets left="10.0" top="5.0" />
-                                                                    </FlowPane.margin>
-                                                                </Label>
-                                                                <DateTimePicker fx:id="timestampPicker" prefWidth="200.0">
-                                                                    <FlowPane.margin>
-                                                                        <Insets left="10.0" top="5.0" />
-                                                                    </FlowPane.margin>
-                                                                </DateTimePicker>
-                                                                <Button mnemonicParsing="false" onAction="#countMessages" text="Count Total Messages">
-                                                                    <FlowPane.margin>
-                                                                        <Insets left="10.0" top="5.0" />
-                                                                    </FlowPane.margin>
-                                                                </Button>
-                                                                <Label fx:id="noMessages" text="0 Messages">
-                                                                    <FlowPane.margin>
-                                                                        <Insets left="10.0" top="5.0" />
-                                                                    </FlowPane.margin>
-                                                                </Label>
-                                                            </children>
-                                                        </FlowPane>
-                                                    </children>
-                                                </AnchorPane>
-                                                <AnchorPane maxHeight="104.0" minHeight="15.0" minWidth="0.0" prefHeight="104.0" prefWidth="937.0">
-                                                                                                    <children>
-                                          <HBox prefHeight="104.0" prefWidth="902.0">
-                                             <children>
-                                                                                                                                                                                <Label prefHeight="17.0" prefWidth="58.0" text="Key Type">
-                                                   <HBox.margin>
-                                                      <Insets right="10.0" />
-                                                   </HBox.margin></Label>
-                                                                                                                                                                                <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="151.0" />
-                                                                                                                                                                                <Label prefHeight="17.0" prefWidth="72.0" text="Value Type">
-                                                   <HBox.margin>
-                                                      <Insets left="10.0" right="10.0" />
-                                                   </HBox.margin></Label>
-                                                                                                                                                                                <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="191.0" />
-                                                <Label prefHeight="17.0" prefWidth="87.0" text="Avro Schema">
-                                                   <HBox.margin>
-                                                      <Insets left="10.0" right="10.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextArea fx:id="schemaTextArea" prefHeight="104.0" prefWidth="329.0" />
-                                             </children>
-                                          </HBox>
-                                                                                                    </children>
-                                                                                                </AnchorPane>
-                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="378.0" prefWidth="937.0">
-                                                    <children>
-                                                        <TableView fx:id="messageTable" layoutY="-1.0" prefHeight="425.0" prefWidth="931.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="-1.0">
-                                                            <columns>
-                                                                <TableColumn prefWidth="75.0" text="Partition" />
-                                                                <TableColumn prefWidth="75.0" text="Offset" />
-                                                                <TableColumn prefWidth="75.0" text="Key" />
-                                                                <TableColumn prefWidth="75.0" text="Value" />
-                                                                <TableColumn prefWidth="75.0" text="Timestamp" />
-                                                            </columns>
-                                                        </TableView>
-                                                    </children>
-                                                </AnchorPane>
-                                            </items>
-                                        </SplitPane>
-                                    </children>
-                                </AnchorPane>
-                            </content>
-                        </Tab>
-                        <Tab text="Properties">
-                            <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                    <children>
-                                        <Accordion prefHeight="450.0" prefWidth="429.0">
-                                            <panes>
-                                                <TitledPane animated="false" text="Content Types">
-                                                    <content>
-                                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                            <children>
-                                                                <GridPane>
-                                                                    <columnConstraints>
-                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                                    </columnConstraints>
-                                                                    <rowConstraints>
-                                                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                    </rowConstraints>
-                                                                    <children>
-                                                                        <Label text="Key" />
-                                                                        <ComboBox prefWidth="150.0" GridPane.columnIndex="1" />
-                                                                        <Label text="Value" GridPane.rowIndex="1" />
-                                                                        <ComboBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                                    </children>
-                                                                </GridPane>
-                                                            </children>
-                                                        </AnchorPane>
-                                                    </content>
-                                                </TitledPane>
-                                                <TitledPane animated="false" text="Properties">
-                                                    <content>
-                                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                            <children>
-                                                                <TableView fx:id="topicConfigTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                    <columns>
-                                                                        <TableColumn prefWidth="138.0" text="Name" />
-                                                                        <TableColumn prefWidth="290.0" text="Value" />
-                                                                    </columns>
-                                                                </TableView>
-                                                            </children>
-                                                        </AnchorPane>
-                                                    </content>
-                                                </TitledPane>
-                                                <!--                                  <TitledPane animated="false" text="Properties">-->
-                                                <!--                                    <content>-->
-                                                <!--                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" >-->
-                                                <!--                                            <children>-->
-                                                <!--                                                <TableView fx:id="propertiesTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
-                                                <!--                                                    <columns>-->
-                                                <!--                                                        <TableColumn prefWidth="138.0" text="Name" />-->
-                                                <!--                                                        <TableColumn prefWidth="290.0" text="Value" />-->
-                                                <!--                                                    </columns>-->
-                                                <!--                                                </TableView>-->
-                                                <!--                                            </children>-->
-                                                <!--                                        </AnchorPane>-->
-                                                <!--                                    </content>-->
-                                                <!--                                  </TitledPane>-->
-                                            </panes>
-                                        </Accordion>
-                                    </children>
-                                </AnchorPane>
-                            </content>
-                        </Tab>
-                        <Tab text="Offsets">
-                            <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                    <children>
-                                        <SplitPane dividerPositions="0.1662971175166297" orientation="VERTICAL" prefHeight="453.0" prefWidth="564.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                            <items>
-                                                <AnchorPane maxHeight="100.0" minHeight="30.0" minWidth="0.0" prefHeight="37.0" prefWidth="727.0" />
-                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="727.0">
-                                                    <children>
-                                                        <TableView fx:id="consumerGroupOffsetTable" layoutX="-2.0" layoutY="-58.0" prefHeight="484.0" prefWidth="729.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
-                                                            <columns>
-                                                                <TableColumn prefWidth="75.0" text="Topic" />
-                                                                <TableColumn prefWidth="75.0" text="Partition" />
-                                                                <TableColumn prefWidth="75.0" text="Start" />
-                                                                <TableColumn prefWidth="75.0" text="End" />
-                                                                <TableColumn prefWidth="75.0" text="Offset" />
-                                                                <TableColumn prefWidth="75.0" text="Lag" />
-                                                                <TableColumn prefWidth="75.0" text="Last Commit" />
-                                                            </columns>
-                                                        </TableView>
-                                                    </children>
-                                                </AnchorPane>
-                                            </items>
-                                        </SplitPane>
-                                    </children>
-                                </AnchorPane>
-                            </content>
-                        </Tab>
-                    </tabs>
-                </TabPane>
-            </children>
-        </AnchorPane>
-    </items>
-</SplitPane>
+
+<AnchorPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.MainController">
+   <children>
+      <SplitPane dividerPositions="0.29069767441860467" prefHeight="614.0" prefWidth="1271.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="0.0">
+          <items>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                  <children>
+                      <GridPane layoutX="14.0" layoutY="14.0" prefHeight="482.0" prefWidth="289.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <!--              <columnConstraints>-->
+                          <!--                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
+                          <!--                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
+                          <!--              </columnConstraints>-->
+                          <!--              <rowConstraints>-->
+                          <!--                <RowConstraints maxHeight="236.0" minHeight="10.0" prefHeight="36.0" vgrow="SOMETIMES" />-->
+                          <!--                <RowConstraints maxHeight="446.0" minHeight="10.0" prefHeight="446.0" vgrow="SOMETIMES" />-->
+                          <!--              </rowConstraints>-->
+                          <children>
+                              <!--                  <TreeView fx:id="clusterTree" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2"GridPane.rowIndex="1" />-->
+                              <TreeView fx:id="clusterTree" prefHeight="600.0" prefWidth="345.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
+                              <!--                  <ComboBox fx:id="clusterComboBox"   prefWidth="150.0" GridPane.halignment="LEFT" GridPane.valignment="TOP" />-->
+                              <!--                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">-->
+                              <!--                     <children>-->
+                              <!--                        <Button fx:id="connectBtn" mnemonicParsing="false" text="Connect" />-->
+                              <!--                        <Button fx:id="disconnectBtn" mnemonicParsing="false" text="Disconnect" />-->
+                              <!--                     </children>-->
+                              <!--                  </HBox>-->
+                          </children>
+                          <columnConstraints>
+                              <ColumnConstraints />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints />
+                          </rowConstraints>
+                      </GridPane>
+                  </children>
+              </AnchorPane>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="601.0" prefWidth="857.0">
+                  <children>
+                      <TabPane prefHeight="600.0" prefWidth="820.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-29.0" AnchorPane.topAnchor="0.0">
+                          <tabs>
+                              <Tab text="Data">
+                                  <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                          <children>
+                                              <SplitPane dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-8.0" AnchorPane.topAnchor="0.0">
+                                                  <items>
+                                                      <AnchorPane maxHeight="100.0" minHeight="30.0" minWidth="0.0" prefHeight="69.0" prefWidth="427.0">
+                                                          <children>
+                                                              <FlowPane prefHeight="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                  <children>
+                                                                      <Button mnemonicParsing="false" onAction="#retrieveMessages" prefHeight="26.0" prefWidth="122.0" text="Poll Messages">
+                                                                          <FlowPane.margin>
+                                                                              <Insets left="10.0" top="5.0" />
+                                                                          </FlowPane.margin>
+                                                                      </Button>
+                                                                      <Button mnemonicParsing="false" onAction="#addMessage" text="Add Message">
+                                                                          <FlowPane.margin>
+                                                                              <Insets left="10.0" top="5.0" />
+                                                                          </FlowPane.margin>
+                                                                      </Button>
+                                                                      <Label text="Poll Time">
+                                                                          <FlowPane.margin>
+                                                                              <Insets left="10.0" top="5.0" />
+                                                                          </FlowPane.margin>
+                                                                      </Label>
+                                                                      <TextField fx:id="pollTimeTextField" prefHeight="26.0" prefWidth="51.0" text="500">
+                                                                          <FlowPane.margin>
+                                                                              <Insets top="5.0" />
+                                                                          </FlowPane.margin>
+                                                                      </TextField>
+                                                                      <Label text="No Messages">
+                                                                          <FlowPane.margin>
+                                                                              <Insets left="10.0" top="5.0" />
+                                                                          </FlowPane.margin>
+                                                                      </Label>
+                                                      <ComboBox fx:id="msgPosition" prefHeight="26.0" prefWidth="83.0" promptText="LAST" />
+                                                                      <TextField fx:id="maxMessagesTextField" prefHeight="26.0" prefWidth="45.0" text="100">
+                                                                          <FlowPane.margin>
+                                                                              <Insets left="10.0" />
+                                                                          </FlowPane.margin>
+                                                                      </TextField>
+                                                                      <Label text="AfterTimestamp">
+                                                                          <FlowPane.margin>
+                                                                              <Insets left="10.0" top="5.0" />
+                                                                          </FlowPane.margin>
+                                                                      </Label>
+                                                                      <DateTimePicker fx:id="timestampPicker" prefWidth="200.0">
+                                                                          <FlowPane.margin>
+                                                                              <Insets left="10.0" top="5.0" />
+                                                                          </FlowPane.margin>
+                                                                      </DateTimePicker>
+                                                                      <Button mnemonicParsing="false" onAction="#countMessages" text="Count Total Messages">
+                                                                          <FlowPane.margin>
+                                                                              <Insets left="10.0" top="5.0" />
+                                                                          </FlowPane.margin>
+                                                                      </Button>
+                                                                      <Label fx:id="noMessages" text="0 Messages">
+                                                                          <FlowPane.margin>
+                                                                              <Insets left="10.0" top="5.0" />
+                                                                          </FlowPane.margin>
+                                                                      </Label>
+                                                                  </children>
+                                                              </FlowPane>
+                                                          </children>
+                                                      </AnchorPane>
+                                                      <AnchorPane maxHeight="104.0" maxWidth="-Infinity" minHeight="15.0" minWidth="0.0" prefHeight="104.0" prefWidth="900.0">
+                                                                                                          <children>
+                                                <HBox prefHeight="104.0" prefWidth="897.0" AnchorPane.rightAnchor="0.0">
+                                                   <children>
+                                                                                                                                                                                      <Label prefHeight="17.0" prefWidth="79.0" text="Key Type">
+                                                         <HBox.margin>
+                                                            <Insets right="10.0" />
+                                                         </HBox.margin>
+                                                      </Label>
+                                                                                                                                                                                      <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="151.0" />
+                                                                                                                                                                                      <Label prefHeight="17.0" prefWidth="72.0" text="Value Type">
+                                                         <HBox.margin>
+                                                            <Insets left="10.0" right="10.0" />
+                                                         </HBox.margin>
+                                                      </Label>
+                                                                                                                                                                                      <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="191.0" />
+                                                      <Label prefHeight="17.0" prefWidth="87.0" text="Avro Schema">
+                                                         <HBox.margin>
+                                                            <Insets left="10.0" right="10.0" />
+                                                         </HBox.margin>
+                                                      </Label>
+                                                      <TextArea fx:id="schemaTextArea" prefHeight="104.0" prefWidth="329.0" />
+                                                   </children>
+                                                </HBox>
+                                                                                                          </children>
+                                                                                                      </AnchorPane>
+                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="378.0" prefWidth="937.0">
+                                                          <children>
+                                                              <TableView fx:id="messageTable" layoutY="-1.0" prefHeight="425.0" prefWidth="931.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="-1.0">
+                                                                  <columns>
+                                                                      <TableColumn prefWidth="75.0" text="Partition" />
+                                                                      <TableColumn prefWidth="75.0" text="Offset" />
+                                                                      <TableColumn prefWidth="75.0" text="Key" />
+                                                                      <TableColumn prefWidth="75.0" text="Value" />
+                                                                      <TableColumn prefWidth="75.0" text="Timestamp" />
+                                                                  </columns>
+                                                              </TableView>
+                                                          </children>
+                                                      </AnchorPane>
+                                                  </items>
+                                              </SplitPane>
+                                          </children>
+                                      </AnchorPane>
+                                  </content>
+                              </Tab>
+                              <Tab text="Properties">
+                                  <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                          <children>
+                                              <Accordion prefHeight="450.0" prefWidth="429.0">
+                                                  <panes>
+                                                      <TitledPane animated="false" text="Content Types">
+                                                          <content>
+                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                  <children>
+                                                                      <GridPane>
+                                                                          <columnConstraints>
+                                                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                          </columnConstraints>
+                                                                          <rowConstraints>
+                                                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                          </rowConstraints>
+                                                                          <children>
+                                                                              <Label text="Key" />
+                                                                              <ComboBox prefWidth="150.0" GridPane.columnIndex="1" />
+                                                                              <Label text="Value" GridPane.rowIndex="1" />
+                                                                              <ComboBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                                          </children>
+                                                                      </GridPane>
+                                                                  </children>
+                                                              </AnchorPane>
+                                                          </content>
+                                                      </TitledPane>
+                                                      <TitledPane animated="false" text="Properties">
+                                                          <content>
+                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                  <children>
+                                                                      <TableView fx:id="topicConfigTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                          <columns>
+                                                                              <TableColumn prefWidth="138.0" text="Name" />
+                                                                              <TableColumn prefWidth="290.0" text="Value" />
+                                                                          </columns>
+                                                                      </TableView>
+                                                                  </children>
+                                                              </AnchorPane>
+                                                          </content>
+                                                      </TitledPane>
+                                                      <!--                                  <TitledPane animated="false" text="Properties">-->
+                                                      <!--                                    <content>-->
+                                                      <!--                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" >-->
+                                                      <!--                                            <children>-->
+                                                      <!--                                                <TableView fx:id="propertiesTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
+                                                      <!--                                                    <columns>-->
+                                                      <!--                                                        <TableColumn prefWidth="138.0" text="Name" />-->
+                                                      <!--                                                        <TableColumn prefWidth="290.0" text="Value" />-->
+                                                      <!--                                                    </columns>-->
+                                                      <!--                                                </TableView>-->
+                                                      <!--                                            </children>-->
+                                                      <!--                                        </AnchorPane>-->
+                                                      <!--                                    </content>-->
+                                                      <!--                                  </TitledPane>-->
+                                                  </panes>
+                                              </Accordion>
+                                          </children>
+                                      </AnchorPane>
+                                  </content>
+                              </Tab>
+                              <Tab text="Offsets">
+                                  <content>
+                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                          <children>
+                                              <SplitPane dividerPositions="0.1662971175166297" orientation="VERTICAL" prefHeight="453.0" prefWidth="564.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                  <items>
+                                                      <AnchorPane maxHeight="100.0" minHeight="30.0" minWidth="0.0" prefHeight="37.0" prefWidth="727.0" />
+                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="727.0">
+                                                          <children>
+                                                              <TableView fx:id="consumerGroupOffsetTable" layoutX="-2.0" layoutY="-58.0" prefHeight="484.0" prefWidth="729.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
+                                                                  <columns>
+                                                                      <TableColumn prefWidth="75.0" text="Topic" />
+                                                                      <TableColumn prefWidth="75.0" text="Partition" />
+                                                                      <TableColumn prefWidth="75.0" text="Start" />
+                                                                      <TableColumn prefWidth="75.0" text="End" />
+                                                                      <TableColumn prefWidth="75.0" text="Offset" />
+                                                                      <TableColumn prefWidth="75.0" text="Lag" />
+                                                                      <TableColumn prefWidth="75.0" text="Last Commit" />
+                                                                  </columns>
+                                                              </TableView>
+                                                          </children>
+                                                      </AnchorPane>
+                                                  </items>
+                                              </SplitPane>
+                                          </children>
+                                      </AnchorPane>
+                                  </content>
+                              </Tab>
+                          </tabs>
+                      </TabPane>
+                  </children>
+              </AnchorPane>
+          </items>
+      </SplitPane>
+      <ProgressIndicator fx:id="msgTableProgressInd" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="1279.0" visible="false" />
+   </children>
+</AnchorPane>

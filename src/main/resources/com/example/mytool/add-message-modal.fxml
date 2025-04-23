@@ -41,8 +41,8 @@
                                         </HBox>
                                         <TextArea fx:id="key" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
                                         <TextArea fx:id="value" prefHeight="108.0" prefWidth="520.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <TextArea fx:id="avroSchema" disable="true" layoutX="59.0" layoutY="69.0" prefHeight="108.0" prefWidth="520.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                              <Label layoutX="10.0" layoutY="114.0" text="Avro Schema" GridPane.rowIndex="2" />
+                              <TextArea fx:id="avroSchema" disable="true" layoutX="59.0" layoutY="69.0" prefHeight="108.0" prefWidth="520.0" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Label layoutX="10.0" layoutY="114.0" text="Avro Schema" visible="false" GridPane.rowIndex="2" />
                                     </children>
                                 </GridPane>
                             </children>

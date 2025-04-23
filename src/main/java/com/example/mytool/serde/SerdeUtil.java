@@ -64,6 +64,10 @@ public class SerdeUtil {
     public static String deserializeAsJsonString(byte[] data, String schemaStr) throws IOException {
         Schema schema = new Schema.Parser().parse(schemaStr);
         GenericRecord avroRecord = deserialize(data, schema);
+        return convertAvroGenericRecordToJson(schema, avroRecord);
+    }
+
+    public static String convertAvroGenericRecordToJson(Schema schema, GenericRecord avroRecord) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         JsonEncoder jsonEncoder = EncoderFactory.get().jsonEncoder(schema, outputStream);
         GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);

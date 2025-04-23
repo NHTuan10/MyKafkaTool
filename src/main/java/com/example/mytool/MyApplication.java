@@ -24,6 +24,7 @@ public class MyApplication extends Application {
         stage.setTitle("MyTool");
         stage.setScene(scene);
         stage.show();
+//        stage.setResizable(false);
         initClusterPanel(stage);
         initTopicConfigUI(stage);
     }
