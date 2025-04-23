@@ -173,7 +173,7 @@
                                       </AnchorPane>
                                   </content>
                               </Tab>
-                              <Tab text="Properties">
+                              <Tab fx:id="propertiesTab" text="Properties">
                                   <content>
                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                           <children>
@@ -238,7 +238,7 @@
                                       </AnchorPane>
                                   </content>
                               </Tab>
-                              <Tab text="Offsets">
+                              <Tab fx:id="offsetsTab" text="Offsets">
                                   <content>
                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                           <children>

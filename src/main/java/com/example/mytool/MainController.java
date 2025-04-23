@@ -93,6 +93,12 @@ public class MainController {
     @FXML
     private ProgressIndicator msgTableProgressInd;
 
+    @FXML
+    private Tab propertiesTab;
+
+    @FXML
+    private Tab offsetsTab;
+
     public enum MessagePollingPosition {
         FIRST, LAST;
 
