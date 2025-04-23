@@ -45,6 +45,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME;
+
 
 public class MainController {
     private final ClusterManager clusterManager = ClusterManager.getInstance();
@@ -118,6 +120,7 @@ public class MainController {
     @FXML
     public void initialize() {
         msgTableProgressInd.setVisible(false);
+        pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME));
         timestampPicker.setDayCellFactory(param -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -329,16 +332,16 @@ public class MainController {
                 return null;
             }
         };
-        pollMsgTask.setOnSucceeded(_ -> {
+        pollMsgTask.setOnSucceeded(event -> {
             msgTableProgressInd.setVisible(false);
+            noMessages.setText(list.size() + " Messages");
         });
-        pollMsgTask.setOnFailed(_ -> {
+        pollMsgTask.setOnFailed(event -> {
             msgTableProgressInd.setVisible(false);
         });
 
         new Thread(pollMsgTask).start();
 
-        noMessages.setText(list.size() + " Messages");
 
     }
 

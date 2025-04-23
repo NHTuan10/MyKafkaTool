@@ -22,9 +22,10 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 
 
-<AnchorPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.MainController">
+<AnchorPane prefHeight="661.0" prefWidth="1334.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.MainController">
    <children>
       <SplitPane dividerPositions="0.29069767441860467" prefHeight="614.0" prefWidth="1271.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="0.0">
           <items>
@@ -65,11 +66,11 @@
                           <tabs>
                               <Tab text="Data">
                                   <content>
-                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                      <AnchorPane minHeight="0.0" minWidth="0.0">
                                           <children>
                                               <SplitPane dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-8.0" AnchorPane.topAnchor="0.0">
                                                   <items>
-                                                      <AnchorPane maxHeight="100.0" minHeight="30.0" minWidth="0.0" prefHeight="69.0" prefWidth="427.0">
+                                                      <AnchorPane maxHeight="100.0" minHeight="30.0" minWidth="0.0" prefHeight="69.0">
                                                           <children>
                                                               <FlowPane prefHeight="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                   <children>
@@ -128,43 +129,54 @@
                                                               </FlowPane>
                                                           </children>
                                                       </AnchorPane>
-                                                      <AnchorPane maxHeight="104.0" maxWidth="-Infinity" minHeight="15.0" minWidth="0.0" prefHeight="104.0" prefWidth="900.0">
+                                                      <AnchorPane maxHeight="104.0" maxWidth="-Infinity" minHeight="15.0" minWidth="0.0" prefHeight="104.0" prefWidth="977.0">
                                                                                                           <children>
-                                                <HBox prefHeight="104.0" prefWidth="897.0" AnchorPane.rightAnchor="0.0">
+                                                <HBox prefHeight="104.0" prefWidth="965.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="5.0">
                                                    <children>
-                                                                                                                                                                                      <Label prefHeight="17.0" prefWidth="79.0" text="Key Type">
+                                                                                                                                                                                      <Label prefHeight="17.0" prefWidth="73.0" text="Key Type">
                                                          <HBox.margin>
                                                             <Insets right="10.0" />
                                                          </HBox.margin>
+                                                         <padding>
+                                                            <Insets left="5.0" />
+                                                         </padding>
                                                       </Label>
-                                                                                                                                                                                      <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="151.0" />
+                                                                                                                                                                                      <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="130.0" />
                                                                                                                                                                                       <Label prefHeight="17.0" prefWidth="72.0" text="Value Type">
                                                          <HBox.margin>
                                                             <Insets left="10.0" right="10.0" />
                                                          </HBox.margin>
                                                       </Label>
-                                                                                                                                                                                      <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="191.0" />
+                                                                                                                                                                                      <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="130.0" />
                                                       <Label prefHeight="17.0" prefWidth="87.0" text="Avro Schema">
                                                          <HBox.margin>
                                                             <Insets left="10.0" right="10.0" />
                                                          </HBox.margin>
                                                       </Label>
-                                                      <TextArea fx:id="schemaTextArea" prefHeight="104.0" prefWidth="329.0" />
+                                                      <TextArea fx:id="schemaTextArea" prefHeight="93.0" prefWidth="388.0">
+                                                         <HBox.margin>
+                                                            <Insets right="5.0" />
+                                                         </HBox.margin>
+                                                      </TextArea>
                                                    </children>
                                                 </HBox>
                                                                                                           </children>
                                                                                                       </AnchorPane>
                                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="378.0" prefWidth="937.0">
                                                           <children>
-                                                              <TableView fx:id="messageTable" layoutY="-1.0" prefHeight="425.0" prefWidth="931.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="-1.0">
-                                                                  <columns>
-                                                                      <TableColumn prefWidth="75.0" text="Partition" />
-                                                                      <TableColumn prefWidth="75.0" text="Offset" />
-                                                                      <TableColumn prefWidth="75.0" text="Key" />
-                                                                      <TableColumn prefWidth="75.0" text="Value" />
-                                                                      <TableColumn prefWidth="75.0" text="Timestamp" />
-                                                                  </columns>
-                                                              </TableView>
+                                                <StackPane AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="0.0">
+                                                   <children>
+                                                                    <TableView fx:id="messageTable">
+                                                                        <columns>
+                                                                            <TableColumn prefWidth="75.0" text="Partition" />
+                                                                            <TableColumn prefWidth="75.0" text="Offset" />
+                                                                            <TableColumn prefWidth="75.0" text="Key" />
+                                                                            <TableColumn prefWidth="75.0" text="Value" />
+                                                                            <TableColumn prefWidth="75.0" text="Timestamp" />
+                                                                        </columns>
+                                                                    </TableView>
+                                                   </children>
+                                                </StackPane>
                                                           </children>
                                                       </AnchorPane>
                                                   </items>
@@ -179,7 +191,7 @@
                                           <children>
                                               <Accordion prefHeight="450.0" prefWidth="429.0">
                                                   <panes>
-                                                      <TitledPane animated="false" text="Content Types">
+                                                      <TitledPane animated="false" text="Content Types" visible="false">
                                                           <content>
                                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                                   <children>
@@ -238,13 +250,12 @@
                                       </AnchorPane>
                                   </content>
                               </Tab>
-                              <Tab fx:id="offsetsTab" text="Offsets">
+                              <Tab fx:id="offsetsTab" text="CG Offsets">
                                   <content>
                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                           <children>
-                                              <SplitPane dividerPositions="0.1662971175166297" orientation="VERTICAL" prefHeight="453.0" prefWidth="564.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                              <SplitPane orientation="VERTICAL" prefHeight="453.0" prefWidth="564.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                   <items>
-                                                      <AnchorPane maxHeight="100.0" minHeight="30.0" minWidth="0.0" prefHeight="37.0" prefWidth="727.0" />
                                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="727.0">
                                                           <children>
                                                               <TableView fx:id="consumerGroupOffsetTable" layoutX="-2.0" layoutY="-58.0" prefHeight="484.0" prefWidth="729.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
