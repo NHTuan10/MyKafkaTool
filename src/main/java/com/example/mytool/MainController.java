@@ -100,7 +100,7 @@ public class MainController {
     private Tab offsetsTab;
 
     @FXML
-    private Button countMessages;
+    private Button countMessagesBtn;
 
     public enum MessagePollingPosition {
         FIRST, LAST;
