@@ -130,7 +130,7 @@ public class MainController {
             try {
 //                TreeItem treeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
 //                if (treeItem != null && treeItem.getParent() == null && AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue())){
-                showAddModal("add-connection-modal.fxml", new AtomicReference<>());
+                showAddModal("add-connection-modal.fxml", "Add New Connection", new AtomicReference<>());
                 if (newConnection != null) {
                     KafkaCluster cluster = new KafkaCluster(newConnection.getLeft(), newConnection.getRight());
                     ViewUtil.addClusterConnIntoClusterTreeView(clusterTree, cluster);
@@ -347,7 +347,7 @@ public class MainController {
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
             String clusterName = ((KafkaTopicListTreeItem.KafkaTopicListTreeItemValue) topicListTreeItem.getValue()).getCluster().getName();
             AtomicReference modelRef = new AtomicReference<>();
-            showAddModal("add-topic-modal.fxml", modelRef);
+            showAddModal("add-topic-modal.fxml", "Add New Topic", modelRef);
             NewTopic newTopic = (NewTopic) modelRef.get();
             CreateTopicsResult result = clusterManager.addTopic(clusterName, newTopic);
             result.all().get();
@@ -381,7 +381,7 @@ public class MainController {
         // TODO: don't send message with key to Kafka if it's empty
 
         AtomicReference ref = new AtomicReference<>();
-        showAddModal("add-message-modal.fxml", ref);
+        showAddModal("add-message-modal.fxml", "Add New Message", ref);
         Triple<String, String, String> newMsg = (Triple<String, String, String>) ref.get();
         if (newMsg != null) {
             KafkaProducer producer;
@@ -440,7 +440,7 @@ public class MainController {
     }
 
     //    private Tuple2<String, String> showAddMsgModalAndGetResult() throws IOException {
-    private void showAddModal(String modalFxml, AtomicReference<Object> modelRef) throws IOException {
+    private void showAddModal(String modalFxml, String title, AtomicReference<Object> modelRef) throws IOException {
         Stage stage = new Stage();
 //        FXMLLoader addMsgModalLoader = new FXMLLoader(
 //                AddMessageModalController.class.getResource("add-message-modal.fxml"));
@@ -453,7 +453,7 @@ public class MainController {
         ModalController modalController = modalLoader.getController();
         modalController.setMainController(this);
         modalController.setModelRef(modelRef);
-        stage.setTitle("Add Message");
+        stage.setTitle(title);
         stage.initModality(Modality.WINDOW_MODAL);
 //        ActionEvent event
 //        stage.initOwner(
