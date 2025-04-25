@@ -6,8 +6,7 @@ import com.example.mytool.ui.ConsumerGroupListTreeItem;
 import com.example.mytool.ui.KafkaTopicListTreeItem;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.*;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -39,34 +38,45 @@ public class ViewUtil {
         return result.orElse(cancel) == yes;
     }
 
-    public static void copyDataFromTableToClipboard(TableView tableView) {
+    public static void enableCopyDataFromTableToClipboard(TableView tableView) {
         tableView.getSelectionModel().setCellSelectionEnabled(true);
         tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         MenuItem item = new MenuItem("Copy");
         item.setOnAction(event -> {
-            ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
-            int old_r = -1;
-            StringBuilder clipboardString = new StringBuilder();
-            for (TablePosition p : posList) {
-                int r = p.getRow();
-                int c = p.getColumn();
-                Object cell = ((TableColumn) tableView.getColumns().get(c)).getCellData(r);
-                if (cell == null)
-                    cell = "";
-                if (old_r == r)
-                    clipboardString.append('\t');
-                else if (old_r != -1)
-                    clipboardString.append('\n');
-                clipboardString.append(cell);
-                old_r = r;
-            }
-            final ClipboardContent content = new ClipboardContent();
-            content.putString(clipboardString.toString());
-            Clipboard.getSystemClipboard().setContent(content);
+            copyTableSelectionToClipboard(tableView);
         });
         ContextMenu menu = new ContextMenu();
         menu.getItems().add(item);
         tableView.setContextMenu(menu);
+
+        final KeyCodeCombination keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN);
+        tableView.setOnKeyPressed(event -> {
+            if (keyCodeCopy.match(event)) {
+                copyTableSelectionToClipboard(tableView);
+            }
+        });
+    }
+
+    public static void copyTableSelectionToClipboard(TableView tableView) {
+        ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
+        int old_r = -1;
+        StringBuilder clipboardString = new StringBuilder();
+        for (TablePosition p : posList) {
+            int r = p.getRow();
+            int c = p.getColumn();
+            Object cell = ((TableColumn) tableView.getColumns().get(c)).getCellData(r);
+            if (cell == null)
+                cell = "";
+            if (old_r == r)
+                clipboardString.append('\t');
+            else if (old_r != -1)
+                clipboardString.append('\n');
+            clipboardString.append(cell);
+            old_r = r;
+        }
+        final ClipboardContent content = new ClipboardContent();
+        content.putString(clipboardString.toString());
+        Clipboard.getSystemClipboard().setContent(content);
     }
 }

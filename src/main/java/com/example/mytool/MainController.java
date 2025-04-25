@@ -287,7 +287,7 @@ public class MainController {
         msgPosition.setItems(FXCollections.observableArrayList(MessagePollingPosition.values()));
         msgPosition.setValue(MessagePollingPosition.LAST);
 
-        ViewUtil.copyDataFromTableToClipboard(messageTable);
+        ViewUtil.enableCopyDataFromTableToClipboard(messageTable);
     }
 
     @FXML
@@ -341,8 +341,6 @@ public class MainController {
         });
 
         new Thread(pollMsgTask).start();
-
-
     }
 
     @FXML
