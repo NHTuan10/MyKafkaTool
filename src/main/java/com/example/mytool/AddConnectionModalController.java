@@ -26,7 +26,8 @@ public class AddConnectionModalController extends ModalController {
 
     @FXML
     protected void add() throws IOException {
-        mainController.setNewConnection(Pair.of(clusterNameTextField.getText(), bootstrapServerTextField.getText()));
+//        mainController.setNewConnection(Pair.of(clusterNameTextField.getText(), bootstrapServerTextField.getText()));
+        modelRef.set(Pair.of(clusterNameTextField.getText(), bootstrapServerTextField.getText()));
         Stage stage = (Stage) addBtn.getScene().getWindow();
         stage.close();
     }

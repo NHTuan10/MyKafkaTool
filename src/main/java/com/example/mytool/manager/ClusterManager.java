@@ -4,6 +4,8 @@ import com.example.mytool.model.ConsumerType;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
+import com.example.mytool.producer.creator.ConsumerCreator;
+import com.example.mytool.producer.creator.ProducerCreator;
 import com.example.mytool.ui.ConsumerGroupOffsetTableItem;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.admin.*;

@@ -1,4 +1,4 @@
-package com.example.mytool.manager;
+package com.example.mytool.producer.creator;
 
 import com.example.mytool.model.kafka.KafkaCluster;
 import lombok.Builder;

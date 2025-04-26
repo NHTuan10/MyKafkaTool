@@ -1,15 +1,28 @@
 package com.example.mytool.ui.util;
 
+import com.example.mytool.ModalController;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.ui.ConsumerGroupListTreeItem;
+import com.example.mytool.ui.KafkaPartitionsTableItem;
 import com.example.mytool.ui.KafkaTopicListTreeItem;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.common.Node;
+import org.apache.kafka.common.TopicPartitionInfo;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ViewUtil {
 
@@ -78,5 +91,52 @@ public class ViewUtil {
         final ClipboardContent content = new ClipboardContent();
         content.putString(clipboardString.toString());
         Clipboard.getSystemClipboard().setContent(content);
+    }
+
+    public static KafkaPartitionsTableItem mapToUIPartitionTableItem(TopicPartitionInfo partitionInfo, Pair<Long, Long> partitionOffsetsInfo) {
+        Node leader = partitionInfo.leader();
+        return new KafkaPartitionsTableItem(
+                partitionInfo.partition(),
+                partitionOffsetsInfo.getLeft(),
+                partitionOffsetsInfo.getRight(),
+                partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft(),
+                leader.host() + ":" + leader.port(),
+                FXCollections.observableArrayList(partitionInfo.isr().stream().filter(r -> r != leader).map(replica -> replica.host() + ":" + replica.port()).toList()),
+                FXCollections.observableArrayList(partitionInfo.replicas().stream().filter(r -> r != leader && !partitionInfo.isr().contains(r)).map(replica -> replica.host() + ":" + replica.port()).toList()));
+    }
+
+    //    private Tuple2<String, String> showAddMsgModalAndGetResult() throws IOException {
+    public static void showAddModal(String modalFxml, String title, AtomicReference<Object> modelRef, final Map<String, String> inputVarMap) throws IOException {
+        Stage stage = new Stage();
+//        FXMLLoader addMsgModalLoader = new FXMLLoader(
+//                AddMessageModalController.class.getResource("add-message-modal.fxml"));
+
+        FXMLLoader modalLoader = new FXMLLoader(
+                ViewUtil.class.getResource(modalFxml));
+        Parent parent = modalLoader.load();
+
+//        AddMessageModalController addMessageModalController =  modalLoader.getController();
+        ModalController modalController = modalLoader.getController();
+//        modalController.setParentController(parentController);
+        modalController.setModelRef(modelRef);
+        modalController.setTextFieldOrAreaText(modalController, inputVarMap);
+        stage.setTitle(title);
+        stage.initModality(Modality.WINDOW_MODAL);
+//        ActionEvent event
+//        stage.initOwner(
+//                ((Node)event.getSource()).getScene().getWindow() );
+        stage.setScene(new Scene(parent));
+        stage.showAndWait();
+//        return modelRef.get();
+    }
+
+
+    public static void showAlertDialog(Alert.AlertType alertType, String text, String title, ButtonType... buttonTypes) {
+        Alert alert = new Alert(alertType, text, buttonTypes);
+        if (title != null) {
+            alert.setTitle(title);
+        }
+
+        alert.show();
     }
 }

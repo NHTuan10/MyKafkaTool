@@ -2,9 +2,9 @@ package com.example.mytool.service;
 
 import com.example.mytool.MainController;
 import com.example.mytool.manager.ClusterManager;
-import com.example.mytool.manager.ConsumerCreator;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
+import com.example.mytool.producer.creator.ConsumerCreator;
 import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.ui.KafkaMessageTableItem;
 import org.apache.kafka.clients.consumer.Consumer;
