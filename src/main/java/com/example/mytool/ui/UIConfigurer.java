@@ -1,6 +1,8 @@
 package com.example.mytool.ui;
 
 import com.example.mytool.constant.AppConstant;
+import com.example.mytool.exception.ClusterNameExistedException;
+import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.manager.UserPreferenceManager;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.scene.control.TableColumn;
@@ -9,10 +11,12 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.stream.IntStream;
 
+@Slf4j
 public class UIConfigurer {
     public static TableView<KafkaMessageTableItem> configureMessageTableView(Stage stage) {
         TableView<KafkaMessageTableItem> messageTableView = (TableView<KafkaMessageTableItem>) stage.getScene().lookup("#messageTable");
@@ -78,9 +82,13 @@ public class UIConfigurer {
 
         UserPreferenceManager.loadUserPreference().connections().forEach((cluster -> {
             try {
-                ViewUtil.addClusterConnIntoClusterTreeView(clusterTree, cluster);
-            } catch (IOException e) {
-                e.printStackTrace();
+                if (!ViewUtil.isClusterNameExistedInTree(clusterTree, cluster.getName())) {
+                    ClusterManager.getInstance().connectToCluster(cluster);
+                    ViewUtil.addClusterConnIntoClusterTreeView(clusterTree, cluster);
+                }
+            } catch (IOException | ClusterNameExistedException e) {
+                log.error("Error when add new connection during loading user preferences", e);
+                throw new RuntimeException(e);
             }
         }));
         TableView<KafkaMessageTableItem> messageTableView = UIConfigurer.configureMessageTableView(stage);

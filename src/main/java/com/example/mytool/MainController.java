@@ -312,7 +312,6 @@ public class MainController {
 //            return;
 //        }
         if (!validateSchema(valueContentType, schema)) return;
-//        Tuple2<String, String> newMsg = showAddModal();
         // TODO: don't send message with key to Kafka if it's empty
 
         AtomicReference ref = new AtomicReference<>();

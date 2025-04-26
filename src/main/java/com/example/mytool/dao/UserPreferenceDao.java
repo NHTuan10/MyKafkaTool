@@ -18,7 +18,8 @@ public class UserPreferenceDao {
 
     public UserPreference loadUserPreference() throws IOException {
         String data = Files.asCharSource(new File(filePath), StandardCharsets.UTF_8).read();
-        return objectMapper.readValue(data, UserPreference.class);
+        UserPreference userPreference = objectMapper.readValue(data, UserPreference.class);
+        return userPreference;
     }
 
     public synchronized void saveUserPreference(UserPreference userPreference) throws IOException {

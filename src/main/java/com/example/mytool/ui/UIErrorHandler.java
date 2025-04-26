@@ -8,18 +8,20 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+@Slf4j
 public class UIErrorHandler {
     public static void showError(Thread t, Throwable e) {
-        System.err.println("***Default exception handler***");
+        log.error("***Default exception handler***", e);
         if (Platform.isFxApplicationThread()) {
             showErrorDialog(e);
         } else {
-            System.err.println("An unexpected error occurred in " + t);
+            log.error("An unexpected error occurred in " + t);
 
         }
     }
@@ -36,7 +38,7 @@ public class UIErrorHandler {
             dialog.setScene(new Scene(root, 450, 600));
             dialog.show();
         } catch (IOException exc) {
-            exc.printStackTrace();
+            log.error("Error loading error dialog", exc);
         }
     }
 }

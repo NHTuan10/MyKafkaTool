@@ -1,7 +1,8 @@
 package com.example.mytool.ui.util;
 
 import com.example.mytool.ModalController;
-import com.example.mytool.manager.ClusterManager;
+import com.example.mytool.MyApplication;
+import com.example.mytool.exception.ClusterNameExistedException;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.ui.ConsumerGroupListTreeItem;
 import com.example.mytool.ui.KafkaPartitionsTableItem;
@@ -24,11 +25,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+
 public class ViewUtil {
 
-    public static void addClusterConnIntoClusterTreeView(TreeView clusterTree, KafkaCluster cluster) throws IOException {
-        ClusterManager.getInstance().connectToCluster(cluster);
-        TreeItem<Object> brokerTreeItem = new TreeItem<>(cluster.getName());
+    public static void addClusterConnIntoClusterTreeView(TreeView clusterTree, KafkaCluster cluster) throws IOException, ClusterNameExistedException {
+        String clusterName = cluster.getName();
+        if (isClusterNameExistedInTree(clusterTree, clusterName)) {
+            throw new ClusterNameExistedException(clusterName, "Cluster already exists");
+        }
+
+        TreeItem<Object> brokerTreeItem = new TreeItem<>(clusterName);
         TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster));
         ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster));
 
@@ -39,6 +45,11 @@ public class ViewUtil {
         brokerTreeItem.getChildren().add(consumerGroupListTreeItem);
 
         clusterTree.getRoot().getChildren().add(brokerTreeItem);
+    }
+
+    public static boolean isClusterNameExistedInTree(TreeView clusterTree, String clusterName) throws ClusterNameExistedException {
+        return ((ObservableList<TreeItem>) clusterTree.getRoot().getChildren()).stream()
+                .filter(treeItem -> treeItem.getValue().equals(clusterName)).findAny().isPresent();
     }
 
     public static boolean confirmAlert(String title, String text, String okDoneText, String cancelCloseText) {
@@ -112,7 +123,7 @@ public class ViewUtil {
 //                AddMessageModalController.class.getResource("add-message-modal.fxml"));
 
         FXMLLoader modalLoader = new FXMLLoader(
-                ViewUtil.class.getResource(modalFxml));
+                MyApplication.class.getResource(modalFxml));
         Parent parent = modalLoader.load();
 
 //        AddMessageModalController addMessageModalController =  modalLoader.getController();
@@ -137,6 +148,6 @@ public class ViewUtil {
             alert.setTitle(title);
         }
 
-        alert.show();
+        alert.showAndWait();
     }
 }

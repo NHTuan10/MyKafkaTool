@@ -1,5 +1,6 @@
 package com.example.mytool.manager;
 
+import com.example.mytool.exception.ClusterNameExistedException;
 import com.example.mytool.model.ConsumerType;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
@@ -43,11 +44,15 @@ public class ClusterManager {
         this.producerMap = producerMap;
     }
 
-    public void connectToCluster(KafkaCluster cluster) {
+    public void connectToCluster(KafkaCluster cluster) throws ClusterNameExistedException {
+        String clusterName = cluster.getName();
+        if (adminMap.containsKey(clusterName)) {
+            throw new ClusterNameExistedException(clusterName, "Cluster already exists");
+        }
         Properties properties = new Properties();
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServer());
         Admin adminClient = Admin.create(properties);
-        adminMap.put(cluster.getName(), adminClient);
+        adminMap.put(clusterName, adminClient);
 //        Consumer<String, String> partitionConsumer = ConsumerCreator.createConsumer(cluster, null);
 //        Consumer<String, String> topicConsumer = ConsumerCreator.createConsumer(cluster, null);
 //        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.PARTITION), partitionConsumer);
@@ -57,6 +62,20 @@ public class ClusterManager {
         producerMap.put(producerCreatorConfig, producer);
     }
 
+    public void closeClusterConnection(String clusterName) {
+
+        Admin adminClient = adminMap.get(clusterName);
+        adminClient.close();
+//        Consumer<String, String> partitionConsumer = ConsumerCreator.createConsumer(cluster, null);
+//        Consumer<String, String> topicConsumer = ConsumerCreator.createConsumer(cluster, null);
+//        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.PARTITION), partitionConsumer);
+//        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.TOPIC), topicConsumer);
+        producerMap.forEach((producerCreatorConfig, producer) -> {
+            if (producerCreatorConfig.getClusterName().equals(clusterName)) {
+                producer.close();
+            }
+        });
+    }
     public Set<String> getAllTopics(String clusterName) throws ExecutionException, InterruptedException, TimeoutException {
         Admin adminClient = adminMap.get(clusterName);
         ListTopicsResult result = adminClient.listTopics();

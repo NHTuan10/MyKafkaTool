@@ -3,6 +3,7 @@ package com.example.mytool.producer.creator;
 import com.example.mytool.model.kafka.KafkaCluster;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -23,10 +24,18 @@ public class ProducerCreator {
     @Builder
     @EqualsAndHashCode
     public static final class ProducerCreatorConfig {
+
         private final KafkaCluster cluster;
         @Builder.Default
+        @Getter
         private String keySerializer = StringSerializer.class.getName();
+
         @Builder.Default
+        @Getter
         private String valueSerializer = StringSerializer.class.getName();
+
+        public String getClusterName() {
+            return cluster.getName();
+        }
     }
 }

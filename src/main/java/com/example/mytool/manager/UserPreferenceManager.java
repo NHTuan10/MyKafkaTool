@@ -46,4 +46,10 @@ public class UserPreferenceManager {
         userPreference.connections().add(cluster);
         saveUserPreference(userPreference);
     }
+
+    public synchronized static void removeClusterFromUserPreference(String clusterName) throws IOException {
+        UserPreference userPreference = loadUserPreference();
+        userPreference.connections().removeIf(cluster -> cluster.getName().equals(clusterName));
+        saveUserPreference(userPreference);
+    }
 }
