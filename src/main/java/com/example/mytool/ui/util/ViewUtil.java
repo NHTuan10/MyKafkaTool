@@ -4,9 +4,10 @@ import com.example.mytool.ModalController;
 import com.example.mytool.MyApplication;
 import com.example.mytool.exception.ClusterNameExistedException;
 import com.example.mytool.model.kafka.KafkaCluster;
-import com.example.mytool.ui.ConsumerGroupListTreeItem;
-import com.example.mytool.ui.KafkaPartitionsTableItem;
-import com.example.mytool.ui.KafkaTopicListTreeItem;
+import com.example.mytool.ui.cg.ConsumerGroupListTreeItem;
+import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
+import com.example.mytool.ui.topic.KafkaTopicListTreeItem;
+import javafx.beans.property.Property;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -21,6 +22,9 @@ import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartitionInfo;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,7 +53,7 @@ public class ViewUtil {
 
     public static boolean isClusterNameExistedInTree(TreeView clusterTree, String clusterName) throws ClusterNameExistedException {
         return ((ObservableList<TreeItem>) clusterTree.getRoot().getChildren()).stream()
-                .filter(treeItem -> treeItem.getValue().equals(clusterName)).findAny().isPresent();
+                .anyMatch(treeItem -> treeItem.getValue().equals(clusterName));
     }
 
     public static boolean confirmAlert(String title, String text, String okDoneText, String cancelCloseText) {
@@ -149,5 +153,10 @@ public class ViewUtil {
         }
 
         alert.showAndWait();
+    }
+
+    public static List<String> getPropertyFieldNamesFromTableItem(Class<?> tableIemClass) {
+        List<String> fieldNames = Arrays.stream(tableIemClass.getDeclaredFields()).filter(f -> Property.class.isAssignableFrom(f.getType())).map(Field::getName).toList();
+        return fieldNames;
     }
 }

@@ -17,27 +17,39 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class ProducerUtil {
-    public static void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, Message message) throws ExecutionException, InterruptedException {
+    public static void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, Message message)
+            throws ExecutionException, InterruptedException {
+
         KafkaCluster cluster = partition != null ? partition.getTopic().getCluster() : kafkaTopic.getCluster();
-        ProducerCreator.ProducerCreatorConfig producerConfig = ProducerCreator.ProducerCreatorConfig.builder()
+
+        ProducerCreator.ProducerCreatorConfig producerConfig = createProducerConfig(cluster, message);
+        KafkaProducer producer = ClusterManager.getInstance().getProducer(producerConfig);
+        producer.flush();
+
+        ProducerRecord<String, Object> producerRecord = createProducerRecord(kafkaTopic, partition, message);
+
+        RecordMetadata metadata = (RecordMetadata) producer.send(producerRecord).get();
+        log.info("Record sent with key '{}' to partition {} with offset {}",
+                message.key(), metadata.partition(), metadata.offset());
+    }
+
+    private static ProducerCreator.ProducerCreatorConfig createProducerConfig(KafkaCluster cluster, Message message) {
+        return ProducerCreator.ProducerCreatorConfig.builder()
                 .cluster(cluster)
                 .keySerializer(SerdeUtil.getSerializeClass(message.keyContentType()))
                 .valueSerializer(SerdeUtil.getSerializeClass(message.valueContentType()))
                 .build();
-        KafkaProducer producer = ClusterManager.getInstance().getProducer(producerConfig);
-        producer.flush();
+    }
+
+    private static ProducerRecord<String, Object> createProducerRecord(KafkaTopic kafkaTopic, KafkaPartition partition,
+                                                                       Message message) {
+
         String key = StringUtils.isBlank(message.key()) ? null : message.key();
         Object value = SerdeUtil.convert(message.valueContentType(), message.value(), message.schema());
-        ProducerRecord record;
         if (partition != null) {
-            record = new ProducerRecord<>(partition.getTopic().getName(), partition.getId(), key, value);
+            return new ProducerRecord<>(partition.getTopic().getName(), partition.getId(), key, value);
         } else {
-            record = new ProducerRecord<>(kafkaTopic.getName(), key, value);
+            return new ProducerRecord<>(kafkaTopic.getName(), key, value);
         }
-
-        RecordMetadata metadata = (RecordMetadata) producer.send(record).get();
-        log.info("record sent with key " + message.key() + " to partition " + metadata.partition()
-                + " with offset " + metadata.offset());
-
     }
 }

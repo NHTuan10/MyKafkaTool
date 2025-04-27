@@ -1,8 +1,9 @@
-package com.example.mytool.ui;
+package com.example.mytool.ui.topic;
 
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
+import com.example.mytool.ui.partition.KafkaPartitionTreeItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -46,7 +47,8 @@ public class KafkaTopicTreeItem<T> extends TreeItem<T> {
                 List<TopicPartitionInfo> partitionInfoList = ClusterManager.getInstance().getTopicPartitions(topic.getCluster().getName(), topic.getName());
 
                 partitionInfoList.forEach(partitionInfo -> {
-                    KafkaPartition partition = new KafkaPartition(partitionInfo.partition(), topic, partitionInfo);
+//                    KafkaPartition partition = new KafkaPartition(partitionInfo.partition(), topic, partitionInfo);
+                    KafkaPartition partition = new KafkaPartition(partitionInfo.partition(), topic);
                     children.add(new KafkaPartitionTreeItem<>((T) partition));
                 });
 

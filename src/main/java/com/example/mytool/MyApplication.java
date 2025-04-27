@@ -19,9 +19,8 @@ public class MyApplication extends Application {
         stage.setTitle("MyTool");
         stage.setScene(scene);
         stage.show();
-//        stage.setResizable(false);
         UIConfigurer.initClusterPanel(stage);
-        UIConfigurer.configureTopicConfigTableView(stage);
+
     }
 
     public static void main(String[] args) {

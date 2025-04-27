@@ -7,7 +7,14 @@ import com.example.mytool.producer.Message;
 import com.example.mytool.producer.ProducerUtil;
 import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.service.KafkaConsumerService;
-import com.example.mytool.ui.*;
+import com.example.mytool.ui.KafkaClusterTree;
+import com.example.mytool.ui.KafkaMessageTableItem;
+import com.example.mytool.ui.UIPropertyItem;
+import com.example.mytool.ui.cg.ConsumerGroupOffsetTableItem;
+import com.example.mytool.ui.cg.ConsumerGroupTreeItem;
+import com.example.mytool.ui.partition.KafkaPartitionTreeItem;
+import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
+import com.example.mytool.ui.topic.KafkaTopicTreeItem;
 import com.example.mytool.ui.util.DateTimePicker;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
@@ -33,21 +40,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME;
+import static com.example.mytool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
+import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
 public class MainController {
     private final ClusterManager clusterManager = ClusterManager.getInstance();
-    //    @FXML
-//    private Label welcomeText;
-//    private Tuple2<String, String> newMsg;
+
     private KafkaConsumerService kafkaConsumerService;
-    //    private Tuple2<String, String> newConnection;
-//    private Pair<String, String> newConnection;
+
     @FXML
     private TreeView clusterTree;
 
@@ -58,7 +64,7 @@ public class MainController {
     private TableView<ConsumerGroupOffsetTableItem> consumerGroupOffsetTable;
 
     @FXML
-    private TableView<UIProperty> topicConfigTable;
+    private TableView<UIPropertyItem> topicConfigTable;
 
     @FXML
     private TextField pollTimeTextField;
@@ -82,7 +88,7 @@ public class MainController {
     private ComboBox<String> valueContentType;
 
     @FXML
-    private ComboBox<MessagePollingPosition> msgPosition;
+    private ComboBox<KafkaConsumerService.MessagePollingPosition> msgPosition;
 
     @FXML
     private TextArea schemaTextArea;
@@ -111,15 +117,9 @@ public class MainController {
     @FXML
     private TitledPane partitionsTitledPane;
 
-    KafkaClusterTree kafkaClusterTree;
-    public enum MessagePollingPosition {
-        FIRST, LAST;
+    private KafkaClusterTree kafkaClusterTree;
 
-        @Override
-        public String toString() {
-            return StringUtils.capitalize(this.name());
-        }
-    }
+    private Map<TreeItem, ObservableList<KafkaMessageTableItem>> treeMsgTableItemCache = new ConcurrentHashMap<>();
 
     public MainController() {
         this.kafkaConsumerService = new KafkaConsumerService();
@@ -127,9 +127,11 @@ public class MainController {
 
     @FXML
     public void initialize() {
+
         msgTableProgressInd.setVisible(false);
         partitionsTitledPane.setVisible(false);
-        pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME));
+        pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME_MS));
+        maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
         timestampPicker.setDayCellFactory(param -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -137,17 +139,40 @@ public class MainController {
                 setDisable(empty || date.compareTo(LocalDate.now()) > 0);
             }
         });
+        keyContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING));
+        keyContentType.setValue(SerdeUtil.SERDE_STRING);
+        valueContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING, SerdeUtil.SERDE_AVRO));
+        valueContentType.setValue(SerdeUtil.SERDE_STRING);
+        msgPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
+        msgPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
+
         this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree);
         kafkaClusterTree.configureClusterTreeActionMenu();
+        configureClusterTreeSelectedItemChanged();
 
+        ViewUtil.enableCopyDataFromTableToClipboard(messageTable);
+
+
+    }
+
+    private void configureClusterTreeSelectedItemChanged() {
         clusterTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             // Display the selection and its complete path from the root.
             if (newValue != null && newValue != oldValue) {
+                // disable/hide UI tab & titled
                 cgOffsetsTab.setDisable(true);
-                dataTab.setDisable(false);
+//                dataTab.setDisable(true);
                 propertiesTab.setDisable(true);
+
                 partitionsTitledPane.setVisible(false);
-                messageTable.setItems(FXCollections.emptyObservableList());
+
+                // if some clear msg table
+                if (treeMsgTableItemCache.containsKey(newValue)) {
+                    messageTable.setItems(treeMsgTableItemCache.get(newValue));
+                } else {
+                    messageTable.setItems(FXCollections.emptyObservableList());
+                }
+
                 if (!(newValue instanceof ConsumerGroupTreeItem)) {
                     consumerGroupOffsetTable.setItems(FXCollections.emptyObservableList());
                 }
@@ -158,9 +183,9 @@ public class MainController {
 
             if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                ObservableList<UIProperty> config = FXCollections.observableArrayList();
+                ObservableList<UIPropertyItem> config = FXCollections.observableArrayList();
                 try {
-                    // Enable tabs and show/hide titled panes in tab
+                    // Enable  datatabs and show/hide titled panes in tab
                     dataTab.setDisable(false);
                     propertiesTab.setDisable(false);
                     partitionsTitledPane.setVisible(true);
@@ -168,7 +193,7 @@ public class MainController {
                     String clusterName = topic.getCluster().getName();
                     String topicName = topic.getName();
                     Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
-                    configEntries.forEach(entry -> config.add(new UIProperty(entry.name(), entry.value())));
+                    configEntries.forEach(entry -> config.add(new UIPropertyItem(entry.name(), entry.value())));
                     topicConfigTable.setItems(config);
                     // partitions table
                     refreshPartitionsTbl(clusterName, topicName);
@@ -180,14 +205,19 @@ public class MainController {
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
+                TreeItem topicTreeItem = selectedItem.getParent();
+                if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
+                    ObservableList observableList = treeMsgTableItemCache.get(topicTreeItem).filtered(item -> item.getPartition() == partition.getId());
+                    messageTable.setItems(observableList);
+                }
                 try {
                     String clusterName = partition.getTopic().getCluster().getName();
                     String topic = partition.getTopic().getName();
                     Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.getId()));
-                    ObservableList<UIProperty> list = FXCollections.observableArrayList(
-                            new UIProperty(UIProperty.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
-                            , new UIProperty(UIProperty.END_OFFSET, partitionOffsetsInfo.getRight().toString())
-                            , new UIProperty(UIProperty.NO_MESSAGES, String.valueOf(partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft())));
+                    ObservableList<UIPropertyItem> list = FXCollections.observableArrayList(
+                            new UIPropertyItem(UIPropertyItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
+                            , new UIPropertyItem(UIPropertyItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
+                            , new UIPropertyItem(UIPropertyItem.NO_MESSAGES, String.valueOf(partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft())));
 
                     TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, partition.getId());
                     list.addAll(getPartitionInfoForUI(partitionInfo));
@@ -210,27 +240,18 @@ public class MainController {
 
             }
         });
-
-        keyContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING));
-        keyContentType.setValue(SerdeUtil.SERDE_STRING);
-        valueContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING, SerdeUtil.SERDE_AVRO));
-        valueContentType.setValue(SerdeUtil.SERDE_STRING);
-        msgPosition.setItems(FXCollections.observableArrayList(MessagePollingPosition.values()));
-        msgPosition.setValue(MessagePollingPosition.LAST);
-
-        ViewUtil.enableCopyDataFromTableToClipboard(messageTable);
     }
 
 
-    private static List<UIProperty> getPartitionInfoForUI(TopicPartitionInfo partitionInfo) {
-        List<UIProperty> list = new ArrayList<>();
+    private static List<UIPropertyItem> getPartitionInfoForUI(TopicPartitionInfo partitionInfo) {
+        List<UIPropertyItem> list = new ArrayList<>();
         Node leader = partitionInfo.leader();
-        list.add(new UIProperty(leader.host() + ":" + leader.port(), UIProperty.LEADER));
+        list.add(new UIPropertyItem(leader.host() + ":" + leader.port(), UIPropertyItem.LEADER));
         list.addAll(partitionInfo.replicas().stream().filter(r -> r != leader).map(replica -> {
             if (partitionInfo.isr().contains(replica)) {
-                return new UIProperty(replica.host() + ":" + replica.port(), UIProperty.REPLICA_IN_SYNC);
+                return new UIPropertyItem(replica.host() + ":" + replica.port(), UIPropertyItem.REPLICA_IN_SYNC);
             } else {
-                return new UIProperty(replica.host() + ":" + replica.port(), UIProperty.REPLICA_NOT_IN_SYNC);
+                return new UIPropertyItem(replica.host() + ":" + replica.port(), UIPropertyItem.REPLICA_NOT_IN_SYNC);
             }
         }).toList());
         return list;
@@ -238,8 +259,9 @@ public class MainController {
 
     @FXML
     protected void retrieveMessages() {
-        if (!(clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?>)
-                && !(clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?>)) {
+        TreeItem selectedTreeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
+        if (!(selectedTreeItem instanceof KafkaTopicTreeItem<?>)
+                && !(selectedTreeItem instanceof KafkaPartitionTreeItem<?>)) {
             ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
             return;
         }
@@ -257,18 +279,27 @@ public class MainController {
         }
         ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
         messageTable.setItems(list);
+        treeMsgTableItemCache.put(selectedTreeItem, list);
         msgTableProgressInd.setVisible(true);
 
         Task<Void> pollMsgTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-                if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
+                KafkaConsumerService.PollingOptions pollingOptions =
+                        KafkaConsumerService.PollingOptions.builder()
+                                .pollTime(Integer.parseInt(pollTimeTextField.getText()))
+                                .noMessages(Integer.parseInt(maxMessagesTextField.getText()))
+                                .timestamp(timestampMs)
+                                .pollingPosition(msgPosition.getValue())
+                                .valueContentType(valueContentTypeStr)
+                                .schema(schema).build();
+                if (selectedTreeItem instanceof KafkaPartitionTreeItem<?> selectedItem) {
                     KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                    list.addAll(kafkaConsumerService.consumeMessages(partition, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue(), valueContentTypeStr, schema));
-                } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
+                    list.addAll(kafkaConsumerService.consumeMessages(partition, pollingOptions));
+                } else if (selectedTreeItem instanceof KafkaTopicTreeItem<?> selectedItem) {
                     KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                     try {
-                        list.addAll(kafkaConsumerService.consumeMessages(topic, Integer.parseInt(pollTimeTextField.getText()), Integer.parseInt(maxMessagesTextField.getText()), timestampMs, msgPosition.getValue(), valueContentTypeStr, schema));
+                        list.addAll(kafkaConsumerService.consumeMessages(topic, pollingOptions));
                     } catch (Exception e) {
                         log.error("Error when poll messages", e);
                         throw new RuntimeException(e);
@@ -286,6 +317,7 @@ public class MainController {
             msgTableProgressInd.setVisible(false);
         });
 
+//        Platform.runLater(pollMsgTask);
         new Thread(pollMsgTask).start();
     }
 

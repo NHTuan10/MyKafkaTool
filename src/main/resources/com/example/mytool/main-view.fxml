@@ -130,7 +130,7 @@
                                                       </AnchorPane>
                                                       <AnchorPane maxHeight="104.0" maxWidth="-Infinity" minHeight="15.0" minWidth="0.0" prefHeight="104.0" prefWidth="977.0">
                                                                                                           <children>
-                                                <HBox prefHeight="104.0" prefWidth="965.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="5.0">
+                                                <HBox AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="5.0">
                                                    <children>
                                                                                                                                                                                       <Label prefHeight="17.0" prefWidth="73.0" text="Key Type">
                                                          <HBox.margin>

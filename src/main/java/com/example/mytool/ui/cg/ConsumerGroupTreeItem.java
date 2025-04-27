@@ -1,4 +1,4 @@
-package com.example.mytool.ui;
+package com.example.mytool.ui.cg;
 
 import javafx.scene.control.TreeItem;
 import lombok.Data;

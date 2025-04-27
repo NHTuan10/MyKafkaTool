@@ -9,12 +9,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class ModalController {
-    //    protected Object parentController;
-    protected AtomicReference<Object> modelRef;
 
-//    public void setParentController(Object parentController) {
-//        this.parentController = parentController;
-//    }
+    protected AtomicReference<Object> modelRef;
 
     public void setModelRef(AtomicReference<Object> modelRef) {
         this.modelRef = modelRef;

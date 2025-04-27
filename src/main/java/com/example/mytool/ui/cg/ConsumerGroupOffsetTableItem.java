@@ -1,4 +1,4 @@
-package com.example.mytool.ui;
+package com.example.mytool.ui.cg;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;

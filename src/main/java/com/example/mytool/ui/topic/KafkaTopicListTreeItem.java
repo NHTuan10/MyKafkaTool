@@ -1,4 +1,4 @@
-package com.example.mytool.ui;
+package com.example.mytool.ui.topic;
 
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.manager.ClusterManager;

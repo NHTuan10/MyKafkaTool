@@ -1,4 +1,4 @@
-package com.example.mytool.ui;
+package com.example.mytool.ui.partition;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -6,18 +6,16 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 
-import java.util.List;
-
 
 public class KafkaPartitionsTableItem {
-    public static final List<String> FIELD_NAMES = List.of("partition", "startOffset", "endOffset", "noMessage", "leader", "replicasInSync", "replicasNotInSync");
+    //    public static final List<String> FIELD_NAMES = List.of("partitionx", "startOffset", "endOffset", "noMessage", "leader", "replicasInSync", "replicasNotInSync");
     private final SimpleIntegerProperty partition;
     private final SimpleLongProperty startOffset;
     private final SimpleLongProperty endOffset;
     private final SimpleLongProperty noMessage;
     private final SimpleStringProperty leader;
-    private final SimpleListProperty replicasInSync;
-    private final SimpleListProperty replicasNotInSync;
+    private final SimpleListProperty<String> replicasInSync;
+    private final SimpleListProperty<String> replicasNotInSync;
 
 
     public KafkaPartitionsTableItem(int partition, long startOffset, long endOffset, long noMessage, String leader, ObservableList<String> replicasInSync, ObservableList<String> replicasNotInSync) {
@@ -26,8 +24,8 @@ public class KafkaPartitionsTableItem {
         this.endOffset = new SimpleLongProperty(endOffset);
         this.noMessage = new SimpleLongProperty(noMessage);
         this.leader = new SimpleStringProperty(leader);
-        this.replicasInSync = new SimpleListProperty(replicasInSync);
-        this.replicasNotInSync = new SimpleListProperty(replicasNotInSync);
+        this.replicasInSync = new SimpleListProperty<>(replicasInSync);
+        this.replicasNotInSync = new SimpleListProperty<>(replicasNotInSync);
     }
 
     public int getPartition() {
@@ -74,7 +72,7 @@ public class KafkaPartitionsTableItem {
         return replicasInSync.get();
     }
 
-    public SimpleListProperty replicasInSyncProperty() {
+    public SimpleListProperty<String> replicasInSyncProperty() {
         return replicasInSync;
     }
 
@@ -82,7 +80,7 @@ public class KafkaPartitionsTableItem {
         return replicasNotInSync.get();
     }
 
-    public SimpleListProperty replicasNotInSyncProperty() {
+    public SimpleListProperty<String> replicasNotInSyncProperty() {
         return replicasNotInSync;
     }
 

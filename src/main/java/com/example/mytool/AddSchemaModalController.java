@@ -8,10 +8,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class AddSchemaModalController extends ModalController {
-//
-//    public Tuple2<String, String> getNewMsg() {
-//        return newMsg;
-//    }
 
     @FXML
     private TextArea schemaTextArea;

@@ -9,10 +9,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.IOException;
 
 public class AddConnectionModalController extends ModalController {
-//
-//    public Tuple2<String, String> getNewMsg() {
-//        return newMsg;
-//    }
 
     @FXML
     private TextField clusterNameTextField;
@@ -26,7 +22,6 @@ public class AddConnectionModalController extends ModalController {
 
     @FXML
     protected void add() throws IOException {
-//        mainController.setNewConnection(Pair.of(clusterNameTextField.getText(), bootstrapServerTextField.getText()));
         modelRef.set(Pair.of(clusterNameTextField.getText(), bootstrapServerTextField.getText()));
         Stage stage = (Stage) addBtn.getScene().getWindow();
         stage.close();

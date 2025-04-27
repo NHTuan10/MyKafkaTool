@@ -9,11 +9,6 @@ import org.apache.kafka.clients.admin.NewTopic;
 import java.io.IOException;
 
 public class AddTopicModalController extends ModalController {
-//
-//    public Tuple2<String, String> getNewMsg() {
-//        return newMsg;
-//    }
-
     @FXML
     private TextField topicNameTextField;
     @FXML

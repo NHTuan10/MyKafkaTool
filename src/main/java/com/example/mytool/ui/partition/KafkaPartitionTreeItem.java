@@ -1,4 +1,4 @@
-package com.example.mytool.ui;
+package com.example.mytool.ui.partition;
 
 import javafx.scene.control.TreeItem;
 

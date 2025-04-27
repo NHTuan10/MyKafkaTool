@@ -1,47 +1,59 @@
 package com.example.mytool.service;
 
-import com.example.mytool.MainController;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.producer.creator.ConsumerCreator;
+import com.example.mytool.serde.AvroUtil;
 import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.ui.KafkaMessageTableItem;
+import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME;
+import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
-//TODO: refactor this whole class, too many parameters in methods
+@Slf4j
 public class KafkaConsumerService {
-    public List<KafkaMessageTableItem> consumeMessages(KafkaPartition partition, Integer pollTime, Integer noMessages, Long timestamp, MainController.MessagePollingPosition pollingPosition, String valueContentType, String schema) {
+    public List<KafkaMessageTableItem> consumeMessages(KafkaPartition partition, PollingOptions pollingOptions) {
         Set<TopicPartition> topicPartitions = Set.of(new TopicPartition(partition.getTopic().getName(), partition.getId()));
-        return consumeMessagesFromPartitions(partition.getTopic(), topicPartitions, pollTime, noMessages, timestamp, pollingPosition, valueContentType, schema);
+        return consumeMessagesFromPartitions(partition.getTopic(), topicPartitions, pollingOptions);
 
     }
 
-    public List<KafkaMessageTableItem> consumeMessages(KafkaTopic kafkaTopic, Integer pollTime, Integer noMessages, Long timestamp, MainController.MessagePollingPosition pollingPosition, String valueContentType, String schema) throws ExecutionException, InterruptedException, TimeoutException {
+    public List<KafkaMessageTableItem> consumeMessages(KafkaTopic kafkaTopic, PollingOptions pollingOptions) throws ExecutionException, InterruptedException, TimeoutException {
         String topicName = kafkaTopic.getName();
         Set<TopicPartition> topicPartitions = ClusterManager.getInstance().getTopicPartitions(kafkaTopic.getCluster().getName(), topicName)
                 .stream().map(p -> new TopicPartition(topicName, p.partition())).collect(Collectors.toSet());
-
-        return consumeMessagesFromPartitions(kafkaTopic, topicPartitions, pollTime, noMessages, timestamp, pollingPosition, valueContentType, schema);
+        return consumeMessagesFromPartitions(kafkaTopic, topicPartitions, pollingOptions);
     }
 
+    private List<KafkaMessageTableItem> consumeMessagesFromPartitions(KafkaTopic kafkaTopic, Set<TopicPartition> topicPartitions, PollingOptions pollingOptions) {
+        Consumer consumer = getConsumer(kafkaTopic, pollingOptions.valueContentType());
+        consumer.assign(topicPartitions);
+        if (pollingOptions.timestamp() != null) {
+            seekOffsetWithTimestamp(consumer, kafkaTopic.getName(), topicPartitions, pollingOptions.timestamp());
+        } else {
+            seekOffset(consumer, topicPartitions, pollingOptions.pollingPosition(), pollingOptions.noMessages());
+        }
+        List<KafkaMessageTableItem> list = pollMessages(consumer, pollingOptions);
+        consumer.close();
+        return list;
+    }
 
     private static Consumer getConsumer(KafkaTopic topic, String valueContentType) {
         ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(topic.getCluster())
@@ -49,19 +61,6 @@ public class KafkaConsumerService {
                 .valueDeserializer(SerdeUtil.getDeserializeClass(valueContentType))
                 .build();
         return ClusterManager.getInstance().getConsumer(consumerCreatorConfig);
-    }
-
-    private List<KafkaMessageTableItem> consumeMessagesFromPartitions(KafkaTopic kafkaTopic, Set<TopicPartition> topicPartitions, Integer pollTime, Integer noMessages, Long timestamp, MainController.MessagePollingPosition pollingPosition, String valueContentType, String schema) {
-        Consumer consumer = getConsumer(kafkaTopic, valueContentType);
-        consumer.assign(topicPartitions);
-        if (timestamp != null) {
-            seekOffsetWithTimestamp(consumer, kafkaTopic.getName(), topicPartitions, timestamp);
-        } else {
-            seekOffset(consumer, topicPartitions, pollingPosition, noMessages);
-        }
-        List<KafkaMessageTableItem> list = pollMessages(consumer, pollTime, noMessages, pollingPosition, valueContentType, schema);
-        consumer.close();
-        return list;
     }
 
     private static void seekOffsetWithTimestamp(Consumer<String, String> consumer, String topicName, Set<TopicPartition> topicPartitions, Long timestamp) {
@@ -76,11 +75,11 @@ public class KafkaConsumerService {
                 });
     }
 
-    private static void seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, MainController.MessagePollingPosition pollingPosition, Integer noMessages) {
-        if (pollingPosition == MainController.MessagePollingPosition.FIRST) {
+    private static void seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, MessagePollingPosition pollingPosition, Integer noMessages) {
+        if (pollingPosition == MessagePollingPosition.FIRST) {
 //                consumer.subscribe(Collections.singleton(topicName));
             consumer.seekToBeginning(topicPartitions);
-        } else if (pollingPosition == MainController.MessagePollingPosition.LAST) {
+        } else if (pollingPosition == MessagePollingPosition.LAST) {
 //                consumer.subscribe(Collections.singleton(topicName));
 //                Set<TopicPartition> partitionSet = consumer.assignment();
             consumer.seekToEnd(topicPartitions);
@@ -91,48 +90,66 @@ public class KafkaConsumerService {
         }
     }
 
-    //    @SneakyThrows(IOException.class)
-    public List<KafkaMessageTableItem> pollMessages(Consumer consumer, Integer pollTime, Integer maxMessage, MainController.MessagePollingPosition pollingPosition, String valueContentType, String schema) {
-        pollTime = pollTime != null ? pollTime : DEFAULT_POLL_TIME;
-        List<KafkaMessageTableItem> list = new ArrayList<>();
-//        int count = 0;
-//        int remainingRetry = 1;
+    public List<KafkaMessageTableItem> pollMessages(Consumer<String, Object> consumer, PollingOptions pollingOptions) {
+        int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_POLL_TIME_MS);
+        List<KafkaMessageTableItem> messages = new ArrayList<>();
         while (true) {
-//            ConsumerRecords<Long,String> consumerRecords = consumer.poll(1000);
-//                ConsumerRecords<String,String> consumerRecords = consumer.poll(Duration.ofMillis(150));
-            ConsumerRecords consumerRecords = consumer.poll(Duration.ofMillis(pollTime));
+            ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
             if (consumerRecords.isEmpty()) break;
-            for (Object consumerRecord : consumerRecords) {
-//                    System.out.println("Record key " + record.key());
-//                    System.out.println("Record value " + record.value());
-//                    System.out.println("Record partition " + record.partition());
-//                    System.out.println("Record offset " + record.offset());
-                try {
-                    ConsumerRecord record = (ConsumerRecord) consumerRecord;
-                    String key = record.key() != null ? record.key().toString() : "";
-                    String value;
-                    if (SerdeUtil.SERDE_AVRO.equals(valueContentType)) {
-                        value = SerdeUtil.deserializeAsJsonString((byte[]) record.value(), schema);
-                    } else {
-                        value = (String) record.value();
-                    }
 
-                    list.add(new KafkaMessageTableItem(record.partition(), record.offset(), key, value, Instant.ofEpochMilli(record.timestamp()).atZone(ZoneId.systemDefault()).toLocalDateTime().toString()));
+            for (ConsumerRecord<String, Object> record : consumerRecords) {
+                try {
+                    KafkaMessageTableItem message = createMessageItem(record, pollingOptions);
+                    messages.add(message);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Error processing record: key={}, partition={}, offset={}",
+                            record.key(), record.partition(), record.offset(), e);
                 }
             }
-//            consumer.commitAsync();
-//            count += consumerRecords.count();
-//            if (maxMessage != null && count > maxMessage) break;
-        }
-        if (maxMessage != null) {
-            list.sort((msg1, msg2) -> CharSequence.compare(msg1.getTimestamp(), msg2.getTimestamp()));
-            if (pollingPosition == MainController.MessagePollingPosition.LAST)
-                return list.reversed().subList(0, Math.min(list.size(), maxMessage));
-            return list.subList(0, Math.min(list.size(), maxMessage));
         }
 
-        return list;
+        return filterAndSortMessages(messages, pollingOptions);
+    }
+
+    private KafkaMessageTableItem createMessageItem
+            (ConsumerRecord<String, Object> record, PollingOptions pollingOptions) throws IOException {
+        String key = record.key() != null ? record.key() : "";
+        String value = SerdeUtil.SERDE_AVRO.equals(pollingOptions.valueContentType())
+                ? AvroUtil.deserializeAsJsonString((byte[]) record.value(), pollingOptions.schema())
+                : (String) record.value();
+
+        String timestamp = Instant.ofEpochMilli(record.timestamp())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .toString();
+
+        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp);
+    }
+
+    private List<KafkaMessageTableItem> filterAndSortMessages
+            (List<KafkaMessageTableItem> messages, PollingOptions pollingOptions) {
+        if (pollingOptions.noMessages() != null) {
+            messages.sort(Comparator.comparing(KafkaMessageTableItem::getTimestamp));
+            if (pollingOptions.pollingPosition() == MessagePollingPosition.LAST) {
+                Collections.reverse(messages);
+            }
+            return messages.subList(0, Math.min(messages.size(), pollingOptions.noMessages()));
+        }
+        return messages;
+    }
+
+    public enum MessagePollingPosition {
+        FIRST, LAST;
+
+        @Override
+        public String toString() {
+            return StringUtils.capitalize(this.name());
+        }
+    }
+
+    @Builder
+    public static record PollingOptions(Integer pollTime, Integer noMessages, Long timestamp,
+                                        MessagePollingPosition pollingPosition, String valueContentType,
+                                        String schema) {
     }
 }
