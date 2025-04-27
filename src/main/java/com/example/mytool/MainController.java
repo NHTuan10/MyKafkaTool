@@ -144,6 +144,8 @@ public class MainController {
             // Display the selection and its complete path from the root.
             if (newValue != null && newValue != oldValue) {
                 cgOffsetsTab.setDisable(true);
+                dataTab.setDisable(false);
+                propertiesTab.setDisable(true);
                 partitionsTitledPane.setVisible(false);
                 messageTable.setItems(FXCollections.emptyObservableList());
                 if (!(newValue instanceof ConsumerGroupTreeItem)) {
@@ -158,7 +160,9 @@ public class MainController {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 ObservableList<UIProperty> config = FXCollections.observableArrayList();
                 try {
-                    // Show/hide titled panes in tab
+                    // Enable tabs and show/hide titled panes in tab
+                    dataTab.setDisable(false);
+                    propertiesTab.setDisable(false);
                     partitionsTitledPane.setVisible(true);
                     // topic config table
                     String clusterName = topic.getCluster().getName();
@@ -173,7 +177,8 @@ public class MainController {
                     throw new RuntimeException(e);
                 }
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
-
+                dataTab.setDisable(false);
+                propertiesTab.setDisable(false);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
                 try {
                     String clusterName = partition.getTopic().getCluster().getName();

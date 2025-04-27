@@ -38,9 +38,11 @@ public class KafkaClusterTree {
             AtomicReference modelRef = new AtomicReference<>();
             ViewUtil.showAddModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of());
             NewTopic newTopic = (NewTopic) modelRef.get();
-            CreateTopicsResult result = clusterManager.addTopic(clusterName, newTopic);
-            result.all().get();
-            topicListTreeItem.reloadChildren();
+            if (newTopic != null) {
+                CreateTopicsResult result = clusterManager.addTopic(clusterName, newTopic);
+                result.all().get();
+                topicListTreeItem.reloadChildren();
+            }
         }
 
     }
@@ -83,7 +85,6 @@ public class KafkaClusterTree {
                 clusterTreeContextMenu.getItems().setAll(addNewTopicItem, refreshItem);
             } else {
                 clusterTreeContextMenu.getItems().setAll(blankItem);
-
             }
         });
         clusterTree.setContextMenu(clusterTreeContextMenu);
