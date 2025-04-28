@@ -1,7 +1,7 @@
 package com.example.mytool;
 
 import atlantafx.base.theme.PrimerLight;
-import com.example.mytool.ui.UIConfigurer;
+import com.example.mytool.ui.KafkaClusterTree;
 import com.example.mytool.ui.UIErrorHandler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -25,7 +25,8 @@ public class MyApplication extends Application {
         stage.setTitle("MyTool");
         stage.setScene(scene);
         stage.show();
-        UIConfigurer.initClusterPanel(stage);
+        KafkaClusterTree.initClusterPanel(stage);
+//        TableViewConfigurer.initTableView(stage);
     }
 
     public static void main(String[] args) {

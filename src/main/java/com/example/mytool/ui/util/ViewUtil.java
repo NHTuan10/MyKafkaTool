@@ -1,12 +1,9 @@
 package com.example.mytool.ui.util;
 
-import com.example.mytool.ModalController;
 import com.example.mytool.MyApplication;
 import com.example.mytool.exception.ClusterNameExistedException;
-import com.example.mytool.model.kafka.KafkaCluster;
-import com.example.mytool.ui.cg.ConsumerGroupListTreeItem;
+import com.example.mytool.ui.controller.ModalController;
 import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
-import com.example.mytool.ui.topic.KafkaTopicListTreeItem;
 import javafx.beans.property.Property;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,25 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 public class ViewUtil {
-
-    public static void addClusterConnIntoClusterTreeView(TreeView clusterTree, KafkaCluster cluster) throws IOException, ClusterNameExistedException {
-        String clusterName = cluster.getName();
-        if (isClusterNameExistedInTree(clusterTree, clusterName)) {
-            throw new ClusterNameExistedException(clusterName, "Cluster already exists");
-        }
-
-        TreeItem<Object> brokerTreeItem = new TreeItem<>(clusterName);
-        TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster));
-        ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster));
-
-        topicListTreeItem.getChildren();
-        brokerTreeItem.getChildren().add(topicListTreeItem);
-
-        consumerGroupListTreeItem.getChildren();
-        brokerTreeItem.getChildren().add(consumerGroupListTreeItem);
-
-        clusterTree.getRoot().getChildren().add(brokerTreeItem);
-    }
 
     public static boolean isClusterNameExistedInTree(TreeView clusterTree, String clusterName) throws ClusterNameExistedException {
         return ((ObservableList<TreeItem>) clusterTree.getRoot().getChildren()).stream()
@@ -120,8 +98,12 @@ public class ViewUtil {
                 FXCollections.observableArrayList(partitionInfo.replicas().stream().filter(r -> r != leader && !partitionInfo.isr().contains(r)).map(replica -> replica.host() + ":" + replica.port()).toList()));
     }
 
+    public static void showPopUpModal(String modalFxml, String title, AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap) throws IOException {
+        showPopUpModal(modalFxml, title, modelRef, inputVarMap, true);
+    }
+
     //    private Tuple2<String, String> showAddMsgModalAndGetResult() throws IOException {
-    public static void showAddModal(String modalFxml, String title, AtomicReference<Object> modelRef, final Map<String, String> inputVarMap) throws IOException {
+    public static void showPopUpModal(String modalFxml, String title, AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable) throws IOException {
         Stage stage = new Stage();
 //        FXMLLoader addMsgModalLoader = new FXMLLoader(
 //                AddMessageModalController.class.getResource("add-message-modal.fxml"));
@@ -135,6 +117,7 @@ public class ViewUtil {
 //        modalController.setParentController(parentController);
         modalController.setModelRef(modelRef);
         modalController.setTextFieldOrAreaText(modalController, inputVarMap);
+        modalController.configureEditableControls(editable);
         stage.setTitle(title);
         stage.initModality(Modality.WINDOW_MODAL);
 //        ActionEvent event

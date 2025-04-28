@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.AddTopicModalController">
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.AddTopicModalController">
     <children>
         <TabPane layoutX="23.0" layoutY="8.0" prefHeight="375.0" prefWidth="569.0" tabClosingPolicy="UNAVAILABLE">
             <tabs>

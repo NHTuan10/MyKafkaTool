@@ -1,9 +1,9 @@
-package com.example.mytool.service;
+package com.example.mytool.consumer;
 
+import com.example.mytool.consumer.creator.ConsumerCreator;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
-import com.example.mytool.producer.creator.ConsumerCreator;
 import com.example.mytool.serde.AvroUtil;
 import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.ui.KafkaMessageTableItem;
@@ -143,7 +143,7 @@ public class KafkaConsumerService {
                 .toLocalDateTime()
                 .toString();
 
-        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp);
+        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, record.headers());
     }
 
     private List<KafkaMessageTableItem> filterAndSortMessages

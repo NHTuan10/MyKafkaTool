@@ -1,20 +1,19 @@
-package com.example.mytool;
+package com.example.mytool.ui.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 
-public class AddTopicModalController extends ModalController {
+public class AddConnectionModalController extends ModalController {
+
     @FXML
-    private TextField topicNameTextField;
+    private TextField clusterNameTextField;
     @FXML
-    private TextField partitionCountTextField;
-    @FXML
-    private TextField replicationFactorTextField;
+    private TextField bootstrapServerTextField;
     @FXML
     private Button addBtn;
     @FXML
@@ -23,7 +22,7 @@ public class AddTopicModalController extends ModalController {
 
     @FXML
     protected void add() throws IOException {
-        modelRef.set(new NewTopic(topicNameTextField.getText(), Integer.parseInt(partitionCountTextField.getText()), Short.parseShort(replicationFactorTextField.getText())));
+        modelRef.set(Pair.of(clusterNameTextField.getText(), bootstrapServerTextField.getText()));
         Stage stage = (Stage) addBtn.getScene().getWindow();
         stage.close();
     }

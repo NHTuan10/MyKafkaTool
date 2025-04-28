@@ -3,6 +3,8 @@ package com.example.mytool.ui;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
+import lombok.Getter;
+import org.apache.kafka.common.header.Headers;
 
 public class KafkaMessageTableItem {
     private final SimpleIntegerProperty partition;
@@ -10,13 +12,16 @@ public class KafkaMessageTableItem {
     private final SimpleStringProperty key;
     private final SimpleStringProperty value;
     private final SimpleStringProperty timestamp;
+    @Getter
+    private Headers headers;
 
-    public KafkaMessageTableItem(int partition, long offset, String key, String value, String timestamp) {
+    public KafkaMessageTableItem(int partition, long offset, String key, String value, String timestamp, Headers headers) {
         this.partition = new SimpleIntegerProperty(partition);
         this.offset = new SimpleLongProperty(offset);
         this.key = new SimpleStringProperty(key);
         this.value = new SimpleStringProperty(value);
         this.timestamp = new SimpleStringProperty(timestamp);
+        this.headers = headers;
     }
 
     public int getPartition() {

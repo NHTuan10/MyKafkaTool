@@ -1,7 +1,7 @@
 package com.example.mytool.ui;
 
-import com.example.mytool.ErrorController;
 import com.example.mytool.MyApplication;
+import com.example.mytool.ui.controller.ErrorController;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,11 +17,12 @@ import java.io.StringWriter;
 @Slf4j
 public class UIErrorHandler {
     public static void showError(Thread t, Throwable e) {
-        log.error("***Default exception handler***", e);
+
         if (Platform.isFxApplicationThread()) {
+            log.error("An error occurred in FX application thread", e);
             showErrorDialog(e);
         } else {
-            log.error("An unexpected error occurred in " + t);
+            log.error("An unexpected error occurred in " + t, e);
 
         }
     }

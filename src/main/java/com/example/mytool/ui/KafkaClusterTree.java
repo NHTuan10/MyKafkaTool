@@ -13,6 +13,7 @@ import com.example.mytool.ui.topic.KafkaTopicListTreeItem;
 import com.example.mytool.ui.topic.KafkaTopicTreeItem;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,16 +32,60 @@ public class KafkaClusterTree {
 
     TreeView clusterTree;
 
+    public static void initClusterPanel(Stage stage) {
+        TreeView clusterTree = (TreeView) stage.getScene().lookup("#clusterTree");
+
+        TreeItem<Object> clustersItem = new TreeItem<>(AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME);
+        clustersItem.setExpanded(true);
+        clusterTree.setRoot(clustersItem);
+
+        UserPreferenceManager.loadUserPreference().connections().forEach((cluster -> {
+            try {
+                if (!ViewUtil.isClusterNameExistedInTree(clusterTree, cluster.getName())) {
+                    ClusterManager.getInstance().connectToCluster(cluster);
+                    KafkaClusterTree.addClusterConnIntoClusterTreeView(clusterTree, cluster);
+                }
+            } catch (IOException | ClusterNameExistedException e) {
+                log.error("Error when add new connection during loading user preferences", e);
+                throw new RuntimeException(e);
+            }
+        }));
+
+//        TreeView<String> tree = new TreeView<String> (rootItem);
+
+//        clusterTree.setEditable(true);
+//        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
+    }
+
     public KafkaClusterTree(ClusterManager clusterManager, TreeView clusterTree) {
         this.clusterManager = clusterManager;
         this.clusterTree = clusterTree;
+    }
+
+    public static void addClusterConnIntoClusterTreeView(TreeView clusterTree, KafkaCluster cluster) throws IOException, ClusterNameExistedException {
+        String clusterName = cluster.getName();
+        if (ViewUtil.isClusterNameExistedInTree(clusterTree, clusterName)) {
+            throw new ClusterNameExistedException(clusterName, "Cluster already exists");
+        }
+
+        TreeItem<Object> brokerTreeItem = new TreeItem<>(clusterName);
+        TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster));
+        ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster));
+
+        topicListTreeItem.getChildren();
+        brokerTreeItem.getChildren().add(topicListTreeItem);
+
+        consumerGroupListTreeItem.getChildren();
+        brokerTreeItem.getChildren().add(consumerGroupListTreeItem);
+
+        clusterTree.getRoot().getChildren().add(brokerTreeItem);
     }
 
     public void addTopic() throws IOException, InterruptedException, ExecutionException {
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
             String clusterName = ((KafkaTopicListTreeItem.KafkaTopicListTreeItemValue) topicListTreeItem.getValue()).getCluster().getName();
             AtomicReference modelRef = new AtomicReference<>();
-            ViewUtil.showAddModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of());
+            ViewUtil.showPopUpModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of());
             NewTopic newTopic = (NewTopic) modelRef.get();
             if (newTopic != null) {
                 CreateTopicsResult result = clusterManager.addTopic(clusterName, newTopic);
@@ -164,7 +209,7 @@ public class KafkaClusterTree {
                 Pair<String, String> newConnection;
                 while (true) {
                     AtomicReference modelRef = new AtomicReference<>();
-                    ViewUtil.showAddModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of());
+                    ViewUtil.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of());
                     newConnection = (Pair<String, String>) modelRef.get();
 
                     if (newConnection != null && (StringUtils.isBlank(newConnection.getLeft()) || StringUtils.isBlank(newConnection.getRight()) || ViewUtil.isClusterNameExistedInTree(clusterTree, newConnection.getLeft()))) {
@@ -178,7 +223,7 @@ public class KafkaClusterTree {
                 if (newConnection != null) {
                     KafkaCluster cluster = new KafkaCluster(newConnection.getLeft(), newConnection.getRight());
                     ClusterManager.getInstance().connectToCluster(cluster);
-                    ViewUtil.addClusterConnIntoClusterTreeView(clusterTree, cluster);
+                    addClusterConnIntoClusterTreeView(clusterTree, cluster);
                     UserPreferenceManager.addClusterToUserPreference(cluster);
                 }
 

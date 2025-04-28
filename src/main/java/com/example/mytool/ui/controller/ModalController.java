@@ -1,5 +1,7 @@
-package com.example.mytool;
+package com.example.mytool.ui.controller;
 
+import javafx.collections.ObservableList;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
@@ -17,7 +19,8 @@ public abstract class ModalController {
         this.modelRef = modelRef;
     }
 
-    public void setTextFieldOrAreaText(ModalController modalController, Map<String, String> text) {
+
+    public void setTextFieldOrAreaText(ModalController modalController, Map<String, Object> text) {
         text.forEach((fieldName, value) -> {
             try {
                 Field field = this.getClass().getDeclaredField(fieldName);
@@ -26,6 +29,8 @@ public abstract class ModalController {
                 Object fieldObject = field.get(modalController);
                 if (fieldClass.equals(TextField.class) || fieldClass.equals(TextArea.class)) {
                     TextInputControl.class.getDeclaredMethod("setText", String.class).invoke(fieldObject, value);
+                } else if (fieldClass.equals(TableView.class) && value instanceof ObservableList) {
+                    TableView.class.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
                 } else {
                     throw new RuntimeException("Field is not supported");
                 }
@@ -34,6 +39,9 @@ public abstract class ModalController {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    public void configureEditableControls(boolean editable) {
 
     }
 }

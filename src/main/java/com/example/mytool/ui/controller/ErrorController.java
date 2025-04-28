@@ -1,4 +1,4 @@
-package com.example.mytool;
+package com.example.mytool.ui.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

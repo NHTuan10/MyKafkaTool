@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 
-<AnchorPane prefHeight="336.0" prefWidth="597.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.AddSchemaModalController">
+<AnchorPane prefHeight="336.0" prefWidth="597.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.AddSchemaModalController">
     <children>
       <HBox prefHeight="276.0" prefWidth="600.0">
          <children>

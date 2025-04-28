@@ -1,6 +1,7 @@
-package com.example.mytool;
+package com.example.mytool.ui.controller;
 
 import com.example.mytool.constant.AppConstant;
+import com.example.mytool.consumer.KafkaConsumerService;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
@@ -8,9 +9,9 @@ import com.example.mytool.producer.Message;
 import com.example.mytool.producer.ProducerUtil;
 import com.example.mytool.serde.AvroUtil;
 import com.example.mytool.serde.SerdeUtil;
-import com.example.mytool.service.KafkaConsumerService;
 import com.example.mytool.ui.KafkaClusterTree;
 import com.example.mytool.ui.KafkaMessageTableItem;
+import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyItem;
 import com.example.mytool.ui.cg.ConsumerGroupOffsetTableItem;
 import com.example.mytool.ui.cg.ConsumerGroupTreeItem;
@@ -38,10 +39,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -143,10 +141,53 @@ public class MainController {
         this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree);
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
-
+        configureTableView();
         ViewUtil.enableCopyDataFromTableToClipboard(messageTable);
 
     }
+
+    private void configureTableView() {
+        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable);
+        messageTable.setRowFactory(tv -> {
+            TableRow<KafkaMessageTableItem> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    KafkaMessageTableItem rowData = row.getItem();
+                    log.debug("Double click on: " + rowData.getKey());
+                    Map<String, Object> msgModalFieldMap = Map.of(
+                            "key", rowData.getKey(),
+                            "value", rowData.getValue(),
+                            "headerTable", FXCollections.observableArrayList(
+                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyItem(header.key(), new String(header.value()))).toList())
+                    );
+                    try {
+                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+//                    System.out.println("Double click on: "+rowData.getKey());
+                }
+            });
+            return row;
+        });
+        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable);
+        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable);
+        TableViewConfigurer.configureTableView(UIPropertyItem.class, topicConfigTable);
+        // Use a change listener to respond to a selection within
+        // a tree view
+//        clusterTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem<String>>) (changed, oldVal, newVal) -> {
+//
+//
+//        });
+
+
+//        TreeView<String> tree = new TreeView<String> (rootItem);
+
+//        clusterTree.setEditable(true);
+//        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
+    }
+
 
     private void initPollingOptionsUI() {
         pollTimeTextField.setText(String.valueOf(DEFAULT_INIT_POLL_TIME_MS));
@@ -231,7 +272,7 @@ public class MainController {
                 try {
                     String clusterName = partition.getTopic().getCluster().getName();
                     String topic = partition.getTopic().getName();
-                    Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.getId()));
+                    Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.getId()), null);
                     ObservableList<UIPropertyItem> list = FXCollections.observableArrayList(
                             new UIPropertyItem(UIPropertyItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
                             , new UIPropertyItem(UIPropertyItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
@@ -289,7 +330,7 @@ public class MainController {
             return;
         }
         String valueContentTypeStr = valueContentType.getValue();
-        Long timestampMs = timestampPicker.getValue() != null ? ZonedDateTime.of(timestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
+        Long timestampMs = getPollStartTimestamp();
         String schema = schemaTextArea.getText();
 //        }
         if (!validateSchema(valueContentTypeStr, schema)) {
@@ -352,6 +393,11 @@ public class MainController {
         new Thread(pollMsgTask).start();
     }
 
+    private Long getPollStartTimestamp() {
+        Long timestampMs = timestampPicker.getValue() != null ? ZonedDateTime.of(timestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
+        return timestampMs;
+    }
+
     @FXML
     protected void addTopic() throws IOException, ExecutionException, InterruptedException {
         kafkaClusterTree.addTopic();
@@ -377,7 +423,7 @@ public class MainController {
         // TODO: don't send message with key to Kafka if it's empty
 
         AtomicReference ref = new AtomicReference<>();
-        ViewUtil.showAddModal("add-message-modal.fxml", "Add New Message", ref, Map.of("schema", schemaTextArea.getText()));
+        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref, Map.of("schema", schemaTextArea.getText()));
         Triple<String, String, String> newMsg = (Triple<String, String, String>) ref.get();
         if (newMsg != null) {
             String inputKey = newMsg.getLeft();
@@ -427,12 +473,12 @@ public class MainController {
         try {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.getTopic().getCluster().getName(), new TopicPartition(partition.getTopic().getName(), partition.getId()));
-                noMessages.setText((partitionInfo.getRight() - partitionInfo.getLeft()) + " Messages");
+                Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.getTopic().getCluster().getName(), new TopicPartition(partition.getTopic().getName(), partition.getId()), getPollStartTimestamp());
+                noMessages.setText((partitionInfo.getLeft() >= 0 ? partitionInfo.getRight() - partitionInfo.getLeft() : 0) + " Messages");
             } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                long count = clusterManager.getAllPartitionOffsetInfo(topic.getCluster().getName(), topic.getName()).values()
-                        .stream().mapToLong(t -> t.getRight() - t.getLeft()).sum();
+                long count = clusterManager.getAllPartitionOffsetInfo(topic.getCluster().getName(), topic.getName(), getPollStartTimestamp()).values()
+                        .stream().mapToLong(t -> t.getLeft() >= 0 ? t.getRight() - t.getLeft() : 0).sum();
                 noMessages.setText(count + " Messages");
             }
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
@@ -456,7 +502,7 @@ public class MainController {
         List<TopicPartitionInfo> topicPartitionInfos = clusterManager.getTopicPartitions(clusterName, topicName);
         topicPartitionInfos.forEach(partitionInfo -> {
             try {
-                Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, partitionInfo.partition()));
+                Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, partitionInfo.partition()), null);
                 KafkaPartitionsTableItem partitionsTableItem = ViewUtil.mapToUIPartitionTableItem(partitionInfo, partitionOffsetsInfo);
                 partitionsTableItems.add(partitionsTableItem);
             } catch (ExecutionException | InterruptedException e) {
