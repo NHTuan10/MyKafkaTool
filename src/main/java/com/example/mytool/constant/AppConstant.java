@@ -15,4 +15,5 @@ public class AppConstant {
     public static final String POLL_MESSAGES_TEXT = "Poll Messages";
     public static final String STOP_POLLING_TEXT = "Stop Polling";
     public static final String ADD_MESSAGE_MODAL_FXML = "add-message-modal.fxml";
+    public static final String DEFAULT_ADMIN_REQUEST_TIMEOUT = "3000";
 }

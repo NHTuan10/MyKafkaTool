@@ -1,5 +1,6 @@
 package com.example.mytool.manager;
 
+import com.example.mytool.constant.AppConstant;
 import com.example.mytool.consumer.creator.ConsumerCreator;
 import com.example.mytool.exception.ClusterNameExistedException;
 import com.example.mytool.model.ConsumerType;
@@ -51,6 +52,7 @@ public class ClusterManager {
         }
         Properties properties = new Properties();
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServer());
+        properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, AppConstant.DEFAULT_ADMIN_REQUEST_TIMEOUT);
         Admin adminClient = Admin.create(properties);
         adminMap.put(clusterName, adminClient);
 //        Consumer<String, String> partitionConsumer = ConsumerCreator.createConsumer(cluster, null);
