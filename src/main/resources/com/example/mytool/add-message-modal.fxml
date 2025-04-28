@@ -69,12 +69,12 @@
                <children>
                             <HBox prefHeight="40.0" prefWidth="598.0" spacing="10.0">
                                 <children>
-                                    <Button fx:id="okBtn" mnemonicParsing="false" onAction="#ok" prefHeight="26.0" prefWidth="60.0" text="OK">
+                                    <Button fx:id="okBtn" mnemonicParsing="false" onAction="#ok" prefHeight="26.0" prefWidth="80.0" text="OK">
                            <HBox.margin>
                               <Insets left="5.0" top="5.0" />
                            </HBox.margin>
                         </Button>
-                                    <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#cancel" prefWidth="60.0" text="Cancel">
+                                    <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#cancel" prefWidth="80.0" text="Cancel">
                            <HBox.margin>
                               <Insets left="5.0" top="5.0" />
                            </HBox.margin>

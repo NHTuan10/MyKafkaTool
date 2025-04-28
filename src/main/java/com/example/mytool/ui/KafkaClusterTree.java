@@ -86,7 +86,7 @@ public class KafkaClusterTree {
             } else if (treeItem instanceof ConsumerGroupListTreeItem<?> consumerGroupListTreeItem) {
                 MenuItem refreshItem = new MenuItem("Refresh");
                 refreshItem.setOnAction(actionEvent -> consumerGroupListTreeItem.reloadChildren());
-                clusterTreeContextMenu.getItems().setAll(addNewTopicItem, refreshItem);
+                clusterTreeContextMenu.getItems().setAll(refreshItem);
             } else {
                 clusterTreeContextMenu.getItems().setAll(blankItem);
             }
@@ -161,8 +161,6 @@ public class KafkaClusterTree {
         MenuItem addNewConnectionItem = new MenuItem("Add New Connection");
         addNewConnectionItem.setOnAction(ae -> {
             try {
-//                TreeItem treeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
-//                if (treeItem != null && treeItem.getParent() == null && AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue())){
                 Pair<String, String> newConnection;
                 while (true) {
                     AtomicReference modelRef = new AtomicReference<>();

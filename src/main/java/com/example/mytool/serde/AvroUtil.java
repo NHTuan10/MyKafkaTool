@@ -11,9 +11,13 @@ import java.io.IOException;
 
 public class AvroUtil {
     public static String deserializeAsJsonString(byte[] data, String schemaStr) throws IOException {
-        Schema schema = new Schema.Parser().parse(schemaStr);
+        Schema schema = parseSchema(schemaStr);
         GenericRecord avroRecord = deserialize(data, schema);
         return convertGenericRecordToJson(avroRecord, schema);
+    }
+
+    public static Schema parseSchema(String schemaStr) {
+        return new Schema.Parser().parse(schemaStr);
     }
 
     public static String convertGenericRecordToJson(GenericRecord avroRecord, Schema schema) throws IOException {

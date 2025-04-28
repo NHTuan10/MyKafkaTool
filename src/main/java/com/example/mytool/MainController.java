@@ -6,6 +6,7 @@ import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.producer.Message;
 import com.example.mytool.producer.ProducerUtil;
+import com.example.mytool.serde.AvroUtil;
 import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.service.KafkaConsumerService;
 import com.example.mytool.ui.KafkaClusterTree;
@@ -136,6 +137,7 @@ public class MainController {
 
         msgTableProgressInd.setVisible(false);
         partitionsTitledPane.setVisible(false);
+        schemaTextArea.setDisable(true);
         initPollingOptionsUI();
 
         this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree);
@@ -162,6 +164,13 @@ public class MainController {
         valueContentType.setValue(SerdeUtil.SERDE_STRING);
         msgPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
         msgPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
+        valueContentType.setOnAction(event -> {
+            if (valueContentType.getValue().equals(SerdeUtil.SERDE_AVRO)) {
+                schemaTextArea.setDisable(false);
+            } else {
+                schemaTextArea.setDisable(true);
+            }
+        });
     }
 
     private void configureClusterTreeSelectedItemChanged() {
@@ -365,12 +374,6 @@ public class MainController {
 
 
     public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException, TimeoutException {
-//        if (kafkaTopic == null && partition == null) {
-//            new Alert(Alert.AlertType.WARNING, "Please choose a topic or partition to add messages", ButtonType.OK)
-//                    .show();
-//            return;
-//        }
-        if (!validateSchema(valueContentType, schema)) return;
         // TODO: don't send message with key to Kafka if it's empty
 
         AtomicReference ref = new AtomicReference<>();
@@ -379,8 +382,9 @@ public class MainController {
         if (newMsg != null) {
             String inputKey = newMsg.getLeft();
             String inputValue = newMsg.getMiddle();
-
-            ProducerUtil.sendMessage(kafkaTopic, partition, new Message(inputKey, keyContentType, inputValue, valueContentType, newMsg.getRight()));
+            schema = newMsg.getRight();
+            if (!validateSchema(valueContentType, schema)) return;
+            ProducerUtil.sendMessage(kafkaTopic, partition, new Message(inputKey, keyContentType, inputValue, valueContentType, schema));
             retrieveMessages();
             ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
                     ButtonType.OK);
@@ -389,12 +393,25 @@ public class MainController {
 
 
     private static boolean validateSchema(String valueContentType, String schema) {
-        if (StringUtils.isBlank(schema) && !SerdeUtil.SERDE_STRING.equals(valueContentType)) {
-            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Please enter the schema", null,
-                    ButtonType.OK);
-            return false;
+        boolean valid = true;
+        if (SerdeUtil.SERDE_AVRO.equals(valueContentType)) {
+            try {
+                if (StringUtils.isNotBlank(schema) &&
+                        AvroUtil.parseSchema(schema) != null) {
+                    valid = true;
+                } else {
+                    valid = false;
+                }
+            } catch (Exception e) {
+                log.warn("Error when parse schema", e);
+                valid = false;
+            }
         }
-        return true;
+        if (!valid) {
+            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
+                    ButtonType.OK);
+        }
+        return valid;
     }
 
     //    public void setNewMsg(Tuple2<String, String> newMsg) {
