@@ -1,9 +1,11 @@
 package com.example.mytool;
 
+import atlantafx.base.theme.PrimerLight;
 import com.example.mytool.ui.UIConfigurer;
 import com.example.mytool.ui.UIErrorHandler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -15,12 +17,15 @@ public class MyApplication extends Application {
     public void start(Stage stage) throws IOException {
         Thread.setDefaultUncaughtExceptionHandler(UIErrorHandler::showError);
         FXMLLoader fxmlLoader = new FXMLLoader(MyApplication.class.getResource("main-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load());
+        Parent parent = fxmlLoader.load();
+        Scene scene = new Scene(parent);
+//        parent.setStyle("-fx-base: rgba(60, 60, 60, 255);");
+        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+//        Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         stage.setTitle("MyTool");
         stage.setScene(scene);
         stage.show();
         UIConfigurer.initClusterPanel(stage);
-
     }
 
     public static void main(String[] args) {

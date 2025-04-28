@@ -2,6 +2,7 @@ package com.example.mytool;
 
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -21,9 +22,10 @@ public abstract class ModalController {
             try {
                 Field field = this.getClass().getDeclaredField(fieldName);
                 Class fieldClass = field.getType();
+                field.setAccessible(true);
                 Object fieldObject = field.get(modalController);
                 if (fieldClass.equals(TextField.class) || fieldClass.equals(TextArea.class)) {
-                    fieldClass.getDeclaredMethod("setText").invoke(fieldObject);
+                    TextInputControl.class.getDeclaredMethod("setText", String.class).invoke(fieldObject, value);
                 } else {
                     throw new RuntimeException("Field is not supported");
                 }

@@ -1,5 +1,6 @@
 package com.example.mytool;
 
+import com.example.mytool.constant.AppConstant;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
@@ -43,10 +44,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.example.mytool.constant.AppConstant.DEFAULT_INIT_POLL_TIME_MS;
 import static com.example.mytool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
-import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
 public class MainController {
@@ -112,6 +114,8 @@ public class MainController {
     private Button countMessagesBtn;
 
     @FXML
+    private Button pullMessagesBtn;
+    @FXML
     private TableView kafkaPartitionsTable;
 
     @FXML
@@ -120,6 +124,8 @@ public class MainController {
     private KafkaClusterTree kafkaClusterTree;
 
     private Map<TreeItem, ObservableList<KafkaMessageTableItem>> treeMsgTableItemCache = new ConcurrentHashMap<>();
+
+    private AtomicBoolean isPolling = new AtomicBoolean(false);
 
     public MainController() {
         this.kafkaConsumerService = new KafkaConsumerService();
@@ -130,7 +136,18 @@ public class MainController {
 
         msgTableProgressInd.setVisible(false);
         partitionsTitledPane.setVisible(false);
-        pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME_MS));
+        initPollingOptionsUI();
+
+        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree);
+        kafkaClusterTree.configureClusterTreeActionMenu();
+        configureClusterTreeSelectedItemChanged();
+
+        ViewUtil.enableCopyDataFromTableToClipboard(messageTable);
+
+    }
+
+    private void initPollingOptionsUI() {
+        pollTimeTextField.setText(String.valueOf(DEFAULT_INIT_POLL_TIME_MS));
         maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
         timestampPicker.setDayCellFactory(param -> new DateCell() {
             @Override
@@ -145,14 +162,6 @@ public class MainController {
         valueContentType.setValue(SerdeUtil.SERDE_STRING);
         msgPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
         msgPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
-
-        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree);
-        kafkaClusterTree.configureClusterTreeActionMenu();
-        configureClusterTreeSelectedItemChanged();
-
-        ViewUtil.enableCopyDataFromTableToClipboard(messageTable);
-
-
     }
 
     private void configureClusterTreeSelectedItemChanged() {
@@ -259,6 +268,11 @@ public class MainController {
 
     @FXML
     protected void retrieveMessages() {
+        if (isPolling.get()) {
+            isPolling.set(false);
+            pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+            return;
+        }
         TreeItem selectedTreeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
         if (!(selectedTreeItem instanceof KafkaTopicTreeItem<?>)
                 && !(selectedTreeItem instanceof KafkaPartitionTreeItem<?>)) {
@@ -267,11 +281,6 @@ public class MainController {
         }
         String valueContentTypeStr = valueContentType.getValue();
         Long timestampMs = timestampPicker.getValue() != null ? ZonedDateTime.of(timestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
-
-//        if (SerdeUtil.SERDE_AVRO.equals(valueContentTypeStr)) {
-//            AtomicReference<Object> modelRef = new AtomicReference<>();
-//            showAddModal("add-schema-modal.fxml", modelRef);
-//            schema = (String) modelRef.get();
         String schema = schemaTextArea.getText();
 //        }
         if (!validateSchema(valueContentTypeStr, schema)) {
@@ -280,11 +289,12 @@ public class MainController {
         ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
         messageTable.setItems(list);
         treeMsgTableItemCache.put(selectedTreeItem, list);
-        msgTableProgressInd.setVisible(true);
-
+//        msgTableProgressInd.setVisible(true);
+        pullMessagesBtn.setText(AppConstant.STOP_POLLING_TEXT);
         Task<Void> pollMsgTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
+                isPolling.set(true);
                 KafkaConsumerService.PollingOptions pollingOptions =
                         KafkaConsumerService.PollingOptions.builder()
                                 .pollTime(Integer.parseInt(pollTimeTextField.getText()))
@@ -292,14 +302,22 @@ public class MainController {
                                 .timestamp(timestampMs)
                                 .pollingPosition(msgPosition.getValue())
                                 .valueContentType(valueContentTypeStr)
-                                .schema(schema).build();
+                                .schema(schema)
+                                .pollCallback(() -> {
+//                                    msgTableProgressInd.setVisible(false);
+//                                    noMessages.setText(list.size() + " Messages");
+                                    return new KafkaConsumerService.PollCallback(list, isPolling);
+                                })
+                                .build();
                 if (selectedTreeItem instanceof KafkaPartitionTreeItem<?> selectedItem) {
                     KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                    list.addAll(kafkaConsumerService.consumeMessages(partition, pollingOptions));
+//                    list.addAll(kafkaConsumerService.consumeMessages(partition, pollingOptions));
+                    kafkaConsumerService.consumeMessages(partition, pollingOptions);
                 } else if (selectedTreeItem instanceof KafkaTopicTreeItem<?> selectedItem) {
                     KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                     try {
-                        list.addAll(kafkaConsumerService.consumeMessages(topic, pollingOptions));
+//                        list.addAll(kafkaConsumerService.consumeMessages(topic, pollingOptions));
+                        kafkaConsumerService.consumeMessages(topic, pollingOptions);
                     } catch (Exception e) {
                         log.error("Error when poll messages", e);
                         throw new RuntimeException(e);
@@ -310,14 +328,18 @@ public class MainController {
             }
         };
         pollMsgTask.setOnSucceeded(event -> {
-            msgTableProgressInd.setVisible(false);
+//            msgTableProgressInd.setVisible(false);
+            isPolling.set(false);
+            pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
             noMessages.setText(list.size() + " Messages");
         });
         pollMsgTask.setOnFailed(event -> {
-            msgTableProgressInd.setVisible(false);
+//            msgTableProgressInd.setVisible(false);
+            isPolling.set(false);
+            pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+
         });
 
-//        Platform.runLater(pollMsgTask);
         new Thread(pollMsgTask).start();
     }
 
@@ -352,13 +374,13 @@ public class MainController {
         // TODO: don't send message with key to Kafka if it's empty
 
         AtomicReference ref = new AtomicReference<>();
-        ViewUtil.showAddModal("add-message-modal.fxml", "Add New Message", ref, Map.of());
+        ViewUtil.showAddModal("add-message-modal.fxml", "Add New Message", ref, Map.of("schema", schemaTextArea.getText()));
         Triple<String, String, String> newMsg = (Triple<String, String, String>) ref.get();
         if (newMsg != null) {
             String inputKey = newMsg.getLeft();
             String inputValue = newMsg.getMiddle();
 
-            ProducerUtil.sendMessage(kafkaTopic, partition, new Message(inputKey, keyContentType, inputValue, valueContentType, schema));
+            ProducerUtil.sendMessage(kafkaTopic, partition, new Message(inputKey, keyContentType, inputValue, valueContentType, newMsg.getRight()));
             retrieveMessages();
             ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
                     ButtonType.OK);

@@ -15,16 +15,16 @@ public class AddMessageModalController extends ModalController {
     @FXML
     private TextArea value;
     @FXML
-    private TextArea avroSchema;
+    private TextArea schema;
     @FXML
-    private Button addBtn;
+    private Button okBtn;
     @FXML
     private Button cancelBtn;
 
     @FXML
-    protected void add() throws IOException {
-        modelRef.set(Triple.of(key.getText(), value.getText(), avroSchema.getText()));
-        Stage stage = (Stage) addBtn.getScene().getWindow();
+    protected void ok() throws IOException {
+        modelRef.set(Triple.of(key.getText(), value.getText(), schema.getText()));
+        Stage stage = (Stage) okBtn.getScene().getWindow();
         stage.close();
     }
 

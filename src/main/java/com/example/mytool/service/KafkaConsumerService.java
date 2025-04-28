@@ -7,6 +7,8 @@ import com.example.mytool.producer.creator.ConsumerCreator;
 import com.example.mytool.serde.AvroUtil;
 import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.ui.KafkaMessageTableItem;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,9 +25,10 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
+import static com.example.mytool.constant.AppConstant.DEFAULT_INIT_POLL_TIME_MS;
 
 @Slf4j
 public class KafkaConsumerService {
@@ -91,24 +94,41 @@ public class KafkaConsumerService {
     }
 
     public List<KafkaMessageTableItem> pollMessages(Consumer<String, Object> consumer, PollingOptions pollingOptions) {
-        int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_POLL_TIME_MS);
-        List<KafkaMessageTableItem> messages = new ArrayList<>();
+        int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_INIT_POLL_TIME_MS);
+//        List<KafkaMessageTableItem> allMessages = new ArrayList<>();
+        ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
+        boolean firstPoll = true;
+        int emptyPullCountDown = 2;
         while (true) {
-            ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
-            if (consumerRecords.isEmpty()) break;
 
-            for (ConsumerRecord<String, Object> record : consumerRecords) {
-                try {
-                    KafkaMessageTableItem message = createMessageItem(record, pollingOptions);
-                    messages.add(message);
-                } catch (Exception e) {
-                    log.error("Error processing record: key={}, partition={}, offset={}",
-                            record.key(), record.partition(), record.offset(), e);
-                }
-            }
+            ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
+            PollCallback pollCallback = pollingOptions.pollCallback().get();
+            if (!pollCallback.isPolling().get()) break;
+//            if (firstPoll) {
+            messageObservableList = pollCallback.resultObservableList();
+//                firstPoll = false;
+//            }
+            List<KafkaMessageTableItem> polledMessages = handleConsumerRecords(pollingOptions, consumerRecords);
+            messageObservableList.addAll(polledMessages);
+            if (consumerRecords.isEmpty()) emptyPullCountDown--;
+            if (emptyPullCountDown == 0) break;
         }
 
-        return filterAndSortMessages(messages, pollingOptions);
+        return filterAndSortMessages(messageObservableList, pollingOptions);
+    }
+
+    private List<KafkaMessageTableItem> handleConsumerRecords(PollingOptions pollingOptions, ConsumerRecords<String, Object> consumerRecords) {
+        List<KafkaMessageTableItem> messages = new ArrayList<>();
+        for (ConsumerRecord<String, Object> record : consumerRecords) {
+            try {
+                KafkaMessageTableItem message = createMessageItem(record, pollingOptions);
+                messages.add(message);
+            } catch (Exception e) {
+                log.error("Error processing record: key={}, partition={}, offset={}",
+                        record.key(), record.partition(), record.offset(), e);
+            }
+        }
+        return messages;
     }
 
     private KafkaMessageTableItem createMessageItem
@@ -150,6 +170,11 @@ public class KafkaConsumerService {
     @Builder
     public static record PollingOptions(Integer pollTime, Integer noMessages, Long timestamp,
                                         MessagePollingPosition pollingPosition, String valueContentType,
-                                        String schema) {
+                                        String schema,
+                                        java.util.function.Supplier<PollCallback> pollCallback) {
+    }
+
+    public static record PollCallback(ObservableList<KafkaMessageTableItem> resultObservableList,
+                                      AtomicBoolean isPolling) {
     }
 }

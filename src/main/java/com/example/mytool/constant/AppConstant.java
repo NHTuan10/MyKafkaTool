@@ -8,6 +8,10 @@ public class AppConstant {
     public static final String TREE_ITEM_TOPIC_LIST_DISPLAY_NAME = "Topics";
     public static final String OFFSET_RESET_EARLIER = "earliest";
     public static final String OFFSET_RESET_LATEST = "latest";
-    public static final int DEFAULT_POLL_TIME_MS = 5000;
+    public static final int DEFAULT_INIT_POLL_TIME_MS = 500;
+    public static final int DEFAULT_SUBSEQUENCE_POLL_TIME_MS = 500;
+
     public static final int DEFAULT_MAX_POLL_RECORDS = 1000;
+    public static final String POLL_MESSAGES_TEXT = "Poll Messages";
+    public static final String STOP_POLLING_TEXT = "Stop Polling";
 }

@@ -59,7 +59,7 @@ dependencies {
 //    implementation 'org.openjfx:javafx-controls:17.0.2'
 // https://mvnrepository.com/artifact/org.openjfx/javafx-fxml
 //    implementation 'org.openjfx:javafx-fxml:17.0.2'
-
+    implementation 'io.github.mkpaz:atlantafx-base:2.0.1'
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     implementation('no.tornado:tornadofx-controls:1.0.4')
