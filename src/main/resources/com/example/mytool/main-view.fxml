@@ -114,7 +114,7 @@
                                                                               <Insets left="10.0" top="5.0" />
                                                                           </FlowPane.margin>
                                                                       </DateTimePicker>
-                                                                      <Button fx:id="countMessagesBtn" mnemonicParsing="false" onAction="#countMessages" text="Count Total Messages">
+                                                                      <Button fx:id="countMessagesBtn" mnemonicParsing="false" onAction="#countMessages" text="Count Messages">
                                                                           <FlowPane.margin>
                                                                               <Insets left="10.0" top="5.0" />
                                                                           </FlowPane.margin>

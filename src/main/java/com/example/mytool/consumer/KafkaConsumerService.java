@@ -87,8 +87,11 @@ public class KafkaConsumerService {
 //                Set<TopicPartition> partitionSet = consumer.assignment();
             consumer.seekToEnd(topicPartitions);
             topicPartitions.forEach(topicPartition -> {
-                long startIndex = Math.max(consumer.position(topicPartition) - noMessages, 0);
-                consumer.seek(topicPartition, startIndex);
+                if (consumer.position(topicPartition) < noMessages) {
+                    consumer.seekToBeginning(List.of(topicPartition));
+                } else {
+                    consumer.seek(topicPartition, consumer.position(topicPartition) - noMessages);
+                }
             });
         }
     }
