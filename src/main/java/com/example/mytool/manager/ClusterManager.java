@@ -39,7 +39,7 @@ public class ClusterManager {
         return InstanceHolder.INSTANCE;
     }
 
-    public ClusterManager(Map<String, Admin> adminMap, Map<Pair<String, ConsumerType>, Consumer<String, String>> consumerMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
+    private ClusterManager(Map<String, Admin> adminMap, Map<Pair<String, ConsumerType>, Consumer<String, String>> consumerMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
         this.adminMap = adminMap;
         this.consumerMap = consumerMap;
         this.producerMap = producerMap;
