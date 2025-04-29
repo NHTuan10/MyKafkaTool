@@ -243,21 +243,28 @@ public class MainController {
             if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 ObservableList<UIPropertyItem> config = FXCollections.observableArrayList();
+                String clusterName = topic.getCluster().getName();
+                String topicName = topic.getName();
+                // Enable  datatabs and show/hide titled panes in tab
+                dataTab.setDisable(false);
+                propertiesTab.setDisable(false);
+                partitionsTitledPane.setVisible(true);
                 try {
-                    // Enable  datatabs and show/hide titled panes in tab
-                    dataTab.setDisable(false);
-                    propertiesTab.setDisable(false);
-                    partitionsTitledPane.setVisible(true);
                     // topic config table
-                    String clusterName = topic.getCluster().getName();
-                    String topicName = topic.getName();
                     Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
                     configEntries.forEach(entry -> config.add(new UIPropertyItem(entry.name(), entry.value())));
                     topicConfigTable.setItems(config);
+                } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                    log.error("Error when get topic config properties", e);
+                    topicConfigTable.setItems(FXCollections.emptyObservableList());
+                    throw new RuntimeException(e);
+                }
+                try {
                     // partitions table
                     refreshPartitionsTbl(clusterName, topicName);
                 } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                    log.error("Error when get topic config or partitions properties", e);
+                    log.error("Error when get partitions properties for Partitions table", e);
+                    kafkaPartitionsTable.setItems(FXCollections.emptyObservableList());
                     throw new RuntimeException(e);
                 }
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
