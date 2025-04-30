@@ -1,10 +1,7 @@
 package com.example.mytool.ui.controller;
 
 import javafx.collections.ObservableList;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputControl;
+import javafx.scene.control.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -29,8 +26,8 @@ public abstract class ModalController {
                 Object fieldObject = field.get(modalController);
                 if (fieldClass.equals(TextField.class) || fieldClass.equals(TextArea.class)) {
                     TextInputControl.class.getDeclaredMethod("setText", String.class).invoke(fieldObject, value);
-                } else if (fieldClass.equals(TableView.class) && value instanceof ObservableList) {
-                    TableView.class.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
+                } else if ((fieldClass.equals(TableView.class) || fieldClass.equals(ComboBox.class)) && value instanceof ObservableList) {
+                    fieldClass.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
                 } else {
                     throw new RuntimeException("Field is not supported");
                 }

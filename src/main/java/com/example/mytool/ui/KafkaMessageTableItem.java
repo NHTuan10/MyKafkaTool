@@ -13,15 +13,21 @@ public class KafkaMessageTableItem {
     private final SimpleStringProperty value;
     private final SimpleStringProperty timestamp;
     @Getter
-    private Headers headers;
+    private final String valueContentType;
+    @Getter
+    private final Headers headers;
+    @Getter
+    private final String schema;
 
-    public KafkaMessageTableItem(int partition, long offset, String key, String value, String timestamp, Headers headers) {
+    public KafkaMessageTableItem(int partition, long offset, String key, String value, String timestamp, String valueContentType, Headers headers, String schema) {
         this.partition = new SimpleIntegerProperty(partition);
         this.offset = new SimpleLongProperty(offset);
         this.key = new SimpleStringProperty(key);
         this.value = new SimpleStringProperty(value);
         this.timestamp = new SimpleStringProperty(timestamp);
+        this.valueContentType = valueContentType;
         this.headers = headers;
+        this.schema = schema;
     }
 
     public int getPartition() {

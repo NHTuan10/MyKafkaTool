@@ -29,7 +29,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.kafka.clients.admin.ConfigEntry;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartition;
@@ -46,8 +45,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.example.mytool.constant.AppConstant.DEFAULT_INIT_POLL_TIME_MS;
 import static com.example.mytool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
+import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
 public class MainController {
@@ -155,11 +154,12 @@ public class MainController {
                     KafkaMessageTableItem rowData = row.getItem();
                     log.debug("Double click on: " + rowData.getKey());
                     Map<String, Object> msgModalFieldMap = Map.of(
-                            "key", rowData.getKey(),
-                            "value", rowData.getValue(),
-                            "headerTable", FXCollections.observableArrayList(
-                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyItem(header.key(), new String(header.value()))).toList())
-                    );
+                            "keyTextArea", rowData.getKey(),
+                            "valueTextArea", rowData.getValue(),
+                            "valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()),
+                            "headerTable",
+                            FXCollections.observableArrayList(
+                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyItem(header.key(), new String(header.value()))).toList()));
                     try {
                         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false);
                     } catch (IOException e) {
@@ -190,7 +190,7 @@ public class MainController {
 
 
     private void initPollingOptionsUI() {
-        pollTimeTextField.setText(String.valueOf(DEFAULT_INIT_POLL_TIME_MS));
+        pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME_MS));
         maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
         timestampPicker.setDayCellFactory(param -> new DateCell() {
             @Override
@@ -201,7 +201,7 @@ public class MainController {
         });
         keyContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING));
         keyContentType.setValue(SerdeUtil.SERDE_STRING);
-        valueContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING, SerdeUtil.SERDE_AVRO));
+        valueContentType.setItems(SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES);
         valueContentType.setValue(SerdeUtil.SERDE_STRING);
         msgPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
         msgPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
@@ -249,6 +249,7 @@ public class MainController {
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
                 partitionsTitledPane.setVisible(true);
+                tabPane.getSelectionModel().select(dataTab);
                 try {
                     // topic config table
                     Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
@@ -270,6 +271,7 @@ public class MainController {
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
+                tabPane.getSelectionModel().select(dataTab);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
                 TreeItem topicTreeItem = selectedItem.getParent();
                 if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
@@ -297,7 +299,8 @@ public class MainController {
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 try {
                     cgOffsetsTab.setDisable(false);
-
+                    dataTab.setDisable(true);
+                    tabPane.getSelectionModel().select(cgOffsetsTab);
                     consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
                 } catch (ExecutionException | InterruptedException e) {
                     log.error("Error when get consumer group offsets", e);
@@ -429,14 +432,16 @@ public class MainController {
     public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException, TimeoutException {
         // TODO: don't send message with key to Kafka if it's empty
 
-        AtomicReference ref = new AtomicReference<>();
-        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref, Map.of("schema", schemaTextArea.getText()));
-        Triple<String, String, String> newMsg = (Triple<String, String, String>) ref.get();
+        AtomicReference<Object> ref = new AtomicReference<>();
+        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
+                Map.of("valueContentTypeComboBox", SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES,
+                        "schemaTextArea", schemaTextArea.getText()));
+        Message newMsg = (Message) ref.get();
         if (newMsg != null) {
-            String inputKey = newMsg.getLeft();
-            String inputValue = newMsg.getMiddle();
-            schema = newMsg.getRight();
-            if (!validateSchema(valueContentType, schema)) return;
+            String inputKey = newMsg.key();
+            String inputValue = newMsg.value();
+            schema = newMsg.schema();
+            valueContentType = newMsg.valueContentType();
             ProducerUtil.sendMessage(kafkaTopic, partition, new Message(inputKey, keyContentType, inputValue, valueContentType, schema));
             retrieveMessages();
             ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
@@ -445,7 +450,7 @@ public class MainController {
     }
 
 
-    private static boolean validateSchema(String valueContentType, String schema) {
+    public static boolean validateSchema(String valueContentType, String schema) {
         boolean valid = true;
         if (SerdeUtil.SERDE_AVRO.equals(valueContentType)) {
             try {

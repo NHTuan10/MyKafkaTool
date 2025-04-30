@@ -1,5 +1,8 @@
 package com.example.mytool.serde;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -10,6 +13,7 @@ public class SerdeUtil {
 
     public static final String SERDE_STRING = "String";
     public static final String SERDE_AVRO = "AVRO";
+    public static final ObservableList<String> SUPPORT_VALUE_CONTENT_TYPES = FXCollections.observableArrayList(SerdeUtil.SERDE_STRING, SerdeUtil.SERDE_AVRO);
 
     public static String getSerializeClass(String contentType) {
         switch (contentType) {
@@ -29,18 +33,31 @@ public class SerdeUtil {
         }
     }
 
-    public static Object convert(String serdeName, String content, String schemaStr) {
+    public static Object convert(String serdeName, String content, String schemaStr) throws IOException {
         switch (serdeName) {
             case SERDE_STRING:
                 return content;
             case SERDE_AVRO:
-                try {
+
                     return AvroUtil.convertJsonToAvro(content, schemaStr);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
         }
         return content;
     }
 
+    public static ValidationResult validateMessageAgainstSchema(String contentType, String content, String schemaStr) {
+        if (SERDE_AVRO.equals(contentType)) {
+            try {
+                GenericRecord s = AvroUtil.convertJsonToAvro(content, schemaStr);
+                return new ValidationResult((s != null), new Exception("Empty content type"));
+            } catch (Exception e) {
+                return new ValidationResult(false, e);
+            }
+        }
+        return new ValidationResult(true, null);
+    }
+
+    public record ValidationResult(boolean isValid, Throwable exception) {
+    }
+    
 }

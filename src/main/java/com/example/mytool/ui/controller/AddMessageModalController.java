@@ -1,25 +1,26 @@
 package com.example.mytool.ui.controller;
 
+import com.example.mytool.producer.Message;
+import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyItem;
+import com.example.mytool.ui.util.ViewUtil;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.tuple.Triple;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 public class AddMessageModalController extends ModalController {
 
     @FXML
-    private TextArea key;
+    private TextArea keyTextArea;
     @FXML
-    private TextArea value;
+    private TextArea valueTextArea;
     @FXML
-    private TextArea schema;
+    private TextArea schemaTextArea;
     @FXML
     private Button okBtn;
     @FXML
@@ -29,16 +30,37 @@ public class AddMessageModalController extends ModalController {
     private Tab headerTab;
 
     @FXML
+    private ComboBox<String> valueContentTypeComboBox;
+
+    @FXML
     private TableView<UIPropertyItem> headerTable;
 
     @FXML
     void initialize() {
         TableViewConfigurer.configureTableView(UIPropertyItem.class, headerTable);
+        valueContentTypeComboBox.setOnAction(event -> {
+            if (valueContentTypeComboBox.getValue().equals(SerdeUtil.SERDE_AVRO)) {
+                schemaTextArea.setDisable(false);
+            } else {
+                schemaTextArea.setDisable(true);
+            }
+        });
     }
 
     @FXML
     protected void ok() throws IOException {
-        modelRef.set(Triple.of(key.getText(), value.getText(), schema.getText()));
+        String schemaText = schemaTextArea.getText();
+        String valueText = valueTextArea.getText();
+        String valueContentTypeText = valueContentTypeComboBox.getValue();
+        if (!MainController.validateSchema(valueContentTypeText, schemaText)) return;
+        SerdeUtil.ValidationResult valueValidationResult = SerdeUtil.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
+        if (!valueValidationResult.isValid()) {
+            log.warn("The message is invalid against the schema", valueValidationResult.exception());
+            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
+            return;
+        }
+
+        modelRef.set(new Message(keyTextArea.getText(), valueText, valueContentTypeText, schemaText));
         Stage stage = (Stage) okBtn.getScene().getWindow();
         stage.close();
     }
@@ -50,8 +72,21 @@ public class AddMessageModalController extends ModalController {
     }
 
     public void configureEditableControls(boolean editable) {
-        key.setEditable(editable);
-        value.setEditable(editable);
-        schema.setEditable(editable);
+
+        keyTextArea.setEditable(editable);
+        valueTextArea.setEditable(editable);
+//        valueContentTypeComboBox.setDisable(!editable);
+        headerTable.setEditable(editable);
+        valueContentTypeComboBox.getSelectionModel().selectFirst();
+        if (!editable) {
+            //suppress combox box drop down
+            valueContentTypeComboBox.setOnShowing(event -> event.consume());
+            ;
+        }
+
+        if (!editable || !SerdeUtil.SERDE_AVRO.equals(valueContentTypeComboBox.getValue())) {
+            schemaTextArea.setDisable(true);
+        }
+
     }
 }

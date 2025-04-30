@@ -28,7 +28,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static com.example.mytool.constant.AppConstant.DEFAULT_INIT_POLL_TIME_MS;
+import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
 public class KafkaConsumerService {
@@ -97,7 +97,7 @@ public class KafkaConsumerService {
     }
 
     public List<KafkaMessageTableItem> pollMessages(Consumer<String, Object> consumer, PollingOptions pollingOptions) {
-        int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_INIT_POLL_TIME_MS);
+        int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_POLL_TIME_MS);
 //        List<KafkaMessageTableItem> allMessages = new ArrayList<>();
         ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
         boolean firstPoll = true;
@@ -146,7 +146,7 @@ public class KafkaConsumerService {
                 .toLocalDateTime()
                 .toString();
 
-        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, record.headers());
+        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, pollingOptions.valueContentType(), record.headers(), pollingOptions.schema());
     }
 
     private List<KafkaMessageTableItem> filterAndSortMessages

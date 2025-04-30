@@ -13,12 +13,13 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class ProducerUtil {
     public static void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, Message message)
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, IOException {
 
         KafkaCluster cluster = partition != null ? partition.getTopic().getCluster() : kafkaTopic.getCluster();
 
@@ -42,7 +43,7 @@ public class ProducerUtil {
     }
 
     private static ProducerRecord<String, Object> createProducerRecord(KafkaTopic kafkaTopic, KafkaPartition partition,
-                                                                       Message message) {
+                                                                       Message message) throws IOException {
 
         String key = StringUtils.isBlank(message.key()) ? null : message.key();
         Object value = SerdeUtil.convert(message.valueContentType(), message.value(), message.schema());
