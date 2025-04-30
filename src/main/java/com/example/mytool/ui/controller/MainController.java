@@ -100,7 +100,7 @@ public class MainController {
     private TabPane tabPane;
 
     @FXML
-    private Tab dataTab;
+    private Tab messagesTab;
 
     @FXML
     private Tab propertiesTab;
@@ -246,10 +246,10 @@ public class MainController {
                 String clusterName = topic.getCluster().getName();
                 String topicName = topic.getName();
                 // Enable  datatabs and show/hide titled panes in tab
-                dataTab.setDisable(false);
+                messagesTab.setDisable(false);
                 propertiesTab.setDisable(false);
                 partitionsTitledPane.setVisible(true);
-                tabPane.getSelectionModel().select(dataTab);
+                tabPane.getSelectionModel().select(messagesTab);
                 try {
                     // topic config table
                     Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
@@ -269,9 +269,9 @@ public class MainController {
                     throw new RuntimeException(e);
                 }
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
-                dataTab.setDisable(false);
+                messagesTab.setDisable(false);
                 propertiesTab.setDisable(false);
-                tabPane.getSelectionModel().select(dataTab);
+                tabPane.getSelectionModel().select(messagesTab);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
                 TreeItem topicTreeItem = selectedItem.getParent();
                 if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
@@ -299,7 +299,7 @@ public class MainController {
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 try {
                     cgOffsetsTab.setDisable(false);
-                    dataTab.setDisable(true);
+                    messagesTab.setDisable(true);
                     tabPane.getSelectionModel().select(cgOffsetsTab);
                     consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
                 } catch (ExecutionException | InterruptedException e) {

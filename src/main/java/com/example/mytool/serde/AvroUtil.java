@@ -41,12 +41,9 @@ public class AvroUtil {
     public static GenericRecord convertJsonToAvro(String json, String schemaStr) throws IOException {
         Schema.Parser parser = new Schema.Parser();
         Schema schema = parser.parse(schemaStr);
-        try {
-            DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
-            Decoder decoder = DecoderFactory.get().jsonDecoder(schema, json);
-            return reader.read(null, decoder);
-        } catch (IOException e) {
-            throw new IOException("Error converting JSON to Avro", e);
-        }
+
+        DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
+        Decoder decoder = DecoderFactory.get().jsonDecoder(schema, json);
+        return reader.read(null, decoder);
     }
 }
