@@ -4,7 +4,6 @@ import com.example.mytool.consumer.creator.ConsumerCreator;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
-import com.example.mytool.serde.AvroUtil;
 import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.ui.KafkaMessageTableItem;
 import javafx.collections.FXCollections;
@@ -60,7 +59,7 @@ public class KafkaConsumerService {
 
     private static Consumer getConsumer(KafkaTopic topic, String valueContentType) {
         ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(topic.getCluster())
-                .keyDeserializer(StringDeserializer.class.getName())
+                .keyDeserializer(StringDeserializer.class)
                 .valueDeserializer(SerdeUtil.getDeserializeClass(valueContentType))
                 .build();
         return ClusterManager.getInstance().getConsumer(consumerCreatorConfig);
@@ -137,10 +136,10 @@ public class KafkaConsumerService {
     private KafkaMessageTableItem createMessageItem
             (ConsumerRecord<String, Object> record, PollingOptions pollingOptions) throws IOException {
         String key = record.key() != null ? record.key() : "";
-        String value = SerdeUtil.SERDE_AVRO.equals(pollingOptions.valueContentType())
-                ? AvroUtil.deserializeAsJsonString((byte[]) record.value(), pollingOptions.schema())
-                : (String) record.value();
-
+//        String value = SerdeUtil.SERDE_AVRO.equals(pollingOptions.valueContentType())
+//                ? AvroUtil.deserializeAsJsonString((byte[]) record.value(), pollingOptions.schema())
+//                : (String) record.value();
+        String value = record.value().toString();
         String timestamp = Instant.ofEpochMilli(record.timestamp())
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime()

@@ -343,9 +343,9 @@ public class MainController {
         Long timestampMs = getPollStartTimestamp();
         String schema = schemaTextArea.getText();
 //        }
-        if (!validateSchema(valueContentTypeStr, schema)) {
-            return;
-        }
+//        if (!validateSchema(valueContentTypeStr, schema)) {
+//            return;
+//        }
         ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
         messageTable.setItems(list);
         treeMsgTableItemCache.put(selectedTreeItem, list);

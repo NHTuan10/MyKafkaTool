@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.util.Properties;
@@ -24,7 +25,7 @@ public class ConsumerCreator {
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, consumerCreatorConfig.keyDeserializer);
 //        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,  consumerCreatorConfig.valueDeserializer);
-
+        properties.put("schema.registry.url", "http://localhost:8081");
         properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, consumerCreatorConfig.maxPollRecords != null ? consumerCreatorConfig.maxPollRecords : DEFAULT_MAX_POLL_RECORDS);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_RESET_EARLIER);
@@ -42,9 +43,9 @@ public class ConsumerCreator {
         private final KafkaCluster cluster;
         private final Integer maxPollRecords;
         @Builder.Default
-        private String keyDeserializer = StringDeserializer.class.getName();
+        private Class<? extends Deserializer> keyDeserializer = StringDeserializer.class;
         @Builder.Default
-        private String valueDeserializer = StringDeserializer.class.getName();
+        private Class<? extends Deserializer> valueDeserializer = StringDeserializer.class;
         @Builder.Default
         private String groupId=  "MyTool";
 
