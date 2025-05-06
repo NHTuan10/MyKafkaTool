@@ -1,6 +1,7 @@
 package com.example.mytool.ui.controller;
 
-import com.example.mytool.producer.KafkaMessage;
+import com.example.mytool.api.KafkaMessage;
+import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyItem;
@@ -13,6 +14,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,6 +23,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class AddMessageModalController extends ModalController {
+
+    private SerdeUtil serdeUtil;
 
     @FXML
     private TextArea keyTextArea;
@@ -56,12 +60,18 @@ public class AddMessageModalController extends ModalController {
         headerItems = FXCollections.observableArrayList();
         headerTable.setItems(headerItems);
         valueContentTypeComboBox.setOnAction(event -> {
-            if (valueContentTypeComboBox.getValue().equals(SerdeUtil.SERDE_AVRO)) {
-                schemaTextArea.setDisable(false);
-            } else {
-                schemaTextArea.setDisable(true);
-            }
+//            if (valueContentTypeComboBox.getValue().equals(SerdeUtil.SERDE_AVRO)) {
+//                schemaTextArea.setDisable(false);
+//            } else {
+//                schemaTextArea.setDisable(true);
+//            }
+            enableDisableSchemaTextArea();
         });
+    }
+
+    private void enableDisableSchemaTextArea() {
+        PluggableSerializer serializer = serdeUtil.getPluggableSerialize(valueContentTypeComboBox.getValue());
+        schemaTextArea.setDisable(!serializer.isUserSchemaInputRequired());
     }
 
     @FXML
@@ -69,8 +79,8 @@ public class AddMessageModalController extends ModalController {
         String schemaText = schemaTextArea.getText();
         String valueText = valueTextArea.getText();
         String valueContentTypeText = valueContentTypeComboBox.getValue();
-        if (!MainController.validateSchema(valueContentTypeText, schemaText)) return;
-        SerdeUtil.ValidationResult valueValidationResult = SerdeUtil.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
+        if (!validateSchema(valueContentTypeText, schemaText)) return;
+        SerdeUtil.ValidationResult valueValidationResult = serdeUtil.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
         if (!valueValidationResult.isValid()) {
             log.warn("The message is invalid against the schema", valueValidationResult.exception());
             ViewUtil.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
@@ -109,12 +119,6 @@ public class AddMessageModalController extends ModalController {
 //        valueContentTypeComboBox.setDisable(!editable);
         headerTable.setEditable(editable);
         valueContentTypeComboBox.getSelectionModel().selectFirst();
-        if (!editable) {
-
-            ;
-        }
-
-
         if (editable) {
             headerTable.setEditable(true);
 
@@ -123,7 +127,6 @@ public class AddMessageModalController extends ModalController {
                     = (TableColumn<UIPropertyItem, String> p) -> new EditingTableCell();
 
             TableColumn<UIPropertyItem, String> nameColumn = (TableColumn<UIPropertyItem, String>) headerTable.getColumns().get(0);
-
 //            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 //            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 //            nameColumn.setCellFactory((tableColumn)-> new EditingTableCell()); // Use TextField for editing
@@ -153,13 +156,37 @@ public class AddMessageModalController extends ModalController {
                 event.getTableView().getItems().get(
                         event.getTablePosition().getRow()).setValue(event.getNewValue());
             });
-
+            enableDisableSchemaTextArea();
         } else {
+
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(event -> event.consume());
-            if (!SerdeUtil.SERDE_AVRO.equals(valueContentTypeComboBox.getValue())) {
-                schemaTextArea.setDisable(true);
+//            if (!SerdeUtil.SERDE_AVRO.equals(valueContentTypeComboBox.getValue())) {
+//                schemaTextArea.setDisable(true);
+//            }
+        }
+    }
+
+    private boolean validateSchema(String valueContentType, String schema) {
+        boolean valid = true;
+        PluggableSerializer serializer = serdeUtil.getPluggableSerialize(valueContentType);
+        if (serializer.isUserSchemaInputRequired()) {
+            try {
+                if (StringUtils.isNotBlank(schema) &&
+                        serializer.parseSchema(schema) != null) {
+                    valid = true;
+                } else {
+                    valid = false;
+                }
+            } catch (Exception e) {
+                log.warn("Error when parse schema", e);
+                valid = false;
             }
         }
+        if (!valid) {
+            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
+                    ButtonType.OK);
+        }
+        return valid;
     }
 }

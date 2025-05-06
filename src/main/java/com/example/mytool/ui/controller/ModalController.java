@@ -29,7 +29,8 @@ public abstract class ModalController {
                 } else if ((fieldClass.equals(TableView.class) || fieldClass.equals(ComboBox.class)) && value instanceof ObservableList) {
                     fieldClass.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
                 } else {
-                    throw new RuntimeException("Field is not supported");
+                    field.set(modalController, value);
+//                    throw new RuntimeException("Field is not supported");
                 }
             } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException |
                      InvocationTargetException e) {

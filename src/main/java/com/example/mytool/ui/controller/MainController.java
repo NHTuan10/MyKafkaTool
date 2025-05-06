@@ -1,14 +1,20 @@
 package com.example.mytool.ui.controller;
 
+import com.example.mytool.api.KafkaMessage;
+import com.example.mytool.api.PluggableDeserializer;
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.consumer.KafkaConsumerService;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
-import com.example.mytool.producer.KafkaMessage;
 import com.example.mytool.producer.ProducerUtil;
-import com.example.mytool.serde.AvroUtil;
 import com.example.mytool.serde.SerdeUtil;
+import com.example.mytool.serde.deserializer.ByteArrayDeserializer;
+import com.example.mytool.serde.deserializer.SchemaRegistryAvroDeserializer;
+import com.example.mytool.serde.deserializer.StringDeserializer;
+import com.example.mytool.serde.serializer.ByteArraySerializer;
+import com.example.mytool.serde.serializer.SchemaRegistryAvroSerializer;
+import com.example.mytool.serde.serializer.StringSerializer;
 import com.example.mytool.ui.KafkaClusterTree;
 import com.example.mytool.ui.KafkaMessageTableItem;
 import com.example.mytool.ui.TableViewConfigurer;
@@ -27,7 +33,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.admin.ConfigEntry;
 import org.apache.kafka.common.Node;
@@ -53,6 +58,10 @@ public class MainController {
     private final ClusterManager clusterManager = ClusterManager.getInstance();
 
     private KafkaConsumerService kafkaConsumerService;
+
+    private ProducerUtil producerUtil;
+
+    private SerdeUtil serdeUtil;
 
     @FXML
     private TreeView clusterTree;
@@ -126,7 +135,22 @@ public class MainController {
     private AtomicBoolean isPolling = new AtomicBoolean(false);
 
     public MainController() {
-        this.kafkaConsumerService = new KafkaConsumerService();
+        StringSerializer stringSerializer = new StringSerializer();
+        StringDeserializer stringDeserializer = new StringDeserializer();
+        ByteArraySerializer byteArraySerializer = new ByteArraySerializer();
+        ByteArrayDeserializer byteArrayDeserializer = new ByteArrayDeserializer();
+        SchemaRegistryAvroSerializer schemaRegistryAvroSerializer = new SchemaRegistryAvroSerializer();
+        SchemaRegistryAvroDeserializer schemaRegistryAvroDeserializer = new SchemaRegistryAvroDeserializer();
+        this.serdeUtil = new SerdeUtil(
+                Map.of(stringSerializer.getName(), stringSerializer,
+                        byteArraySerializer.getName(), byteArraySerializer,
+                        schemaRegistryAvroSerializer.getName(), schemaRegistryAvroSerializer),
+                Map.of(stringDeserializer.getName(), stringDeserializer,
+                        byteArrayDeserializer.getName(), byteArrayDeserializer,
+                        schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer)
+        );
+        this.producerUtil = new ProducerUtil(this.serdeUtil);
+        this.kafkaConsumerService = new KafkaConsumerService(this.serdeUtil);
     }
 
     @FXML
@@ -154,6 +178,7 @@ public class MainController {
                     KafkaMessageTableItem rowData = row.getItem();
                     log.debug("Double click on: " + rowData.getKey());
                     Map<String, Object> msgModalFieldMap = Map.of(
+                            "serdeUtil", serdeUtil,
                             "keyTextArea", rowData.getKey(),
                             "valueTextArea", rowData.getValue(),
                             "valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()),
@@ -202,16 +227,21 @@ public class MainController {
         });
         keyContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING));
         keyContentType.setValue(SerdeUtil.SERDE_STRING);
-        valueContentType.setItems(SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES);
-        valueContentType.setValue(SerdeUtil.SERDE_STRING);
+//        valueContentType.setItems(SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES);
+        valueContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedContentTypes()));
+//        valueContentType.setValue(SerdeUtil.SERDE_STRING);
+        valueContentType.getSelectionModel().selectFirst();
         msgPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
         msgPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
         valueContentType.setOnAction(event -> {
-            if (valueContentType.getValue().equals(SerdeUtil.SERDE_AVRO)) {
-                schemaTextArea.setDisable(false);
-            } else {
-                schemaTextArea.setDisable(true);
-            }
+//            if (valueContentType.getValue().equals(SerdeUtil.SERDE_AVRO)) {
+//                schemaTextArea.setDisable(false);
+//            } else {
+//                schemaTextArea.setDisable(true);
+//            }
+            PluggableDeserializer deserializer = serdeUtil.getPluggableDeserialize(valueContentType.getValue());
+            schemaTextArea.setDisable(!deserializer.isUserSchemaInputRequired());
+
         });
     }
 
@@ -435,7 +465,7 @@ public class MainController {
 
         AtomicReference<Object> ref = new AtomicReference<>();
         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
-                Map.of("valueContentTypeComboBox", SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES,
+                Map.of("serdeUtil", serdeUtil, "valueContentTypeComboBox", FXCollections.observableArrayList(serdeUtil.getSupportedContentTypes()),
                         "schemaTextArea", schemaTextArea.getText()));
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {
@@ -443,35 +473,13 @@ public class MainController {
 //            String inputValue = newMsg.value();
 //            schema = newMsg.schema();
 //            valueContentType = newMsg.valueContentType();
-            ProducerUtil.sendMessage(kafkaTopic, partition, newMsg);
+            producerUtil.sendMessage(kafkaTopic, partition, newMsg);
             retrieveMessages();
             ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
                     ButtonType.OK);
         }
     }
 
-
-    public static boolean validateSchema(String valueContentType, String schema) {
-        boolean valid = true;
-        if (SerdeUtil.SERDE_AVRO.equals(valueContentType)) {
-            try {
-                if (StringUtils.isNotBlank(schema) &&
-                        AvroUtil.parseSchema(schema) != null) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
-            } catch (Exception e) {
-                log.warn("Error when parse schema", e);
-                valid = false;
-            }
-        }
-        if (!valid) {
-            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
-                    ButtonType.OK);
-        }
-        return valid;
-    }
 
     //    public void setNewMsg(Tuple2<String, String> newMsg) {
 //        this.newMsg = newMsg;

@@ -9,6 +9,7 @@ import com.example.mytool.ui.KafkaMessageTableItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -30,7 +31,10 @@ import java.util.stream.Collectors;
 import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
+@RequiredArgsConstructor
 public class KafkaConsumerService {
+    private final SerdeUtil serdeUtil;
+
     public List<KafkaMessageTableItem> consumeMessages(KafkaPartition partition, PollingOptions pollingOptions) {
         Set<TopicPartition> topicPartitions = Set.of(new TopicPartition(partition.getTopic().getName(), partition.getId()));
         return consumeMessagesFromPartitions(partition.getTopic(), topicPartitions, pollingOptions);
@@ -57,10 +61,10 @@ public class KafkaConsumerService {
         return list;
     }
 
-    private static Consumer getConsumer(KafkaTopic topic, String valueContentType) {
+    private Consumer getConsumer(KafkaTopic topic, String valueContentType) {
         ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(topic.getCluster())
                 .keyDeserializer(StringDeserializer.class)
-                .valueDeserializer(SerdeUtil.getDeserializeClass(valueContentType))
+                .valueDeserializer(serdeUtil.getDeserializeClass(valueContentType))
                 .build();
         return ClusterManager.getInstance().getConsumer(consumerCreatorConfig);
     }

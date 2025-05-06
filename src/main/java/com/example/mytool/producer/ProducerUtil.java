@@ -1,5 +1,6 @@
 package com.example.mytool.producer;
 
+import com.example.mytool.api.KafkaMessage;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
@@ -7,6 +8,7 @@ import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.producer.creator.ProducerCreator;
 import com.example.mytool.serde.SerdeUtil;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -22,8 +24,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Slf4j
+@RequiredArgsConstructor
 public class ProducerUtil {
-    public static void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, KafkaMessage kafkaMessage)
+    private final SerdeUtil serdeUtil;
+
+    public void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, KafkaMessage kafkaMessage)
             throws ExecutionException, InterruptedException, IOException {
 
         KafkaCluster cluster = kafkaTopic.getCluster();
@@ -39,19 +44,19 @@ public class ProducerUtil {
                 kafkaMessage.key(), metadata.partition(), metadata.offset());
     }
 
-    private static ProducerCreator.ProducerCreatorConfig createProducerConfig(KafkaCluster cluster, KafkaMessage kafkaMessage) {
+    private ProducerCreator.ProducerCreatorConfig createProducerConfig(KafkaCluster cluster, KafkaMessage kafkaMessage) {
         return ProducerCreator.ProducerCreatorConfig.builder()
                 .cluster(cluster)
-                .keySerializer(SerdeUtil.getSerializeClass(kafkaMessage.keyContentType()))
-                .valueSerializer(SerdeUtil.getSerializeClass(kafkaMessage.valueContentType()))
+                .keySerializer(serdeUtil.getSerializeClass(kafkaMessage.keyContentType()))
+                .valueSerializer(serdeUtil.getSerializeClass(kafkaMessage.valueContentType()))
                 .build();
     }
 
-    private static ProducerRecord<String, Object> createProducerRecord(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition,
+    private ProducerRecord<String, Object> createProducerRecord(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition,
                                                                        KafkaMessage kafkaMessage) throws IOException {
 
         String key = StringUtils.isBlank(kafkaMessage.key()) ? null : kafkaMessage.key();
-        Object value = SerdeUtil.convert(kafkaMessage.valueContentType(), kafkaMessage.value(), kafkaMessage.schema());
+        Object value = serdeUtil.convert(kafkaMessage.valueContentType(), kafkaMessage.value(), kafkaMessage.schema());
         List<Header> headers = kafkaMessage.headers().entrySet().stream().map(entry -> new RecordHeader(entry.getKey(), entry.getValue().getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
 
 //        if (partition != null) {

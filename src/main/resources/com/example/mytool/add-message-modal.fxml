@@ -43,7 +43,7 @@
                                               <TextArea fx:id="keyTextArea" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
                                               <TextArea fx:id="valueTextArea" prefHeight="108.0" prefWidth="520.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <TextArea fx:id="schemaTextArea" layoutX="59.0" layoutY="69.0" prefHeight="108.0" prefWidth="520.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                    <Label layoutX="10.0" layoutY="114.0" text="Schema" GridPane.rowIndex="2" />
+                                    <Label layoutX="10.0" layoutY="114.0" text="Value Schema" GridPane.rowIndex="2" />
                                     <Label text="Label" GridPane.rowIndex="3" />
                                     <ComboBox fx:id="valueContentTypeComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                           </children>

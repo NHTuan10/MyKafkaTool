@@ -1,4 +1,4 @@
-package com.example.mytool.producer;
+package com.example.mytool.api;
 
 import com.example.mytool.serde.SerdeUtil;
 
