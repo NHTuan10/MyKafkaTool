@@ -27,10 +27,18 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+java {
+    modularity.inferModulePath = true
+}
+
 application {
 //    mainModule = 'com.example.mytool'
     mainClass = 'com.example.mytool.MyApplication'
 }
+
+//compileJava {
+//    options.compilerArgs << '--add-modules kafka.clients'
+//}
 
 javafx {
     version = '23.0.2'
@@ -39,7 +47,7 @@ javafx {
 
 dependencies {
 // https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients
-    implementation 'org.apache.kafka:kafka-clients:3.9.0'
+//    implementation 'org.apache.kafka:kafka-clients:3.9.0'
 //    implementation 'org.apache.kafka:kafka-streams:3.9.0'
 // https://mvnrepository.com/artifact/org.apache.kafka/kafka
 //    implementation 'org.apache.kafka:kafka_2.13:3.2.0'
@@ -71,11 +79,20 @@ test {
     useJUnitPlatform()
 }
 
+//jlink {
+//    imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
+//    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+//    launcher {
+//        name = 'app'
+//    }
+//    addExtraDependencies("javafx")
+//}
+
 jlink {
-    imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
     launcher {
         name = 'app'
+        jvmArgs = ['-Dlog4j.configurationFile=./logback.xml']
     }
     addExtraDependencies("javafx")
 }

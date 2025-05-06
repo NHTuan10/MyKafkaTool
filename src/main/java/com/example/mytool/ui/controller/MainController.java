@@ -5,7 +5,7 @@ import com.example.mytool.consumer.KafkaConsumerService;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
-import com.example.mytool.producer.Message;
+import com.example.mytool.producer.KafkaMessage;
 import com.example.mytool.producer.ProducerUtil;
 import com.example.mytool.serde.AvroUtil;
 import com.example.mytool.serde.SerdeUtil;
@@ -174,6 +174,7 @@ public class MainController {
         TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable);
         TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable);
         TableViewConfigurer.configureTableView(UIPropertyItem.class, topicConfigTable);
+
         // Use a change listener to respond to a selection within
         // a tree view
 //        clusterTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem<String>>) (changed, oldVal, newVal) -> {
@@ -436,13 +437,13 @@ public class MainController {
         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
                 Map.of("valueContentTypeComboBox", SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES,
                         "schemaTextArea", schemaTextArea.getText()));
-        Message newMsg = (Message) ref.get();
+        KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {
-            String inputKey = newMsg.key();
-            String inputValue = newMsg.value();
-            schema = newMsg.schema();
-            valueContentType = newMsg.valueContentType();
-            ProducerUtil.sendMessage(kafkaTopic, partition, new Message(inputKey, keyContentType, inputValue, valueContentType, schema));
+//            String inputKey = newMsg.key();
+//            String inputValue = newMsg.value();
+//            schema = newMsg.schema();
+//            valueContentType = newMsg.valueContentType();
+            ProducerUtil.sendMessage(kafkaTopic, partition, newMsg);
             retrieveMessages();
             ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
                     ButtonType.OK);

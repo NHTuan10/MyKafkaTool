@@ -120,6 +120,7 @@ public class ViewUtil {
         modalController.configureEditableControls(editable);
         stage.setTitle(title);
         stage.initModality(Modality.WINDOW_MODAL);
+        stage.setResizable(false);
 //        ActionEvent event
 //        stage.initOwner(
 //                ((Node)event.getSource()).getScene().getWindow() );

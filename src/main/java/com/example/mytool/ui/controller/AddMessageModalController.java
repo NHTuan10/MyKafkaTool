@@ -1,16 +1,23 @@
 package com.example.mytool.ui.controller;
 
-import com.example.mytool.producer.Message;
+import com.example.mytool.producer.KafkaMessage;
 import com.example.mytool.serde.SerdeUtil;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyItem;
+import com.example.mytool.ui.util.EditingTableCell;
 import com.example.mytool.ui.util.ViewUtil;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class AddMessageModalController extends ModalController {
@@ -25,7 +32,11 @@ public class AddMessageModalController extends ModalController {
     private Button okBtn;
     @FXML
     private Button cancelBtn;
+    @FXML
+    private Button addHeaderBtn;
 
+    @FXML
+    private Button removeHeaderBtn;
     @FXML
     private Tab headerTab;
 
@@ -35,9 +46,15 @@ public class AddMessageModalController extends ModalController {
     @FXML
     private TableView<UIPropertyItem> headerTable;
 
+    private ObservableList<UIPropertyItem> headerItems;
+
     @FXML
     void initialize() {
         TableViewConfigurer.configureTableView(UIPropertyItem.class, headerTable);
+
+        headerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        headerItems = FXCollections.observableArrayList();
+        headerTable.setItems(headerItems);
         valueContentTypeComboBox.setOnAction(event -> {
             if (valueContentTypeComboBox.getValue().equals(SerdeUtil.SERDE_AVRO)) {
                 schemaTextArea.setDisable(false);
@@ -60,7 +77,8 @@ public class AddMessageModalController extends ModalController {
             return;
         }
 
-        modelRef.set(new Message(keyTextArea.getText(), valueText, valueContentTypeText, schemaText));
+        Map<String, String> headers = headerItems.stream().collect(Collectors.toMap(UIPropertyItem::getName, UIPropertyItem::getValue));
+        modelRef.set(new KafkaMessage(keyTextArea.getText(), valueText, valueContentTypeText, schemaText, headers));
         Stage stage = (Stage) okBtn.getScene().getWindow();
         stage.close();
     }
@@ -71,6 +89,19 @@ public class AddMessageModalController extends ModalController {
         stage.close();
     }
 
+    @FXML
+    protected void addHeader() {
+        headerItems.add(new UIPropertyItem("", ""));
+    }
+
+    @FXML
+    protected void removeHeader() {
+        List<Integer> indicesToRemove = headerTable.getSelectionModel().getSelectedIndices().reversed();
+        indicesToRemove.forEach((i) -> {
+            headerItems.remove((int) i);
+        });
+    }
+
     public void configureEditableControls(boolean editable) {
 
         keyTextArea.setEditable(editable);
@@ -79,14 +110,56 @@ public class AddMessageModalController extends ModalController {
         headerTable.setEditable(editable);
         valueContentTypeComboBox.getSelectionModel().selectFirst();
         if (!editable) {
-            //suppress combox box drop down
-            valueContentTypeComboBox.setOnShowing(event -> event.consume());
+
             ;
         }
 
-        if (!editable || !SerdeUtil.SERDE_AVRO.equals(valueContentTypeComboBox.getValue())) {
-            schemaTextArea.setDisable(true);
-        }
 
+        if (editable) {
+            headerTable.setEditable(true);
+
+            Callback<TableColumn<UIPropertyItem, String>,
+                    TableCell<UIPropertyItem, String>> cellFactory
+                    = (TableColumn<UIPropertyItem, String> p) -> new EditingTableCell();
+
+            TableColumn<UIPropertyItem, String> nameColumn = (TableColumn<UIPropertyItem, String>) headerTable.getColumns().get(0);
+
+//            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+//            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+//            nameColumn.setCellFactory((tableColumn)-> new EditingTableCell()); // Use TextField for editing
+            nameColumn.setCellFactory(cellFactory); // Use TextField for editing
+            nameColumn.setOnEditCommit(event -> {
+                // Update the model when editing is committed
+//                UIPropertyItem row = event.getRowValue();
+//                row.setName(event.getNewValue());
+                event.getTableView().getItems().get(
+                        event.getTablePosition().getRow()).setName(event.getNewValue());
+            });
+//            nameColumn.setOnEditCancel(event -> {
+//                event.getRowValue();
+//            });
+
+            TableColumn<UIPropertyItem, String> valueColumn = (TableColumn<UIPropertyItem, String>) headerTable.getColumns().get(1);
+
+//            valueColumn.setCellValueFactory(cellData -> cellData.getValue().valueProperty());
+//            valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+//            valueColumn.setCellFactory(TextFieldTableCell.forTableColumn()); // Use TextField for editing
+//            valueColumn.setCellFactory((tableColumn)-> new EditingTableCell());
+            valueColumn.setCellFactory(cellFactory);
+            valueColumn.setOnEditCommit(event -> {
+                // Update the model when editing is committed
+//                UIPropertyItem row = event.getRowValue();
+//                row.setValue(event.getNewValue());
+                event.getTableView().getItems().get(
+                        event.getTablePosition().getRow()).setValue(event.getNewValue());
+            });
+
+        } else {
+            //suppress combox box drop down
+            valueContentTypeComboBox.setOnShowing(event -> event.consume());
+            if (!SerdeUtil.SERDE_AVRO.equals(valueContentTypeComboBox.getValue())) {
+                schemaTextArea.setDisable(true);
+            }
+        }
     }
 }

@@ -1,0 +1,20 @@
+module com.example.mytool {
+    requires atlantafx.base;
+    requires com.fasterxml.jackson.databind;
+    requires com.google.common;
+    requires javafx.controls;
+    requires javafx.fxml;
+    requires javafx.graphics;
+//    requires static kafka.avro.serializer;
+    requires  kafka.clients;
+    requires static lombok;
+    requires org.apache.avro;
+    requires org.apache.commons.lang3;
+//    requires kafka.clients;
+//    requires kafka.clients;
+//    requires static kafka.schema.serializer;
+//    requires static kafka.schema.registry.client;
+
+    opens com.example.mytool to javafx.fxml;
+    exports com.example.mytool;
+}
