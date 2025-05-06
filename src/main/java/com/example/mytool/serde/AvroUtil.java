@@ -10,14 +10,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class AvroUtil {
+    public static Schema parseSchema(String schemaStr) {
+        return new Schema.Parser().parse(schemaStr);
+    }
+
+    public static GenericRecord convertJsonToAvro(String json, String schemaStr) throws IOException {
+        Schema.Parser parser = new Schema.Parser();
+        Schema schema = parser.parse(schemaStr);
+
+        DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
+        Decoder decoder = DecoderFactory.get().jsonDecoder(schema, json);
+        return reader.read(null, decoder);
+    }
+
+    //  Deserialized Methods
     public static String deserializeAsJsonString(byte[] data, String schemaStr) throws IOException {
         Schema schema = parseSchema(schemaStr);
         GenericRecord avroRecord = deserialize(data, schema);
         return convertGenericRecordToJson(avroRecord, schema);
-    }
-
-    public static Schema parseSchema(String schemaStr) {
-        return new Schema.Parser().parse(schemaStr);
     }
 
     public static String convertGenericRecordToJson(GenericRecord avroRecord, Schema schema) throws IOException {
@@ -36,14 +46,5 @@ public class AvroUtil {
         Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
         return reader.read(null, decoder);
 
-    }
-
-    public static GenericRecord convertJsonToAvro(String json, String schemaStr) throws IOException {
-        Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse(schemaStr);
-
-        DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
-        Decoder decoder = DecoderFactory.get().jsonDecoder(schema, json);
-        return reader.read(null, decoder);
     }
 }

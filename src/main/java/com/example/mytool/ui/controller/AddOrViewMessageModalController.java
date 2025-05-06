@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class AddMessageModalController extends ModalController {
+public class AddOrViewMessageModalController extends ModalController {
 
     private SerdeUtil serdeUtil;
 
@@ -161,6 +161,7 @@ public class AddMessageModalController extends ModalController {
 
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(event -> event.consume());
+            schemaTextArea.setEditable(false);
 //            if (!SerdeUtil.SERDE_AVRO.equals(valueContentTypeComboBox.getValue())) {
 //                schemaTextArea.setDisable(true);
 //            }
