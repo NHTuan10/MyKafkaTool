@@ -1,4 +1,4 @@
-package com.example.mytool.serde;
+package com.example.mytool.serdes;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;

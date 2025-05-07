@@ -31,7 +31,7 @@ public interface PluggableSerializer {
         return kafkaMessage.value().getBytes(StandardCharsets.UTF_8);
     }
 
-    default Object convertStringToObject(String str, Map<String, Object> optionalParams) throws IOException {
+    default Object convertStringToTargetType(String str, Map<String, Object> optionalParams) throws IOException {
         return str;
     }
 }

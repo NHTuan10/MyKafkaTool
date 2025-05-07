@@ -1,9 +1,11 @@
-package com.example.mytool.serde;
+package com.example.mytool.serdes;
 
 import com.example.mytool.api.PluggableDeserializer;
 import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.constant.AppConstant;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 
@@ -11,6 +13,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @RequiredArgsConstructor
 public class SerdeUtil {
 
@@ -19,6 +22,24 @@ public class SerdeUtil {
     //    public static final ObservableList<String> SUPPORT_VALUE_CONTENT_TYPES = FXCollections.observableArrayList(SerdeUtil.SERDE_STRING, SerdeUtil.SERDE_AVRO);
     private final Map<String, PluggableSerializer> serializerMap;
     private final Map<String, PluggableDeserializer> deserializerMap;
+
+    public static boolean isValidSchema(SerdeUtil serdeUtil, String valueContentType, String schema, boolean valid) {
+        PluggableSerializer serializer = serdeUtil.getPluggableSerialize(valueContentType);
+        if (serializer.isUserSchemaInputRequired()) {
+            try {
+                if (StringUtils.isNotBlank(schema) &&
+                        serializer.parseSchema(schema) != null) {
+                    valid = true;
+                } else {
+                    valid = false;
+                }
+            } catch (Exception e) {
+                log.warn("Error when parse schema", e);
+                valid = false;
+            }
+        }
+        return valid;
+    }
 
     public Class<? extends Serializer> getSerializeClass(String contentType) {
 //        switch (contentType) {
@@ -77,7 +98,7 @@ public class SerdeUtil {
 //
 //        }
 //        return content;
-        return serializerMap.get(serdeName).convertStringToObject(content, Map.of(AppConstant.SCHEMA, schemaStr));
+        return serializerMap.get(serdeName).convertStringToTargetType(content, Map.of(AppConstant.SCHEMA, schemaStr));
     }
 
     public ValidationResult validateMessageAgainstSchema(String contentType, String content, String schemaStr) {
@@ -85,7 +106,7 @@ public class SerdeUtil {
         PluggableSerializer serializer = serializerMap.get(contentType);
         if (serializer.isUserSchemaInputRequired()) {
             try {
-                Object s = serializer.convertStringToObject(content, Map.of(AppConstant.SCHEMA, schemaStr));
+                Object s = serializer.convertStringToTargetType(content, Map.of(AppConstant.SCHEMA, schemaStr));
                 return new ValidationResult((s != null), new Exception("Empty content type"));
             } catch (Exception e) {
                 return new ValidationResult(false, e);

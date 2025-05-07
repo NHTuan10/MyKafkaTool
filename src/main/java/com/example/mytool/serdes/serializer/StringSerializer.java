@@ -1,4 +1,4 @@
-package com.example.mytool.serde.serializer;
+package com.example.mytool.serdes.serializer;
 
 import com.example.mytool.api.PluggableSerializer;
 

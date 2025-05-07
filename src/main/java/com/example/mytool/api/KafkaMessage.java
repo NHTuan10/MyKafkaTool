@@ -1,6 +1,6 @@
 package com.example.mytool.api;
 
-import com.example.mytool.serde.SerdeUtil;
+import com.example.mytool.serdes.SerdeUtil;
 
 import java.util.Map;
 

@@ -2,19 +2,16 @@ package com.example.mytool.ui.controller;
 
 import com.example.mytool.api.KafkaMessage;
 import com.example.mytool.api.PluggableSerializer;
-import com.example.mytool.serde.SerdeUtil;
+import com.example.mytool.serdes.SerdeUtil;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyItem;
-import com.example.mytool.ui.util.EditingTableCell;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -122,40 +119,7 @@ public class AddOrViewMessageModalController extends ModalController {
         if (editable) {
             headerTable.setEditable(true);
 
-            Callback<TableColumn<UIPropertyItem, String>,
-                    TableCell<UIPropertyItem, String>> cellFactory
-                    = (TableColumn<UIPropertyItem, String> p) -> new EditingTableCell();
-
-            TableColumn<UIPropertyItem, String> nameColumn = (TableColumn<UIPropertyItem, String>) headerTable.getColumns().get(0);
-//            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-//            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-//            nameColumn.setCellFactory((tableColumn)-> new EditingTableCell()); // Use TextField for editing
-            nameColumn.setCellFactory(cellFactory); // Use TextField for editing
-            nameColumn.setOnEditCommit(event -> {
-                // Update the model when editing is committed
-//                UIPropertyItem row = event.getRowValue();
-//                row.setName(event.getNewValue());
-                event.getTableView().getItems().get(
-                        event.getTablePosition().getRow()).setName(event.getNewValue());
-            });
-//            nameColumn.setOnEditCancel(event -> {
-//                event.getRowValue();
-//            });
-
-            TableColumn<UIPropertyItem, String> valueColumn = (TableColumn<UIPropertyItem, String>) headerTable.getColumns().get(1);
-
-//            valueColumn.setCellValueFactory(cellData -> cellData.getValue().valueProperty());
-//            valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
-//            valueColumn.setCellFactory(TextFieldTableCell.forTableColumn()); // Use TextField for editing
-//            valueColumn.setCellFactory((tableColumn)-> new EditingTableCell());
-            valueColumn.setCellFactory(cellFactory);
-            valueColumn.setOnEditCommit(event -> {
-                // Update the model when editing is committed
-//                UIPropertyItem row = event.getRowValue();
-//                row.setValue(event.getNewValue());
-                event.getTableView().getItems().get(
-                        event.getTablePosition().getRow()).setValue(event.getNewValue());
-            });
+            TableViewConfigurer.configureEditableKeyValueTable(headerTable);
             enableDisableSchemaTextArea();
         } else {
 
@@ -170,24 +134,12 @@ public class AddOrViewMessageModalController extends ModalController {
 
     private boolean validateSchema(String valueContentType, String schema) {
         boolean valid = true;
-        PluggableSerializer serializer = serdeUtil.getPluggableSerialize(valueContentType);
-        if (serializer.isUserSchemaInputRequired()) {
-            try {
-                if (StringUtils.isNotBlank(schema) &&
-                        serializer.parseSchema(schema) != null) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
-            } catch (Exception e) {
-                log.warn("Error when parse schema", e);
-                valid = false;
-            }
-        }
+        valid = SerdeUtil.isValidSchema(serdeUtil, valueContentType, schema, valid);
         if (!valid) {
             ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
                     ButtonType.OK);
         }
         return valid;
     }
+
 }

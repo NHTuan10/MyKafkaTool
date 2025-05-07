@@ -4,7 +4,7 @@ import com.example.mytool.consumer.creator.ConsumerCreator;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
-import com.example.mytool.serde.SerdeUtil;
+import com.example.mytool.serdes.SerdeUtil;
 import com.example.mytool.ui.KafkaMessageTableItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

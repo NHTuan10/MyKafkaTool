@@ -6,7 +6,7 @@ import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.producer.creator.ProducerCreator;
-import com.example.mytool.serde.SerdeUtil;
+import com.example.mytool.serdes.SerdeUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +57,8 @@ public class ProducerUtil {
 
         String key = StringUtils.isBlank(kafkaMessage.key()) ? null : kafkaMessage.key();
         Object value = serdeUtil.convert(kafkaMessage.valueContentType(), kafkaMessage.value(), kafkaMessage.schema());
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        Object value = objectMapper.readValue(kafkaMessage.value(), Object.class);
         List<Header> headers = kafkaMessage.headers().entrySet().stream().map(entry -> new RecordHeader(entry.getKey(), entry.getValue().getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
 
 //        if (partition != null) {

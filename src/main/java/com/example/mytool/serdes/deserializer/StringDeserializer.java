@@ -1,4 +1,4 @@
-package com.example.mytool.serde.deserializer;
+package com.example.mytool.serdes.deserializer;
 
 import com.example.mytool.api.PluggableDeserializer;
 
