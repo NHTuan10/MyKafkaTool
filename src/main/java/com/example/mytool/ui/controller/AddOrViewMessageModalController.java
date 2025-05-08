@@ -117,12 +117,9 @@ public class AddOrViewMessageModalController extends ModalController {
         headerTable.setEditable(editable);
         valueContentTypeComboBox.getSelectionModel().selectFirst();
         if (editable) {
-            headerTable.setEditable(true);
-
             TableViewConfigurer.configureEditableKeyValueTable(headerTable);
             enableDisableSchemaTextArea();
         } else {
-
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(event -> event.consume());
             schemaTextArea.setEditable(false);

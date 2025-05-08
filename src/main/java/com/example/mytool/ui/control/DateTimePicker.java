@@ -1,4 +1,4 @@
-package com.example.mytool.ui.util;
+package com.example.mytool.ui.control;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

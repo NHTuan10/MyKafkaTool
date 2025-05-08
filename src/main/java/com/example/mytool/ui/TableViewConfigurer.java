@@ -1,6 +1,6 @@
 package com.example.mytool.ui;
 
-import com.example.mytool.ui.util.EditingTableCell;
+import com.example.mytool.ui.control.EditingTableCell;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;

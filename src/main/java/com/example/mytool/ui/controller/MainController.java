@@ -21,10 +21,10 @@ import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyItem;
 import com.example.mytool.ui.cg.ConsumerGroupOffsetTableItem;
 import com.example.mytool.ui.cg.ConsumerGroupTreeItem;
+import com.example.mytool.ui.control.DateTimePicker;
 import com.example.mytool.ui.partition.KafkaPartitionTreeItem;
 import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
 import com.example.mytool.ui.topic.KafkaTopicTreeItem;
-import com.example.mytool.ui.util.DateTimePicker;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -109,7 +109,7 @@ public class MainController {
     private TabPane tabPane;
 
     @FXML
-    private Tab messagesTab;
+    private Tab dataTab;
 
     @FXML
     private Tab propertiesTab;
@@ -127,6 +127,12 @@ public class MainController {
 
     @FXML
     private TitledPane partitionsTitledPane;
+
+    @FXML
+    private SplitPane schemaSplitPane;
+
+    @FXML
+    private SplitPane messageSplitPane;
 
     private KafkaClusterTree kafkaClusterTree;
 
@@ -277,10 +283,10 @@ public class MainController {
                 String clusterName = topic.getCluster().getName();
                 String topicName = topic.getName();
                 // Enable  datatabs and show/hide titled panes in tab
-                messagesTab.setDisable(false);
+                dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
                 partitionsTitledPane.setVisible(true);
-                tabPane.getSelectionModel().select(messagesTab);
+                tabPane.getSelectionModel().select(dataTab);
                 try {
                     // topic config table
                     Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
@@ -300,9 +306,9 @@ public class MainController {
                     throw new RuntimeException(e);
                 }
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
-                messagesTab.setDisable(false);
+                dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
-                tabPane.getSelectionModel().select(messagesTab);
+                tabPane.getSelectionModel().select(dataTab);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
                 TreeItem topicTreeItem = selectedItem.getParent();
                 if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
@@ -330,7 +336,7 @@ public class MainController {
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 try {
                     cgOffsetsTab.setDisable(false);
-                    messagesTab.setDisable(true);
+                    dataTab.setDisable(true);
                     tabPane.getSelectionModel().select(cgOffsetsTab);
                     consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
                 } catch (ExecutionException | InterruptedException e) {

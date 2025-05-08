@@ -1,4 +1,4 @@
-package com.example.mytool.ui.util;
+package com.example.mytool.ui.control;
 
 import com.example.mytool.ui.UIPropertyItem;
 import javafx.beans.value.ChangeListener;
