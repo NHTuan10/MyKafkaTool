@@ -1,5 +1,6 @@
 package com.example.mytool.ui.partition;
 
+import com.example.mytool.annotation.TableColumn;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleLongProperty;
@@ -9,12 +10,19 @@ import javafx.collections.ObservableList;
 
 public class KafkaPartitionsTableItem {
     //    public static final List<String> FIELD_NAMES = List.of("partitionx", "startOffset", "endOffset", "noMessage", "leader", "replicasInSync", "replicasNotInSync");
+    @TableColumn
     private final SimpleIntegerProperty partition;
+    @TableColumn
     private final SimpleLongProperty startOffset;
+    @TableColumn
     private final SimpleLongProperty endOffset;
+    @TableColumn
     private final SimpleLongProperty noMessage;
+    @TableColumn
     private final SimpleStringProperty leader;
+    @TableColumn
     private final SimpleListProperty<String> replicasInSync;
+    @TableColumn
     private final SimpleListProperty<String> replicasNotInSync;
 
 

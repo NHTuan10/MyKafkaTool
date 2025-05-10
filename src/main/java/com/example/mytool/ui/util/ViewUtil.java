@@ -1,7 +1,6 @@
 package com.example.mytool.ui.util;
 
 import com.example.mytool.MyApplication;
-import com.example.mytool.exception.ClusterNameExistedException;
 import com.example.mytool.ui.controller.ModalController;
 import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
 import javafx.beans.property.Property;
@@ -28,11 +27,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 public class ViewUtil {
-
-    public static boolean isClusterNameExistedInTree(TreeView clusterTree, String clusterName) throws ClusterNameExistedException {
-        return ((ObservableList<TreeItem>) clusterTree.getRoot().getChildren()).stream()
-                .anyMatch(treeItem -> treeItem.getValue().equals(clusterName));
-    }
 
     public static boolean confirmAlert(String title, String text, String okDoneText, String cancelCloseText) {
         ButtonType yes = new ButtonType(okDoneText, ButtonBar.ButtonData.OK_DONE);
@@ -140,7 +134,10 @@ public class ViewUtil {
     }
 
     public static List<String> getPropertyFieldNamesFromTableItem(Class<?> tableIemClass) {
-        List<String> fieldNames = Arrays.stream(tableIemClass.getDeclaredFields()).filter(f -> Property.class.isAssignableFrom(f.getType())).map(Field::getName).toList();
+        List<String> fieldNames = Arrays.stream(tableIemClass.getDeclaredFields())
+                .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(com.example.mytool.annotation.TableColumn.class))
+                .map(Field::getName)
+                .toList();
         return fieldNames;
     }
 }

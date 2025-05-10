@@ -2,35 +2,45 @@ package com.example.mytool.ui.control;
 
 import com.example.mytool.MyApplication;
 import com.example.mytool.ui.TableViewConfigurer;
-import com.example.mytool.ui.UIPropertyItem;
+import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 @Slf4j
-public class EditableTableControl extends AnchorPane {
+public class EditableTableControl<T> extends AnchorPane {
 
     @FXML
-    private Button addItemBtn;
+    protected Button addItemBtn;
 
     @FXML
-    private Button removeItemBtn;
+    protected Button removeItemBtn;
 
     @FXML
-    private TableView<UIPropertyItem> table;
+    protected TableView<T> table;
 
-    private ObservableList<UIPropertyItem> tableItems;
+    protected ObservableList<T> tableItems;
+
+    protected Class<T> itemClass;
+
+//    private final TypeToken<T> typeToken = new TypeToken<T>(getClass()) { };
+
+//    private final Type type = typeToken.getType();
 
     public EditableTableControl() {
+        itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         FXMLLoader fxmlLoader = new FXMLLoader(MyApplication.class.getResource(
                 "editable-table.fxml"));
         fxmlLoader.setRoot(this);
@@ -44,19 +54,30 @@ public class EditableTableControl extends AnchorPane {
     }
 
     @FXML
-    void initialize() {
-        TableViewConfigurer.configureTableView(UIPropertyItem.class, table);
+    protected void initialize() {
+        table.getColumns().clear();
+        List<String> itemClassFields = ViewUtil.getPropertyFieldNamesFromTableItem(itemClass);
+        itemClassFields.forEach(fieldName -> {
+            String columnName = StringUtils.capitalize(StringUtils.join(
+                    StringUtils.splitByCharacterTypeCamelCase(fieldName),
+                    ' '
+            ));
+            TableColumn tableColumn = new TableColumn(columnName);
+            table.getColumns().add(tableColumn);
+        });
+
+
+        TableViewConfigurer.configureTableView(itemClass, table);
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
         table.setItems(tableItems);
-
     }
 
 
     @FXML
     protected void addItem() {
-        tableItems.add(new UIPropertyItem("", ""));
+//        tableItems.add(new UIPropertyItem("", ""));
     }
 
     @FXML
@@ -70,7 +91,7 @@ public class EditableTableControl extends AnchorPane {
     public void configureEditableControls(boolean editable) {
         table.setEditable(editable);
         if (editable) {
-            TableViewConfigurer.configureEditableKeyValueTable(table);
+//            TableViewConfigurer.configureEditableKeyValueTable(table);
         }
     }
 

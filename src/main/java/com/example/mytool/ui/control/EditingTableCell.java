@@ -1,13 +1,12 @@
 package com.example.mytool.ui.control;
 
-import com.example.mytool.ui.UIPropertyItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
-public class EditingTableCell extends TableCell<UIPropertyItem, String> {
+public class EditingTableCell<T> extends TableCell<T, String> {
 
     private TextField textField;
 

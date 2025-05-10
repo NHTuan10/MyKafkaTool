@@ -72,11 +72,13 @@ public class ClusterManager {
 //        Consumer<String, String> topicConsumer = ConsumerCreator.createConsumer(cluster, null);
 //        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.PARTITION), partitionConsumer);
 //        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.TOPIC), topicConsumer);
-        producerMap.forEach((producerCreatorConfig, producer) -> {
+        new HashMap<>(producerMap).forEach((producerCreatorConfig, producer) -> {
             if (producerCreatorConfig.getClusterName().equals(clusterName)) {
                 producer.close();
+                producerMap.remove(producerCreatorConfig);
             }
         });
+        adminMap.remove(clusterName);
     }
     public Set<String> getAllTopics(String clusterName) throws ExecutionException, InterruptedException, TimeoutException {
         Admin adminClient = adminMap.get(clusterName);

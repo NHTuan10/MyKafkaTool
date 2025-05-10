@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 public class KafkaCluster extends Connection {
     private String name;
     private String bootstrapServer;
+    private String schemaRegistryUrl;
 
 }

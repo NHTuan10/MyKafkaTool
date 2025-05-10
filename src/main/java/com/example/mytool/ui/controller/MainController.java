@@ -5,6 +5,7 @@ import com.example.mytool.api.PluggableDeserializer;
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.consumer.KafkaConsumerService;
 import com.example.mytool.manager.ClusterManager;
+import com.example.mytool.manager.SchemaRegistryManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.producer.ProducerUtil;
@@ -18,14 +19,17 @@ import com.example.mytool.serdes.serializer.StringSerializer;
 import com.example.mytool.ui.KafkaClusterTree;
 import com.example.mytool.ui.KafkaMessageTableItem;
 import com.example.mytool.ui.TableViewConfigurer;
-import com.example.mytool.ui.UIPropertyItem;
+import com.example.mytool.ui.UIPropertyTableItem;
 import com.example.mytool.ui.cg.ConsumerGroupOffsetTableItem;
 import com.example.mytool.ui.cg.ConsumerGroupTreeItem;
 import com.example.mytool.ui.control.DateTimePicker;
+import com.example.mytool.ui.control.SchemaEditableTableControl;
 import com.example.mytool.ui.partition.KafkaPartitionTreeItem;
 import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
 import com.example.mytool.ui.topic.KafkaTopicTreeItem;
 import com.example.mytool.ui.util.ViewUtil;
+import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -73,7 +77,7 @@ public class MainController {
     private TableView<ConsumerGroupOffsetTableItem> consumerGroupOffsetTable;
 
     @FXML
-    private TableView<UIPropertyItem> topicConfigTable;
+    private TableView<UIPropertyTableItem> topicConfigTable;
 
     @FXML
     private TextField pollTimeTextField;
@@ -134,6 +138,12 @@ public class MainController {
     @FXML
     private SplitPane messageSplitPane;
 
+    @FXML
+    private SchemaEditableTableControl schemaEditableTableControl;
+
+    @FXML
+    private TextArea schemaRegistryTextArea;
+
     private KafkaClusterTree kafkaClusterTree;
 
     private Map<TreeItem, ObservableList<KafkaMessageTableItem>> treeMsgTableItemCache = new ConcurrentHashMap<>();
@@ -190,7 +200,7 @@ public class MainController {
                             "valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()),
                             "headerTable",
                             FXCollections.observableArrayList(
-                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyItem(header.key(), new String(header.value()))).toList()));
+                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
                     try {
                         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false);
                     } catch (IOException e) {
@@ -204,8 +214,10 @@ public class MainController {
         });
         TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable);
         TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable);
-        TableViewConfigurer.configureTableView(UIPropertyItem.class, topicConfigTable);
-
+        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable);
+        schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE, (event) -> {
+            schemaRegistryTextArea.textProperty().bindBidirectional(event.getData());
+        });
         // Use a change listener to respond to a selection within
         // a tree view
 //        clusterTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem<String>>) (changed, oldVal, newVal) -> {
@@ -279,7 +291,7 @@ public class MainController {
 
             if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                ObservableList<UIPropertyItem> config = FXCollections.observableArrayList();
+                ObservableList<UIPropertyTableItem> config = FXCollections.observableArrayList();
                 String clusterName = topic.getCluster().getName();
                 String topicName = topic.getName();
                 // Enable  datatabs and show/hide titled panes in tab
@@ -287,10 +299,12 @@ public class MainController {
                 propertiesTab.setDisable(false);
                 partitionsTitledPane.setVisible(true);
                 tabPane.getSelectionModel().select(dataTab);
+                schemaSplitPane.setVisible(false);
+                messageSplitPane.setVisible(true);
                 try {
                     // topic config table
                     Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
-                    configEntries.forEach(entry -> config.add(new UIPropertyItem(entry.name(), entry.value())));
+                    configEntries.forEach(entry -> config.add(new UIPropertyTableItem(entry.name(), entry.value())));
                     topicConfigTable.setItems(config);
                 } catch (ExecutionException | InterruptedException | TimeoutException e) {
                     log.error("Error when get topic config properties", e);
@@ -309,6 +323,8 @@ public class MainController {
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
                 tabPane.getSelectionModel().select(dataTab);
+                schemaSplitPane.setVisible(false);
+                messageSplitPane.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
                 TreeItem topicTreeItem = selectedItem.getParent();
                 if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
@@ -319,10 +335,10 @@ public class MainController {
                     String clusterName = partition.getTopic().getCluster().getName();
                     String topic = partition.getTopic().getName();
                     Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.getId()), null);
-                    ObservableList<UIPropertyItem> list = FXCollections.observableArrayList(
-                            new UIPropertyItem(UIPropertyItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
-                            , new UIPropertyItem(UIPropertyItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
-                            , new UIPropertyItem(UIPropertyItem.NO_MESSAGES, String.valueOf(partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft())));
+                    ObservableList<UIPropertyTableItem> list = FXCollections.observableArrayList(
+                            new UIPropertyTableItem(UIPropertyTableItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
+                            , new UIPropertyTableItem(UIPropertyTableItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
+                            , new UIPropertyTableItem(UIPropertyTableItem.NO_MESSAGES, String.valueOf(partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft())));
 
                     TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, partition.getId());
                     list.addAll(getPartitionInfoForUI(partitionInfo));
@@ -344,20 +360,32 @@ public class MainController {
                     throw new RuntimeException(e);
                 }
 
+            } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equals(selectedItem.getValue())) {
+                dataTab.setDisable(false);
+                schemaSplitPane.setVisible(true);
+                messageSplitPane.setVisible(false);
+                String clusterName = selectedItem.getParent().getValue().toString();
+                try {
+                    List<SchemaMetadata> schemaMetadataList = SchemaRegistryManager.getInstance().getAllSubjectMetadata(clusterName);
+                    schemaEditableTableControl.setItems(schemaMetadataList, clusterName);
+                } catch (RestClientException | IOException e) {
+                    log.error("Error when get schema registry subject metadata", e);
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
 
 
-    private static List<UIPropertyItem> getPartitionInfoForUI(TopicPartitionInfo partitionInfo) {
-        List<UIPropertyItem> list = new ArrayList<>();
+    private static List<UIPropertyTableItem> getPartitionInfoForUI(TopicPartitionInfo partitionInfo) {
+        List<UIPropertyTableItem> list = new ArrayList<>();
         Node leader = partitionInfo.leader();
-        list.add(new UIPropertyItem(leader.host() + ":" + leader.port(), UIPropertyItem.LEADER));
+        list.add(new UIPropertyTableItem(leader.host() + ":" + leader.port(), UIPropertyTableItem.LEADER));
         list.addAll(partitionInfo.replicas().stream().filter(r -> r != leader).map(replica -> {
             if (partitionInfo.isr().contains(replica)) {
-                return new UIPropertyItem(replica.host() + ":" + replica.port(), UIPropertyItem.REPLICA_IN_SYNC);
+                return new UIPropertyTableItem(replica.host() + ":" + replica.port(), UIPropertyTableItem.REPLICA_IN_SYNC);
             } else {
-                return new UIPropertyItem(replica.host() + ":" + replica.port(), UIPropertyItem.REPLICA_NOT_IN_SYNC);
+                return new UIPropertyTableItem(replica.host() + ":" + replica.port(), UIPropertyTableItem.REPLICA_NOT_IN_SYNC);
             }
         }).toList());
         return list;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.example.mytool.ui.control.DateTimePicker?>
-<?import com.example.mytool.ui.control.EditableTableControl?>
+<?import com.example.mytool.ui.control.SchemaEditableTableControl?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
@@ -68,7 +68,7 @@
                                   <content>
                                       <AnchorPane minHeight="0.0" minWidth="0.0">
                                           <children>
-                                              <SplitPane fx:id="messageSplitPane" dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-8.0" AnchorPane.topAnchor="0.0">
+                                              <SplitPane fx:id="messageSplitPane" dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-8.0" AnchorPane.topAnchor="0.0">
                                                   <items>
                                                       <AnchorPane maxHeight="100.0" minHeight="30.0" minWidth="0.0" prefHeight="69.0">
                                                           <children>
@@ -181,14 +181,17 @@
                                                       </AnchorPane>
                                                   </items>
                                               </SplitPane>
-                                    <SplitPane dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="622.0" prefWidth="936.0" visible="false">
+                                    <SplitPane fx:id="schemaSplitPane" dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="622.0" prefWidth="936.0" visible="false">
                                       <items>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                             <children>
-                                                <EditableTableControl layoutY="7.0" minHeight="200.0" prefHeight="297.0" prefWidth="924.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
-                                             </children>
+                                            <children>
+                                               <SchemaEditableTableControl fx:id="schemaEditableTableControl" layoutY="7.0" minHeight="200.0" prefHeight="297.0" prefWidth="924.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                            </children>
                                         </AnchorPane>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                             <children>
+                                                <TextArea fx:id="schemaRegistryTextArea" prefHeight="318.0" prefWidth="934.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                             </children></AnchorPane>
                                       </items>
                                     </SplitPane>
                                           </children>

@@ -4,6 +4,7 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.1.0'
     id 'org.beryx.jlink' version '3.1.1'
     id "io.freefair.lombok" version "6.4.3"
+    id 'maven-publish'
 }
 
 group 'com.example'
@@ -62,7 +63,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.0'
     implementation 'io.confluent:kafka-avro-serializer:7.9.0'
 // https://mvnrepository.com/artifact/com.google.guava/guava
-    implementation 'com.google.guava:guava:31.1-jre'
+//    implementation 'com.google.guava:guava:31.1-jre'
 // https://mvnrepository.com/artifact/org.openjfx/javafx-controls
 //    implementation 'org.openjfx:javafx-controls:17.0.2'
 // https://mvnrepository.com/artifact/org.openjfx/javafx-fxml
@@ -99,4 +100,25 @@ jlink {
 
 jlinkZip {
     group = 'distribution'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+//task fatJar(type: Jar) {
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.example.mytool.MyApplication'
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+//    with jar
 }

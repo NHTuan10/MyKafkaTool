@@ -3,6 +3,7 @@ package com.example.mytool.ui;
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.exception.ClusterNameExistedException;
 import com.example.mytool.manager.ClusterManager;
+import com.example.mytool.manager.SchemaRegistryManager;
 import com.example.mytool.manager.UserPreferenceManager;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
@@ -12,11 +13,11 @@ import com.example.mytool.ui.partition.KafkaPartitionTreeItem;
 import com.example.mytool.ui.topic.KafkaTopicListTreeItem;
 import com.example.mytool.ui.topic.KafkaTopicTreeItem;
 import com.example.mytool.ui.util.ViewUtil;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 
@@ -41,9 +42,8 @@ public class KafkaClusterTree {
 
         UserPreferenceManager.loadUserPreference().connections().forEach((cluster -> {
             try {
-                if (!ViewUtil.isClusterNameExistedInTree(clusterTree, cluster.getName())) {
-                    ClusterManager.getInstance().connectToCluster(cluster);
-                    KafkaClusterTree.addClusterConnIntoClusterTreeView(clusterTree, cluster);
+                if (!isClusterNameExistedInTree(clusterTree, cluster.getName())) {
+                    connectToClusterAndSchemaRegistry(cluster, clusterTree);
                 }
             } catch (IOException | ClusterNameExistedException e) {
                 log.error("Error when add new connection during loading user preferences", e);
@@ -64,21 +64,28 @@ public class KafkaClusterTree {
 
     public static void addClusterConnIntoClusterTreeView(TreeView clusterTree, KafkaCluster cluster) throws IOException, ClusterNameExistedException {
         String clusterName = cluster.getName();
-        if (ViewUtil.isClusterNameExistedInTree(clusterTree, clusterName)) {
+        if (isClusterNameExistedInTree(clusterTree, clusterName)) {
             throw new ClusterNameExistedException(clusterName, "Cluster already exists");
         }
 
         TreeItem<Object> brokerTreeItem = new TreeItem<>(clusterName);
         TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster));
         ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster));
+        TreeItem<Object> schemaRegistry = new TreeItem<>(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME);
 
         topicListTreeItem.getChildren();
         brokerTreeItem.getChildren().add(topicListTreeItem);
 
         consumerGroupListTreeItem.getChildren();
         brokerTreeItem.getChildren().add(consumerGroupListTreeItem);
+        brokerTreeItem.getChildren().add(schemaRegistry);
 
         clusterTree.getRoot().getChildren().add(brokerTreeItem);
+    }
+
+    public static boolean isClusterNameExistedInTree(TreeView clusterTree, String clusterName) throws ClusterNameExistedException {
+        return ((ObservableList<TreeItem>) clusterTree.getRoot().getChildren()).stream()
+                .anyMatch(treeItem -> treeItem.getValue().equals(clusterName));
     }
 
     public void addTopic() throws IOException, InterruptedException, ExecutionException {
@@ -118,7 +125,7 @@ public class KafkaClusterTree {
             TreeItem treeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
             if ((treeItem == null) || (treeItem.getParent() == null && AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue()))) {
                 clusterTreeContextMenu.getItems().setAll(addNewConnectionItem);
-            } else if (treeItem.getParent() != null && treeItem.getParent().getParent() == null) {
+            } else if (treeItem.getParent() != null && treeItem.getParent().getParent() == null) {// tree item for a connection
                 clusterTreeContextMenu.getItems().setAll(deleteConnectionItem);
             } else if (treeItem instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
                 MenuItem refreshItem = new MenuItem("Refresh");
@@ -131,6 +138,10 @@ public class KafkaClusterTree {
             } else if (treeItem instanceof ConsumerGroupListTreeItem<?> consumerGroupListTreeItem) {
                 MenuItem refreshItem = new MenuItem("Refresh");
                 refreshItem.setOnAction(actionEvent -> consumerGroupListTreeItem.reloadChildren());
+                clusterTreeContextMenu.getItems().setAll(refreshItem);
+            } else if (AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue())) {
+                MenuItem refreshItem = new MenuItem("Refresh");
+                //TODO: need to add action
                 clusterTreeContextMenu.getItems().setAll(refreshItem);
             } else {
                 clusterTreeContextMenu.getItems().setAll(blankItem);
@@ -206,14 +217,14 @@ public class KafkaClusterTree {
         MenuItem addNewConnectionItem = new MenuItem("Add New Connection");
         addNewConnectionItem.setOnAction(ae -> {
             try {
-                Pair<String, String> newConnection;
+                KafkaCluster newConnection;
                 while (true) {
                     AtomicReference modelRef = new AtomicReference<>();
                     ViewUtil.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of());
-                    newConnection = (Pair<String, String>) modelRef.get();
+                    newConnection = (KafkaCluster) modelRef.get();
 
-                    if (newConnection != null && (StringUtils.isBlank(newConnection.getLeft()) || StringUtils.isBlank(newConnection.getRight()) || ViewUtil.isClusterNameExistedInTree(clusterTree, newConnection.getLeft()))) {
-                        String clusterName = newConnection.getLeft();
+                    if (newConnection != null && (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInTree(clusterTree, newConnection.getName()))) {
+                        String clusterName = newConnection.getName();
                         log.warn("User enter an invalid cluster name {} or bootstrap server", clusterName);
                         ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
                     } else {
@@ -221,9 +232,8 @@ public class KafkaClusterTree {
                     }
                 }
                 if (newConnection != null) {
-                    KafkaCluster cluster = new KafkaCluster(newConnection.getLeft(), newConnection.getRight());
-                    ClusterManager.getInstance().connectToCluster(cluster);
-                    addClusterConnIntoClusterTreeView(clusterTree, cluster);
+                    KafkaCluster cluster = new KafkaCluster(newConnection.getName(), newConnection.getBootstrapServer(), newConnection.getSchemaRegistryUrl());
+                    connectToClusterAndSchemaRegistry(cluster, clusterTree);
                     UserPreferenceManager.addClusterToUserPreference(cluster);
                 }
 
@@ -233,6 +243,14 @@ public class KafkaClusterTree {
             }
         });
         return addNewConnectionItem;
+    }
+
+    private static void connectToClusterAndSchemaRegistry(KafkaCluster cluster, TreeView clusterTree) throws ClusterNameExistedException, IOException {
+        ClusterManager.getInstance().connectToCluster(cluster);
+        addClusterConnIntoClusterTreeView(clusterTree, cluster);
+        if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
+            SchemaRegistryManager.getInstance().connectToSchemaRegistry(cluster);
+        }
     }
 
     private MenuItem configureDeleteConnectionActionMenuItem() {

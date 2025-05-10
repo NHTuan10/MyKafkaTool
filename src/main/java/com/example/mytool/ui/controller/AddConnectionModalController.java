@@ -1,10 +1,10 @@
 package com.example.mytool.ui.controller;
 
+import com.example.mytool.model.kafka.KafkaCluster;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 
@@ -15,6 +15,8 @@ public class AddConnectionModalController extends ModalController {
     @FXML
     private TextField bootstrapServerTextField;
     @FXML
+    private TextField schemaRegistryTextField;
+    @FXML
     private Button addBtn;
     @FXML
     private Button cancelBtn;
@@ -22,7 +24,7 @@ public class AddConnectionModalController extends ModalController {
 
     @FXML
     protected void add() throws IOException {
-        modelRef.set(Pair.of(clusterNameTextField.getText(), bootstrapServerTextField.getText()));
+        modelRef.set(new KafkaCluster(clusterNameTextField.getText(), bootstrapServerTextField.getText(), schemaRegistryTextField.getText()));
         Stage stage = (Stage) addBtn.getScene().getWindow();
         stage.close();
     }

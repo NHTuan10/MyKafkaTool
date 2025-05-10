@@ -1,5 +1,6 @@
 package com.example.mytool.ui;
 
+import com.example.mytool.annotation.TableColumn;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -7,10 +8,15 @@ import lombok.Getter;
 import org.apache.kafka.common.header.Headers;
 
 public class KafkaMessageTableItem {
+    @TableColumn
     private final SimpleIntegerProperty partition;
+    @TableColumn
     private final SimpleLongProperty offset;
+    @TableColumn
     private final SimpleStringProperty key;
+    @TableColumn
     private final SimpleStringProperty value;
+    @TableColumn
     private final SimpleStringProperty timestamp;
     @Getter
     private final String valueContentType;

@@ -1,16 +1,24 @@
 package com.example.mytool.ui.cg;
 
+import com.example.mytool.annotation.TableColumn;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 public class ConsumerGroupOffsetTableItem {
+    @TableColumn
     private final SimpleStringProperty topic;
+    @TableColumn
     private final SimpleIntegerProperty partition;
+    @TableColumn
     private final SimpleLongProperty start;
+    @TableColumn
     private final SimpleLongProperty end;
+    @TableColumn
     private final SimpleLongProperty offset;
+    @TableColumn
     private final SimpleLongProperty lag;
+    @TableColumn
     private final SimpleStringProperty lastCommit;
 
     public ConsumerGroupOffsetTableItem(String topic, int partition, long start, long end, long offset, long lag, String lastCommit) {

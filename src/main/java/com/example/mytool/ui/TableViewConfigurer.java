@@ -31,12 +31,12 @@ public class TableViewConfigurer {
 //        return kafkaPartitionsTableView;
     }
 
-    public static void configureEditableKeyValueTable(TableView<UIPropertyItem> headerTable) {
-        Callback<TableColumn<UIPropertyItem, String>,
-                TableCell<UIPropertyItem, String>> cellFactory
-                = (TableColumn<UIPropertyItem, String> p) -> new EditingTableCell();
+    public static void configureEditableKeyValueTable(TableView<UIPropertyTableItem> headerTable) {
+        Callback<TableColumn<UIPropertyTableItem, String>,
+                TableCell<UIPropertyTableItem, String>> cellFactory
+                = (TableColumn<UIPropertyTableItem, String> p) -> new EditingTableCell<>();
 
-        TableColumn<UIPropertyItem, String> nameColumn = (TableColumn<UIPropertyItem, String>) headerTable.getColumns().get(0);
+        TableColumn<UIPropertyTableItem, String> nameColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().get(0);
 //            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 //            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 //            nameColumn.setCellFactory((tableColumn)-> new EditingTableCell()); // Use TextField for editing
@@ -52,7 +52,7 @@ public class TableViewConfigurer {
 //                event.getRowValue();
 //            });
 
-        TableColumn<UIPropertyItem, String> valueColumn = (TableColumn<UIPropertyItem, String>) headerTable.getColumns().get(1);
+        TableColumn<UIPropertyTableItem, String> valueColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().get(1);
 
 //            valueColumn.setCellValueFactory(cellData -> cellData.getValue().valueProperty());
 //            valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));

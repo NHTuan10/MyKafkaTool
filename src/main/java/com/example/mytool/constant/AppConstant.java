@@ -5,6 +5,7 @@ public class AppConstant {
     public static final String USER_PREF_FILENAME = "user_settings.json";
     public static final String TREE_ITEM_CLUSTERS_DISPLAY_NAME = "Clusters";
     public static final String TREE_ITEM_CONSUMER_GROUPS_DISPLAY_NAME = "Consumer Groups";
+    public static final String TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME = "Schema Registry";
     public static final String TREE_ITEM_TOPIC_LIST_DISPLAY_NAME = "Topics";
     public static final String OFFSET_RESET_EARLIER = "earliest";
     public static final String OFFSET_RESET_LATEST = "latest";
@@ -16,4 +17,5 @@ public class AppConstant {
     public static final String ADD_MESSAGE_MODAL_FXML = "add-message-modal.fxml";
     public static final int DEFAULT_ADMIN_REQUEST_TIMEOUT = 5000;
     public static final String SCHEMA = "schema";
+    public static final int MAX_SCHEMA_CACHED_SIZE = 1000;
 }

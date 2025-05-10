@@ -4,7 +4,7 @@ import com.example.mytool.api.KafkaMessage;
 import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.serdes.SerdeUtil;
 import com.example.mytool.ui.TableViewConfigurer;
-import com.example.mytool.ui.UIPropertyItem;
+import com.example.mytool.ui.UIPropertyTableItem;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -45,13 +45,13 @@ public class AddOrViewMessageModalController extends ModalController {
     private ComboBox<String> valueContentTypeComboBox;
 
     @FXML
-    private TableView<UIPropertyItem> headerTable;
+    private TableView<UIPropertyTableItem> headerTable;
 
-    private ObservableList<UIPropertyItem> headerItems;
+    private ObservableList<UIPropertyTableItem> headerItems;
 
     @FXML
     void initialize() {
-        TableViewConfigurer.configureTableView(UIPropertyItem.class, headerTable);
+        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, headerTable);
 
         headerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         headerItems = FXCollections.observableArrayList();
@@ -84,7 +84,7 @@ public class AddOrViewMessageModalController extends ModalController {
             return;
         }
 
-        Map<String, String> headers = headerItems.stream().collect(Collectors.toMap(UIPropertyItem::getName, UIPropertyItem::getValue));
+        Map<String, String> headers = headerItems.stream().collect(Collectors.toMap(UIPropertyTableItem::getName, UIPropertyTableItem::getValue));
         modelRef.set(new KafkaMessage(keyTextArea.getText(), valueText, valueContentTypeText, schemaText, headers));
         Stage stage = (Stage) okBtn.getScene().getWindow();
         stage.close();
@@ -98,7 +98,7 @@ public class AddOrViewMessageModalController extends ModalController {
 
     @FXML
     protected void addHeader() {
-        headerItems.add(new UIPropertyItem("", ""));
+        headerItems.add(new UIPropertyTableItem("", ""));
     }
 
     @FXML
