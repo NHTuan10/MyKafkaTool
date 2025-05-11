@@ -19,6 +19,11 @@
                <children>
                   <HBox prefHeight="17.0" prefWidth="200.0">
                      <children>
+                        <Button fx:id="refreshBtn" mnemonicParsing="false" onAction="#refresh" text="↻">
+                           <HBox.margin>
+                              <Insets left="10.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
                         <Button fx:id="addHeaderBtn" mnemonicParsing="false" onAction="#addItem" text="+">
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />

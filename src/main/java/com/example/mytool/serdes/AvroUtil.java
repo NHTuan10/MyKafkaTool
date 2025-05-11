@@ -14,7 +14,7 @@ public class AvroUtil {
         return new Schema.Parser().parse(schemaStr);
     }
 
-    public static GenericRecord convertJsonToAvro(String json, String schemaStr) throws IOException {
+    public static Object convertJsonToAvro(String json, String schemaStr) throws IOException {
         Schema.Parser parser = new Schema.Parser();
         Schema schema = parser.parse(schemaStr);
 

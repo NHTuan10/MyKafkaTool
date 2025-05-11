@@ -8,18 +8,16 @@ import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.manager.SchemaRegistryManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
+import com.example.mytool.model.kafka.SchemaMetadataFromRegistry;
 import com.example.mytool.producer.ProducerUtil;
 import com.example.mytool.serdes.SerdeUtil;
 import com.example.mytool.serdes.deserializer.ByteArrayDeserializer;
-import com.example.mytool.serdes.deserializer.SchemaRegistryAvroDeserializer;
 import com.example.mytool.serdes.deserializer.StringDeserializer;
+import com.example.mytool.serdes.deserializer.deprecation.SchemaRegistryAvroDeserializer;
 import com.example.mytool.serdes.serializer.ByteArraySerializer;
-import com.example.mytool.serdes.serializer.SchemaRegistryAvroSerializer;
 import com.example.mytool.serdes.serializer.StringSerializer;
-import com.example.mytool.ui.KafkaClusterTree;
-import com.example.mytool.ui.KafkaMessageTableItem;
-import com.example.mytool.ui.TableViewConfigurer;
-import com.example.mytool.ui.UIPropertyTableItem;
+import com.example.mytool.serdes.serializer.deprecation.SchemaRegistryAvroSerializer;
+import com.example.mytool.ui.*;
 import com.example.mytool.ui.cg.ConsumerGroupOffsetTableItem;
 import com.example.mytool.ui.cg.ConsumerGroupTreeItem;
 import com.example.mytool.ui.control.DateTimePicker;
@@ -28,7 +26,7 @@ import com.example.mytool.ui.partition.KafkaPartitionTreeItem;
 import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
 import com.example.mytool.ui.topic.KafkaTopicTreeItem;
 import com.example.mytool.ui.util.ViewUtil;
-import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
+import com.google.common.collect.ImmutableMap;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -158,10 +156,10 @@ public class MainController {
         SchemaRegistryAvroSerializer schemaRegistryAvroSerializer = new SchemaRegistryAvroSerializer();
         SchemaRegistryAvroDeserializer schemaRegistryAvroDeserializer = new SchemaRegistryAvroDeserializer();
         this.serdeUtil = new SerdeUtil(
-                Map.of(stringSerializer.getName(), stringSerializer,
+                ImmutableMap.of(stringSerializer.getName(), stringSerializer,
                         byteArraySerializer.getName(), byteArraySerializer,
                         schemaRegistryAvroSerializer.getName(), schemaRegistryAvroSerializer),
-                Map.of(stringDeserializer.getName(), stringDeserializer,
+                ImmutableMap.of(stringDeserializer.getName(), stringDeserializer,
                         byteArrayDeserializer.getName(), byteArrayDeserializer,
                         schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer)
         );
@@ -177,7 +175,7 @@ public class MainController {
         schemaTextArea.setDisable(true);
         initPollingOptionsUI();
 
-        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree);
+        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaEditableTableControl);
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
         configureTableView();
@@ -243,10 +241,10 @@ public class MainController {
                 setDisable(empty || date.compareTo(LocalDate.now()) > 0);
             }
         });
-        keyContentType.setItems(FXCollections.observableArrayList(SerdeUtil.SERDE_STRING));
-        keyContentType.setValue(SerdeUtil.SERDE_STRING);
+        keyContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedKeyContentTypes()));
+        keyContentType.getSelectionModel().selectFirst();
 //        valueContentType.setItems(SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES);
-        valueContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedContentTypes()));
+        valueContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedValueContentTypes()));
 //        valueContentType.setValue(SerdeUtil.SERDE_STRING);
         valueContentType.getSelectionModel().selectFirst();
         msgPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
@@ -366,7 +364,7 @@ public class MainController {
                 messageSplitPane.setVisible(false);
                 String clusterName = selectedItem.getParent().getValue().toString();
                 try {
-                    List<SchemaMetadata> schemaMetadataList = SchemaRegistryManager.getInstance().getAllSubjectMetadata(clusterName);
+                    List<SchemaMetadataFromRegistry> schemaMetadataList = SchemaRegistryManager.getInstance().getAllSubjectMetadata(clusterName);
                     schemaEditableTableControl.setItems(schemaMetadataList, clusterName);
                 } catch (RestClientException | IOException e) {
                     log.error("Error when get schema registry subject metadata", e);
@@ -462,7 +460,9 @@ public class MainController {
 //            msgTableProgressInd.setVisible(false);
             isPolling.set(false);
             pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
-
+            Throwable e = event.getSource().getException();
+            log.error("Error when poll messages", e);
+            UIErrorHandler.showError(Thread.currentThread(), e);
         });
 
         new Thread(pollMsgTask).start();
@@ -499,7 +499,7 @@ public class MainController {
 
         AtomicReference<Object> ref = new AtomicReference<>();
         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
-                Map.of("serdeUtil", serdeUtil, "valueContentTypeComboBox", FXCollections.observableArrayList(serdeUtil.getSupportedContentTypes()),
+                Map.of("serdeUtil", serdeUtil, "valueContentTypeComboBox", FXCollections.observableArrayList(serdeUtil.getSupportedValueContentTypes()),
                         "schemaTextArea", schemaTextArea.getText()));
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {

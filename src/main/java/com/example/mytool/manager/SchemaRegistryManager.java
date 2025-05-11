@@ -3,10 +3,13 @@ package com.example.mytool.manager;
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.exception.ClusterNameExistedException;
 import com.example.mytool.model.kafka.KafkaCluster;
+import com.example.mytool.model.kafka.SchemaMetadataFromRegistry;
+import io.confluent.kafka.schemaregistry.CompatibilityLevel;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 
 import java.io.IOException;
@@ -16,7 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+
+@Slf4j
 public class SchemaRegistryManager {
+
+    public static final String DEFAULT_SCHEMA_COMPATIBILITY_LEVEL = CompatibilityLevel.BACKWARD.toString();
+
     private static class InstanceHolder {
         private static final SchemaRegistryManager INSTANCE = new SchemaRegistryManager();
     }
@@ -35,11 +43,22 @@ public class SchemaRegistryManager {
         return schemaRegistryClientMap.get(clusterName).getLatestSchemaMetadata(subjectName);
     }
 
-    public List<SchemaMetadata> getAllSubjectMetadata(String clusterName) throws RestClientException, IOException {
+    public String getCompatibility(String clusterName, String subjectName) throws RestClientException, IOException {
+        return schemaRegistryClientMap.get(clusterName).getCompatibility(subjectName);
+    }
+
+
+    public List<SchemaMetadataFromRegistry> getAllSubjectMetadata(String clusterName) throws RestClientException, IOException {
         Collection<String> subjects = getAllSubjects(clusterName);
-        List<SchemaMetadata> result = new ArrayList<>();
+        List<SchemaMetadataFromRegistry> result = new ArrayList<>();
         for (String subject : subjects) {
-            result.add(getSubject(clusterName, subject));
+            String compatibility = DEFAULT_SCHEMA_COMPATIBILITY_LEVEL;
+            try {
+                compatibility = getCompatibility(clusterName, subject);
+            } catch (Exception e) {
+                log.warn("Error when get compatibility level", e);
+            }
+            result.add(new SchemaMetadataFromRegistry(getSubject(clusterName, subject), compatibility));
         }
         return result;
     }

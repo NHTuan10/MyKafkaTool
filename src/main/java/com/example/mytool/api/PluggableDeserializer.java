@@ -17,7 +17,7 @@ public interface PluggableDeserializer {
         return false;
     }
 
-    default byte[] deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, String> others) {
+    default byte[] deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) {
         return payload;
     }
 

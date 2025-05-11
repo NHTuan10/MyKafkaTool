@@ -106,7 +106,6 @@ public class KafkaConsumerService {
         boolean firstPoll = true;
         int emptyPullCountDown = 2;
         while (true) {
-
             ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
             PollCallback pollCallback = pollingOptions.pollCallback().get();
             if (!pollCallback.isPolling().get()) break;

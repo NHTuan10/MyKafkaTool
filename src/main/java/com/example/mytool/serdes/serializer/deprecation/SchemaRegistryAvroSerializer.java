@@ -1,4 +1,4 @@
-package com.example.mytool.serdes.serializer;
+package com.example.mytool.serdes.serializer.deprecation;
 
 import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.serdes.AvroUtil;
@@ -9,7 +9,7 @@ import java.util.Map;
 public class SchemaRegistryAvroSerializer implements PluggableSerializer {
     @Override
     public String getName() {
-        return "Schema Registry Avro";
+        return "Deprecated Schema Registry Avro";
     }
 
     @Override

@@ -29,6 +29,9 @@ public class EditableTableControl<T> extends AnchorPane {
     protected Button removeItemBtn;
 
     @FXML
+    protected Button refreshBtn;
+
+    @FXML
     protected TableView<T> table;
 
     protected ObservableList<T> tableItems;
@@ -66,7 +69,6 @@ public class EditableTableControl<T> extends AnchorPane {
             table.getColumns().add(tableColumn);
         });
 
-
         TableViewConfigurer.configureTableView(itemClass, table);
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -86,6 +88,11 @@ public class EditableTableControl<T> extends AnchorPane {
         indicesToRemove.forEach((i) -> {
             tableItems.remove((int) i);
         });
+    }
+
+    @FXML
+    protected void refresh() throws Exception {
+
     }
 
     public void configureEditableControls(boolean editable) {

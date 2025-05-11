@@ -9,13 +9,16 @@ import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.ui.cg.ConsumerGroupListTreeItem;
+import com.example.mytool.ui.control.SchemaEditableTableControl;
 import com.example.mytool.ui.partition.KafkaPartitionTreeItem;
 import com.example.mytool.ui.topic.KafkaTopicListTreeItem;
 import com.example.mytool.ui.topic.KafkaTopicTreeItem;
 import com.example.mytool.ui.util.ViewUtil;
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
@@ -28,10 +31,13 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
+@RequiredArgsConstructor
 public class KafkaClusterTree {
-    ClusterManager clusterManager;
+    final ClusterManager clusterManager;
 
-    TreeView clusterTree;
+    final TreeView clusterTree;
+
+    final SchemaEditableTableControl schemaEditableTableControl;
 
     public static void initClusterPanel(Stage stage) {
         TreeView clusterTree = (TreeView) stage.getScene().lookup("#clusterTree");
@@ -57,11 +63,6 @@ public class KafkaClusterTree {
 //        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
     }
 
-    public KafkaClusterTree(ClusterManager clusterManager, TreeView clusterTree) {
-        this.clusterManager = clusterManager;
-        this.clusterTree = clusterTree;
-    }
-
     public static void addClusterConnIntoClusterTreeView(TreeView clusterTree, KafkaCluster cluster) throws IOException, ClusterNameExistedException {
         String clusterName = cluster.getName();
         if (isClusterNameExistedInTree(clusterTree, clusterName)) {
@@ -71,14 +72,17 @@ public class KafkaClusterTree {
         TreeItem<Object> brokerTreeItem = new TreeItem<>(clusterName);
         TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster));
         ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster));
-        TreeItem<Object> schemaRegistry = new TreeItem<>(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME);
 
         topicListTreeItem.getChildren();
         brokerTreeItem.getChildren().add(topicListTreeItem);
 
         consumerGroupListTreeItem.getChildren();
         brokerTreeItem.getChildren().add(consumerGroupListTreeItem);
-        brokerTreeItem.getChildren().add(schemaRegistry);
+
+        if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
+            TreeItem<Object> schemaRegistry = new TreeItem<>(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME);
+            brokerTreeItem.getChildren().add(schemaRegistry);
+        }
 
         clusterTree.getRoot().getChildren().add(brokerTreeItem);
     }
@@ -141,7 +145,13 @@ public class KafkaClusterTree {
                 clusterTreeContextMenu.getItems().setAll(refreshItem);
             } else if (AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue())) {
                 MenuItem refreshItem = new MenuItem("Refresh");
-                //TODO: need to add action
+                refreshItem.setOnAction(actionEvent -> {
+                    try {
+                        schemaEditableTableControl.refresh();
+                    } catch (RestClientException | IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
                 clusterTreeContextMenu.getItems().setAll(refreshItem);
             } else {
                 clusterTreeContextMenu.getItems().setAll(blankItem);

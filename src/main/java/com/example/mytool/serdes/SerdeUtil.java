@@ -18,6 +18,7 @@ import java.util.Set;
 public class SerdeUtil {
 
     public static final String SERDE_STRING = "String";
+    public static final String IS_KEY_PROP = "isKey";
     public static final String SERDE_AVRO = "AVRO";
     //    public static final ObservableList<String> SUPPORT_VALUE_CONTENT_TYPES = FXCollections.observableArrayList(SerdeUtil.SERDE_STRING, SerdeUtil.SERDE_AVRO);
     private final Map<String, PluggableSerializer> serializerMap;
@@ -65,10 +66,13 @@ public class SerdeUtil {
         return serializerMap.get(contentType);
     }
 
-    public Set<String> getSupportedContentTypes() {
+    public Set<String> getSupportedValueContentTypes() {
         return deserializerMap.keySet();
     }
 
+    public Set<String> getSupportedKeyContentTypes() {
+        return Set.of(SERDE_STRING);
+    }
 
 //    public static Class<? extends Deserializer> getDeserializeClass(String contentType) {
 //        switch (contentType) {
