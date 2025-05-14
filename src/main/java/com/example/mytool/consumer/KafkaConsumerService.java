@@ -6,7 +6,7 @@ import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.serdes.AvroUtil;
-import com.example.mytool.serdes.SerdeUtil;
+import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.KafkaMessageTableItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,7 +35,7 @@ import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 @Slf4j
 @RequiredArgsConstructor
 public class KafkaConsumerService {
-    private final SerdeUtil serdeUtil;
+    private final SerDesHelper serDesHelper;
 
     public List<KafkaMessageTableItem> consumeMessages(KafkaPartition partition, PollingOptions pollingOptions) {
         Set<TopicPartition> topicPartitions = Set.of(new TopicPartition(partition.topic().name(), partition.id()));
@@ -53,7 +53,7 @@ public class KafkaConsumerService {
     private List<KafkaMessageTableItem> consumeMessagesFromPartitions(KafkaTopic kafkaTopic, Set<TopicPartition> topicPartitions, PollingOptions pollingOptions) {
         ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(kafkaTopic.cluster())
                 .keyDeserializer(StringDeserializer.class)
-                .valueDeserializer(serdeUtil.getDeserializeClass(pollingOptions.valueContentType()))
+                .valueDeserializer(serDesHelper.getDeserializeClass(pollingOptions.valueContentType()))
                 .build();
         Map<String, Object> consumerProps = ConsumerCreator.buildConsumerConfigs(consumerCreatorConfig);
         Consumer consumer = ClusterManager.getInstance().getConsumer(consumerProps);
@@ -143,7 +143,7 @@ public class KafkaConsumerService {
 //                ? AvroUtil.deserializeAsJsonString((byte[]) record.value(), pollingOptions.schema())
 //                : (String) record.value();
 //        String value = record.value().toString();
-        String value = serdeUtil.deserializeToJsonString(record,
+        String value = serDesHelper.deserializeToJsonString(record,
                 pollingOptions.valueContentType,
                 record.headers(), consumerProps, false);
 

@@ -15,7 +15,7 @@ public interface PluggableSerializer {
         return false;
     }
 
-    default boolean isUserSchemaInputRequired() {
+    default boolean mayUseSchema() {
         return false;
     }
 

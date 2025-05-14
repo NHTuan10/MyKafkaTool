@@ -1,15 +1,18 @@
 package com.example.mytool.serdes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+@Slf4j
 public class AvroUtil {
     public static Schema parseSchema(String schemaStr) {
         return new Schema.Parser().parse(schemaStr);
@@ -18,12 +21,22 @@ public class AvroUtil {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static Object convertJsonToAvro(String json, String schemaStr) throws IOException {
-        Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse(schemaStr);
-
-        DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
-        Decoder decoder = DecoderFactory.get().jsonDecoder(schema, json);
-        return reader.read(null, decoder);
+        Schema schema = null;
+        if (StringUtils.isNotBlank(schemaStr)) {
+            try {
+                Schema.Parser parser = new Schema.Parser();
+                schema = parser.parse(schemaStr);
+            } catch (Exception e) {
+                log.error("Error parse schema {}", schema, e);
+            }
+        }
+        if (schema != null) {
+            DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
+            Decoder decoder = DecoderFactory.get().jsonDecoder(schema, json);
+            return reader.read(null, decoder);
+        } else {
+            return objectMapper.readValue(json, Object.class);
+        }
     }
 
     //  Deserialized Methods
@@ -55,8 +68,9 @@ public class AvroUtil {
                 result = outputStream.toString();
             }
             default -> {
-                objectMapper.writeValue(outputStream, deserializedObject);
-                result = outputStream.toString();
+//                objectMapper.writeValue(outputStream, deserializedObject);
+//                result = outputStream.toString();
+                result = deserializedObject.toString(); // TODO: find a better approach than toString
             }
         }
         outputStream.close();

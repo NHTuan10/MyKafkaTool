@@ -10,7 +10,7 @@ import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.model.kafka.SchemaMetadataFromRegistry;
 import com.example.mytool.producer.ProducerUtil;
-import com.example.mytool.serdes.SerdeUtil;
+import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.serdes.deserializer.ByteArrayDeserializer;
 import com.example.mytool.serdes.deserializer.SchemaRegistryAvroDeserializer;
 import com.example.mytool.serdes.deserializer.StringDeserializer;
@@ -67,7 +67,7 @@ public class MainController {
 
     private final ProducerUtil producerUtil;
 
-    private final SerdeUtil serdeUtil;
+    private final SerDesHelper serDesHelper;
 
     @FXML
     private TreeView clusterTree;
@@ -160,7 +160,7 @@ public class MainController {
         SchemaRegistryAvroSerializer schemaRegistryAvroSerializer = new SchemaRegistryAvroSerializer();
         SchemaRegistryAvroDeserializer schemaRegistryAvroDeserializer = new SchemaRegistryAvroDeserializer();
         DeprecatedSchemaRegistryAvroDeserializer deprecatedSchemaRegistryAvroDeserializer = new DeprecatedSchemaRegistryAvroDeserializer();
-        this.serdeUtil = new SerdeUtil(
+        this.serDesHelper = new SerDesHelper(
                 ImmutableMap.of(stringSerializer.getName(), stringSerializer,
                         byteArraySerializer.getName(), byteArraySerializer,
                         schemaRegistryAvroSerializer.getName(), schemaRegistryAvroSerializer),
@@ -169,8 +169,8 @@ public class MainController {
                         schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer,
                         deprecatedSchemaRegistryAvroDeserializer.getName(), deprecatedSchemaRegistryAvroDeserializer)
         );
-        this.producerUtil = new ProducerUtil(this.serdeUtil);
-        this.kafkaConsumerService = new KafkaConsumerService(this.serdeUtil);
+        this.producerUtil = new ProducerUtil(this.serDesHelper);
+        this.kafkaConsumerService = new KafkaConsumerService(this.serDesHelper);
     }
 
     @FXML
@@ -191,7 +191,7 @@ public class MainController {
 
     private void configureTableView() {
 
-        TableViewConfigurer.configureMessageTable(messageTable, serdeUtil);
+        TableViewConfigurer.configureMessageTable(messageTable, serDesHelper);
         TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable);
         TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable);
         TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable);
@@ -221,16 +221,16 @@ public class MainController {
                 setDisable(empty || date.isAfter(LocalDate.now()));
             }
         });
-        keyContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedKeyDeserializer()));
+        keyContentType.setItems(FXCollections.observableArrayList(serDesHelper.getSupportedKeyDeserializer()));
         keyContentType.getSelectionModel().selectFirst();
 //        valueContentType.setItems(SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES);
-        valueContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedValueDeserializer()));
+        valueContentType.setItems(FXCollections.observableArrayList(serDesHelper.getSupportedValueDeserializer()));
 //        valueContentType.setValue(SerdeUtil.SERDE_STRING);
         valueContentType.getSelectionModel().selectFirst();
         msgPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
         msgPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
         valueContentType.setOnAction(event -> {
-            PluggableDeserializer deserializer = serdeUtil.getPluggableDeserialize(valueContentType.getValue());
+            PluggableDeserializer deserializer = serDesHelper.getPluggableDeserialize(valueContentType.getValue());
             schemaTextArea.setDisable(!deserializer.isUserSchemaInputRequired());
 
         });
@@ -474,7 +474,7 @@ public class MainController {
 
         AtomicReference<Object> ref = new AtomicReference<>();
         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
-                Map.of("serdeUtil", serdeUtil, "valueContentTypeComboBox", FXCollections.observableArrayList(serdeUtil.getSupportedValueSerializer()),
+                Map.of("serDesHelper", serDesHelper, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
                         "schemaTextArea", schemaTextArea.getText()));
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {

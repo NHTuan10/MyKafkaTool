@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-public class SerdeUtil {
+public class SerDesHelper {
 
     public static final String SERDE_STRING = "String";
     public static final String IS_KEY_PROP = "isKey";
@@ -30,10 +30,10 @@ public class SerdeUtil {
     private final Map<String, PluggableSerializer> serializerMap;
     private final Map<String, PluggableDeserializer> deserializerMap;
 
-    public static boolean isValidSchemaForSerialization(SerdeUtil serdeUtil, String valueContentType, String schema) {
+    public static boolean isValidSchemaForSerialization(SerDesHelper serDesHelper, String valueContentType, String schema) {
         boolean valid = true;
-        PluggableSerializer serializer = serdeUtil.getPluggableSerialize(valueContentType);
-        if (serializer.isUserSchemaInputRequired()) {
+        PluggableSerializer serializer = serDesHelper.getPluggableSerialize(valueContentType);
+        if (StringUtils.isNotBlank(schema) && serializer.mayUseSchema()) {
             try {
                 valid = StringUtils.isNotBlank(schema) &&
                         serializer.parseSchema(schema) != null;
@@ -102,7 +102,7 @@ public class SerdeUtil {
         Object payload = record.value();
         if (deserializer.isCustomDeserializeMethodUsed()) {
             if (payload instanceof byte[] payloadBytes) {
-                Map<String, String> others = Map.of(SerdeUtil.IS_KEY_PROP, Boolean.toString(isKey));
+                Map<String, String> others = Map.of(SerDesHelper.IS_KEY_PROP, Boolean.toString(isKey));
                 try {
                     return deserializerMap.get(contentType).deserialize(record.topic(), record.partition(), payloadBytes, headerMap, consumerProps, others);
                 } catch (Exception e) {
@@ -124,7 +124,7 @@ public class SerdeUtil {
 
     public ValidationResult validateMessageAgainstSchema(String contentType, String content, String schemaStr) {
         PluggableSerializer serializer = serializerMap.get(contentType);
-        if (serializer.isUserSchemaInputRequired()) {
+        if (serializer.mayUseSchema()) {
             try {
                 Object s = serializer.convertStringToObject(content, Map.of(AppConstant.SCHEMA, schemaStr));
                 return new ValidationResult((s != null), new Exception("Empty content type"));

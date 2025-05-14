@@ -1,7 +1,7 @@
 package com.example.mytool.ui;
 
 import com.example.mytool.constant.AppConstant;
-import com.example.mytool.serdes.SerdeUtil;
+import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.control.EditingTableCell;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
@@ -68,7 +68,7 @@ public class TableViewConfigurer {
         });
     }
 
-    public static void configureMessageTable(TableView<KafkaMessageTableItem> messageTable, SerdeUtil serdeUtil) {
+    public static void configureMessageTable(TableView<KafkaMessageTableItem> messageTable, SerDesHelper serDesHelper) {
         TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable);
         messageTable.setRowFactory(tv -> {
             TableRow<KafkaMessageTableItem> row = new TableRow<>() {
@@ -91,7 +91,7 @@ public class TableViewConfigurer {
                     KafkaMessageTableItem rowData = row.getItem();
                     log.debug("Double click on: {}", rowData.getKey());
                     Map<String, Object> msgModalFieldMap = Map.of(
-                            "serdeUtil", serdeUtil,
+                            "serDesHelper", serDesHelper,
                             "keyTextArea", rowData.getKey(),
                             "valueTextArea", rowData.getValue(),
                             "valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()),

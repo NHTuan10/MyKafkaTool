@@ -6,7 +6,7 @@ import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.producer.creator.ProducerCreator;
-import com.example.mytool.serdes.SerdeUtil;
+import com.example.mytool.serdes.SerDesHelper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class ProducerUtil {
-    private final SerdeUtil serdeUtil;
+    private final SerDesHelper serDesHelper;
 
     public void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, KafkaMessage kafkaMessage)
             throws ExecutionException, InterruptedException, IOException {
@@ -47,8 +47,8 @@ public class ProducerUtil {
     private ProducerCreator.ProducerCreatorConfig createProducerConfig(KafkaCluster cluster, KafkaMessage kafkaMessage) {
         return ProducerCreator.ProducerCreatorConfig.builder()
                 .cluster(cluster)
-                .keySerializer(serdeUtil.getSerializeClass(kafkaMessage.keyContentType()))
-                .valueSerializer(serdeUtil.getSerializeClass(kafkaMessage.valueContentType()))
+                .keySerializer(serDesHelper.getSerializeClass(kafkaMessage.keyContentType()))
+                .valueSerializer(serDesHelper.getSerializeClass(kafkaMessage.valueContentType()))
                 .build();
     }
 
@@ -56,7 +56,7 @@ public class ProducerUtil {
                                                                        KafkaMessage kafkaMessage) throws IOException {
 
         String key = StringUtils.isBlank(kafkaMessage.key()) ? null : kafkaMessage.key();
-        Object value = serdeUtil.convertStringToObjectBeforeSerialize(kafkaMessage.valueContentType(), kafkaMessage.value(), kafkaMessage.schema());
+        Object value = serDesHelper.convertStringToObjectBeforeSerialize(kafkaMessage.valueContentType(), kafkaMessage.value(), kafkaMessage.schema());
         List<Header> headers = kafkaMessage.headers().entrySet().stream().map(entry -> new RecordHeader(entry.getKey(), entry.getValue().getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
 
 //        if (partition != null) {

@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-public class ViewUtil {
+public final class ViewUtil {
 
     public static boolean confirmAlert(String title, String text, String okDoneText, String cancelCloseText) {
         ButtonType yes = new ButtonType(okDoneText, ButtonBar.ButtonData.OK_DONE);

@@ -2,7 +2,7 @@ package com.example.mytool.ui.controller;
 
 import com.example.mytool.api.KafkaMessage;
 import com.example.mytool.api.PluggableSerializer;
-import com.example.mytool.serdes.SerdeUtil;
+import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyTableItem;
 import com.example.mytool.ui.util.ViewUtil;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AddOrViewMessageModalController extends ModalController {
 
-    private SerdeUtil serdeUtil;
+    private SerDesHelper serDesHelper;
 
     @FXML
     private TextArea keyTextArea;
@@ -63,8 +63,8 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     private void enableDisableSchemaTextArea() {
-        PluggableSerializer serializer = serdeUtil.getPluggableSerialize(valueContentTypeComboBox.getValue());
-        schemaTextArea.setDisable(!serializer.isUserSchemaInputRequired());
+        PluggableSerializer serializer = serDesHelper.getPluggableSerialize(valueContentTypeComboBox.getValue());
+        schemaTextArea.setDisable(!serializer.mayUseSchema());
     }
 
     @FXML
@@ -73,7 +73,7 @@ public class AddOrViewMessageModalController extends ModalController {
         String valueText = valueTextArea.getText();
         String valueContentTypeText = valueContentTypeComboBox.getValue();
         if (!validateSchema(valueContentTypeText, schemaText)) return;
-        SerdeUtil.ValidationResult valueValidationResult = serdeUtil.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
+        SerDesHelper.ValidationResult valueValidationResult = serDesHelper.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
         if (!valueValidationResult.isValid()) {
             log.warn("The message is invalid against the schema", valueValidationResult.exception());
             ViewUtil.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
@@ -121,7 +121,7 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     private boolean validateSchema(String valueContentType, String schema) {
-        boolean valid = SerdeUtil.isValidSchemaForSerialization(serdeUtil, valueContentType, schema);
+        boolean valid = SerDesHelper.isValidSchemaForSerialization(serDesHelper, valueContentType, schema);
         if (!valid) {
             ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
                     ButtonType.OK);

@@ -2,7 +2,7 @@ package com.example.mytool.serdes.deserializer;
 
 import com.example.mytool.api.PluggableDeserializer;
 import com.example.mytool.serdes.AvroUtil;
-import com.example.mytool.serdes.SerdeUtil;
+import com.example.mytool.serdes.SerDesHelper;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
@@ -38,7 +38,7 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
         } else {
             kafkaAvroDeserializer = kafkaAvroDeserializerMap.get(consumerProps);
         }
-        boolean isKey = Boolean.getBoolean(others.getOrDefault(SerdeUtil.IS_KEY_PROP, "false"));
+        boolean isKey = Boolean.getBoolean(others.getOrDefault(SerDesHelper.IS_KEY_PROP, "false"));
         kafkaAvroDeserializer.configure(consumerProps, isKey);
         Headers headers = new RecordHeaders(headerMap.entrySet().stream().map(entry -> (Header) new RecordHeader(entry.getKey(), entry.getValue())).toList());
         Object deserializedObject = kafkaAvroDeserializer.deserialize(topic, headers, payload);
