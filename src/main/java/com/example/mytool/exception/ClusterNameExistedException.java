@@ -2,7 +2,7 @@ package com.example.mytool.exception;
 
 public class ClusterNameExistedException extends Exception {
 
-    String clusterName;
+    private String clusterName;
 
     public ClusterNameExistedException(String clusterName, String message) {
         super(message);

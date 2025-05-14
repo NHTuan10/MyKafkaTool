@@ -56,7 +56,7 @@ public class ProducerUtil {
                                                                        KafkaMessage kafkaMessage) throws IOException {
 
         String key = StringUtils.isBlank(kafkaMessage.key()) ? null : kafkaMessage.key();
-        Object value = serdeUtil.convert(kafkaMessage.valueContentType(), kafkaMessage.value(), kafkaMessage.schema());
+        Object value = serdeUtil.convertStringToObjectBeforeSerialize(kafkaMessage.valueContentType(), kafkaMessage.value(), kafkaMessage.schema());
 //        ObjectMapper objectMapper = new ObjectMapper();
 //        Object value = objectMapper.readValue(kafkaMessage.value(), Object.class);
         List<Header> headers = kafkaMessage.headers().entrySet().stream().map(entry -> new RecordHeader(entry.getKey(), entry.getValue().getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());

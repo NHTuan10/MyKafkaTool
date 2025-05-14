@@ -116,6 +116,10 @@ public class ClusterManager {
         return ConsumerCreator.createConsumer(consumerCreatorConfig);
     }
 
+    public Consumer getConsumer(Map<String, Object> consumerProperties) {
+        return ConsumerCreator.createConsumer(consumerProperties);
+    }
+
     public KafkaProducer getProducer(ProducerCreator.ProducerCreatorConfig producerCreatorConfig) {
         if (producerMap.containsKey(producerCreatorConfig)) {
             return producerMap.get(producerCreatorConfig);

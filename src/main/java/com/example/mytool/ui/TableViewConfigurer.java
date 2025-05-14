@@ -1,16 +1,24 @@
 package com.example.mytool.ui;
 
+import com.example.mytool.constant.AppConstant;
+import com.example.mytool.serdes.SerdeUtil;
 import com.example.mytool.ui.control.EditingTableCell;
 import com.example.mytool.ui.util.ViewUtil;
+import javafx.collections.FXCollections;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -66,6 +74,72 @@ public class TableViewConfigurer {
             event.getTableView().getItems().get(
                     event.getTablePosition().getRow()).setValue(event.getNewValue());
         });
+    }
+
+//    private static void configureErrorMessageRow(TableColumn<KafkaMessageTableItem, Object> tableColumn) {
+//        tableColumn.setCellFactory(column -> new TableCell<>() {
+//            @Override
+//            protected void updateItem(Object item, boolean empty) {
+//                super.updateItem(item, empty);
+//
+//                setText(empty ? "" : getItem().toString());
+//                setGraphic(null);
+//
+//                TableRow<KafkaMessageTableItem> currentRow = getTableRow();
+//
+//                if (!isEmpty()) {
+//
+//                    if (currentRow.getItem().isErrorItem())
+//                        currentRow.setStyle("-fx-background-color:lightcoral");
+//                    else
+//                        currentRow.setStyle("-fx-background-color:white");
+//                }
+//            }
+//        });
+//    }
+
+    public static void configureMessageTable(TableView<KafkaMessageTableItem> messageTable, SerdeUtil serdeUtil) {
+        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable);
+        messageTable.setRowFactory(tv -> {
+            TableRow<KafkaMessageTableItem> row = new TableRow<>() {
+                @Override
+                protected void updateItem(KafkaMessageTableItem item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (!empty && item != null) {
+                        if (item.isErrorItem()) {
+                            setStyle("-fx-background-color: lightcoral; -fx-border-color: transparent transparent #D3D3D3 transparent;");
+                        } else {
+                            setStyle("-fx-background-color: transparent; -fx-border-color: transparent transparent #D3D3D3 transparent;");
+                        }
+                    } else {
+                        setStyle("");
+                    }
+                }
+            };
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    KafkaMessageTableItem rowData = row.getItem();
+                    log.debug("Double click on: " + rowData.getKey());
+                    Map<String, Object> msgModalFieldMap = Map.of(
+                            "serdeUtil", serdeUtil,
+                            "keyTextArea", rowData.getKey(),
+                            "valueTextArea", rowData.getValue(),
+                            "valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()),
+                            "headerTable",
+                            FXCollections.observableArrayList(
+                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
+                    try {
+                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+//                    System.out.println("Double click on: "+rowData.getKey());
+                }
+            });
+            return row;
+        });
+//        configureErrorMessageRow((TableColumn<KafkaMessageTableItem, Object>) messageTable.getColumns().get(3));
     }
 
 //    public static void configureTopicConfigTableView(Stage stage) {

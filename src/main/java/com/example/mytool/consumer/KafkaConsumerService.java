@@ -1,9 +1,11 @@
 package com.example.mytool.consumer;
 
 import com.example.mytool.consumer.creator.ConsumerCreator;
+import com.example.mytool.exception.DeserializationException;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
+import com.example.mytool.serdes.AvroUtil;
 import com.example.mytool.serdes.SerdeUtil;
 import com.example.mytool.ui.KafkaMessageTableItem;
 import javafx.collections.FXCollections;
@@ -49,14 +51,19 @@ public class KafkaConsumerService {
     }
 
     private List<KafkaMessageTableItem> consumeMessagesFromPartitions(KafkaTopic kafkaTopic, Set<TopicPartition> topicPartitions, PollingOptions pollingOptions) {
-        Consumer consumer = getConsumer(kafkaTopic, pollingOptions.valueContentType());
+        ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(kafkaTopic.getCluster())
+                .keyDeserializer(StringDeserializer.class)
+                .valueDeserializer(serdeUtil.getDeserializeClass(pollingOptions.valueContentType()))
+                .build();
+        Map<String, Object> consumerProps = ConsumerCreator.buildConsumerConfigs(consumerCreatorConfig);
+        Consumer consumer = ClusterManager.getInstance().getConsumer(consumerProps);
         consumer.assign(topicPartitions);
         if (pollingOptions.timestamp() != null) {
             seekOffsetWithTimestamp(consumer, kafkaTopic.getName(), topicPartitions, pollingOptions.timestamp());
         } else {
             seekOffset(consumer, topicPartitions, pollingOptions.pollingPosition(), pollingOptions.noMessages());
         }
-        List<KafkaMessageTableItem> list = pollMessages(consumer, pollingOptions);
+        List<KafkaMessageTableItem> list = pollMessages(consumer, consumerProps, pollingOptions);
         consumer.close();
         return list;
     }
@@ -99,7 +106,7 @@ public class KafkaConsumerService {
         }
     }
 
-    public List<KafkaMessageTableItem> pollMessages(Consumer<String, Object> consumer, PollingOptions pollingOptions) {
+    public List<KafkaMessageTableItem> pollMessages(Consumer<String, Object> consumer, Map<String, Object> consumerProps, PollingOptions pollingOptions) {
         int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_POLL_TIME_MS);
 //        List<KafkaMessageTableItem> allMessages = new ArrayList<>();
         ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
@@ -113,8 +120,10 @@ public class KafkaConsumerService {
             messageObservableList = pollCallback.resultObservableList();
 //                firstPoll = false;
 //            }
-            List<KafkaMessageTableItem> polledMessages = handleConsumerRecords(pollingOptions, consumerRecords);
-            messageObservableList.addAll(polledMessages);
+            List<KafkaMessageTableItem> polledMessages = handleConsumerRecords(pollingOptions, consumerRecords, consumerProps);
+            if (!polledMessages.isEmpty()) {
+                messageObservableList.addAll(polledMessages);
+            }
             if (consumerRecords.isEmpty()) emptyPullCountDown--;
             if (emptyPullCountDown == 0) break;
         }
@@ -122,35 +131,64 @@ public class KafkaConsumerService {
         return filterAndSortMessages(messageObservableList, pollingOptions);
     }
 
-    private List<KafkaMessageTableItem> handleConsumerRecords(PollingOptions pollingOptions, ConsumerRecords<String, Object> consumerRecords) {
+    private List<KafkaMessageTableItem> handleConsumerRecords(PollingOptions pollingOptions, ConsumerRecords<String, Object> consumerRecords, Map<String, Object> consumerProps) {
         List<KafkaMessageTableItem> messages = new ArrayList<>();
         for (ConsumerRecord<String, Object> record : consumerRecords) {
             try {
-                KafkaMessageTableItem message = createMessageItem(record, pollingOptions);
+                KafkaMessageTableItem message = createMessageItem(record, pollingOptions, consumerProps);
                 messages.add(message);
-            } catch (Exception e) {
+            } catch (DeserializationException e) {
                 log.error("Error processing record: key={}, partition={}, offset={}",
                         record.key(), record.partition(), record.offset(), e);
+                KafkaMessageTableItem message = createErrorMessageItem(record, pollingOptions);
+                messages.add(message);
             }
         }
         return messages;
     }
 
     private KafkaMessageTableItem createMessageItem
-            (ConsumerRecord<String, Object> record, PollingOptions pollingOptions) throws IOException {
+            (ConsumerRecord<String, Object> record, PollingOptions pollingOptions, Map<String, Object> consumerProps) throws DeserializationException {
         String key = record.key() != null ? record.key() : "";
 //        String value = SerdeUtil.SERDE_AVRO.equals(pollingOptions.valueContentType())
 //                ? AvroUtil.deserializeAsJsonString((byte[]) record.value(), pollingOptions.schema())
 //                : (String) record.value();
-        String value = record.value().toString();
+//        String value = record.value().toString();
+        String value = serdeUtil.deserializeToJsonString(record,
+                pollingOptions.valueContentType,
+                record.headers(), consumerProps, false);
+
         String timestamp = Instant.ofEpochMilli(record.timestamp())
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime()
                 .toString();
 
-        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, pollingOptions.valueContentType(), record.headers(), pollingOptions.schema());
+        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, pollingOptions.valueContentType(), record.headers(), pollingOptions.schema(), false);
     }
 
+    private KafkaMessageTableItem createErrorMessageItem
+            (ConsumerRecord<String, Object> record, PollingOptions pollingOptions) {
+
+        String timestamp = Instant.ofEpochMilli(record.timestamp())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .toString();
+        String displayValue = "";
+        try {
+            displayValue = AvroUtil.toString(record.value());
+        } catch (IOException e) {
+            log.error("Error when display value: " + record.value(), e);
+        }
+        return new KafkaMessageTableItem(record.partition(),
+                record.offset(),
+                record.key() != null ? record.key() : "",
+                "Error when deserialize message: " + displayValue,
+                timestamp,
+                pollingOptions.valueContentType(),
+                record.headers(),
+                "",
+                true);
+    }
     private List<KafkaMessageTableItem> filterAndSortMessages
             (List<KafkaMessageTableItem> messages, PollingOptions pollingOptions) {
         if (pollingOptions.noMessages() != null) {

@@ -1,5 +1,6 @@
 package com.example.mytool.serdes;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -14,6 +15,8 @@ public class AvroUtil {
         return new Schema.Parser().parse(schemaStr);
     }
 
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
     public static Object convertJsonToAvro(String json, String schemaStr) throws IOException {
         Schema.Parser parser = new Schema.Parser();
         Schema schema = parser.parse(schemaStr);
@@ -24,19 +27,44 @@ public class AvroUtil {
     }
 
     //  Deserialized Methods
-    public static String deserializeAsJsonString(byte[] data, String schemaStr) throws IOException {
+    public static String deserializeToJsonString(byte[] data, String schemaStr) throws IOException {
         Schema schema = parseSchema(schemaStr);
         GenericRecord avroRecord = deserialize(data, schema);
-        return convertGenericRecordToJson(avroRecord, schema);
+        return convertObjectToJsonString(avroRecord);
     }
 
-    public static String convertGenericRecordToJson(GenericRecord avroRecord, Schema schema) throws IOException {
+    public static String convertObjectToJsonString(Object deserializedObject) throws IOException {
+        String result;
+        result = toString(deserializedObject);
+        return result;
+    }
+
+    public static String toString(Object deserializedObject) throws IOException {
+        String result;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        JsonEncoder jsonEncoder = EncoderFactory.get().jsonEncoder(schema, outputStream);
-        GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
-        writer.write(avroRecord, jsonEncoder);
-        jsonEncoder.flush();
-        String result = outputStream.toString();
+        switch (deserializedObject) {
+            case null -> {
+                result = null;
+            }
+            case String str -> {
+                result = str;
+            }
+            case byte[] bytes -> {
+                result = new String(bytes);
+            }
+            case GenericRecord avroRecord -> {
+                Schema schema = avroRecord.getSchema();
+                JsonEncoder jsonEncoder = EncoderFactory.get().jsonEncoder(schema, outputStream);
+                GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
+                writer.write(avroRecord, jsonEncoder);
+                jsonEncoder.flush();
+                result = outputStream.toString();
+            }
+            default -> {
+                objectMapper.writeValue(outputStream, deserializedObject);
+                result = outputStream.toString();
+            }
+        }
         outputStream.close();
         return result;
     }

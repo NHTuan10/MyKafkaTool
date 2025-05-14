@@ -12,11 +12,12 @@ import com.example.mytool.model.kafka.SchemaMetadataFromRegistry;
 import com.example.mytool.producer.ProducerUtil;
 import com.example.mytool.serdes.SerdeUtil;
 import com.example.mytool.serdes.deserializer.ByteArrayDeserializer;
+import com.example.mytool.serdes.deserializer.SchemaRegistryAvroDeserializer;
 import com.example.mytool.serdes.deserializer.StringDeserializer;
-import com.example.mytool.serdes.deserializer.deprecation.SchemaRegistryAvroDeserializer;
+import com.example.mytool.serdes.deserializer.deprecation.DeprecatedSchemaRegistryAvroDeserializer;
 import com.example.mytool.serdes.serializer.ByteArraySerializer;
+import com.example.mytool.serdes.serializer.SchemaRegistryAvroSerializer;
 import com.example.mytool.serdes.serializer.StringSerializer;
-import com.example.mytool.serdes.serializer.deprecation.SchemaRegistryAvroSerializer;
 import com.example.mytool.ui.*;
 import com.example.mytool.ui.cg.ConsumerGroupOffsetTableItem;
 import com.example.mytool.ui.cg.ConsumerGroupTreeItem;
@@ -45,7 +46,10 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -155,13 +159,15 @@ public class MainController {
         ByteArrayDeserializer byteArrayDeserializer = new ByteArrayDeserializer();
         SchemaRegistryAvroSerializer schemaRegistryAvroSerializer = new SchemaRegistryAvroSerializer();
         SchemaRegistryAvroDeserializer schemaRegistryAvroDeserializer = new SchemaRegistryAvroDeserializer();
+        DeprecatedSchemaRegistryAvroDeserializer deprecatedSchemaRegistryAvroDeserializer = new DeprecatedSchemaRegistryAvroDeserializer();
         this.serdeUtil = new SerdeUtil(
                 ImmutableMap.of(stringSerializer.getName(), stringSerializer,
                         byteArraySerializer.getName(), byteArraySerializer,
                         schemaRegistryAvroSerializer.getName(), schemaRegistryAvroSerializer),
                 ImmutableMap.of(stringDeserializer.getName(), stringDeserializer,
                         byteArrayDeserializer.getName(), byteArrayDeserializer,
-                        schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer)
+                        schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer,
+                        deprecatedSchemaRegistryAvroDeserializer.getName(), deprecatedSchemaRegistryAvroDeserializer)
         );
         this.producerUtil = new ProducerUtil(this.serdeUtil);
         this.kafkaConsumerService = new KafkaConsumerService(this.serdeUtil);
@@ -184,32 +190,8 @@ public class MainController {
     }
 
     private void configureTableView() {
-        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable);
-        messageTable.setRowFactory(tv -> {
-            TableRow<KafkaMessageTableItem> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    KafkaMessageTableItem rowData = row.getItem();
-                    log.debug("Double click on: " + rowData.getKey());
-                    Map<String, Object> msgModalFieldMap = Map.of(
-                            "serdeUtil", serdeUtil,
-                            "keyTextArea", rowData.getKey(),
-                            "valueTextArea", rowData.getValue(),
-                            "valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()),
-                            "headerTable",
-                            FXCollections.observableArrayList(
-                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
-                    try {
-                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
 
-//                    System.out.println("Double click on: "+rowData.getKey());
-                }
-            });
-            return row;
-        });
+        TableViewConfigurer.configureMessageTable(messageTable, serdeUtil);
         TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable);
         TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable);
         TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable);
@@ -241,10 +223,10 @@ public class MainController {
                 setDisable(empty || date.compareTo(LocalDate.now()) > 0);
             }
         });
-        keyContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedKeyContentTypes()));
+        keyContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedKeyDeserializer()));
         keyContentType.getSelectionModel().selectFirst();
 //        valueContentType.setItems(SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES);
-        valueContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedValueContentTypes()));
+        valueContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedValueDeserializer()));
 //        valueContentType.setValue(SerdeUtil.SERDE_STRING);
         valueContentType.getSelectionModel().selectFirst();
         msgPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
@@ -499,7 +481,7 @@ public class MainController {
 
         AtomicReference<Object> ref = new AtomicReference<>();
         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
-                Map.of("serdeUtil", serdeUtil, "valueContentTypeComboBox", FXCollections.observableArrayList(serdeUtil.getSupportedValueContentTypes()),
+                Map.of("serdeUtil", serdeUtil, "valueContentTypeComboBox", FXCollections.observableArrayList(serdeUtil.getSupportedValueSerializer()),
                         "schemaTextArea", schemaTextArea.getText()));
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {

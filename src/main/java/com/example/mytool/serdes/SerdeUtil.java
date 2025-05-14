@@ -3,15 +3,21 @@ package com.example.mytool.serdes;
 import com.example.mytool.api.PluggableDeserializer;
 import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.constant.AppConstant;
+import com.example.mytool.exception.DeserializationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,16 +30,12 @@ public class SerdeUtil {
     private final Map<String, PluggableSerializer> serializerMap;
     private final Map<String, PluggableDeserializer> deserializerMap;
 
-    public static boolean isValidSchema(SerdeUtil serdeUtil, String valueContentType, String schema, boolean valid) {
+    public static boolean isValidSchemaForSerialization(SerdeUtil serdeUtil, String valueContentType, String schema, boolean valid) {
         PluggableSerializer serializer = serdeUtil.getPluggableSerialize(valueContentType);
         if (serializer.isUserSchemaInputRequired()) {
             try {
-                if (StringUtils.isNotBlank(schema) &&
-                        serializer.parseSchema(schema) != null) {
-                    valid = true;
-                } else {
-                    valid = false;
-                }
+                valid = StringUtils.isNotBlank(schema) &&
+                        serializer.parseSchema(schema) != null;
             } catch (Exception e) {
                 log.warn("Error when parse schema", e);
                 valid = false;
@@ -51,7 +53,7 @@ public class SerdeUtil {
 //                return StringSerializer.class;
 //        }
         try {
-            return (Class<? extends Serializer>) Class.forName(serializerMap.get(contentType).getSerializerClass());
+            return (Class<? extends Serializer>) Class.forName(getPluggableSerialize(contentType).getSerializerClass());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -66,11 +68,15 @@ public class SerdeUtil {
         return serializerMap.get(contentType);
     }
 
-    public Set<String> getSupportedValueContentTypes() {
+    public Set<String> getSupportedValueDeserializer() {
         return deserializerMap.keySet();
     }
 
-    public Set<String> getSupportedKeyContentTypes() {
+    public Set<String> getSupportedValueSerializer() {
+        return deserializerMap.keySet();
+    }
+
+    public Set<String> getSupportedKeyDeserializer() {
         return Set.of(SERDE_STRING);
     }
 
@@ -86,13 +92,13 @@ public class SerdeUtil {
 //    }
     public Class<? extends Deserializer> getDeserializeClass(String contentType) {
         try {
-            return (Class<? extends Deserializer>) Class.forName(deserializerMap.get(contentType).getDeserializerClass());
+            return (Class<? extends Deserializer>) Class.forName(getPluggableDeserialize(contentType).getDeserializerClass());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public Object convert(String serdeName, String content, String schemaStr) throws IOException {
+    public Object convertStringToObjectBeforeSerialize(String serdeName, String content, String schemaStr) throws IOException {
 //        switch (serdeName) {
 //            case SERDE_STRING:
 //                return content;
@@ -102,15 +108,40 @@ public class SerdeUtil {
 //
 //        }
 //        return content;
-        return serializerMap.get(serdeName).convertStringToTargetType(content, Map.of(AppConstant.SCHEMA, schemaStr));
+        return getPluggableSerialize(serdeName).convertStringToObject(content, Map.of(AppConstant.SCHEMA, schemaStr));
     }
 
+    public String deserializeToJsonString(ConsumerRecord<String, Object> record, String contentType, Headers headers, Map<String, Object> consumerProps, boolean isKey) throws DeserializationException {
+        Map<String, byte[]> headerMap = convertKafkaHeadersObjectToMap(headers);
+        PluggableDeserializer deserializer = getPluggableDeserialize(contentType);
+        Object payload = record.value();
+        if (deserializer.isCustomDeserializeMethodUsed()) {
+            if (payload instanceof byte[] payloadBytes) {
+                Map<String, String> others = Map.of(SerdeUtil.IS_KEY_PROP, Boolean.toString(isKey));
+                try {
+                    return deserializerMap.get(contentType).deserialize(record.topic(), record.partition(), payloadBytes, headerMap, consumerProps, others);
+                } catch (Exception e) {
+                    throw new DeserializationException("Deserialize error", payload, e);
+                }
+            } else {
+                throw new DeserializationException("Internal Error: custom deserialize non byte array is not supported yet", payload);
+            }
+        } else {
+            return payload.toString();
+        }
+
+    }
+
+    private static Map<String, byte[]> convertKafkaHeadersObjectToMap(Headers headers) {
+        return Arrays.stream(headers.toArray()).collect(Collectors.toMap(Header::key, Header::value));
+    }
+
+
     public ValidationResult validateMessageAgainstSchema(String contentType, String content, String schemaStr) {
-//        if (SERDE_AVRO.equals(contentType)) {
         PluggableSerializer serializer = serializerMap.get(contentType);
         if (serializer.isUserSchemaInputRequired()) {
             try {
-                Object s = serializer.convertStringToTargetType(content, Map.of(AppConstant.SCHEMA, schemaStr));
+                Object s = serializer.convertStringToObject(content, Map.of(AppConstant.SCHEMA, schemaStr));
                 return new ValidationResult((s != null), new Exception("Empty content type"));
             } catch (Exception e) {
                 return new ValidationResult(false, e);

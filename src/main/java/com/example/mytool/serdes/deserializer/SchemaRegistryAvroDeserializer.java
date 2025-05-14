@@ -1,13 +1,14 @@
 package com.example.mytool.serdes.deserializer;
 
 import com.example.mytool.api.PluggableDeserializer;
+import com.example.mytool.serdes.AvroUtil;
+import com.example.mytool.serdes.SerdeUtil;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,7 +29,7 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
     }
 
     @Override
-    public byte[] deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) {
+    public String deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
         KafkaAvroDeserializer kafkaAvroDeserializer;
 
         if (!kafkaAvroDeserializerMap.containsKey(consumerProps)) {
@@ -37,10 +38,10 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
         } else {
             kafkaAvroDeserializer = kafkaAvroDeserializerMap.get(consumerProps);
         }
-        boolean isKey = Boolean.getBoolean(others.getOrDefault("isKey", "false"));
-        kafkaAvroDeserializer.configure(consumerProps, false);
+        boolean isKey = Boolean.getBoolean(others.getOrDefault(SerdeUtil.IS_KEY_PROP, "false"));
+        kafkaAvroDeserializer.configure(consumerProps, isKey);
         Headers headers = new RecordHeaders(headerMap.entrySet().stream().map(entry -> (Header) new RecordHeader(entry.getKey(), entry.getValue())).toList());
         Object deserializedObject = kafkaAvroDeserializer.deserialize(topic, headers, payload);
-        return deserializedObject.toString().getBytes(StandardCharsets.UTF_8);
+        return AvroUtil.convertObjectToJsonString(deserializedObject);
     }
 }

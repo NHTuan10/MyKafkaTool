@@ -13,7 +13,7 @@ public class ByteArraySerializer implements PluggableSerializer {
     }
 
     @Override
-    public Object convertStringToTargetType(String str, Map<String, Object> optionalParams) throws IOException {
+    public Object convertStringToObject(String str, Map<String, Object> optionalParams) throws IOException {
         return str.getBytes(StandardCharsets.UTF_8);
     }
 }

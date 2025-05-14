@@ -131,7 +131,7 @@ public class AddOrViewMessageModalController extends ModalController {
 
     private boolean validateSchema(String valueContentType, String schema) {
         boolean valid = true;
-        valid = SerdeUtil.isValidSchema(serdeUtil, valueContentType, schema, valid);
+        valid = SerdeUtil.isValidSchemaForSerialization(serdeUtil, valueContentType, schema, valid);
         if (!valid) {
             ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
                     ButtonType.OK);

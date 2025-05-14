@@ -24,8 +24,10 @@ public class KafkaMessageTableItem {
     private final Headers headers;
     @Getter
     private final String schema;
+    @Getter
+    private final boolean isErrorItem;
 
-    public KafkaMessageTableItem(int partition, long offset, String key, String value, String timestamp, String valueContentType, Headers headers, String schema) {
+    public KafkaMessageTableItem(int partition, long offset, String key, String value, String timestamp, String valueContentType, Headers headers, String schema, boolean isErrorItem) {
         this.partition = new SimpleIntegerProperty(partition);
         this.offset = new SimpleLongProperty(offset);
         this.key = new SimpleStringProperty(key);
@@ -34,6 +36,7 @@ public class KafkaMessageTableItem {
         this.valueContentType = valueContentType;
         this.headers = headers;
         this.schema = schema;
+        this.isErrorItem = isErrorItem;
     }
 
     public int getPartition() {
