@@ -387,7 +387,7 @@ public class MainController {
         ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
         messageTable.setItems(list);
         treeMsgTableItemCache.put(selectedTreeItem, list);
-//        msgTableProgressInd.setVisible(true);
+        msgTableProgressInd.setVisible(true);
         pullMessagesBtn.setText(AppConstant.STOP_POLLING_TEXT);
         Task<Void> pollMsgTask = new Task<>() {
             @Override
@@ -427,13 +427,13 @@ public class MainController {
             }
         };
         pollMsgTask.setOnSucceeded(event -> {
-//            msgTableProgressInd.setVisible(false);
+            msgTableProgressInd.setVisible(false);
             isPolling.set(false);
             pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
             noMessages.setText(list.size() + " Messages");
         });
         pollMsgTask.setOnFailed(event -> {
-//            msgTableProgressInd.setVisible(false);
+            msgTableProgressInd.setVisible(false);
             isPolling.set(false);
             pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
             Throwable e = event.getSource().getException();
