@@ -24,17 +24,23 @@ import java.util.stream.IntStream;
 @Slf4j
 public class TableViewConfigurer {
 
-    public static <T> TableView<T> configureTableView(Class<T> clazz, String fxId, Stage stage) {
-        TableView<T> tableView = (TableView<T>) stage.getScene().lookup("#" + fxId);
+    public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage) {
+        TableView<S> tableView = (TableView<S>) stage.getScene().lookup("#" + fxId);
         return configureTableView(clazz, tableView);
     }
 
 
-    public static <T> TableView<T> configureTableView(Class<T> clazz, TableView<T> tableView) {
+    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView) {
         List<String> fieldNames = ViewUtil.getPropertyFieldNamesFromTableItem(clazz);
-        IntStream.range(0, fieldNames.size()).forEach(i -> tableView.getColumns().get(i).setCellValueFactory(new PropertyValueFactory<>(fieldNames.get(i))));
+        IntStream.range(0, fieldNames.size()).forEach(i -> {
+            TableColumn<S, ?> tableColumn = tableView.getColumns().get(i);
+            tableColumn.setCellValueFactory(new PropertyValueFactory<>(fieldNames.get(i)));
+            tableColumn.setCellFactory((callback) -> new ViewUtil.DragSelectionCell<>());
+        });
+        // Enable copy by Ctrl + C or by right click -> Copy
+        ViewUtil.enableCopyDataFromTableToClipboard(tableView);
+
         return tableView;
-//        return kafkaPartitionsTableView;
     }
 
     public static void configureEditableKeyValueTable(TableView<UIPropertyTableItem> headerTable) {

@@ -185,7 +185,7 @@ public class MainController {
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
         configureTableView();
-        ViewUtil.enableCopyDataFromTableToClipboard(messageTable);
+
 
     }
 

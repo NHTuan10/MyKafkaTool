@@ -132,10 +132,38 @@ public final class ViewUtil {
     }
 
     public static List<String> getPropertyFieldNamesFromTableItem(Class<?> tableIemClass) {
-        List<String> fieldNames = Arrays.stream(tableIemClass.getDeclaredFields())
-                .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(com.example.mytool.annotation.TableColumn.class))
+        List<String> fieldNames = getPropertyFieldFromTableItem(tableIemClass).stream()
                 .map(Field::getName)
                 .toList();
         return fieldNames;
+    }
+
+    public static List<Field> getPropertyFieldFromTableItem(Class<?> tableIemClass) {
+        return Arrays.stream(tableIemClass.getDeclaredFields())
+                .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(com.example.mytool.annotation.TableColumn.class))
+                .toList();
+    }
+
+    public static class DragSelectionCell<S, T> extends TableCell<S, T> {
+
+        public DragSelectionCell() {
+            setOnDragDetected(event -> {
+                startFullDrag();
+                getTableColumn().getTableView().getSelectionModel().select(getIndex(), getTableColumn());
+            });
+
+            setOnMouseDragEntered(event -> getTableColumn().getTableView().getSelectionModel().select(getIndex(), getTableColumn()));
+        }
+
+        @Override
+        public void updateItem(T item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty) {
+                setText(null);
+            } else {
+                setText(item.toString());
+            }
+        }
     }
 }
