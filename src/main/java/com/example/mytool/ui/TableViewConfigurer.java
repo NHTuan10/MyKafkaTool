@@ -77,9 +77,9 @@ public class TableViewConfigurer {
                     super.updateItem(item, empty);
                     if (!empty && item != null) {
                         if (item.isErrorItem()) {
-                            setStyle("-fx-background-color: lightcoral; -fx-border-color: transparent transparent #D3D3D3 transparent;");
+                            setStyle("-fx-background-color: lightcoral; -fx-border-color: transparent transparent lightgray transparent;");
                         } else {
-                            setStyle("-fx-background-color: transparent; -fx-border-color: transparent transparent #D3D3D3 transparent;");
+                            setStyle("-fx-background-color: transparent; -fx-border-color: transparent transparent lightgray transparent;");
                         }
                     } else {
                         setStyle("");
