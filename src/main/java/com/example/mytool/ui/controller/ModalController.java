@@ -2,26 +2,24 @@ package com.example.mytool.ui.controller;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import lombok.Setter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Setter
 public abstract class ModalController {
 
     protected AtomicReference<Object> modelRef;
-
-    public void setModelRef(AtomicReference<Object> modelRef) {
-        this.modelRef = modelRef;
-    }
 
 
     public void setTextFieldOrAreaText(ModalController modalController, Map<String, Object> text) {
         text.forEach((fieldName, value) -> {
             try {
                 Field field = this.getClass().getDeclaredField(fieldName);
-                Class fieldClass = field.getType();
+                Class<?> fieldClass = field.getType();
                 field.setAccessible(true);
                 Object fieldObject = field.get(modalController);
                 if (fieldClass.equals(TextField.class) || fieldClass.equals(TextArea.class)) {

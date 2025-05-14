@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
-    private Map<Object, KafkaAvroDeserializer> kafkaAvroDeserializerMap;
+    private final Map<Object, KafkaAvroDeserializer> kafkaAvroDeserializerMap;
 
     public SchemaRegistryAvroDeserializer() {
         this.kafkaAvroDeserializerMap = new ConcurrentHashMap<>();

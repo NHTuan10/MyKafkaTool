@@ -2,9 +2,11 @@ package com.example.mytool.ui.cg;
 
 import javafx.scene.control.TreeItem;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class ConsumerGroupTreeItem extends TreeItem<String> {
 

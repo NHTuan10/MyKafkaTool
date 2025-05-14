@@ -13,6 +13,7 @@ import javafx.event.Event;
 import javafx.event.EventTarget;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -80,21 +81,18 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
     }
 
 
+    @Getter
     public static class SelectedSchemaEvent extends Event {
         // Define event type
         public static final EventType<SelectedSchemaEvent> SELECTED_SCHEMA_EVENT_TYPE =
                 new EventType<>(Event.ANY, "SELECTED_SCHEMA_EVENT_TYPE");
 
+        // Getter for custom data
         private final SimpleStringProperty data;
 
         public SelectedSchemaEvent(SimpleStringProperty data) {
             super(SELECTED_SCHEMA_EVENT_TYPE);
             this.data = data;
-        }
-
-        // Getter for custom data
-        public SimpleStringProperty getData() {
-            return data;
         }
 
         // Override copy method (required for event system)

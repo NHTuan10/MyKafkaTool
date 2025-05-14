@@ -10,11 +10,13 @@ import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+@Slf4j
 public class KafkaTopicListTreeItem<T> extends TreeItem<T> {
     public KafkaTopicListTreeItem(T value) {
         super(value);
@@ -57,7 +59,7 @@ public class KafkaTopicListTreeItem<T> extends TreeItem<T> {
                 });
                 return children;
             } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                e.printStackTrace();
+                log.error("Error loading topics", e);
             }
         }
         return FXCollections.emptyObservableList();

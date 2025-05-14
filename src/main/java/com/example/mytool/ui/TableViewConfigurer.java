@@ -32,9 +32,7 @@ public class TableViewConfigurer {
 
     public static <T> TableView<T> configureTableView(Class<T> clazz, TableView<T> tableView) {
         List<String> fieldNames = ViewUtil.getPropertyFieldNamesFromTableItem(clazz);
-        IntStream.range(0, fieldNames.size()).forEach(i -> {
-            tableView.getColumns().get(i).setCellValueFactory(new PropertyValueFactory<>(fieldNames.get(i)));
-        });
+        IntStream.range(0, fieldNames.size()).forEach(i -> tableView.getColumns().get(i).setCellValueFactory(new PropertyValueFactory<>(fieldNames.get(i))));
         return tableView;
 //        return kafkaPartitionsTableView;
     }
@@ -44,7 +42,7 @@ public class TableViewConfigurer {
                 TableCell<UIPropertyTableItem, String>> cellFactory
                 = (TableColumn<UIPropertyTableItem, String> p) -> new EditingTableCell<>();
 
-        TableColumn<UIPropertyTableItem, String> nameColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().get(0);
+        TableColumn<UIPropertyTableItem, String> nameColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().getFirst();
 //            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 //            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 //            nameColumn.setCellFactory((tableColumn)-> new EditingTableCell()); // Use TextField for editing
@@ -62,41 +60,13 @@ public class TableViewConfigurer {
 
         TableColumn<UIPropertyTableItem, String> valueColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().get(1);
 
-//            valueColumn.setCellValueFactory(cellData -> cellData.getValue().valueProperty());
-//            valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
-//            valueColumn.setCellFactory(TextFieldTableCell.forTableColumn()); // Use TextField for editing
-//            valueColumn.setCellFactory((tableColumn)-> new EditingTableCell());
         valueColumn.setCellFactory(cellFactory);
         valueColumn.setOnEditCommit(event -> {
             // Update the model when editing is committed
-//                UIPropertyItem row = event.getRowValue();
-//                row.setValue(event.getNewValue());
             event.getTableView().getItems().get(
                     event.getTablePosition().getRow()).setValue(event.getNewValue());
         });
     }
-
-//    private static void configureErrorMessageRow(TableColumn<KafkaMessageTableItem, Object> tableColumn) {
-//        tableColumn.setCellFactory(column -> new TableCell<>() {
-//            @Override
-//            protected void updateItem(Object item, boolean empty) {
-//                super.updateItem(item, empty);
-//
-//                setText(empty ? "" : getItem().toString());
-//                setGraphic(null);
-//
-//                TableRow<KafkaMessageTableItem> currentRow = getTableRow();
-//
-//                if (!isEmpty()) {
-//
-//                    if (currentRow.getItem().isErrorItem())
-//                        currentRow.setStyle("-fx-background-color:lightcoral");
-//                    else
-//                        currentRow.setStyle("-fx-background-color:white");
-//                }
-//            }
-//        });
-//    }
 
     public static void configureMessageTable(TableView<KafkaMessageTableItem> messageTable, SerdeUtil serdeUtil) {
         TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable);
@@ -119,7 +89,7 @@ public class TableViewConfigurer {
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     KafkaMessageTableItem rowData = row.getItem();
-                    log.debug("Double click on: " + rowData.getKey());
+                    log.debug("Double click on: {}", rowData.getKey());
                     Map<String, Object> msgModalFieldMap = Map.of(
                             "serdeUtil", serdeUtil,
                             "keyTextArea", rowData.getKey(),
@@ -142,16 +112,6 @@ public class TableViewConfigurer {
 //        configureErrorMessageRow((TableColumn<KafkaMessageTableItem, Object>) messageTable.getColumns().get(3));
     }
 
-//    public static void configureTopicConfigTableView(Stage stage) {
-//        TableView<KafkaMessageTableItem> topicConfigTable = (TableView<KafkaMessageTableItem>) stage.getScene().lookup("#topicConfigTable");
-//        TableColumn<KafkaMessageTableItem, Long> partition = (TableColumn<KafkaMessageTableItem, Long>) topicConfigTable.getColumns().get(0);
-//        partition.setCellValueFactory(new PropertyValueFactory<>("name"));
-//
-//        TableColumn<KafkaMessageTableItem, Long> offset = (TableColumn<KafkaMessageTableItem, Long>) topicConfigTable.getColumns().get(1);
-//        offset.setCellValueFactory(new PropertyValueFactory<>("value"));
-//
-//    }
-
 //    public static void initTableView(Stage stage) {
 //        TableView<KafkaMessageTableItem> kafkaMsgTable = TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, "messageTable", stage);
 //        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, "consumerGroupOffsetTable", stage);
@@ -159,15 +119,15 @@ public class TableViewConfigurer {
 //        TableViewConfigurer.configureTableView(UIPropertyItem.class, "topicConfigTable", stage);
 //        // Use a change listener to respond to a selection within
 //        // a tree view
-////        clusterTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem<String>>) (changed, oldVal, newVal) -> {
-////
-////
-////        });
+//        clusterTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem<String>>) (changed, oldVal, newVal) -> {
 //
 //
-////        TreeView<String> tree = new TreeView<String> (rootItem);
-//
-////        clusterTree.setEditable(true);
-////        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
+//        });
+
+
+//        TreeView<String> tree = new TreeView<String> (rootItem);
+
+//        clusterTree.setEditable(true);
+//        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
 //    }
 }

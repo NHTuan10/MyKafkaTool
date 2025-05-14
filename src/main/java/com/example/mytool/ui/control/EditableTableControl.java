@@ -38,10 +38,6 @@ public class EditableTableControl<T> extends AnchorPane {
 
     protected Class<T> itemClass;
 
-//    private final TypeToken<T> typeToken = new TypeToken<T>(getClass()) { };
-
-//    private final Type type = typeToken.getType();
-
     public EditableTableControl() {
         itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         FXMLLoader fxmlLoader = new FXMLLoader(MyApplication.class.getResource(
@@ -65,7 +61,7 @@ public class EditableTableControl<T> extends AnchorPane {
                     StringUtils.splitByCharacterTypeCamelCase(fieldName),
                     ' '
             ));
-            TableColumn tableColumn = new TableColumn(columnName);
+            TableColumn<T, ?> tableColumn = new TableColumn<>(columnName);
             table.getColumns().add(tableColumn);
         });
 
@@ -85,9 +81,7 @@ public class EditableTableControl<T> extends AnchorPane {
     @FXML
     protected void removeItem() {
         List<Integer> indicesToRemove = table.getSelectionModel().getSelectedIndices().reversed();
-        indicesToRemove.forEach((i) -> {
-            tableItems.remove((int) i);
-        });
+        indicesToRemove.forEach((i) -> tableItems.remove((int) i));
     }
 
     @FXML

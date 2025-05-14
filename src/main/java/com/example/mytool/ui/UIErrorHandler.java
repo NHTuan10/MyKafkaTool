@@ -22,7 +22,7 @@ public class UIErrorHandler {
             log.error("An error occurred in FX application thread", e);
             showErrorDialog(e);
         } else {
-            log.error("An unexpected error occurred in " + t, e);
+            log.error("An unexpected error occurred in {}", t, e);
 
         }
     }

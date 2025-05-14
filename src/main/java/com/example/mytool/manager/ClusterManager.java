@@ -3,12 +3,12 @@ package com.example.mytool.manager;
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.consumer.creator.ConsumerCreator;
 import com.example.mytool.exception.ClusterNameExistedException;
-import com.example.mytool.model.ConsumerType;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.producer.creator.ProducerCreator;
 import com.example.mytool.ui.cg.ConsumerGroupOffsetTableItem;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -25,23 +25,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class ClusterManager {
 
-    private Map<String, Admin> adminMap;
-    private Map<Pair<String, ConsumerType>, Consumer<String, String>> consumerMap;
-    private Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap;
+    private final Map<String, Admin> adminMap;
+    //    private Map<Pair<String, ConsumerType>, Consumer<String, String>> consumerMap;
+    private final Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap;
 
     private static class InstanceHolder {
-        private static final ClusterManager INSTANCE = new ClusterManager(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+        private static final ClusterManager INSTANCE = new ClusterManager(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
     }
 
     public static ClusterManager getInstance() {
         return InstanceHolder.INSTANCE;
     }
 
-    private ClusterManager(Map<String, Admin> adminMap, Map<Pair<String, ConsumerType>, Consumer<String, String>> consumerMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
+    private ClusterManager(Map<String, Admin> adminMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
         this.adminMap = adminMap;
-        this.consumerMap = consumerMap;
+//        this.consumerMap = consumerMap;
         this.producerMap = producerMap;
     }
 
@@ -112,10 +113,6 @@ public class ClusterManager {
 //        return consumerMap.get(Tuples.of(clusterName, consumerType));
 //    }
 
-    public Consumer getConsumer(ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig) {
-        return ConsumerCreator.createConsumer(consumerCreatorConfig);
-    }
-
     public Consumer getConsumer(Map<String, Object> consumerProperties) {
         return ConsumerCreator.createConsumer(consumerProperties);
     }
@@ -133,10 +130,6 @@ public class ClusterManager {
 
     public DeleteTopicsResult deleteTopic(String clusterName, String topicName) {
         return adminMap.get(clusterName).deleteTopics(Set.of(topicName));
-    }
-
-    public CreateTopicsResult addTopic(String clusterName, String topicName, int partitionCount, short replicationFactor) {
-        return addTopic(clusterName, new NewTopic(topicName, partitionCount, replicationFactor));
     }
 
     public CreateTopicsResult addTopic(String clusterName, NewTopic newTopic) {
@@ -187,15 +180,15 @@ public class ClusterManager {
                 String leaderEpoch = metadata.leaderEpoch().orElse(0).toString();
                 return new ConsumerGroupOffsetTableItem(tp.topic(), tp.partition(), startAndEndOffset.getLeft(), startAndEndOffset.getRight(), metadata.offset(), startAndEndOffset.getRight() - metadata.offset(), leaderEpoch);
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                log.error("Error when list consumer group offsets", e);
             }
             return null;
         }).toList();
     }
 
     public void purgePartition(KafkaPartition kafkaPartition) throws ExecutionException, InterruptedException {
-        String clusterName = kafkaPartition.getTopic().getCluster().getName();
-        TopicPartition topicPartition = new TopicPartition(kafkaPartition.getTopic().getName(), kafkaPartition.getId());
+        String clusterName = kafkaPartition.topic().cluster().getName();
+        TopicPartition topicPartition = new TopicPartition(kafkaPartition.topic().name(), kafkaPartition.id());
         long endOffset = getPartitionOffsetInfo(clusterName, topicPartition, null).getRight();
         Map<TopicPartition, RecordsToDelete> map = Map.of(
                 topicPartition,
@@ -205,8 +198,8 @@ public class ClusterManager {
     }
 
     public void purgeTopic(KafkaTopic kafkaTopic) throws ExecutionException, InterruptedException, TimeoutException {
-        String clusterName = kafkaTopic.getCluster().getName();
-        Map<TopicPartition, RecordsToDelete> map = getAllPartitionOffsetInfo(clusterName, kafkaTopic.getName(), null).entrySet().stream()
+        String clusterName = kafkaTopic.cluster().getName();
+        Map<TopicPartition, RecordsToDelete> map = getAllPartitionOffsetInfo(clusterName, kafkaTopic.name(), null).entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, (entry) -> RecordsToDelete.beforeOffset(entry.getValue().getRight())));
         adminMap.get(clusterName).deleteRecords(map).all().get();
     }

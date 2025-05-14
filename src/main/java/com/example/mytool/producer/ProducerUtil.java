@@ -31,7 +31,7 @@ public class ProducerUtil {
     public void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, KafkaMessage kafkaMessage)
             throws ExecutionException, InterruptedException, IOException {
 
-        KafkaCluster cluster = kafkaTopic.getCluster();
+        KafkaCluster cluster = kafkaTopic.cluster();
 
         ProducerCreator.ProducerCreatorConfig producerConfig = createProducerConfig(cluster, kafkaMessage);
         KafkaProducer producer = ClusterManager.getInstance().getProducer(producerConfig);
@@ -57,12 +57,10 @@ public class ProducerUtil {
 
         String key = StringUtils.isBlank(kafkaMessage.key()) ? null : kafkaMessage.key();
         Object value = serdeUtil.convertStringToObjectBeforeSerialize(kafkaMessage.valueContentType(), kafkaMessage.value(), kafkaMessage.schema());
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        Object value = objectMapper.readValue(kafkaMessage.value(), Object.class);
         List<Header> headers = kafkaMessage.headers().entrySet().stream().map(entry -> new RecordHeader(entry.getKey(), entry.getValue().getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
 
 //        if (partition != null) {
-        return new ProducerRecord<>(kafkaTopic.getName(), partition != null ? partition.getId() : null, key, value, headers);
+        return new ProducerRecord<>(kafkaTopic.name(), partition != null ? partition.id() : null, key, value, headers);
 //        } else {
 //            return new ProducerRecord<>(kafkaTopic.getName(), key, value);
 //        }

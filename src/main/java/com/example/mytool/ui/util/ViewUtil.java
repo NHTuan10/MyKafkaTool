@@ -38,14 +38,12 @@ public class ViewUtil {
         return result.orElse(cancel) == yes;
     }
 
-    public static void enableCopyDataFromTableToClipboard(TableView tableView) {
+    public static void enableCopyDataFromTableToClipboard(TableView<?> tableView) {
         tableView.getSelectionModel().setCellSelectionEnabled(true);
         tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         MenuItem item = new MenuItem("Copy");
-        item.setOnAction(event -> {
-            copyTableSelectionToClipboard(tableView);
-        });
+        item.setOnAction(event -> copyTableSelectionToClipboard(tableView));
         ContextMenu menu = new ContextMenu();
         menu.getItems().add(item);
         tableView.setContextMenu(menu);
@@ -58,14 +56,14 @@ public class ViewUtil {
         });
     }
 
-    public static void copyTableSelectionToClipboard(TableView tableView) {
+    public static void copyTableSelectionToClipboard(TableView<?> tableView) {
         ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
         int old_r = -1;
         StringBuilder clipboardString = new StringBuilder();
-        for (TablePosition p : posList) {
+        for (TablePosition<?, ?> p : posList) {
             int r = p.getRow();
             int c = p.getColumn();
-            Object cell = ((TableColumn) tableView.getColumns().get(c)).getCellData(r);
+            Object cell = tableView.getColumns().get(c).getCellData(r);
             if (cell == null)
                 cell = "";
             if (old_r == r)

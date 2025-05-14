@@ -63,11 +63,11 @@ import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 public class MainController {
     private final ClusterManager clusterManager = ClusterManager.getInstance();
 
-    private KafkaConsumerService kafkaConsumerService;
+    private final KafkaConsumerService kafkaConsumerService;
 
-    private ProducerUtil producerUtil;
+    private final ProducerUtil producerUtil;
 
-    private SerdeUtil serdeUtil;
+    private final SerdeUtil serdeUtil;
 
     @FXML
     private TreeView clusterTree;
@@ -129,7 +129,7 @@ public class MainController {
     @FXML
     private Button pullMessagesBtn;
     @FXML
-    private TableView kafkaPartitionsTable;
+    private TableView<KafkaPartitionsTableItem> kafkaPartitionsTable;
 
     @FXML
     private TitledPane partitionsTitledPane;
@@ -148,9 +148,9 @@ public class MainController {
 
     private KafkaClusterTree kafkaClusterTree;
 
-    private Map<TreeItem, ObservableList<KafkaMessageTableItem>> treeMsgTableItemCache = new ConcurrentHashMap<>();
+    private final Map<TreeItem, ObservableList<KafkaMessageTableItem>> treeMsgTableItemCache = new ConcurrentHashMap<>();
 
-    private AtomicBoolean isPolling = new AtomicBoolean(false);
+    private final AtomicBoolean isPolling = new AtomicBoolean(false);
 
     public MainController() {
         StringSerializer stringSerializer = new StringSerializer();
@@ -195,9 +195,7 @@ public class MainController {
         TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable);
         TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable);
         TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable);
-        schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE, (event) -> {
-            schemaRegistryTextArea.textProperty().bindBidirectional(event.getData());
-        });
+        schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE, (event) -> schemaRegistryTextArea.textProperty().bindBidirectional(event.getData()));
         // Use a change listener to respond to a selection within
         // a tree view
 //        clusterTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem<String>>) (changed, oldVal, newVal) -> {
@@ -220,7 +218,7 @@ public class MainController {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
-                setDisable(empty || date.compareTo(LocalDate.now()) > 0);
+                setDisable(empty || date.isAfter(LocalDate.now()));
             }
         });
         keyContentType.setItems(FXCollections.observableArrayList(serdeUtil.getSupportedKeyDeserializer()));
@@ -232,11 +230,6 @@ public class MainController {
         msgPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
         msgPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
         valueContentType.setOnAction(event -> {
-//            if (valueContentType.getValue().equals(SerdeUtil.SERDE_AVRO)) {
-//                schemaTextArea.setDisable(false);
-//            } else {
-//                schemaTextArea.setDisable(true);
-//            }
             PluggableDeserializer deserializer = serdeUtil.getPluggableDeserialize(valueContentType.getValue());
             schemaTextArea.setDisable(!deserializer.isUserSchemaInputRequired());
 
@@ -247,7 +240,7 @@ public class MainController {
         clusterTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             // Display the selection and its complete path from the root.
             if (newValue != null && newValue != oldValue) {
-                // disable/hide UI tab & titled
+                // disable/hide UI tab and titled
                 cgOffsetsTab.setDisable(true);
 //                dataTab.setDisable(true);
                 propertiesTab.setDisable(true);
@@ -272,9 +265,9 @@ public class MainController {
             if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 ObservableList<UIPropertyTableItem> config = FXCollections.observableArrayList();
-                String clusterName = topic.getCluster().getName();
-                String topicName = topic.getName();
-                // Enable  datatabs and show/hide titled panes in tab
+                String clusterName = topic.cluster().getName();
+                String topicName = topic.name();
+                // Enable the data tab and show/hide titled panes in the tab
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
                 partitionsTitledPane.setVisible(true);
@@ -306,21 +299,21 @@ public class MainController {
                 schemaSplitPane.setVisible(false);
                 messageSplitPane.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                TreeItem topicTreeItem = selectedItem.getParent();
+                TreeItem<?> topicTreeItem = selectedItem.getParent();
                 if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
-                    ObservableList observableList = treeMsgTableItemCache.get(topicTreeItem).filtered(item -> item.getPartition() == partition.getId());
+                    ObservableList<KafkaMessageTableItem> observableList = treeMsgTableItemCache.get(topicTreeItem).filtered(item -> item.getPartition() == partition.id());
                     messageTable.setItems(observableList);
                 }
                 try {
-                    String clusterName = partition.getTopic().getCluster().getName();
-                    String topic = partition.getTopic().getName();
-                    Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.getId()), null);
+                    String clusterName = partition.topic().cluster().getName();
+                    String topic = partition.topic().name();
+                    Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.id()), null);
                     ObservableList<UIPropertyTableItem> list = FXCollections.observableArrayList(
                             new UIPropertyTableItem(UIPropertyTableItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
                             , new UIPropertyTableItem(UIPropertyTableItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
                             , new UIPropertyTableItem(UIPropertyTableItem.NO_MESSAGES, String.valueOf(partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft())));
 
-                    TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, partition.getId());
+                    TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, partition.id());
                     list.addAll(getPartitionInfoForUI(partitionInfo));
 
                     topicConfigTable.setItems(list);
@@ -396,9 +389,9 @@ public class MainController {
         treeMsgTableItemCache.put(selectedTreeItem, list);
 //        msgTableProgressInd.setVisible(true);
         pullMessagesBtn.setText(AppConstant.STOP_POLLING_TEXT);
-        Task<Void> pollMsgTask = new Task<Void>() {
+        Task<Void> pollMsgTask = new Task<>() {
             @Override
-            protected Void call() throws Exception {
+            protected Void call() {
                 isPolling.set(true);
                 KafkaConsumerService.PollingOptions pollingOptions =
                         KafkaConsumerService.PollingOptions.builder()
@@ -418,7 +411,8 @@ public class MainController {
                     KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
 //                    list.addAll(kafkaConsumerService.consumeMessages(partition, pollingOptions));
                     kafkaConsumerService.consumeMessages(partition, pollingOptions);
-                } else if (selectedTreeItem instanceof KafkaTopicTreeItem<?> selectedItem) {
+                } else {
+                    KafkaTopicTreeItem<?> selectedItem = (KafkaTopicTreeItem<?>) selectedTreeItem;
                     KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                     try {
 //                        list.addAll(kafkaConsumerService.consumeMessages(topic, pollingOptions));
@@ -451,8 +445,7 @@ public class MainController {
     }
 
     private Long getPollStartTimestamp() {
-        Long timestampMs = timestampPicker.getValue() != null ? ZonedDateTime.of(timestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
-        return timestampMs;
+        return timestampPicker.getValue() != null ? ZonedDateTime.of(timestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
     }
 
     @FXML
@@ -464,7 +457,7 @@ public class MainController {
     protected void addMessage() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
             KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-            KafkaTopic topic = partition.getTopic();
+            KafkaTopic topic = partition.topic();
             addMessage(topic, partition, keyContentType.getValue(), valueContentType.getValue(), schemaTextArea.getText());
         } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
             KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
@@ -476,7 +469,7 @@ public class MainController {
     }
 
 
-    public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException {
         // TODO: don't send message with key to Kafka if it's empty
 
         AtomicReference<Object> ref = new AtomicReference<>();
@@ -485,10 +478,6 @@ public class MainController {
                         "schemaTextArea", schemaTextArea.getText()));
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {
-//            String inputKey = newMsg.key();
-//            String inputValue = newMsg.value();
-//            schema = newMsg.schema();
-//            valueContentType = newMsg.valueContentType();
             producerUtil.sendMessage(kafkaTopic, partition, newMsg);
             retrieveMessages();
             ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
@@ -496,25 +485,16 @@ public class MainController {
         }
     }
 
-
-    //    public void setNewMsg(Tuple2<String, String> newMsg) {
-//        this.newMsg = newMsg;
-//    }
-
-//    public void setNewConnection(Pair<String, String> newConnection) {
-//        this.newConnection = newConnection;
-//    }
-
     @FXML
-    protected void countMessages() throws IOException {
+    protected void countMessages() {
         try {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.getTopic().getCluster().getName(), new TopicPartition(partition.getTopic().getName(), partition.getId()), getPollStartTimestamp());
+                Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.topic().cluster().getName(), new TopicPartition(partition.topic().name(), partition.id()), getPollStartTimestamp());
                 noMessages.setText((partitionInfo.getLeft() >= 0 ? partitionInfo.getRight() - partitionInfo.getLeft() : 0) + " Messages");
             } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                long count = clusterManager.getAllPartitionOffsetInfo(topic.getCluster().getName(), topic.getName(), getPollStartTimestamp()).values()
+                long count = clusterManager.getAllPartitionOffsetInfo(topic.cluster().getName(), topic.name(), getPollStartTimestamp()).values()
                         .stream().mapToLong(t -> t.getLeft() >= 0 ? t.getRight() - t.getLeft() : 0).sum();
                 noMessages.setText(count + " Messages");
             }
@@ -529,7 +509,7 @@ public class MainController {
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> topicTreeItem) {
             KafkaTopic topic = (KafkaTopic) topicTreeItem.getValue();
 
-            refreshPartitionsTbl(topic.getCluster().getName(), topic.getName());
+            refreshPartitionsTbl(topic.cluster().getName(), topic.name());
         }
     }
 

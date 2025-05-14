@@ -63,7 +63,7 @@ public class KafkaClusterTree {
 //        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
     }
 
-    public static void addClusterConnIntoClusterTreeView(TreeView clusterTree, KafkaCluster cluster) throws IOException, ClusterNameExistedException {
+    public static void addClusterConnIntoClusterTreeView(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
         String clusterName = cluster.getName();
         if (isClusterNameExistedInTree(clusterTree, clusterName)) {
             throw new ClusterNameExistedException(clusterName, "Cluster already exists");
@@ -95,7 +95,7 @@ public class KafkaClusterTree {
     public void addTopic() throws IOException, InterruptedException, ExecutionException {
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
             String clusterName = ((KafkaTopicListTreeItem.KafkaTopicListTreeItemValue) topicListTreeItem.getValue()).getCluster().getName();
-            AtomicReference modelRef = new AtomicReference<>();
+            AtomicReference<Object> modelRef = new AtomicReference<>();
             ViewUtil.showPopUpModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of());
             NewTopic newTopic = (NewTopic) modelRef.get();
             if (newTopic != null) {
@@ -165,7 +165,7 @@ public class KafkaClusterTree {
         purgePartitionItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedPartitionTreeItem) {
                 KafkaPartition partition = (KafkaPartition) selectedPartitionTreeItem.getValue();
-                if (ViewUtil.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.getId() + " ?", "Yes", "Cancel")) {
+                if (ViewUtil.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.id() + " ?", "Yes", "Cancel")) {
                     try {
                         clusterManager.purgePartition(partition);
                     } catch (ExecutionException | InterruptedException e) {
@@ -183,7 +183,7 @@ public class KafkaClusterTree {
         purgeTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
-                if (ViewUtil.confirmAlert("Purge Topic", "Are you sure to delete all data in the topic " + topic.getName() + " ?", "Yes", "Cancel")) {
+                if (ViewUtil.confirmAlert("Purge Topic", "Are you sure to delete all data in the topic " + topic.name() + " ?", "Yes", "Cancel")) {
                     try {
                         clusterManager.purgeTopic(topic);
                     } catch (ExecutionException | InterruptedException | TimeoutException e) {
@@ -215,8 +215,9 @@ public class KafkaClusterTree {
         deleteTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
-                if (ViewUtil.confirmAlert("Delete Topic", "Are you sure to delete " + topic.getName() + " ?", "Yes", "Cancel")) {
-                    clusterManager.deleteTopic(topic.getCluster().getName(), topic.getName());
+                if (ViewUtil.confirmAlert("Delete Topic", "Are you sure to delete " + topic.name() + " ?", "Yes", "Cancel")) {
+                    //TODO: handle DeleteTopicsResult
+                    clusterManager.deleteTopic(topic.cluster().getName(), topic.name());
                 }
             }
         });
@@ -229,7 +230,7 @@ public class KafkaClusterTree {
             try {
                 KafkaCluster newConnection;
                 while (true) {
-                    AtomicReference modelRef = new AtomicReference<>();
+                    AtomicReference<Object> modelRef = new AtomicReference<>();
                     ViewUtil.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of());
                     newConnection = (KafkaCluster) modelRef.get();
 
@@ -269,7 +270,7 @@ public class KafkaClusterTree {
             TreeItem<String> selectedItem = (TreeItem<String>) clusterTree.getSelectionModel().getSelectedItem();
             if (selectedItem != null && selectedItem.getParent() != null) {
                 // Remove the selected item from its parent's children
-                String clusterName = selectedItem.getValue().toString();
+                String clusterName = selectedItem.getValue();
                 clusterManager.closeClusterConnection(clusterName);
                 selectedItem.getParent().getChildren().remove(selectedItem);
                 try {

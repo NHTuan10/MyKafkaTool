@@ -1,8 +1,11 @@
 package com.example.mytool.exception;
 
+import lombok.Getter;
+
 public class DeserializationException extends Exception {
 
-    private Object data;
+    @Getter
+    private final Object data;
 
     public DeserializationException(String message, Object data) {
         super(message);

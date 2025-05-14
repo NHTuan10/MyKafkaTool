@@ -20,8 +20,8 @@ public class DateTimePicker extends DatePicker {
     public static final String DefaultFormat = "yyyy-MM-dd HH:mm";
 
     private DateTimeFormatter formatter;
-    private ObjectProperty<LocalDateTime> dateTimeValue = new SimpleObjectProperty<>(LocalDateTime.now());
-    private ObjectProperty<String> format = new SimpleObjectProperty<String>() {
+    private final ObjectProperty<LocalDateTime> dateTimeValue = new SimpleObjectProperty<>(LocalDateTime.now());
+    private final ObjectProperty<String> format = new SimpleObjectProperty<>() {
         public void set(String newValue) {
             super.set(newValue);
             formatter = DateTimeFormatter.ofPattern(newValue);

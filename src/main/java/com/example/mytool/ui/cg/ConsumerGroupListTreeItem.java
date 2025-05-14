@@ -8,11 +8,13 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.ConsumerGroupListing;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
     public ConsumerGroupListTreeItem(T value) {
         super(value);
@@ -52,9 +54,7 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
                 consumerGroupListings.forEach(consumerGroupListing -> {
                     String consumerGroupId = consumerGroupListing.groupId();
                     StringBuilder displayValSB = new StringBuilder(consumerGroupId);
-                    consumerGroupListing.state().ifPresent(state -> {
-                        displayValSB.append(" [" + state + "]");
-                    });
+                    consumerGroupListing.state().ifPresent(state -> displayValSB.append(" [").append(state).append("]"));
 
                     TreeItem<T> consumerGroupItem = (TreeItem<T>) new ConsumerGroupTreeItem(displayValSB.toString(), clusterName, consumerGroupId);
                     children.add(consumerGroupItem);
@@ -63,7 +63,7 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
 
                 return children;
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                log.error("Error loading consumer groups", e);
             }
         }
         return FXCollections.emptyObservableList();

@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class UserPreferenceDao {
-    private String filePath;
+    private final String filePath;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public UserPreferenceDao(String filePath) {
@@ -18,8 +18,7 @@ public class UserPreferenceDao {
     public UserPreference loadUserPreference() throws IOException {
 //        String data = Files.asCharSource(new File(filePath), StandardCharsets.UTF_8).read();
         String data = Files.readString(Paths.get(filePath));
-        UserPreference userPreference = objectMapper.readValue(data, UserPreference.class);
-        return userPreference;
+        return objectMapper.readValue(data, UserPreference.class);
     }
 
     public synchronized void saveUserPreference(UserPreference userPreference) throws IOException {

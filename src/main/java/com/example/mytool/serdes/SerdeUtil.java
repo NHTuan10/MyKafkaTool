@@ -30,7 +30,8 @@ public class SerdeUtil {
     private final Map<String, PluggableSerializer> serializerMap;
     private final Map<String, PluggableDeserializer> deserializerMap;
 
-    public static boolean isValidSchemaForSerialization(SerdeUtil serdeUtil, String valueContentType, String schema, boolean valid) {
+    public static boolean isValidSchemaForSerialization(SerdeUtil serdeUtil, String valueContentType, String schema) {
+        boolean valid = true;
         PluggableSerializer serializer = serdeUtil.getPluggableSerialize(valueContentType);
         if (serializer.isUserSchemaInputRequired()) {
             try {
@@ -45,13 +46,6 @@ public class SerdeUtil {
     }
 
     public Class<? extends Serializer> getSerializeClass(String contentType) {
-//        switch (contentType) {
-//            case SERDE_AVRO:
-//                return KafkaAvroSerializer.class;
-////            return AvroSerializer.class.getName();
-//            default:
-//                return StringSerializer.class;
-//        }
         try {
             return (Class<? extends Serializer>) Class.forName(getPluggableSerialize(contentType).getSerializerClass());
         } catch (ClassNotFoundException e) {
@@ -99,15 +93,6 @@ public class SerdeUtil {
     }
 
     public Object convertStringToObjectBeforeSerialize(String serdeName, String content, String schemaStr) throws IOException {
-//        switch (serdeName) {
-//            case SERDE_STRING:
-//                return content;
-//            case SERDE_AVRO:
-//
-//                return AvroUtil.convertJsonToAvro(content, schemaStr);
-//
-//        }
-//        return content;
         return getPluggableSerialize(serdeName).convertStringToObject(content, Map.of(AppConstant.SCHEMA, schemaStr));
     }
 

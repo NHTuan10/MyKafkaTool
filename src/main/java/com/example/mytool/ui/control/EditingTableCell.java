@@ -1,7 +1,5 @@
 package com.example.mytool.ui.control;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -31,7 +29,7 @@ public class EditingTableCell<T> extends TableCell<T, String> {
     public void cancelEdit() {
 //        super.cancelEdit();
 
-        setText((String) getItem());
+        setText(getItem());
         setGraphic(null);
     }
 
@@ -60,13 +58,9 @@ public class EditingTableCell<T> extends TableCell<T, String> {
     private void createTextField() {
         textField = new TextField(getString());
         textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
-        textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> arg0,
-                                Boolean arg1, Boolean arg2) {
-                if (!arg2) {
-                    commitEdit(textField.getText());
-                }
+        textField.focusedProperty().addListener((arg0, arg1, arg2) -> {
+            if (!arg2) {
+                commitEdit(textField.getText());
             }
         });
 
@@ -80,6 +74,6 @@ public class EditingTableCell<T> extends TableCell<T, String> {
     }
 
     private String getString() {
-        return getItem() == null ? "" : getItem().toString();
+        return getItem() == null ? "" : getItem();
     }
 }

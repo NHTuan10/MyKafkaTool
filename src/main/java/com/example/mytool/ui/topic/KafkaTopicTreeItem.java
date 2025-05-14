@@ -9,12 +9,14 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartitionInfo;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+@Slf4j
 @AllArgsConstructor
 public class KafkaTopicTreeItem<T> extends TreeItem<T> {
     public KafkaTopicTreeItem(T value) {
@@ -44,7 +46,7 @@ public class KafkaTopicTreeItem<T> extends TreeItem<T> {
         if (treeItem.getValue() instanceof KafkaTopic topic) {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             try {
-                List<TopicPartitionInfo> partitionInfoList = ClusterManager.getInstance().getTopicPartitions(topic.getCluster().getName(), topic.getName());
+                List<TopicPartitionInfo> partitionInfoList = ClusterManager.getInstance().getTopicPartitions(topic.cluster().getName(), topic.name());
 
                 partitionInfoList.forEach(partitionInfo -> {
 //                    KafkaPartition partition = new KafkaPartition(partitionInfo.partition(), topic, partitionInfo);
@@ -54,7 +56,7 @@ public class KafkaTopicTreeItem<T> extends TreeItem<T> {
 
                 return children;
             } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                e.printStackTrace();
+                log.error("Error loading partitions", e);
             }
         }
         return FXCollections.emptyObservableList();

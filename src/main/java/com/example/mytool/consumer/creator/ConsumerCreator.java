@@ -17,16 +17,12 @@ import static com.example.mytool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
 import static com.example.mytool.constant.AppConstant.OFFSET_RESET_EARLIER;
 
 public class ConsumerCreator {
-    //    public static Consumer<Long,String> createConsumer(String consumerGroup){
     public static Consumer createConsumer(ConsumerCreatorConfig consumerCreatorConfig) {
         return createConsumer(buildConsumerConfigs(consumerCreatorConfig));
     }
 
     public static Consumer createConsumer(Map<String, Object> properties) {
-        //        Consumer<Long,String> consumer = new KafkaConsumer<Long, String>(properties);
-        Consumer consumer = new KafkaConsumer<>(properties);
-//        consumer.subscribe(Collections.singletonList(topic));
-        return consumer;
+        return new KafkaConsumer<>(properties);
     }
 
     public static Map<String, Object> buildConsumerConfigs(ConsumerCreatorConfig consumerCreatorConfig) {

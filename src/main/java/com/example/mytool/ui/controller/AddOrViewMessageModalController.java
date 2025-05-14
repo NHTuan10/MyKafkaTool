@@ -8,6 +8,7 @@ import com.example.mytool.ui.UIPropertyTableItem;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -57,11 +58,6 @@ public class AddOrViewMessageModalController extends ModalController {
         headerItems = FXCollections.observableArrayList();
         headerTable.setItems(headerItems);
         valueContentTypeComboBox.setOnAction(event -> {
-//            if (valueContentTypeComboBox.getValue().equals(SerdeUtil.SERDE_AVRO)) {
-//                schemaTextArea.setDisable(false);
-//            } else {
-//                schemaTextArea.setDisable(true);
-//            }
             enableDisableSchemaTextArea();
         });
     }
@@ -72,7 +68,7 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     @FXML
-    protected void ok() throws IOException {
+    protected void ok() {
         String schemaText = schemaTextArea.getText();
         String valueText = valueTextArea.getText();
         String valueContentTypeText = valueContentTypeComboBox.getValue();
@@ -104,9 +100,7 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     protected void removeHeader() {
         List<Integer> indicesToRemove = headerTable.getSelectionModel().getSelectedIndices().reversed();
-        indicesToRemove.forEach((i) -> {
-            headerItems.remove((int) i);
-        });
+        indicesToRemove.forEach((i) -> headerItems.remove((int) i));
     }
 
     public void configureEditableControls(boolean editable) {
@@ -121,17 +115,13 @@ public class AddOrViewMessageModalController extends ModalController {
             enableDisableSchemaTextArea();
         } else {
             //suppress combox box drop down
-            valueContentTypeComboBox.setOnShowing(event -> event.consume());
+            valueContentTypeComboBox.setOnShowing(Event::consume);
             schemaTextArea.setEditable(false);
-//            if (!SerdeUtil.SERDE_AVRO.equals(valueContentTypeComboBox.getValue())) {
-//                schemaTextArea.setDisable(true);
-//            }
         }
     }
 
     private boolean validateSchema(String valueContentType, String schema) {
-        boolean valid = true;
-        valid = SerdeUtil.isValidSchemaForSerialization(serdeUtil, valueContentType, schema, valid);
+        boolean valid = SerdeUtil.isValidSchemaForSerialization(serdeUtil, valueContentType, schema);
         if (!valid) {
             ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
                     ButtonType.OK);

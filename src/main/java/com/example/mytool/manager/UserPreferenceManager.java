@@ -3,6 +3,7 @@ package com.example.mytool.manager;
 import com.example.mytool.dao.UserPreferenceDao;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.preference.UserPreference;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,12 +12,9 @@ import static com.example.mytool.constant.AppConstant.APP_NAME;
 import static com.example.mytool.constant.AppConstant.USER_PREF_FILENAME;
 
 public class UserPreferenceManager {
-    private static String userPrefFilePath = getDefaultUserPreferenceFilePath();
-    private static UserPreferenceDao userPreferenceDao = new UserPreferenceDao(userPrefFilePath);
-
-    public static String getUserPrefFilePath() {
-        return userPrefFilePath;
-    }
+    @Getter
+    private static final String userPrefFilePath = getDefaultUserPreferenceFilePath();
+    private static final UserPreferenceDao userPreferenceDao = new UserPreferenceDao(userPrefFilePath);
 
     public static void saveUserPreference(UserPreference userPreference) throws IOException {
         userPreferenceDao.saveUserPreference(userPreference);

@@ -26,7 +26,7 @@ public final class TextFieldTreeCellImpl extends TreeCell<String> {
     @Override
     public void cancelEdit() {
         super.cancelEdit();
-        setText((String) getItem());
+        setText(getItem());
         setGraphic(getTreeItem().getGraphic());
     }
 
@@ -63,6 +63,6 @@ public final class TextFieldTreeCellImpl extends TreeCell<String> {
     }
 
     private String getString() {
-        return getItem() == null ? "" : getItem().toString();
+        return getItem() == null ? "" : getItem();
     }
 }

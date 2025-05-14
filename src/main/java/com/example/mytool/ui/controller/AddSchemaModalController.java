@@ -20,7 +20,7 @@ public class AddSchemaModalController extends ModalController {
 
 
     @FXML
-    protected void ok() throws IOException {
+    protected void ok() {
         modelRef.set(schemaTextArea.getText());
         Stage stage = (Stage) okBtn.getScene().getWindow();
         stage.close();

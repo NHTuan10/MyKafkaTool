@@ -15,7 +15,7 @@ public class AvroUtil {
         return new Schema.Parser().parse(schemaStr);
     }
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static Object convertJsonToAvro(String json, String schemaStr) throws IOException {
         Schema.Parser parser = new Schema.Parser();
@@ -43,15 +43,9 @@ public class AvroUtil {
         String result;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         switch (deserializedObject) {
-            case null -> {
-                result = null;
-            }
-            case String str -> {
-                result = str;
-            }
-            case byte[] bytes -> {
-                result = new String(bytes);
-            }
+            case null -> result = null;
+            case String str -> result = str;
+            case byte[] bytes -> result = new String(bytes);
             case GenericRecord avroRecord -> {
                 Schema schema = avroRecord.getSchema();
                 JsonEncoder jsonEncoder = EncoderFactory.get().jsonEncoder(schema, outputStream);
