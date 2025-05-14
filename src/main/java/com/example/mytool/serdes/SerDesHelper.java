@@ -1,5 +1,6 @@
 package com.example.mytool.serdes;
 
+import com.example.mytool.api.KafkaMessage;
 import com.example.mytool.api.PluggableDeserializer;
 import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.constant.AppConstant;
@@ -92,8 +93,14 @@ public class SerDesHelper {
         }
     }
 
-    public Object convertStringToObjectBeforeSerialize(String serdeName, String content, String schemaStr) throws IOException {
-        return getPluggableSerialize(serdeName).convertStringToObject(content, Map.of(AppConstant.SCHEMA, schemaStr));
+    public Object convertStringToObjectBeforeSerialize(String topic, Integer partition, KafkaMessage kafkaMessage, boolean isKey) throws IOException {
+        PluggableSerializer serializer = getPluggableSerialize(isKey ? kafkaMessage.keyContentType() : kafkaMessage.valueContentType());
+        if (serializer.isCustomSerializeMethodUsed()) {
+            return serializer.serialize(topic, partition, kafkaMessage, kafkaMessage.headers(), Map.of(SerDesHelper.IS_KEY_PROP, Boolean.toString(isKey)));
+        } else {
+            return serializer.convertStringToObject(isKey ? kafkaMessage.key() : kafkaMessage.value(),
+                    Map.of(AppConstant.SCHEMA, kafkaMessage.schema()));
+        }
     }
 
     public String deserializeToJsonString(ConsumerRecord<String, Object> record, String contentType, Headers headers, Map<String, Object> consumerProps, boolean isKey) throws DeserializationException {

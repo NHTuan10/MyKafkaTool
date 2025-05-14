@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -80,7 +81,7 @@ public class AddOrViewMessageModalController extends ModalController {
             return;
         }
 
-        Map<String, String> headers = headerItems.stream().collect(Collectors.toMap(UIPropertyTableItem::getName, UIPropertyTableItem::getValue));
+        Map<String, byte[]> headers = headerItems.stream().collect(Collectors.toMap(UIPropertyTableItem::getName, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
         modelRef.set(new KafkaMessage(keyTextArea.getText(), valueText, valueContentTypeText, schemaText, headers));
         Stage stage = (Stage) okBtn.getScene().getWindow();
         stage.close();
