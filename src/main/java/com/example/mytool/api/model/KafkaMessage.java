@@ -1,4 +1,4 @@
-package com.example.mytool.api;
+package com.example.mytool.api.model;
 
 import com.example.mytool.serdes.SerDesHelper;
 

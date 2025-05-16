@@ -97,6 +97,7 @@ public class TableViewConfigurer {
                     KafkaMessageTableItem rowData = row.getItem();
                     log.debug("Double click on: {}", rowData.getKey());
                     Map<String, Object> msgModalFieldMap = Map.of(
+                            "valueContentType", rowData.getValueContentType(),
                             "serDesHelper", serDesHelper,
                             "keyTextArea", rowData.getKey(),
                             "valueTextArea", rowData.getValue(),

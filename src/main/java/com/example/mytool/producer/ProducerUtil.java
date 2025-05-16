@@ -1,6 +1,6 @@
 package com.example.mytool.producer;
 
-import com.example.mytool.api.KafkaMessage;
+import com.example.mytool.api.model.KafkaMessage;
 import com.example.mytool.manager.ClusterManager;
 import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;

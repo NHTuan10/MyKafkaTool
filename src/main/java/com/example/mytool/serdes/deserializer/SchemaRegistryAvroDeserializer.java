@@ -1,5 +1,6 @@
 package com.example.mytool.serdes.deserializer;
 
+import com.example.mytool.api.DisplayType;
 import com.example.mytool.api.PluggableDeserializer;
 import com.example.mytool.serdes.AvroUtil;
 import com.example.mytool.serdes.SerDesHelper;
@@ -43,5 +44,10 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
         Headers headers = new RecordHeaders(headerMap.entrySet().stream().map(entry -> (Header) new RecordHeader(entry.getKey(), entry.getValue())).toList());
         Object deserializedObject = kafkaAvroDeserializer.deserialize(topic, headers, payload);
         return AvroUtil.convertObjectToJsonString(deserializedObject);
+    }
+
+    @Override
+    public DisplayType getDisplayType() {
+        return DisplayType.JSON;
     }
 }

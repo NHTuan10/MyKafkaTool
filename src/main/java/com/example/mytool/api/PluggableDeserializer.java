@@ -21,4 +21,7 @@ public interface PluggableDeserializer {
         return new String(payload);
     }
 
+    default DisplayType getDisplayType() {
+        return DisplayType.TEXT;
+    }
 }

@@ -15,4 +15,8 @@ public class KafkaCluster extends Connection {
     private String bootstrapServer;
     private String schemaRegistryUrl;
 
+    @Override
+    public String toString() {
+        return name;
+    }
 }

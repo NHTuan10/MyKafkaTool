@@ -1,5 +1,6 @@
 package com.example.mytool.serdes.serializer;
 
+import com.example.mytool.api.DisplayType;
 import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.serdes.AvroUtil;
 
@@ -31,5 +32,10 @@ public class SchemaRegistryAvroSerializer implements PluggableSerializer {
     @Override
     public Object parseSchema(String schema) {
         return AvroUtil.parseSchema(schema);
+    }
+
+    @Override
+    public DisplayType getDisplayType() {
+        return DisplayType.JSON;
     }
 }

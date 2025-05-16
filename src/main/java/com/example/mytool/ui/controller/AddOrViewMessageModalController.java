@@ -1,7 +1,8 @@
 package com.example.mytool.ui.controller;
 
-import com.example.mytool.api.KafkaMessage;
+import com.example.mytool.api.DisplayType;
 import com.example.mytool.api.PluggableSerializer;
+import com.example.mytool.api.model.KafkaMessage;
 import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyTableItem;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 public class AddOrViewMessageModalController extends ModalController {
 
     private SerDesHelper serDesHelper;
+    private String valueContentType;
 
     @FXML
     private TextArea keyTextArea;
@@ -59,16 +61,9 @@ public class AddOrViewMessageModalController extends ModalController {
 
     private ObservableList<UIPropertyTableItem> headerItems;
 
-    private boolean editable;
-
     private final Json json = new Json();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    enum DisplayType {
-        TEXT,
-        JSON
-    }
 
     @FXML
     void initialize() {
@@ -137,32 +132,43 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     public void launch(boolean editable) {
-        this.editable = editable;
         keyTextArea.setEditable(editable);
         valueTextArea.setEditable(editable);
 //        valueContentTypeComboBox.setDisable(!editable);
         headerTable.setEditable(editable);
         final String initValue = valueTextArea.getText();
         valueDisplayTypeComboBox.setOnAction(event -> {
-            enableDisableSchemaTextArea();
-            if (!editable) {
-                refreshDisplayValue(true, initValue, valueDisplayTypeComboBox.getValue(), valueTextArea);
-            }
-            refreshDisplayValue(true, valueTextArea.getText(), valueDisplayTypeComboBox.getValue(), valueTextArea);
+//            enableDisableSchemaTextArea();
+            valueDisplayTypeToggleEventAction(editable, initValue);
         });
         //TODO: Set value on below combox box based on the valueContentTypeComboBox
-        valueContentTypeComboBox.getSelectionModel().selectFirst();
-        valueDisplayTypeComboBox.getSelectionModel().select(DisplayType.TEXT);
+        if (valueContentType != null) {
+            valueContentTypeComboBox.getSelectionModel().select(valueContentType);
+        } else {
+            valueContentTypeComboBox.getSelectionModel().selectFirst();
+        }
+        DisplayType displayType;
 
         if (editable) {
+            displayType = serDesHelper.getPluggableSerialize(valueContentType).getDisplayType();
             TableViewConfigurer.configureEditableKeyValueTable(headerTable);
             enableDisableSchemaTextArea();
         } else {
+            displayType = serDesHelper.getPluggableDeserialize(valueContentType).getDisplayType();
+            valueDisplayTypeComboBox.getSelectionModel().select(displayType);
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(Event::consume);
             schemaTextArea.setEditable(false);
         }
+        valueDisplayTypeComboBox.getSelectionModel().select(displayType);
+        valueDisplayTypeToggleEventAction(true, initValue);
+    }
 
+    private void valueDisplayTypeToggleEventAction(boolean editable, String initValue) {
+        if (!editable) {
+            refreshDisplayValue(true, initValue, valueDisplayTypeComboBox.getValue(), valueTextArea);
+        }
+        refreshDisplayValue(true, valueTextArea.getText(), valueDisplayTypeComboBox.getValue(), valueTextArea);
     }
 
     private void refreshDisplayValue(boolean prettyPrint, String inValue, DisplayType displayType, CodeArea codeArea) {

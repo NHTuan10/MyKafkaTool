@@ -1,5 +1,7 @@
 package com.example.mytool.api;
 
+import com.example.mytool.api.model.KafkaMessage;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -33,5 +35,9 @@ public interface PluggableSerializer {
 
     default Object convertStringToObject(String str, Map<String, Object> optionalParams) throws IOException {
         return str;
+    }
+
+    default DisplayType getDisplayType() {
+        return DisplayType.TEXT;
     }
 }

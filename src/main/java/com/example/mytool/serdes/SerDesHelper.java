@@ -1,8 +1,8 @@
 package com.example.mytool.serdes;
 
-import com.example.mytool.api.KafkaMessage;
 import com.example.mytool.api.PluggableDeserializer;
 import com.example.mytool.api.PluggableSerializer;
+import com.example.mytool.api.model.KafkaMessage;
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.exception.DeserializationException;
 import lombok.RequiredArgsConstructor;

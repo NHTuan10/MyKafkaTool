@@ -1,7 +1,7 @@
 package com.example.mytool.ui.controller;
 
-import com.example.mytool.api.KafkaMessage;
 import com.example.mytool.api.PluggableDeserializer;
+import com.example.mytool.api.model.KafkaMessage;
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.consumer.KafkaConsumerService;
 import com.example.mytool.manager.ClusterManager;
@@ -492,11 +492,10 @@ public class MainController {
 
 
     public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException {
-        // TODO: don't send message with key to Kafka if it's empty
 
         AtomicReference<Object> ref = new AtomicReference<>();
         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
-                Map.of("serDesHelper", serDesHelper, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
+                Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
                         "schemaTextArea", schemaTextArea.getText()));
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {

@@ -37,7 +37,7 @@
                                         <TextField fx:id="bootstrapServerTextField" prefHeight="4.0" prefWidth="477.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                         <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                             <children>
-                                                <Button fx:id="addBtn" mnemonicParsing="false" onAction="#add" text="Add" />
+                                                <Button fx:id="addBtn" mnemonicParsing="false" onAction="#add" text="OK" />
                                                 <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#cancel" text="Cancel" />
                                             </children>
                                         </HBox>
