@@ -38,8 +38,8 @@ public final class ViewUtil {
         return result.orElse(cancel) == yes;
     }
 
-    public static void enableCopyDataFromTableToClipboard(TableView<?> tableView) {
-        tableView.getSelectionModel().setCellSelectionEnabled(true);
+    public static void enableCopyDataFromTableToClipboard(TableView<?> tableView, boolean isCellSelectionEnabled) {
+        tableView.getSelectionModel().setCellSelectionEnabled(isCellSelectionEnabled);
         tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         MenuItem item = new MenuItem("Copy");

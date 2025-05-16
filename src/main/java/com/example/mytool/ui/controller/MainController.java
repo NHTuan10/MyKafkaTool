@@ -69,17 +69,24 @@ public class MainController {
 
     private final SerDesHelper serDesHelper;
 
+    private KafkaClusterTree kafkaClusterTree;
+
+    private final Map<TreeItem, ObservableList<KafkaMessageTableItem>> treeMsgTableItemCache = new ConcurrentHashMap<>();
+
+    private final AtomicBoolean isPolling = new AtomicBoolean(false);
+
     @FXML
     private TreeView clusterTree;
 
     @FXML
+    private ProgressIndicator blockAppProgressInd;
+
+    // Data Tab
+    @FXML
+    private Tab dataTab;
+
+    @FXML
     private TableView<KafkaMessageTableItem> messageTable;
-
-    @FXML
-    private TableView<ConsumerGroupOffsetTableItem> consumerGroupOffsetTable;
-
-    @FXML
-    private TableView<UIPropertyTableItem> topicConfigTable;
 
     @FXML
     private TextField pollTimeTextField;
@@ -109,30 +116,16 @@ public class MainController {
     private TextArea schemaTextArea;
 
     @FXML
-    private ProgressIndicator msgTableProgressInd;
-
-    @FXML
-    private TabPane tabPane;
-
-    @FXML
-    private Tab dataTab;
-
-    @FXML
-    private Tab propertiesTab;
-
-    @FXML
-    private Tab cgOffsetsTab;
+    private CheckBox isLiveUpdateCheckBox;
 
     @FXML
     private Button countMessagesBtn;
 
     @FXML
     private Button pullMessagesBtn;
-    @FXML
-    private TableView<KafkaPartitionsTableItem> kafkaPartitionsTable;
 
     @FXML
-    private TitledPane partitionsTitledPane;
+    private ProgressIndicator isPollingMsgProgressIndicator;
 
     @FXML
     private SplitPane schemaSplitPane;
@@ -146,11 +139,28 @@ public class MainController {
     @FXML
     private TextArea schemaRegistryTextArea;
 
-    private KafkaClusterTree kafkaClusterTree;
+    // Consumer Groups
+    @FXML
+    private TableView<ConsumerGroupOffsetTableItem> consumerGroupOffsetTable;
 
-    private final Map<TreeItem, ObservableList<KafkaMessageTableItem>> treeMsgTableItemCache = new ConcurrentHashMap<>();
+    @FXML
+    private Tab cgOffsetsTab;
 
-    private final AtomicBoolean isPolling = new AtomicBoolean(false);
+    // Topic/Partition properties
+    @FXML
+    private TableView<UIPropertyTableItem> topicConfigTable;
+
+    @FXML
+    private TabPane tabPane;
+
+    @FXML
+    private Tab propertiesTab;
+
+    @FXML
+    private TableView<KafkaPartitionsTableItem> kafkaPartitionsTable;
+
+    @FXML
+    private TitledPane partitionsTitledPane;
 
     public MainController() {
         StringSerializer stringSerializer = new StringSerializer();
@@ -176,7 +186,7 @@ public class MainController {
     @FXML
     public void initialize() {
 
-        msgTableProgressInd.setVisible(false);
+        blockAppProgressInd.setVisible(false);
         partitionsTitledPane.setVisible(false);
         schemaTextArea.setDisable(true);
         initPollingOptionsUI();
@@ -186,15 +196,14 @@ public class MainController {
         configureClusterTreeSelectedItemChanged();
         configureTableView();
 
-
     }
 
     private void configureTableView() {
 
         TableViewConfigurer.configureMessageTable(messageTable, serDesHelper);
-        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable);
-        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable);
-        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable);
+        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable, true);
+        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable, true);
+        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable, true);
         schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE, (event) -> schemaRegistryTextArea.textProperty().bindBidirectional(event.getData()));
         // Use a change listener to respond to a selection within
         // a tree view
@@ -232,7 +241,13 @@ public class MainController {
         valueContentType.setOnAction(event -> {
             PluggableDeserializer deserializer = serDesHelper.getPluggableDeserialize(valueContentType.getValue());
             schemaTextArea.setDisable(!deserializer.isUserSchemaInputRequired());
-
+            displayNotPollingMessage();
+        });
+        isLiveUpdateCheckBox.setOnAction(event -> {
+            if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
+                isPolling.set(false);
+                pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+            }
         });
     }
 
@@ -365,7 +380,7 @@ public class MainController {
     }
 
     @FXML
-    protected void retrieveMessages() {
+    protected void pollMessages() {
         if (isPolling.get()) {
             isPolling.set(false);
             pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
@@ -387,7 +402,8 @@ public class MainController {
         ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
         messageTable.setItems(list);
         treeMsgTableItemCache.put(selectedTreeItem, list);
-        msgTableProgressInd.setVisible(true);
+        blockAppProgressInd.setVisible(true);
+        isPollingMsgProgressIndicator.setVisible(true);
         pullMessagesBtn.setText(AppConstant.STOP_POLLING_TEXT);
         Task<Void> pollMsgTask = new Task<>() {
             @Override
@@ -402,10 +418,11 @@ public class MainController {
                                 .valueContentType(valueContentTypeStr)
                                 .schema(schema)
                                 .pollCallback(() -> {
-//                                    msgTableProgressInd.setVisible(false);
+                                    blockAppProgressInd.setVisible(false);
 //                                    noMessages.setText(list.size() + " Messages");
                                     return new KafkaConsumerService.PollCallback(list, isPolling);
                                 })
+                                .isLiveUpdate(isLiveUpdateCheckBox.isSelected())
                                 .build();
                 if (selectedTreeItem instanceof KafkaPartitionTreeItem<?> selectedItem) {
                     KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
@@ -427,21 +444,26 @@ public class MainController {
             }
         };
         pollMsgTask.setOnSucceeded(event -> {
-            msgTableProgressInd.setVisible(false);
-            isPolling.set(false);
-            pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+            displayNotPollingMessage();
             noMessages.setText(list.size() + " Messages");
         });
         pollMsgTask.setOnFailed(event -> {
-            msgTableProgressInd.setVisible(false);
-            isPolling.set(false);
-            pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+            displayNotPollingMessage();
             Throwable e = event.getSource().getException();
             log.error("Error when poll messages", e);
             UIErrorHandler.showError(Thread.currentThread(), e);
         });
 
-        new Thread(pollMsgTask).start();
+        Thread backgroundMsgPollingThread = new Thread(pollMsgTask);
+        backgroundMsgPollingThread.setDaemon(true);
+        backgroundMsgPollingThread.start();
+    }
+
+    private void displayNotPollingMessage() {
+        isPollingMsgProgressIndicator.setVisible(false);
+        blockAppProgressInd.setVisible(false);
+        isPolling.set(false);
+        pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
     }
 
     private Long getPollStartTimestamp() {
@@ -479,7 +501,8 @@ public class MainController {
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {
             producerUtil.sendMessage(kafkaTopic, partition, newMsg);
-            retrieveMessages();
+            if (!isPolling.get())
+                pollMessages();
             ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
                     ButtonType.OK);
         }

@@ -72,7 +72,7 @@ public class AddOrViewMessageModalController extends ModalController {
 
     @FXML
     void initialize() {
-        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, headerTable);
+        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, headerTable, true);
 
         headerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         headerItems = FXCollections.observableArrayList();

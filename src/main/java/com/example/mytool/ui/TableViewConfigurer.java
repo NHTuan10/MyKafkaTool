@@ -26,11 +26,11 @@ public class TableViewConfigurer {
 
     public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage) {
         TableView<S> tableView = (TableView<S>) stage.getScene().lookup("#" + fxId);
-        return configureTableView(clazz, tableView);
+        return configureTableView(clazz, tableView, true);
     }
 
 
-    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView) {
+    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView, boolean isCellSelectionEnabled) {
         List<String> fieldNames = ViewUtil.getPropertyFieldNamesFromTableItem(clazz);
         IntStream.range(0, fieldNames.size()).forEach(i -> {
             TableColumn<S, ?> tableColumn = tableView.getColumns().get(i);
@@ -38,7 +38,7 @@ public class TableViewConfigurer {
             tableColumn.setCellFactory((callback) -> new ViewUtil.DragSelectionCell<>());
         });
         // Enable copy by Ctrl + C or by right click -> Copy
-        ViewUtil.enableCopyDataFromTableToClipboard(tableView);
+        ViewUtil.enableCopyDataFromTableToClipboard(tableView, isCellSelectionEnabled);
 
         return tableView;
     }
@@ -75,7 +75,7 @@ public class TableViewConfigurer {
     }
 
     public static void configureMessageTable(TableView<KafkaMessageTableItem> messageTable, SerDesHelper serDesHelper) {
-        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable);
+        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable, true);
         messageTable.setRowFactory(tv -> {
             TableRow<KafkaMessageTableItem> row = new TableRow<>() {
                 @Override

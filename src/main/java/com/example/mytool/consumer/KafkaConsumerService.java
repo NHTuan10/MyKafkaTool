@@ -11,13 +11,13 @@ import com.example.mytool.ui.KafkaMessageTableItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Builder;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.io.IOException;
@@ -33,9 +33,18 @@ import java.util.stream.Collectors;
 import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
-@RequiredArgsConstructor
 public class KafkaConsumerService {
     private final SerDesHelper serDesHelper;
+
+    private List<Consumer> consumers = Collections.synchronizedList(new ArrayList<>());
+
+    public KafkaConsumerService(SerDesHelper serDesHelper) {
+        this.serDesHelper = serDesHelper;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            consumers.forEach(Consumer::wakeup);
+//            consumers.clear();
+        }));
+    }
 
     public List<KafkaMessageTableItem> consumeMessages(KafkaPartition partition, PollingOptions pollingOptions) {
         Set<TopicPartition> topicPartitions = Set.of(new TopicPartition(partition.topic().name(), partition.id()));
@@ -57,6 +66,7 @@ public class KafkaConsumerService {
                 .build();
         Map<String, Object> consumerProps = ConsumerCreator.buildConsumerConfigs(consumerCreatorConfig);
         Consumer consumer = ClusterManager.getInstance().getConsumer(consumerProps);
+        consumers.add(consumer);
         consumer.assign(topicPartitions);
         if (pollingOptions.timestamp() != null) {
             seekOffsetWithTimestamp(consumer, kafkaTopic.name(), topicPartitions, pollingOptions.timestamp());
@@ -65,6 +75,7 @@ public class KafkaConsumerService {
         }
         List<KafkaMessageTableItem> list = pollMessages(consumer, consumerProps, pollingOptions);
         consumer.close();
+        consumers.remove(consumer);
         return list;
     }
 
@@ -103,18 +114,24 @@ public class KafkaConsumerService {
 //        List<KafkaMessageTableItem> allMessages = new ArrayList<>();
         ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
         int emptyPullCountDown = 2;
-        while (true) {
-            ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
-            PollCallback pollCallback = pollingOptions.pollCallback().get();
-            if (!pollCallback.isPolling().get()) break;
-
-            messageObservableList = pollCallback.resultObservableList();
-            List<KafkaMessageTableItem> polledMessages = handleConsumerRecords(pollingOptions, consumerRecords, consumerProps);
-            if (!polledMessages.isEmpty()) {
-                messageObservableList.addAll(polledMessages);
+        try (consumer) {
+            while (true) {
+                ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
+                PollCallback pollCallback = pollingOptions.pollCallback().get();
+                if (!pollCallback.isPolling().get()) break;
+                if (consumerRecords.isEmpty()) emptyPullCountDown--;
+                if (emptyPullCountDown <= 0 && !pollingOptions.isLiveUpdate()) break;
+                if (!consumerRecords.isEmpty()) {
+                    messageObservableList = pollCallback.resultObservableList();
+                    List<KafkaMessageTableItem> polledMessages = handleConsumerRecords(pollingOptions, consumerRecords, consumerProps);
+                    if (!polledMessages.isEmpty()) {
+                        messageObservableList.addAll(polledMessages);
+                    }
+                    sortMessages(messageObservableList, pollingOptions);
+                }
             }
-            if (consumerRecords.isEmpty()) emptyPullCountDown--;
-            if (emptyPullCountDown == 0) break;
+        } catch (WakeupException e) {
+
         }
 
         return filterAndSortMessages(messageObservableList, pollingOptions);
@@ -191,6 +208,13 @@ public class KafkaConsumerService {
         return messages;
     }
 
+    private void sortMessages(List<KafkaMessageTableItem> messages, PollingOptions pollingOptions) {
+        messages.sort(Comparator.comparing(KafkaMessageTableItem::getTimestamp));
+        if (pollingOptions.pollingPosition() == MessagePollingPosition.LAST) {
+            Collections.reverse(messages);
+        }
+    }
+
     public enum MessagePollingPosition {
         FIRST, LAST;
 
@@ -204,7 +228,7 @@ public class KafkaConsumerService {
     public record PollingOptions(Integer pollTime, Integer noMessages, Long timestamp,
                                  MessagePollingPosition pollingPosition, String valueContentType,
                                  String schema,
-                                 java.util.function.Supplier<PollCallback> pollCallback) {
+                                 java.util.function.Supplier<PollCallback> pollCallback, boolean isLiveUpdate) {
     }
 
     public record PollCallback(ObservableList<KafkaMessageTableItem> resultObservableList,

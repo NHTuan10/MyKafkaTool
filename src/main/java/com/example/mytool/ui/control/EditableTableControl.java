@@ -65,7 +65,7 @@ public class EditableTableControl<T> extends AnchorPane {
             table.getColumns().add(tableColumn);
         });
 
-        TableViewConfigurer.configureTableView(itemClass, table);
+        TableViewConfigurer.configureTableView(itemClass, table, false);
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();

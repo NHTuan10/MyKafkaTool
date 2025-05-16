@@ -12,7 +12,7 @@ public class AppConstant {
     public static final int DEFAULT_POLL_TIME_MS = 100;
 
     public static final int DEFAULT_MAX_POLL_RECORDS = 1000;
-    public static final String POLL_MESSAGES_TEXT = "Poll Messages";
+    public static final String POLL_MESSAGES_TEXT = "Poll Msgs";
     public static final String STOP_POLLING_TEXT = "Stop Polling";
     public static final String ADD_MESSAGE_MODAL_FXML = "add-message-modal.fxml";
     public static final int DEFAULT_ADMIN_REQUEST_TIMEOUT = 5000;
