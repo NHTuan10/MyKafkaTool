@@ -1,13 +1,12 @@
 package com.example.mytool.ui.util;
 
-import com.example.mytool.MyApplication;
+import com.example.mytool.Application;
 import com.example.mytool.ui.controller.ModalController;
 import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
 import javafx.beans.property.Property;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
@@ -19,6 +18,7 @@ import org.apache.kafka.common.TopicPartitionInfo;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -101,22 +101,29 @@ public final class ViewUtil {
 //                AddMessageModalController.class.getResource("add-message-modal.fxml"));
 
         FXMLLoader modalLoader = new FXMLLoader(
-                MyApplication.class.getResource(modalFxml));
-        Parent parent = modalLoader.load();
+                Application.class.getResource(modalFxml));
+        Scene scene = new Scene(modalLoader.load());
 
 //        AddMessageModalController addMessageModalController =  modalLoader.getController();
         ModalController modalController = modalLoader.getController();
 //        modalController.setParentController(parentController);
         modalController.setModelRef(modelRef);
         modalController.setTextFieldOrAreaText(modalController, inputVarMap);
-        modalController.configureEditableControls(editable);
+        modalController.launch(editable);
         stage.setTitle(title);
         stage.initModality(Modality.WINDOW_MODAL);
+
         stage.setResizable(false);
+        if (editable) {
+            stage.setAlwaysOnTop(true);
+            stage.initModality(Modality.APPLICATION_MODAL);
+        }
 //        ActionEvent event
 //        stage.initOwner(
 //                ((Node)event.getSource()).getScene().getWindow() );
-        stage.setScene(new Scene(parent));
+        stage.setScene(scene);
+        URL cssResource = Application.class.getResource("style.css");
+        scene.getStylesheets().add(cssResource.toExternalForm());
         stage.showAndWait();
 //        return modelRef.get();
     }
@@ -162,7 +169,7 @@ public final class ViewUtil {
             if (empty) {
                 setText(null);
             } else {
-                setText(item.toString());
+                setText(item != null ? item.toString() : null);
             }
         }
     }

@@ -3,7 +3,6 @@ package com.example.mytool;
 import atlantafx.base.theme.PrimerLight;
 import com.example.mytool.ui.KafkaClusterTree;
 import com.example.mytool.ui.UIErrorHandler;
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -11,17 +10,17 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class MyApplication extends Application {
+public class Application extends javafx.application.Application {
 
     @Override
     public void start(Stage stage) throws IOException {
         Thread.setDefaultUncaughtExceptionHandler(UIErrorHandler::showError);
-        FXMLLoader fxmlLoader = new FXMLLoader(MyApplication.class.getResource("main-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource("main-view.fxml"));
         Parent parent = fxmlLoader.load();
         Scene scene = new Scene(parent);
 //        parent.setStyle("-fx-base: rgba(60, 60, 60, 255);");
-        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
-//        Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+        javafx.application.Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+//        Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet()); //PrimerDark
         stage.setTitle("MyTool");
         stage.setScene(scene);
         stage.show();

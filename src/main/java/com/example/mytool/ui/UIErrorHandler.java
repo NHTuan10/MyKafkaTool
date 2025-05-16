@@ -1,6 +1,6 @@
 package com.example.mytool.ui;
 
-import com.example.mytool.MyApplication;
+import com.example.mytool.Application;
 import com.example.mytool.ui.controller.ErrorController;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -32,7 +32,7 @@ public class UIErrorHandler {
         e.printStackTrace(new PrintWriter(errorMsg));
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
-        FXMLLoader loader = new FXMLLoader(MyApplication.class.getResource("error.fxml"));
+        FXMLLoader loader = new FXMLLoader(Application.class.getResource("error.fxml"));
         try {
             Parent root = loader.load();
             ((ErrorController) loader.getController()).setErrorText(errorMsg.toString());

@@ -5,7 +5,10 @@ import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyTableItem;
+import com.example.mytool.ui.codehighlighting.Json;
 import com.example.mytool.ui.util.ViewUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -13,6 +16,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,9 +33,9 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private TextArea keyTextArea;
     @FXML
-    private TextArea valueTextArea;
+    private CodeArea valueTextArea;
     @FXML
-    private TextArea schemaTextArea;
+    private CodeArea schemaTextArea;
     @FXML
     private Button okBtn;
     @FXML
@@ -47,9 +52,23 @@ public class AddOrViewMessageModalController extends ModalController {
     private ComboBox<String> valueContentTypeComboBox;
 
     @FXML
+    private ComboBox<DisplayType> valueDisplayTypeComboBox;
+
+    @FXML
     private TableView<UIPropertyTableItem> headerTable;
 
     private ObservableList<UIPropertyTableItem> headerItems;
+
+    private boolean editable;
+
+    private final Json json = new Json();
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    enum DisplayType {
+        TEXT,
+        JSON
+    }
 
     @FXML
     void initialize() {
@@ -60,6 +79,19 @@ public class AddOrViewMessageModalController extends ModalController {
         headerTable.setItems(headerItems);
         valueContentTypeComboBox.setOnAction(event -> {
             enableDisableSchemaTextArea();
+        });
+        valueDisplayTypeComboBox.setItems(FXCollections.observableArrayList(DisplayType.values()));
+        valueTextArea.textProperty().addListener((obs, oldText, newText) -> {
+            refreshDisplayValue(false, newText, valueDisplayTypeComboBox.getValue(), valueTextArea);
+//                    if (valueDisplayTypeComboBox.getValue() == DisplayType.JSON) {
+////                       && !newText.equals(oldText)){
+//                        textArea.setStyleSpans(0, json.highlight(newText));
+//                    } else if (valueDisplayTypeComboBox.getValue() == DisplayType.TEXT) {
+//                        textArea.clearStyle(0, newText.length() - 1);
+//                    }
+        });
+        schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
+            refreshDisplayValue(false, newText, DisplayType.JSON, schemaTextArea);
         });
     }
 
@@ -104,13 +136,24 @@ public class AddOrViewMessageModalController extends ModalController {
         indicesToRemove.forEach((i) -> headerItems.remove((int) i));
     }
 
-    public void configureEditableControls(boolean editable) {
-
+    public void launch(boolean editable) {
+        this.editable = editable;
         keyTextArea.setEditable(editable);
         valueTextArea.setEditable(editable);
 //        valueContentTypeComboBox.setDisable(!editable);
         headerTable.setEditable(editable);
+        final String initValue = valueTextArea.getText();
+        valueDisplayTypeComboBox.setOnAction(event -> {
+            enableDisableSchemaTextArea();
+            if (!editable) {
+                refreshDisplayValue(true, initValue, valueDisplayTypeComboBox.getValue(), valueTextArea);
+            }
+            refreshDisplayValue(true, valueTextArea.getText(), valueDisplayTypeComboBox.getValue(), valueTextArea);
+        });
+        //TODO: Set value on below combox box based on the valueContentTypeComboBox
         valueContentTypeComboBox.getSelectionModel().selectFirst();
+        valueDisplayTypeComboBox.getSelectionModel().select(DisplayType.TEXT);
+
         if (editable) {
             TableViewConfigurer.configureEditableKeyValueTable(headerTable);
             enableDisableSchemaTextArea();
@@ -118,6 +161,30 @@ public class AddOrViewMessageModalController extends ModalController {
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(Event::consume);
             schemaTextArea.setEditable(false);
+        }
+
+    }
+
+    private void refreshDisplayValue(boolean prettyPrint, String inValue, DisplayType displayType, CodeArea codeArea) {
+        if (StringUtils.isNotBlank(inValue)) {
+
+            if (displayType == DisplayType.JSON) {
+                String value = inValue;
+                try {
+                    value = prettyPrint ?
+                            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectMapper.readTree(inValue)) :
+                            codeArea.getText();
+                } catch (JsonProcessingException e) {
+                }
+                codeArea.replaceText(value);
+                codeArea.setStyleSpans(0, json.highlight(value));
+            } else if (displayType == DisplayType.TEXT) {
+                if (prettyPrint) {
+                    codeArea.replaceText(inValue);
+                }
+                codeArea.clearStyle(0, codeArea.getText().length() - 1);
+            }
+
         }
     }
 

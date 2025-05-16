@@ -3,6 +3,7 @@ package com.example.mytool.ui.controller;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import lombok.Setter;
+import org.fxmisc.richtext.CodeArea;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -24,6 +25,8 @@ public abstract class ModalController {
                 Object fieldObject = field.get(modalController);
                 if (fieldClass.equals(TextField.class) || fieldClass.equals(TextArea.class)) {
                     TextInputControl.class.getDeclaredMethod("setText", String.class).invoke(fieldObject, value);
+                } else if (fieldObject instanceof CodeArea codeArea && value instanceof String str) {
+                    codeArea.replaceText(str);
                 } else if ((fieldClass.equals(TableView.class) || fieldClass.equals(ComboBox.class)) && value instanceof ObservableList) {
                     fieldClass.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
                 } else {
@@ -37,7 +40,7 @@ public abstract class ModalController {
         });
     }
 
-    public void configureEditableControls(boolean editable) {
+    public void launch(boolean editable) {
 
     }
 }

@@ -1,6 +1,6 @@
 package com.example.mytool.ui.control;
 
-import com.example.mytool.MyApplication;
+import com.example.mytool.Application;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
@@ -40,7 +40,7 @@ public class EditableTableControl<T> extends AnchorPane {
 
     public EditableTableControl() {
         itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        FXMLLoader fxmlLoader = new FXMLLoader(MyApplication.class.getResource(
+        FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource(
                 "editable-table.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
