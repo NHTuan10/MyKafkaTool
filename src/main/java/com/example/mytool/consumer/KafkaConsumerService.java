@@ -1,5 +1,6 @@
 package com.example.mytool.consumer;
 
+import com.example.mytool.constant.AppConstant;
 import com.example.mytool.consumer.creator.ConsumerCreator;
 import com.example.mytool.exception.DeserializationException;
 import com.example.mytool.manager.ClusterManager;
@@ -113,7 +114,7 @@ public class KafkaConsumerService {
         int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_POLL_TIME_MS);
 //        List<KafkaMessageTableItem> allMessages = new ArrayList<>();
         ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
-        int emptyPullCountDown = 2;
+        int emptyPullCountDown = AppConstant.EMPTY_PULL_STILL_STOP;
         try (consumer) {
             while (true) {
                 ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
