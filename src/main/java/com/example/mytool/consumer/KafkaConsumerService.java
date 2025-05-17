@@ -160,9 +160,10 @@ public class KafkaConsumerService {
 //                ? AvroUtil.deserializeAsJsonString((byte[]) record.value(), pollingOptions.schema())
 //                : (String) record.value();
 //        String value = record.value().toString();
+        Map<String, String> others = Map.of(SerDesHelper.IS_KEY_PROP, Boolean.toString(false), SerDesHelper.SCHEMA_PROP, pollingOptions.schema());
         String value = serDesHelper.deserializeToJsonString(record,
                 pollingOptions.valueContentType,
-                record.headers(), consumerProps, false);
+                record.headers(), consumerProps, others);
 
         String timestamp = Instant.ofEpochMilli(record.timestamp())
                 .atZone(ZoneId.systemDefault())

@@ -104,13 +104,13 @@ public class SerDesHelper {
         }
     }
 
-    public String deserializeToJsonString(ConsumerRecord<String, Object> record, String contentType, Headers headers, Map<String, Object> consumerProps, boolean isKey) throws DeserializationException {
+    public String deserializeToJsonString(ConsumerRecord<String, Object> record, String contentType, Headers headers, Map<String, Object> consumerProps, Map<String, String> others) throws DeserializationException {
         Map<String, byte[]> headerMap = convertKafkaHeadersObjectToMap(headers);
         PluggableDeserializer deserializer = getPluggableDeserialize(contentType);
         Object payload = record.value();
         if (deserializer.isCustomDeserializeMethodUsed()) {
             if (payload instanceof byte[] payloadBytes) {
-                Map<String, String> others = Map.of(SerDesHelper.IS_KEY_PROP, Boolean.toString(isKey));
+
                 try {
                     return deserializerMap.get(contentType).deserialize(record.topic(), record.partition(), payloadBytes, headerMap, consumerProps, others);
                 } catch (Exception e) {
@@ -126,7 +126,7 @@ public class SerDesHelper {
     }
 
     private static Map<String, byte[]> convertKafkaHeadersObjectToMap(Headers headers) {
-        return Arrays.stream(headers.toArray()).collect(Collectors.toMap(Header::key, Header::value));
+        return Arrays.stream(headers.toArray()).collect(Collectors.toMap(Header::key, Header::value, (v1, v2) -> v2));
     }
 
 
