@@ -3,12 +3,12 @@ package com.example.mytool.ui.controller;
 import com.example.mytool.api.DisplayType;
 import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.api.model.KafkaMessage;
+import com.example.mytool.serdes.AvroUtil;
 import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyTableItem;
 import com.example.mytool.ui.codehighlighting.Json;
 import com.example.mytool.ui.util.ViewUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -61,8 +61,6 @@ public class AddOrViewMessageModalController extends ModalController {
     private ObservableList<UIPropertyTableItem> headerItems;
 
     private final Json json = new Json();
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @FXML
     void initialize() {
@@ -174,7 +172,7 @@ public class AddOrViewMessageModalController extends ModalController {
         if (StringUtils.isNotBlank(inValue)) {
 
             if (displayType == DisplayType.JSON) {
-                ViewUtil.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, objectMapper, json);
+                ViewUtil.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, AvroUtil.OBJECT_MAPPER, json);
             } else if (displayType == DisplayType.TEXT) {
                 if (prettyPrint) {
                     codeArea.replaceText(inValue);

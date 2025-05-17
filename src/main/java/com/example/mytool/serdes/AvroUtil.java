@@ -1,5 +1,7 @@
 package com.example.mytool.serdes;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
@@ -18,7 +20,16 @@ public class AvroUtil {
         return new Schema.Parser().parse(schemaStr);
     }
 
-    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    public static final ObjectMapper OBJECT_MAPPER = constructObjectMapper();
+
+    public static ObjectMapper constructObjectMapper() {
+        DefaultPrettyPrinter p = new DefaultPrettyPrinter();
+        DefaultPrettyPrinter.Indenter i = new DefaultIndenter("  ", System.lineSeparator());
+        p.indentArraysWith(i);
+        p.indentObjectsWith(i);
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.setDefaultPrettyPrinter(p);
+    }
 
     public static Object convertJsonToAvro(String json, String schemaStr) throws IOException {
         Schema schema = null;
