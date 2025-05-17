@@ -22,7 +22,7 @@ public class SchemaRegistryAvroSerializer implements PluggableSerializer {
 
     @Override
     public Object convertStringToObject(String str, Map<String, Object> optionalParams) throws IOException {
-        String schema = optionalParams.get(SerDesHelper.SCHEMA).toString();
+        String schema = optionalParams.get(SerDesHelper.SCHEMA_PROP).toString();
         return AvroUtil.convertJsonToAvro(str, schema);
     }
 
