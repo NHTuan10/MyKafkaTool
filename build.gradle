@@ -62,7 +62,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.16.0'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.0'
     implementation 'io.confluent:kafka-avro-serializer:7.9.0'
-    implementation group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.11.5'
+    implementation group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.10.5'
 // https://mvnrepository.com/artifact/com.google.guava/guava
 //    implementation 'com.google.guava:guava:31.1-jre'
 // https://mvnrepository.com/artifact/org.openjfx/javafx-controls
