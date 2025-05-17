@@ -248,10 +248,10 @@ public class MainController {
         msgPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
         valueContentType.setOnAction(event -> {
             PluggableDeserializer deserializer = serDesHelper.getPluggableDeserialize(valueContentType.getValue());
-            schemaTextArea.setDisable(!deserializer.mayUseSchema());
+            schemaTextArea.setDisable(!deserializer.mayNeedUserInputForSchema());
             displayNotPollingMessage();
         });
-        schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayUseSchema());
+        schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
         isLiveUpdateCheckBox.setOnAction(event -> {
             if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
                 isPolling.set(false);

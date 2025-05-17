@@ -35,7 +35,7 @@ public class SerDesHelper {
     public static boolean isValidSchemaForSerialization(SerDesHelper serDesHelper, String valueContentType, String schema) {
         boolean valid = true;
         PluggableSerializer serializer = serDesHelper.getPluggableSerialize(valueContentType);
-        if (StringUtils.isNotBlank(schema) && serializer.mayUseSchema()) {
+        if (StringUtils.isNotBlank(schema) && serializer.mayNeedUserInputForSchema()) {
             try {
                 valid = StringUtils.isNotBlank(schema) &&
                         serializer.parseSchema(schema) != null;
@@ -132,7 +132,7 @@ public class SerDesHelper {
 
     public ValidationResult validateMessageAgainstSchema(String contentType, String content, String schemaStr) {
         PluggableSerializer serializer = serializerMap.get(contentType);
-        if (serializer.mayUseSchema()) {
+        if (serializer.mayNeedUserInputForSchema()) {
             try {
                 Object s = serializer.convertStringToObject(content, Map.of(AppConstant.SCHEMA, schemaStr));
                 return new ValidationResult((s != null), new Exception("Empty content type"));

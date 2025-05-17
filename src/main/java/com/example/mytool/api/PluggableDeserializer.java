@@ -13,7 +13,7 @@ public interface PluggableDeserializer {
         return false;
     }
 
-    default boolean mayUseSchema() {
+    default boolean mayNeedUserInputForSchema() {
         return false;
     }
 

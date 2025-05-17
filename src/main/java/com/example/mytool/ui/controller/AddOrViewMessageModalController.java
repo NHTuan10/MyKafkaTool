@@ -91,7 +91,7 @@ public class AddOrViewMessageModalController extends ModalController {
 
     private void enableDisableSchemaTextArea() {
         PluggableSerializer serializer = serDesHelper.getPluggableSerialize(valueContentTypeComboBox.getValue());
-        schemaTextArea.setDisable(!serializer.mayUseSchema());
+        schemaTextArea.setDisable(!serializer.mayNeedUserInputForSchema());
     }
 
     @FXML

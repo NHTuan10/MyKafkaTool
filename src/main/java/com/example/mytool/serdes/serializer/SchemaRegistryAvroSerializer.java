@@ -27,7 +27,7 @@ public class SchemaRegistryAvroSerializer implements PluggableSerializer {
     }
 
     @Override
-    public boolean mayUseSchema() {
+    public boolean mayNeedUserInputForSchema() {
         return true;
     }
 
