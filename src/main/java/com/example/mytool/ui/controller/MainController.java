@@ -194,7 +194,6 @@ public class MainController {
 
         blockAppProgressInd.setVisible(false);
         partitionsTitledPane.setVisible(false);
-        schemaTextArea.setDisable(true);
         initPollingOptionsUI();
 
         this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaEditableTableControl);
@@ -249,9 +248,10 @@ public class MainController {
         msgPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
         valueContentType.setOnAction(event -> {
             PluggableDeserializer deserializer = serDesHelper.getPluggableDeserialize(valueContentType.getValue());
-            schemaTextArea.setDisable(!deserializer.isUserSchemaInputRequired());
+            schemaTextArea.setDisable(!deserializer.mayUseSchema());
             displayNotPollingMessage();
         });
+        schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayUseSchema());
         isLiveUpdateCheckBox.setOnAction(event -> {
             if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
                 isPolling.set(false);

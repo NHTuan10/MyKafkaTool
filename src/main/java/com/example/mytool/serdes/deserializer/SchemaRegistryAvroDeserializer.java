@@ -50,4 +50,9 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
     public DisplayType getDisplayType() {
         return DisplayType.JSON;
     }
+
+    @Override
+    public boolean mayUseSchema() {
+        return true;
+    }
 }
