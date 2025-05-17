@@ -31,6 +31,8 @@ import com.example.mytool.ui.topic.KafkaTopicTreeItem;
 import com.example.mytool.ui.util.ViewUtil;
 import com.google.common.collect.ImmutableMap;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -53,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -80,6 +83,9 @@ public class MainController {
 
     private final AtomicBoolean isPolling = new AtomicBoolean(false);
 
+//    private final SimpleLongProperty totalMessagesInTheTopicProperty = new SimpleLongProperty(0);
+
+    private final SimpleStringProperty totalMessagesInTheTopicStringProperty = new SimpleStringProperty("0 Messages");
     @FXML
     private TreeView clusterTree;
 
@@ -100,7 +106,7 @@ public class MainController {
     private Label noMessages;
 
     @FXML
-    private Label totalMessages;
+    private Label totalMessagesInTheTopicLabel;
 
     @FXML
     private TextField maxMessagesTextField;
@@ -203,6 +209,10 @@ public class MainController {
         schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
             ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, json);
         });
+        totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty
+//                totalMessagesInTheTopicProperty.asString("%,d Messages")
+        );
+
     }
 
     private void configureTableView() {
@@ -298,24 +308,38 @@ public class MainController {
                 tabPane.getSelectionModel().select(dataTab);
                 schemaSplitPane.setVisible(false);
                 messageSplitPane.setVisible(true);
-                try {
-                    // topic config table
-                    Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
-                    configEntries.forEach(entry -> config.add(new UIPropertyTableItem(entry.name(), entry.value())));
-                    topicConfigTable.setItems(config);
-                } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                    log.error("Error when get topic config properties", e);
-                    topicConfigTable.setItems(FXCollections.emptyObservableList());
-                    throw new RuntimeException(e);
-                }
-                try {
-                    // partitions table
-                    refreshPartitionsTbl(clusterName, topicName);
-                } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                    log.error("Error when get partitions properties for Partitions table", e);
-                    kafkaPartitionsTable.setItems(FXCollections.emptyObservableList());
-                    throw new RuntimeException(e);
-                }
+                Task<Void> getTopicAndPartitionProperties = new Task<>() {
+                    @Override
+                    protected Void call() {
+                        try {
+                            // topic config table
+                            Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
+                            configEntries.forEach(entry -> config.add(new UIPropertyTableItem(entry.name(), entry.value())));
+                            topicConfigTable.setItems(config);
+                        } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                            log.error("Error when get topic config properties", e);
+//                            topicConfigTable.setItems(FXCollections.emptyObservableList());
+//                            throw new RuntimeException(e);
+                        }
+                        try {
+                            // partitions table
+                            refreshPartitionsTbl(clusterName, topicName);
+                        } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                            log.error("Error when get partitions properties for Partitions table", e);
+//                            kafkaPartitionsTable.setItems(FXCollections.emptyObservableList());
+//                            throw new RuntimeException(e);
+                        }
+                        return null;
+                    }
+                };
+                getTopicAndPartitionProperties.setOnSucceeded(event -> {
+                    log.info("Successfully get topic config & partitions properties for cluster {} and topic {}", clusterName, topicName);
+                });
+                getTopicAndPartitionProperties.setOnFailed(event -> {
+                    log.error("Error when getting topic config & partitions properties for cluster {} and topic {}", clusterName, topicName);
+                });
+//                CompletableFuture.runAsync(getTopicAndPartitionProperties);
+                Platform.runLater(getTopicAndPartitionProperties);
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
@@ -408,7 +432,7 @@ public class MainController {
 //        if (!validateSchema(valueContentTypeStr, schema)) {
 //            return;
 //        }
-        ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
+        ObservableList<KafkaMessageTableItem> list = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
         messageTable.setItems(list);
         treeMsgTableItemCache.put(selectedTreeItem, list);
         blockAppProgressInd.setVisible(true);
@@ -463,9 +487,10 @@ public class MainController {
             UIErrorHandler.showError(Thread.currentThread(), e);
         });
 
-        Thread backgroundMsgPollingThread = new Thread(pollMsgTask);
-        backgroundMsgPollingThread.setDaemon(true);
-        backgroundMsgPollingThread.start();
+        CompletableFuture.runAsync(pollMsgTask);
+//        Thread backgroundMsgPollingThread = new Thread(pollMsgTask);
+//        backgroundMsgPollingThread.setDaemon(true);
+//        backgroundMsgPollingThread.start();
     }
 
     private void displayNotPollingMessage() {
@@ -559,6 +584,9 @@ public class MainController {
             }
         });
         long totalMsg = partitionsTableItems.stream().mapToLong(KafkaPartitionsTableItem::getNoMessage).sum();
-        totalMessages.setText(totalMsg + " Messages");
+//        totalMessagesInTheTopicProperty.set(totalMsg);
+        Platform.runLater(() -> totalMessagesInTheTopicStringProperty.set(totalMsg + " Messages"));
+//        ;
+//        totalMessagesInTheTopicLabel.setText(totalMsg + " Messages");
     }
 }

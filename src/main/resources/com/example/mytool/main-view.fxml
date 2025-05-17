@@ -27,7 +27,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import org.fxmisc.richtext.CodeArea?>
 
-<AnchorPane prefHeight="661.0" prefWidth="1397.0" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.MainController">
+<AnchorPane prefHeight="661.0" prefWidth="1397.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.MainController">
    <children>
       <SplitPane dividerPositions="0.29069767441860467" prefHeight="614.0" prefWidth="1271.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="0.0">
           <items>
@@ -202,8 +202,7 @@
                                         </AnchorPane>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                              <children>
-                                                <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-                                                 style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"/>
+                                                <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                              </children></AnchorPane>
                                       </items>
                                     </SplitPane>
@@ -265,7 +264,7 @@
                                                             <HBox prefHeight="36.0" prefWidth="934.0">
                                                                <children>
                                                                   <Button mnemonicParsing="false" onAction="#refreshPartitionsTblAction" prefHeight="26.0" prefWidth="72.0" text="Refresh" />
-                                                                  <Label fx:id="totalMessages" prefHeight="28.0" prefWidth="106.0" text="0 Messages">
+                                                                  <Label fx:id="totalMessagesInTheTopicLabel" prefHeight="28.0" prefWidth="106.0" text="0 Messages">
                                                                      <HBox.margin>
                                                                         <Insets left="10.0" />
                                                                      </HBox.margin>

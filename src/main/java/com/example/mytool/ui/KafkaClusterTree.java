@@ -273,7 +273,7 @@ public class KafkaClusterTree {
                         ViewUtil.showPopUpModal("add-connection-modal.fxml", "Edit Connection", modelRef,
                                 Map.of("clusterNameTextField", oldConnection.getName(),
                                         "bootstrapServerTextField", oldConnection.getBootstrapServer(),
-                                        "schemaRegistryTextField", oldConnection.getSchemaRegistryUrl()));
+                                        "schemaRegistryTextField", oldConnection.getSchemaRegistryUrl() != null ? oldConnection.getSchemaRegistryUrl() : ""));
                         newConnection = (KafkaCluster) modelRef.get();
                         //TODO: check the new name not in existing connections
                         if (newConnection != null &&

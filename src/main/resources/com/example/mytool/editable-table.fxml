@@ -10,7 +10,7 @@
 
 <!-- fx:controller="com.example.mytool.ui.control.EditableTableControl" -->
 
-<fx:root prefHeight="437.0" prefWidth="730.0" type="AnchorPane" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="437.0" prefWidth="730.0" type="AnchorPane" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
    <children>
 
                                     <SplitPane dividerPositions="0.12440944881889764" minHeight="200.0" orientation="VERTICAL" prefHeight="473.0" prefWidth="876.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

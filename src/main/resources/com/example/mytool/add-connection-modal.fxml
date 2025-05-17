@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.AddConnectionModalController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.AddConnectionModalController">
     <children>
         <TabPane layoutX="23.0" layoutY="8.0" prefHeight="375.0" prefWidth="569.0" tabClosingPolicy="UNAVAILABLE">
             <tabs>
