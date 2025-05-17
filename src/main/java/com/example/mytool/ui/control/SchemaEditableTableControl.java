@@ -53,7 +53,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                 fireEvent(selectedSchemaEvent);
             }
         });
-
+        addItemBtn.setDisable(true);
     }
 
     @FXML

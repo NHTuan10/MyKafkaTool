@@ -24,12 +24,12 @@
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button fx:id="addHeaderBtn" mnemonicParsing="false" onAction="#addItem" text="+">
+                        <Button fx:id="addItemBtn" mnemonicParsing="false" onAction="#addItem" text="+">
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button fx:id="removeHeaderBtn" mnemonicParsing="false" onAction="#removeItem" text="-">
+                        <Button fx:id="removeItemBtn" mnemonicParsing="false" onAction="#removeItem" text="-">
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
