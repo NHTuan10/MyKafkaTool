@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartitionInfo;
@@ -29,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-
+@Slf4j
 public final class ViewUtil {
 
     public static boolean confirmAlert(String title, String text, String okDoneText, String cancelCloseText) {
@@ -164,7 +165,11 @@ public final class ViewUtil {
         } catch (JsonProcessingException e) {
         }
         codeArea.replaceText(value);
-        codeArea.setStyleSpans(0, json.highlight(value));
+        try {
+            codeArea.setStyleSpans(0, json.highlight(value));
+        } catch (Exception e) {
+            log.error("Error highlighting json in code area", e);
+        }
     }
 
     public static class DragSelectionCell<S, T> extends TableCell<S, T> {

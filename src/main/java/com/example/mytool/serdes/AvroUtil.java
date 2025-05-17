@@ -24,7 +24,7 @@ public class AvroUtil {
 
     public static ObjectMapper constructObjectMapper() {
         DefaultPrettyPrinter p = new DefaultPrettyPrinter();
-        DefaultPrettyPrinter.Indenter i = new DefaultIndenter("  ", System.lineSeparator());
+        DefaultPrettyPrinter.Indenter i = new DefaultIndenter("  ", "\n");
         p.indentArraysWith(i);
         p.indentObjectsWith(i);
         ObjectMapper objectMapper = new ObjectMapper();
