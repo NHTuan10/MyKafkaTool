@@ -338,8 +338,7 @@ public class MainController {
                 getTopicAndPartitionProperties.setOnFailed(event -> {
                     log.error("Error when getting topic config & partitions properties for cluster {} and topic {}", clusterName, topicName);
                 });
-//                CompletableFuture.runAsync(getTopicAndPartitionProperties);
-                Platform.runLater(getTopicAndPartitionProperties);
+                CompletableFuture.runAsync(getTopicAndPartitionProperties);
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
@@ -452,7 +451,8 @@ public class MainController {
                                 .schema(schema)
                                 .pollCallback(() -> {
                                     blockAppProgressInd.setVisible(false);
-//                                    noMessages.setText(list.size() + " Messages");
+                                    Platform.runLater(() -> noMessages.setText(list.size() + " Messages"));
+//
                                     return new KafkaConsumerService.PollCallback(list, isPolling);
                                 })
                                 .isLiveUpdate(isLiveUpdateCheckBox.isSelected())
