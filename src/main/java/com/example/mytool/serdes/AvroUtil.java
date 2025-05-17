@@ -35,7 +35,12 @@ public class AvroUtil {
             Decoder decoder = DecoderFactory.get().jsonDecoder(schema, json);
             return reader.read(null, decoder);
         } else {
-            return objectMapper.readValue(json, Object.class);
+//            try {
+//                return objectMapper.readValue(json, Object.class);
+//            } catch (JsonProcessingException e) {
+//                return json;
+//            }
+            return json;
         }
     }
 

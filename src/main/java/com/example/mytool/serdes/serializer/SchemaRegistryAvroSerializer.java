@@ -3,11 +3,13 @@ package com.example.mytool.serdes.serializer;
 import com.example.mytool.api.DisplayType;
 import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.serdes.AvroUtil;
+import com.example.mytool.serdes.SerDesHelper;
 
 import java.io.IOException;
 import java.util.Map;
 
 public class SchemaRegistryAvroSerializer implements PluggableSerializer {
+
     @Override
     public String getName() {
         return "Schema Registry Avro";
@@ -20,7 +22,7 @@ public class SchemaRegistryAvroSerializer implements PluggableSerializer {
 
     @Override
     public Object convertStringToObject(String str, Map<String, Object> optionalParams) throws IOException {
-        String schema = optionalParams.get("schema").toString();
+        String schema = optionalParams.get(SerDesHelper.SCHEMA).toString();
         return AvroUtil.convertJsonToAvro(str, schema);
     }
 
