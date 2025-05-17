@@ -25,6 +25,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
+<?import org.fxmisc.richtext.CodeArea?>
 
 <AnchorPane prefHeight="661.0" prefWidth="1397.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.MainController">
    <children>
@@ -201,7 +202,8 @@
                                         </AnchorPane>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                              <children>
-                                                <TextArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+                                                 style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"/>
                                              </children></AnchorPane>
                                       </items>
                                     </SplitPane>

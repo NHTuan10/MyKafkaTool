@@ -1,8 +1,11 @@
 package com.example.mytool.ui.util;
 
 import com.example.mytool.Application;
+import com.example.mytool.ui.codehighlighting.Json;
 import com.example.mytool.ui.controller.ModalController;
 import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.beans.property.Property;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,6 +18,7 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartitionInfo;
+import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -149,6 +153,18 @@ public final class ViewUtil {
         return Arrays.stream(tableIemClass.getDeclaredFields())
                 .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(com.example.mytool.annotation.TableColumn.class))
                 .toList();
+    }
+
+    public static void highlightJsonInCodeArea(String inValue, CodeArea codeArea, boolean prettyPrint, ObjectMapper objectMapper, Json json) {
+        String value = inValue;
+        try {
+            value = prettyPrint ?
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectMapper.readTree(inValue)) :
+                    codeArea.getText();
+        } catch (JsonProcessingException e) {
+        }
+        codeArea.replaceText(value);
+        codeArea.setStyleSpans(0, json.highlight(value));
     }
 
     public static class DragSelectionCell<S, T> extends TableCell<S, T> {

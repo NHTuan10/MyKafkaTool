@@ -8,7 +8,6 @@ import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyTableItem;
 import com.example.mytool.ui.codehighlighting.Json;
 import com.example.mytool.ui.util.ViewUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -77,7 +76,7 @@ public class AddOrViewMessageModalController extends ModalController {
         });
         valueDisplayTypeComboBox.setItems(FXCollections.observableArrayList(DisplayType.values()));
         valueTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            refreshDisplayValue(false, newText, valueDisplayTypeComboBox.getValue(), valueTextArea);
+            refreshDisplayValue(newText, valueTextArea, valueDisplayTypeComboBox.getValue(), false);
 //                    if (valueDisplayTypeComboBox.getValue() == DisplayType.JSON) {
 ////                       && !newText.equals(oldText)){
 //                        textArea.setStyleSpans(0, json.highlight(newText));
@@ -86,7 +85,7 @@ public class AddOrViewMessageModalController extends ModalController {
 //                    }
         });
         schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            refreshDisplayValue(false, newText, DisplayType.JSON, schemaTextArea);
+            refreshDisplayValue(newText, schemaTextArea, DisplayType.JSON, false);
         });
     }
 
@@ -166,24 +165,16 @@ public class AddOrViewMessageModalController extends ModalController {
 
     private void valueDisplayTypeToggleEventAction(boolean editable, String initValue) {
         if (!editable) {
-            refreshDisplayValue(true, initValue, valueDisplayTypeComboBox.getValue(), valueTextArea);
+            refreshDisplayValue(initValue, valueTextArea, valueDisplayTypeComboBox.getValue(), true);
         }
-        refreshDisplayValue(true, valueTextArea.getText(), valueDisplayTypeComboBox.getValue(), valueTextArea);
+        refreshDisplayValue(valueTextArea.getText(), valueTextArea, valueDisplayTypeComboBox.getValue(), true);
     }
 
-    private void refreshDisplayValue(boolean prettyPrint, String inValue, DisplayType displayType, CodeArea codeArea) {
+    private void refreshDisplayValue(String inValue, CodeArea codeArea, DisplayType displayType, boolean prettyPrint) {
         if (StringUtils.isNotBlank(inValue)) {
 
             if (displayType == DisplayType.JSON) {
-                String value = inValue;
-                try {
-                    value = prettyPrint ?
-                            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectMapper.readTree(inValue)) :
-                            codeArea.getText();
-                } catch (JsonProcessingException e) {
-                }
-                codeArea.replaceText(value);
-                codeArea.setStyleSpans(0, json.highlight(value));
+                ViewUtil.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, objectMapper, json);
             } else if (displayType == DisplayType.TEXT) {
                 if (prettyPrint) {
                     codeArea.replaceText(inValue);

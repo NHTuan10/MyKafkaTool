@@ -10,6 +10,7 @@ import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.model.kafka.SchemaMetadataFromRegistry;
 import com.example.mytool.producer.ProducerUtil;
+import com.example.mytool.serdes.AvroUtil;
 import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.serdes.deserializer.ByteArrayDeserializer;
 import com.example.mytool.serdes.deserializer.SchemaRegistryAvroDeserializer;
@@ -21,6 +22,7 @@ import com.example.mytool.serdes.serializer.StringSerializer;
 import com.example.mytool.ui.*;
 import com.example.mytool.ui.cg.ConsumerGroupOffsetTableItem;
 import com.example.mytool.ui.cg.ConsumerGroupTreeItem;
+import com.example.mytool.ui.codehighlighting.Json;
 import com.example.mytool.ui.control.DateTimePicker;
 import com.example.mytool.ui.control.SchemaEditableTableControl;
 import com.example.mytool.ui.partition.KafkaPartitionTreeItem;
@@ -41,6 +43,7 @@ import org.apache.kafka.clients.admin.ConfigEntry;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
+import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -68,6 +71,8 @@ public class MainController {
     private final ProducerUtil producerUtil;
 
     private final SerDesHelper serDesHelper;
+
+    private final Json json;
 
     private KafkaClusterTree kafkaClusterTree;
 
@@ -137,7 +142,7 @@ public class MainController {
     private SchemaEditableTableControl schemaEditableTableControl;
 
     @FXML
-    private TextArea schemaRegistryTextArea;
+    private CodeArea schemaRegistryTextArea;
 
     // Consumer Groups
     @FXML
@@ -181,6 +186,7 @@ public class MainController {
         );
         this.producerUtil = new ProducerUtil(this.serDesHelper);
         this.kafkaConsumerService = new KafkaConsumerService(this.serDesHelper);
+        this.json = new Json();
     }
 
     @FXML
@@ -195,7 +201,9 @@ public class MainController {
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
         configureTableView();
-
+        schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
+            ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, json);
+        });
     }
 
     private void configureTableView() {
@@ -204,7 +212,8 @@ public class MainController {
         TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable, true);
         TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable, true);
         TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable, true);
-        schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE, (event) -> schemaRegistryTextArea.textProperty().bindBidirectional(event.getData()));
+        schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
+                (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));
         // Use a change listener to respond to a selection within
         // a tree view
 //        clusterTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem<String>>) (changed, oldVal, newVal) -> {

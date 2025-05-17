@@ -18,7 +18,7 @@ public class AvroUtil {
         return new Schema.Parser().parse(schemaStr);
     }
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public static Object convertJsonToAvro(String json, String schemaStr) throws IOException {
         Schema schema = null;
