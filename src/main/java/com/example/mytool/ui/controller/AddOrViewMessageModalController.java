@@ -1,13 +1,14 @@
 package com.example.mytool.ui.controller;
 
 import com.example.mytool.api.DisplayType;
+import com.example.mytool.api.PluggableDeserializer;
 import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.api.model.KafkaMessage;
 import com.example.mytool.serdes.AvroUtil;
 import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyTableItem;
-import com.example.mytool.ui.codehighlighting.Json;
+import com.example.mytool.ui.codehighlighting.JsonHighlighter;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -60,7 +62,7 @@ public class AddOrViewMessageModalController extends ModalController {
 
     private ObservableList<UIPropertyTableItem> headerItems;
 
-    private final Json json = new Json();
+    private final JsonHighlighter jsonHighlighter = new JsonHighlighter();
 
     @FXML
     void initialize() {
@@ -139,19 +141,24 @@ public class AddOrViewMessageModalController extends ModalController {
             valueDisplayTypeToggleEventAction(editable, initValue);
         });
         //TODO: Set value on below combox box based on the valueContentTypeComboBox
-        if (valueContentType != null) {
-            valueContentTypeComboBox.getSelectionModel().select(valueContentType);
-        } else {
-            valueContentTypeComboBox.getSelectionModel().selectFirst();
-        }
+        valueContentTypeComboBox.getSelectionModel().selectFirst();
+
         DisplayType displayType;
 
-        if (editable) {
-            displayType = serDesHelper.getPluggableSerialize(valueContentType).getDisplayType();
+        if (editable) { // For Add Message Modal
+            if (valueContentType != null && serDesHelper.getPluggableSerialize(valueContentType) != null) {
+                valueContentTypeComboBox.getSelectionModel().select(valueContentType);
+            }
+            displayType = Optional.ofNullable(serDesHelper.getPluggableSerialize(valueContentType))
+                    .map(PluggableSerializer::getDisplayType).orElse(DisplayType.TEXT);
             TableViewConfigurer.configureEditableKeyValueTable(headerTable);
             enableDisableSchemaTextArea();
-        } else {
-            displayType = serDesHelper.getPluggableDeserialize(valueContentType).getDisplayType();
+        } else { // For View Message Modal
+            if (valueContentType != null && serDesHelper.getPluggableDeserialize(valueContentType) != null) {
+                valueContentTypeComboBox.getSelectionModel().select(valueContentType);
+            }
+            displayType = Optional.ofNullable(serDesHelper.getPluggableDeserialize(valueContentType))
+                    .map(PluggableDeserializer::getDisplayType).orElse(DisplayType.TEXT);
             valueDisplayTypeComboBox.getSelectionModel().select(displayType);
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(Event::consume);
@@ -174,7 +181,7 @@ public class AddOrViewMessageModalController extends ModalController {
         if (StringUtils.isNotBlank(inValue)) {
 
             if (displayType == DisplayType.JSON) {
-                ViewUtil.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, AvroUtil.OBJECT_MAPPER, json);
+                ViewUtil.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
             } else if (displayType == DisplayType.TEXT) {
                 if (prettyPrint) {
                     codeArea.replaceText(inValue);

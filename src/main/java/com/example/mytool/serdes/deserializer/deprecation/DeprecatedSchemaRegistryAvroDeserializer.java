@@ -12,4 +12,9 @@ public class DeprecatedSchemaRegistryAvroDeserializer implements PluggableDeseri
     public String getDeserializerClass() {
         return "io.confluent.kafka.serializers.KafkaAvroDeserializer";
     }
+
+    @Override
+    public boolean mayNeedUserInputForSchema() {
+        return true;
+    }
 }

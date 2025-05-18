@@ -1,7 +1,7 @@
 package com.example.mytool.ui.util;
 
 import com.example.mytool.Application;
-import com.example.mytool.ui.codehighlighting.Json;
+import com.example.mytool.ui.codehighlighting.JsonHighlighter;
 import com.example.mytool.ui.controller.ModalController;
 import com.example.mytool.ui.partition.KafkaPartitionsTableItem;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.beans.property.Property;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -28,7 +29,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 @Slf4j
 public final class ViewUtil {
@@ -156,7 +159,7 @@ public final class ViewUtil {
                 .toList();
     }
 
-    public static void highlightJsonInCodeArea(String inValue, CodeArea codeArea, boolean prettyPrint, ObjectMapper objectMapper, Json json) {
+    public static void highlightJsonInCodeArea(String inValue, CodeArea codeArea, boolean prettyPrint, ObjectMapper objectMapper, JsonHighlighter jsonHighlighter) {
         String value = inValue;
         try {
             value = prettyPrint ?
@@ -166,7 +169,7 @@ public final class ViewUtil {
         }
         codeArea.replaceText(value);
         try {
-            codeArea.setStyleSpans(0, json.highlight(value));
+            codeArea.setStyleSpans(0, jsonHighlighter.highlight(value));
         } catch (Exception e) {
             log.error("Error highlighting json in code area", e);
         }
@@ -193,5 +196,18 @@ public final class ViewUtil {
                 setText(item != null ? item.toString() : null);
             }
         }
+    }
+
+    public static <T> Task<T> runBackgroundTask(Callable<T> runnable, Consumer<Object> onSuccess, Consumer<Throwable> onError) {
+        Task<T> task = new Task<>() {
+            @Override
+            protected T call() throws Exception {
+                return runnable.call();
+            }
+        };
+        task.setOnSucceeded(workerStateEvent -> onSuccess.accept(workerStateEvent.getSource().getValue()));
+        task.setOnFailed(workerStateEvent -> onError.accept(workerStateEvent.getSource().getException()));
+        new Thread(task).start();
+        return task;
     }
 }

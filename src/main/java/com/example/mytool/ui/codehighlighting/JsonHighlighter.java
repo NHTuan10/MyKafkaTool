@@ -12,11 +12,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class Json {
+public class JsonHighlighter {
 
     private final JsonFactory jsonFactory;
 
-    public Json() {
+    public JsonHighlighter() {
         jsonFactory = new JsonFactory();
     }
 

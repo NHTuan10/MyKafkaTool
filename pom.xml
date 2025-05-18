@@ -152,7 +152,7 @@
                         <configuration>
                             <mainClass>com.example.mytool.Application</mainClass>
                             <options>
-                                <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8000</option>
+                                <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005</option>
                             </options>
                         </configuration>
                     </execution>

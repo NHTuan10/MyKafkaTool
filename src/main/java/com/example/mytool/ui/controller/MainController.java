@@ -22,7 +22,7 @@ import com.example.mytool.serdes.serializer.StringSerializer;
 import com.example.mytool.ui.*;
 import com.example.mytool.ui.cg.ConsumerGroupOffsetTableItem;
 import com.example.mytool.ui.cg.ConsumerGroupTreeItem;
-import com.example.mytool.ui.codehighlighting.Json;
+import com.example.mytool.ui.codehighlighting.JsonHighlighter;
 import com.example.mytool.ui.control.DateTimePicker;
 import com.example.mytool.ui.control.SchemaEditableTableControl;
 import com.example.mytool.ui.partition.KafkaPartitionTreeItem;
@@ -35,7 +35,6 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import lombok.NonNull;
@@ -55,12 +54,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static com.example.mytool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
 import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
@@ -75,7 +75,7 @@ public class MainController {
 
     private final SerDesHelper serDesHelper;
 
-    private final Json json;
+    private final JsonHighlighter jsonHighlighter;
 
     private KafkaClusterTree kafkaClusterTree;
 
@@ -124,7 +124,7 @@ public class MainController {
     private ComboBox<KafkaConsumerService.MessagePollingPosition> msgPosition;
 
     @FXML
-    private TextArea schemaTextArea;
+    private CodeArea schemaTextArea;
 
     @FXML
     private CheckBox isLiveUpdateCheckBox;
@@ -192,7 +192,7 @@ public class MainController {
         );
         this.producerUtil = new ProducerUtil(this.serDesHelper);
         this.kafkaConsumerService = new KafkaConsumerService(this.serDesHelper);
-        this.json = new Json();
+        this.jsonHighlighter = new JsonHighlighter();
     }
 
     @FXML
@@ -207,7 +207,7 @@ public class MainController {
         configureClusterTreeSelectedItemChanged();
         configureTableView();
         schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, json);
+            ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
         });
         totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty
 //                totalMessagesInTheTopicProperty.asString("%,d Messages")
@@ -262,6 +262,15 @@ public class MainController {
             displayNotPollingMessage();
         });
         schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
+        schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
+            ViewUtil.highlightJsonInCodeArea(newText, schemaTextArea, false, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+//                    if (valueDisplayTypeComboBox.getValue() == DisplayType.JSON) {
+////                       && !newText.equals(oldText)){
+//                        textArea.setStyleSpans(0, json.highlight(newText));
+//                    } else if (valueDisplayTypeComboBox.getValue() == DisplayType.TEXT) {
+//                        textArea.clearStyle(0, newText.length() - 1);
+//                    }
+        });
         isLiveUpdateCheckBox.setOnAction(event -> {
             if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
                 isPolling.set(false);
@@ -274,6 +283,7 @@ public class MainController {
         clusterTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             // Display the selection and its complete path from the root.
             if (newValue != null && newValue != oldValue) {
+                displayNotPollingMessage();
                 // disable/hide UI tab and titled
                 cgOffsetsTab.setDisable(true);
 //                dataTab.setDisable(true);
@@ -308,37 +318,34 @@ public class MainController {
                 tabPane.getSelectionModel().select(dataTab);
                 schemaSplitPane.setVisible(false);
                 messageSplitPane.setVisible(true);
-                Task<Void> getTopicAndPartitionProperties = new Task<>() {
-                    @Override
-                    protected Void call() {
-                        try {
-                            // topic config table
-                            Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
-                            configEntries.forEach(entry -> config.add(new UIPropertyTableItem(entry.name(), entry.value())));
-                            topicConfigTable.setItems(config);
-                        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                            log.error("Error when get topic config properties", e);
+                Callable<Void> getTopicAndPartitionProperties = () -> {
+                    try {
+                        // topic config table
+                        Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
+                        configEntries.forEach(entry -> config.add(new UIPropertyTableItem(entry.name(), entry.value())));
+                        topicConfigTable.setItems(config);
+                    } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                        log.error("Error when get topic config properties", e);
 //                            topicConfigTable.setItems(FXCollections.emptyObservableList());
 //                            throw new RuntimeException(e);
-                        }
-                        try {
-                            // partitions table
-                            refreshPartitionsTbl(clusterName, topicName);
-                        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                            log.error("Error when get partitions properties for Partitions table", e);
+                    }
+                    try {
+                        // partitions table
+                        refreshPartitionsTbl(clusterName, topicName);
+                    } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                        log.error("Error when get partitions properties for Partitions table", e);
 //                            kafkaPartitionsTable.setItems(FXCollections.emptyObservableList());
 //                            throw new RuntimeException(e);
-                        }
-                        return null;
                     }
+                    return null;
                 };
-                getTopicAndPartitionProperties.setOnSucceeded(event -> {
+                Consumer<Object> onSuccess = (val) -> {
                     log.info("Successfully get topic config & partitions properties for cluster {} and topic {}", clusterName, topicName);
-                });
-                getTopicAndPartitionProperties.setOnFailed(event -> {
-                    log.error("Error when getting topic config & partitions properties for cluster {} and topic {}", clusterName, topicName);
-                });
-                CompletableFuture.runAsync(getTopicAndPartitionProperties);
+                };
+                Consumer<Throwable> onFailure = (exception) -> {
+                    log.error("Error when getting topic config & partitions properties for cluster {} and topic {}", clusterName, topicName, exception);
+                };
+                ViewUtil.runBackgroundTask(getTopicAndPartitionProperties, onSuccess, onFailure);
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
@@ -351,23 +358,34 @@ public class MainController {
                     ObservableList<KafkaMessageTableItem> observableList = treeMsgTableItemCache.get(topicTreeItem).filtered(item -> item.getPartition() == partition.id());
                     messageTable.setItems(observableList);
                 }
-                try {
-                    String clusterName = partition.topic().cluster().getName();
-                    String topic = partition.topic().name();
-                    Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.id()), null);
-                    ObservableList<UIPropertyTableItem> list = FXCollections.observableArrayList(
-                            new UIPropertyTableItem(UIPropertyTableItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
-                            , new UIPropertyTableItem(UIPropertyTableItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
-                            , new UIPropertyTableItem(UIPropertyTableItem.NO_MESSAGES, String.valueOf(partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft())));
+                final String clusterName = partition.topic().cluster().getName();
+                final String topic = partition.topic().name();
+                Callable<Void> getPartitionInfo = () -> {
+                    try {
 
-                    TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, partition.id());
-                    list.addAll(getPartitionInfoForUI(partitionInfo));
+                        Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.id()), null);
+                        ObservableList<UIPropertyTableItem> list = FXCollections.observableArrayList(
+                                new UIPropertyTableItem(UIPropertyTableItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
+                                , new UIPropertyTableItem(UIPropertyTableItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
+                                , new UIPropertyTableItem(UIPropertyTableItem.NO_MESSAGES, String.valueOf(partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft())));
 
-                    topicConfigTable.setItems(list);
-                } catch (ExecutionException | InterruptedException e) {
-                    log.error("Error when get partition info", e);
-                    throw new RuntimeException(e);
-                }
+                        TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, partition.id());
+                        list.addAll(getPartitionInfoForUI(partitionInfo));
+
+                        topicConfigTable.setItems(list);
+                        return null;
+                    } catch (ExecutionException | InterruptedException e) {
+                        log.error("Error when get partition info", e);
+                        throw new RuntimeException(e);
+                    }
+                };
+                Consumer<Object> onSuccess = (val) -> {
+                    log.info("Successfully get topic config & partitions properties for cluster {}, topic {} and partition", clusterName, topic, partition.id());
+                };
+                Consumer<Throwable> onFailure = (exception) -> {
+                    log.error("Error when getting topic config & partitions properties for cluster {} and topic {} and partition", clusterName, topic, partition.id(), exception);
+                };
+                ViewUtil.runBackgroundTask(getPartitionInfo, onSuccess, onFailure);
 
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 try {
@@ -437,9 +455,7 @@ public class MainController {
         blockAppProgressInd.setVisible(true);
         isPollingMsgProgressIndicator.setVisible(true);
         pullMessagesBtn.setText(AppConstant.STOP_POLLING_TEXT);
-        Task<Void> pollMsgTask = new Task<>() {
-            @Override
-            protected Void call() {
+        Callable<Void> pollMsgTask = () -> {
                 isPolling.set(true);
                 KafkaConsumerService.PollingOptions pollingOptions =
                         KafkaConsumerService.PollingOptions.builder()
@@ -474,23 +490,17 @@ public class MainController {
                 }
 
                 return null;
-            }
         };
-        pollMsgTask.setOnSucceeded(event -> {
+        Consumer<Object> onSuccess = (val) -> {
             displayNotPollingMessage();
             noMessages.setText(list.size() + " Messages");
-        });
-        pollMsgTask.setOnFailed(event -> {
+        };
+        Consumer<Throwable> onFailure = (exception) -> {
             displayNotPollingMessage();
-            Throwable e = event.getSource().getException();
-            log.error("Error when poll messages", e);
-            UIErrorHandler.showError(Thread.currentThread(), e);
-        });
-
-        CompletableFuture.runAsync(pollMsgTask);
-//        Thread backgroundMsgPollingThread = new Thread(pollMsgTask);
-//        backgroundMsgPollingThread.setDaemon(true);
-//        backgroundMsgPollingThread.start();
+            log.error("Error when poll messages", exception);
+            UIErrorHandler.showError(Thread.currentThread(), exception);
+        };
+        ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
     }
 
     private void displayNotPollingMessage() {

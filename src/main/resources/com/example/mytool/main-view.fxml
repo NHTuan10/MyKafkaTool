@@ -165,11 +165,12 @@
                                                             <Insets left="10.0" right="10.0" />
                                                          </HBox.margin>
                                                       </Label>
-                                                      <TextArea fx:id="schemaTextArea" disable="true" prefHeight="93.0" prefWidth="388.0">
+                                                      <CodeArea fx:id="schemaTextArea" disable="true" prefHeight="93.0" prefWidth="388.0"
+                                                      style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;">
                                                          <HBox.margin>
                                                             <Insets right="5.0" />
                                                          </HBox.margin>
-                                                      </TextArea>
+                                                      </CodeArea>
                                                    </children>
                                                 </HBox>
                                                                                                           </children>
