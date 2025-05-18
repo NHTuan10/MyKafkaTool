@@ -26,6 +26,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import org.fxmisc.richtext.CodeArea?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
 
 <AnchorPane prefHeight="661.0" prefWidth="1397.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.MainController">
    <children>
@@ -165,12 +166,14 @@
                                                             <Insets left="10.0" right="10.0" />
                                                          </HBox.margin>
                                                       </Label>
-                                                      <CodeArea fx:id="schemaTextArea" disable="true" prefHeight="93.0" prefWidth="388.0"
-                                                      style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;">
-                                                         <HBox.margin>
-                                                            <Insets right="5.0" />
-                                                         </HBox.margin>
-                                                      </CodeArea>
+                                                      <VirtualizedScrollPane>
+                                                          <HBox.margin><Insets right="5.0" /></HBox.margin>
+                                                          <content>
+                                                             <CodeArea fx:id="schemaTextArea" disable="true" prefHeight="93.0" prefWidth="388.0" wrapText="true"
+                                                             style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;">
+                                                                         </CodeArea>
+                                                          </content>
+                                                      </VirtualizedScrollPane>
                                                    </children>
                                                 </HBox>
                                                                                                           </children>
@@ -202,9 +205,14 @@
                                             </children>
                                         </AnchorPane>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                             <children>
-                                                <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                             </children></AnchorPane>
+                                         <children>
+                                             <VirtualizedScrollPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" >
+                                                <content>
+                                                    <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" />
+                                                </content>
+                                             </VirtualizedScrollPane>
+                                         </children>
+                                         </AnchorPane>
                                       </items>
                                     </SplitPane>
                                           </children>

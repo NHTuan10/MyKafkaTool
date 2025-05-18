@@ -75,7 +75,6 @@ public class EditableTableControl<T> extends AnchorPane {
 
     @FXML
     protected void addItem() {
-//        tableItems.add(new UIPropertyItem("", ""));
     }
 
     @FXML
