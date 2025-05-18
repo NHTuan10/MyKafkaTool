@@ -10,10 +10,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Slf4j
 public class EditableTableControl<T> extends AnchorPane {
@@ -42,6 +41,11 @@ public class EditableTableControl<T> extends AnchorPane {
     protected Class<T> itemClass;
 
     protected BooleanProperty editable = new SimpleBooleanProperty(true);
+    @FXML
+    protected TextField filterTextField;
+
+    @FXML
+    protected Label filterLabel;
 
     public EditableTableControl() {
         this(true);
@@ -79,6 +83,11 @@ public class EditableTableControl<T> extends AnchorPane {
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
+        filterTextField.setOnKeyPressed(e -> {
+            if (e.getCode().equals(KeyCode.ENTER)) {
+                table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
+            }
+        });
         table.setItems(tableItems);
         configureEditableControls();
     }
@@ -99,6 +108,10 @@ public class EditableTableControl<T> extends AnchorPane {
 
     }
 
+    protected Predicate<T> filterPredicate(String filterText) {
+        return (item) -> true;
+    }
+
     protected void configureEditableControls() {
         table.editableProperty().bind(editable);
         addItemBtn.disableProperty().bind(editable.not());
@@ -106,4 +119,5 @@ public class EditableTableControl<T> extends AnchorPane {
                 .or(table.getSelectionModel().selectedItemProperty().isNull()));
     }
 
+//    public record Filter<T> (T item, String filterText){}
 }

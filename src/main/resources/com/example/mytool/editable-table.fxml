@@ -2,22 +2,24 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 
 <!-- fx:controller="com.example.mytool.ui.control.EditableTableControl" -->
 
-<fx:root prefHeight="437.0" prefWidth="730.0" type="AnchorPane" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="437.0" prefWidth="730.0" type="AnchorPane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
 
                                     <SplitPane dividerPositions="0.12440944881889764" minHeight="200.0" orientation="VERTICAL" prefHeight="473.0" prefWidth="876.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane maxHeight="50.0" minHeight="50.0" minWidth="-Infinity">
                <children>
-                  <HBox prefHeight="17.0" prefWidth="200.0">
+                  <HBox prefHeight="31.0" prefWidth="728.0">
                      <children>
                         <Button fx:id="refreshBtn" mnemonicParsing="false" onAction="#refresh" text="↻">
                            <HBox.margin>
@@ -34,6 +36,16 @@
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </Button>
+                        <Label fx:id="filterLabel" text="Filter">
+                           <HBox.margin>
+                              <Insets left="10.0" top="5.0" />
+                           </HBox.margin>
+                        </Label>
+                        <TextField fx:id="filterTextField" prefHeight="26.0" prefWidth="202.0">
+                           <HBox.margin>
+                              <Insets left="10.0" top="5.0" />
+                           </HBox.margin>
+                        </TextField>
                      </children>
                   </HBox>
                </children>

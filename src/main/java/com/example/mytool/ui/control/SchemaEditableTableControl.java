@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Slf4j
 public class SchemaEditableTableControl extends EditableTableControl<SchemaTableItem> {
@@ -56,6 +57,12 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
             }
         });
 //        addItemBtn.setVisible(false);
+    }
+
+    @Override
+    protected Predicate<SchemaTableItem> filterPredicate(String filterText) {
+        return (item) -> item.getSubject().toLowerCase().contains(filterText.toLowerCase()) ||
+                item.getSchema().toLowerCase().contains(filterText.toLowerCase());
     }
 
     @FXML
