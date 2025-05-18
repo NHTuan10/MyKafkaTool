@@ -397,17 +397,23 @@ public class MainController {
 
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 blockAppProgressInd.setVisible(true);
-                try {
-                    cgOffsetsTab.setDisable(false);
-                    dataTab.setDisable(true);
-                    tabPane.getSelectionModel().select(cgOffsetsTab);
-                    consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
+                ViewUtil.runBackgroundTask(() -> {
+                    try {
+                        cgOffsetsTab.setDisable(false);
+                        dataTab.setDisable(true);
+                        tabPane.getSelectionModel().select(cgOffsetsTab);
+                        consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
+
+                    } catch (ExecutionException | InterruptedException e) {
+                        blockAppProgressInd.setVisible(false);
+                        log.error("Error when get consumer group offsets", e);
+                        throw new RuntimeException(e);
+                    }
+                    return null;
+                }, (e) -> blockAppProgressInd.setVisible(false), (e) -> {
                     blockAppProgressInd.setVisible(false);
-                } catch (ExecutionException | InterruptedException e) {
-                    blockAppProgressInd.setVisible(false);
-                    log.error("Error when get consumer group offsets", e);
-                    throw new RuntimeException(e);
-                }
+                    throw ((RuntimeException) e);
+                });
 
             } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equals(selectedItem.getValue())) {
                 blockAppProgressInd.setVisible(true);
@@ -415,15 +421,21 @@ public class MainController {
                 schemaSplitPane.setVisible(true);
                 messageSplitPane.setVisible(false);
                 String clusterName = selectedItem.getParent().getValue().toString();
-                try {
-                    List<SchemaMetadataFromRegistry> schemaMetadataList = SchemaRegistryManager.getInstance().getAllSubjectMetadata(clusterName);
-                    schemaEditableTableControl.setItems(schemaMetadataList, clusterName);
+                ViewUtil.runBackgroundTask(() -> {
+                    try {
+                        List<SchemaMetadataFromRegistry> schemaMetadataList = SchemaRegistryManager.getInstance().getAllSubjectMetadata(clusterName);
+                        schemaEditableTableControl.setItems(schemaMetadataList, clusterName);
+                        blockAppProgressInd.setVisible(false);
+                    } catch (RestClientException | IOException e) {
+                        log.error("Error when get schema registry subject metadata", e);
+                        blockAppProgressInd.setVisible(false);
+                        throw new RuntimeException(e);
+                    }
+                    return null;
+                }, (e) -> blockAppProgressInd.setVisible(false), (e) -> {
                     blockAppProgressInd.setVisible(false);
-                } catch (RestClientException | IOException e) {
-                    log.error("Error when get schema registry subject metadata", e);
-                    blockAppProgressInd.setVisible(false);
-                    throw new RuntimeException(e);
-                }
+                    throw ((RuntimeException) e);
+                });
             }
         });
     }

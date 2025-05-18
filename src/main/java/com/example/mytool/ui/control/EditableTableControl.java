@@ -3,6 +3,9 @@ package com.example.mytool.ui.control;
 import com.example.mytool.Application;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.util.ViewUtil;
+import javafx.beans.NamedArg;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -38,7 +41,14 @@ public class EditableTableControl<T> extends AnchorPane {
 
     protected Class<T> itemClass;
 
+    protected BooleanProperty editable = new SimpleBooleanProperty(true);
+
     public EditableTableControl() {
+        this(true);
+    }
+
+    public EditableTableControl(@NamedArg(value = "editable", defaultValue = "false") Boolean editable) {
+        this.editable.set(editable);
         itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource(
                 "editable-table.fxml"));
@@ -70,6 +80,7 @@ public class EditableTableControl<T> extends AnchorPane {
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
         table.setItems(tableItems);
+        configureEditableControls();
     }
 
 
@@ -88,11 +99,11 @@ public class EditableTableControl<T> extends AnchorPane {
 
     }
 
-    public void configureEditableControls(boolean editable) {
-        table.setEditable(editable);
-        if (editable) {
-//            TableViewConfigurer.configureEditableKeyValueTable(table);
-        }
+    protected void configureEditableControls() {
+        table.editableProperty().bind(editable);
+        addItemBtn.disableProperty().bind(editable.not());
+        removeItemBtn.disableProperty().bind(editable.not()
+                .or(table.getSelectionModel().selectedItemProperty().isNull()));
     }
 
 }

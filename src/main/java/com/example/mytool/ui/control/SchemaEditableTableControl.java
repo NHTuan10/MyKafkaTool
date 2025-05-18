@@ -53,7 +53,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                 fireEvent(selectedSchemaEvent);
             }
         });
-        addItemBtn.setVisible(false);
+//        addItemBtn.setVisible(false);
     }
 
     @FXML
@@ -65,7 +65,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
     }
 
     @FXML
-    protected void removeItem() {
+    public void removeItem() {
         List<Integer> indicesToRemove = table.getSelectionModel().getSelectedIndices().reversed();
         indicesToRemove.forEach((i) -> {
             SchemaTableItem item = tableItems.get(i);
