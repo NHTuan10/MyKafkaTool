@@ -37,6 +37,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -53,10 +54,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -469,12 +467,11 @@ public class MainController {
         String filterText = filterMsgTextField.getText();
         filterMsgTextField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
-                ObservableList<KafkaMessageTableItem> FilteredList = list.filtered((item) -> isMsgTableItemMatched(item, filterMsgTextField.getText()));
-                messageTable.setItems(FilteredList);
+                configureSortAndFilterForMessageTable(list);
             }
         });
-        ObservableList<KafkaMessageTableItem> FilteredList = list.filtered((item) -> isMsgTableItemMatched(item, filterMsgTextField.getText()));
-        messageTable.setItems(FilteredList);
+        configureSortAndFilterForMessageTable(list);
+//        messageTable.setItems(list);
         treeMsgTableItemCache.put(selectedTreeItem, list);
         blockAppProgressInd.setVisible(true);
 //        isPollingMsgProgressIndicator.setVisible(true);
@@ -527,6 +524,14 @@ public class MainController {
             UIErrorHandler.showError(Thread.currentThread(), exception);
         };
         ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
+    }
+
+    private void configureSortAndFilterForMessageTable(ObservableList<KafkaMessageTableItem> list) {
+        Comparator defaultComparator = Comparator.comparing(KafkaMessageTableItem::getTimestamp).reversed();
+        ObservableList<KafkaMessageTableItem> FilteredList = list.filtered((item) -> isMsgTableItemMatched(item, filterMsgTextField.getText()));
+        SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(FilteredList, defaultComparator);
+        sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
+        messageTable.setItems(sortedList);
     }
 
     private boolean isMsgTableItemMatched(KafkaMessageTableItem item, String filterText) {

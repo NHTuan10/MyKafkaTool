@@ -128,14 +128,14 @@ public class KafkaConsumerService {
                     if (!polledMessages.isEmpty()) {
                         messageObservableList.addAll(polledMessages);
                     }
-                    sortMessages(messageObservableList, pollingOptions);
+//                    sortMessages(messageObservableList, pollingOptions);
                 }
             }
         } catch (WakeupException e) {
 
         }
-
-        return filterAndSortMessages(messageObservableList, pollingOptions);
+        return messageObservableList;
+//        return filterAndSortMessages(messageObservableList, pollingOptions);
     }
 
     private List<KafkaMessageTableItem> handleConsumerRecords(PollingOptions pollingOptions, ConsumerRecords<String, Object> consumerRecords, Map<String, Object> consumerProps) {
