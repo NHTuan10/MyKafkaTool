@@ -37,6 +37,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -128,6 +129,9 @@ public class MainController {
 
     @FXML
     private CheckBox isLiveUpdateCheckBox;
+
+    @FXML
+    private TextField filterMsgTextField;
 
     @FXML
     private Button countMessagesBtn;
@@ -388,17 +392,21 @@ public class MainController {
                 ViewUtil.runBackgroundTask(getPartitionInfo, onSuccess, onFailure);
 
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
+                blockAppProgressInd.setVisible(true);
                 try {
                     cgOffsetsTab.setDisable(false);
                     dataTab.setDisable(true);
                     tabPane.getSelectionModel().select(cgOffsetsTab);
                     consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
+                    blockAppProgressInd.setVisible(false);
                 } catch (ExecutionException | InterruptedException e) {
+                    blockAppProgressInd.setVisible(false);
                     log.error("Error when get consumer group offsets", e);
                     throw new RuntimeException(e);
                 }
 
             } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equals(selectedItem.getValue())) {
+                blockAppProgressInd.setVisible(true);
                 dataTab.setDisable(false);
                 schemaSplitPane.setVisible(true);
                 messageSplitPane.setVisible(false);
@@ -406,8 +414,10 @@ public class MainController {
                 try {
                     List<SchemaMetadataFromRegistry> schemaMetadataList = SchemaRegistryManager.getInstance().getAllSubjectMetadata(clusterName);
                     schemaEditableTableControl.setItems(schemaMetadataList, clusterName);
+                    blockAppProgressInd.setVisible(false);
                 } catch (RestClientException | IOException e) {
                     log.error("Error when get schema registry subject metadata", e);
+                    blockAppProgressInd.setVisible(false);
                     throw new RuntimeException(e);
                 }
             }
@@ -449,8 +459,16 @@ public class MainController {
 //        if (!validateSchema(valueContentTypeStr, schema)) {
 //            return;
 //        }
-        ObservableList<KafkaMessageTableItem> list = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
-        messageTable.setItems(list);
+        ObservableList<KafkaMessageTableItem> list = FXCollections.synchronizedObservableList(FXCollections.<KafkaMessageTableItem>observableArrayList());
+        String filterText = filterMsgTextField.getText();
+        filterMsgTextField.setOnKeyPressed(e -> {
+            if (e.getCode().equals(KeyCode.ENTER)) {
+                ObservableList<KafkaMessageTableItem> FilteredList = list.filtered((item) -> isMsgTableItemMatched(item, filterMsgTextField.getText()));
+                messageTable.setItems(FilteredList);
+            }
+        });
+        ObservableList<KafkaMessageTableItem> FilteredList = list.filtered((item) -> isMsgTableItemMatched(item, filterMsgTextField.getText()));
+        messageTable.setItems(FilteredList);
         treeMsgTableItemCache.put(selectedTreeItem, list);
         blockAppProgressInd.setVisible(true);
         isPollingMsgProgressIndicator.setVisible(true);
@@ -501,6 +519,11 @@ public class MainController {
             UIErrorHandler.showError(Thread.currentThread(), exception);
         };
         ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
+    }
+
+    private boolean isMsgTableItemMatched(KafkaMessageTableItem item, String filterText) {
+        return (item != null && item.getKey().toLowerCase().contains(filterText.toLowerCase()))
+                || (item != null && item.getValue().toLowerCase().contains(filterText.toLowerCase()));
     }
 
     private void displayNotPollingMessage() {
