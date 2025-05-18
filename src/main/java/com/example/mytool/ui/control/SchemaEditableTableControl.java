@@ -6,6 +6,7 @@ import com.example.mytool.ui.SchemaTableItem;
 import com.example.mytool.ui.util.ViewUtil;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,11 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Slf4j
 public class SchemaEditableTableControl extends EditableTableControl<SchemaTableItem> {
     private String selectedClusterName;
-
+    private BooleanProperty isBusy;
     public void setItems(List<SchemaMetadataFromRegistry> schemaMetadataList, String clusterName) {
         ObservableList<SchemaTableItem> items = FXCollections.observableArrayList(schemaMetadataList.stream().map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, clusterName)).toList());
         tableItems.setAll(items);
@@ -59,9 +61,37 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
     @FXML
     public void refresh() throws RestClientException, IOException {
         if (this.selectedClusterName != null) {
-            List<SchemaMetadataFromRegistry> schemaMetadataList = SchemaRegistryManager.getInstance().getAllSubjectMetadata(this.selectedClusterName);
-            setItems(schemaMetadataList, this.selectedClusterName);
+            refresh((e) -> isBusy.set(false), (e) -> {
+                isBusy.set(false);
+                throw ((RuntimeException) e);
+            });
         }
+    }
+
+    public void loadAllSchemas(String clusterName, Consumer<Object> onSuccess, Consumer<Throwable> onError, BooleanProperty isBusy) {
+        this.selectedClusterName = clusterName;
+        this.isBusy = isBusy;
+        refresh(onSuccess, onError);
+    }
+
+    private void refresh(Consumer<Object> onSuccess, Consumer<Throwable> onError) {
+        ViewUtil.runBackgroundTask(() -> {
+            try {
+                this.isBusy.set(true);
+                List<SchemaMetadataFromRegistry> schemaMetadataList = SchemaRegistryManager.getInstance().getAllSubjectMetadata(this.selectedClusterName);
+                ObservableList<SchemaTableItem> items = FXCollections.observableArrayList(
+                        schemaMetadataList
+                                .stream()
+                                .map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, this.selectedClusterName))
+                                .toList());
+                tableItems.setAll(items);
+                this.isBusy.set(false);
+            } catch (RestClientException | IOException e) {
+                log.error("Error when get schema registry subject metadata", e);
+                throw new RuntimeException(e);
+            }
+            return null;
+        }, onSuccess, onError);
     }
 
     @FXML

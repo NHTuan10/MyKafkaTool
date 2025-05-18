@@ -198,14 +198,14 @@ public final class ViewUtil {
         }
     }
 
-    public static <T> Task<T> runBackgroundTask(Callable<T> runnable, Consumer<Object> onSuccess, Consumer<Throwable> onError) {
+    public static <T> Task<T> runBackgroundTask(Callable<T> runnable, Consumer<T> onSuccess, Consumer<Throwable> onError) {
         Task<T> task = new Task<>() {
             @Override
             protected T call() throws Exception {
                 return runnable.call();
             }
         };
-        task.setOnSucceeded(workerStateEvent -> onSuccess.accept(workerStateEvent.getSource().getValue()));
+        task.setOnSucceeded(workerStateEvent -> onSuccess.accept((T) workerStateEvent.getSource().getValue()));
         task.setOnFailed(workerStateEvent -> onError.accept(workerStateEvent.getSource().getException()));
         new Thread(task).start();
         return task;
