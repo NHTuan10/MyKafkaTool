@@ -32,6 +32,8 @@ import com.example.mytool.ui.util.ViewUtil;
 import com.google.common.collect.ImmutableMap;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -59,7 +61,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -82,7 +83,7 @@ public class MainController {
 
     private final Map<TreeItem, ObservableList<KafkaMessageTableItem>> treeMsgTableItemCache = new ConcurrentHashMap<>();
 
-    private final AtomicBoolean isPolling = new AtomicBoolean(false);
+    private final BooleanProperty isPolling = new SimpleBooleanProperty(false);
 
 //    private final SimpleLongProperty totalMessagesInTheTopicProperty = new SimpleLongProperty(0);
 
@@ -216,7 +217,12 @@ public class MainController {
         totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty
 //                totalMessagesInTheTopicProperty.asString("%,d Messages")
         );
-
+        isPollingMsgProgressIndicator.visibleProperty().bindBidirectional(isPolling);
+//        pullMessagesBtn.textProperty().bind(isPolling.map((isPolling) ->
+//                isPolling ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT));
+        isPolling.addListener((observable, oldValue, newValue) -> {
+            pullMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
+        });
     }
 
     private void configureTableView() {
@@ -263,7 +269,7 @@ public class MainController {
         valueContentType.setOnAction(event -> {
             PluggableDeserializer deserializer = serDesHelper.getPluggableDeserialize(valueContentType.getValue());
             schemaTextArea.setDisable(!deserializer.mayNeedUserInputForSchema());
-            displayNotPollingMessage();
+            isPolling.set(false);
         });
         schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
         schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
@@ -278,7 +284,7 @@ public class MainController {
         isLiveUpdateCheckBox.setOnAction(event -> {
             if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
                 isPolling.set(false);
-                pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+//                pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
             }
         });
     }
@@ -287,7 +293,7 @@ public class MainController {
         clusterTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             // Display the selection and its complete path from the root.
             if (newValue != null && newValue != oldValue) {
-                displayNotPollingMessage();
+                isPolling.set(false);
                 // disable/hide UI tab and titled
                 cgOffsetsTab.setDisable(true);
 //                dataTab.setDisable(true);
@@ -443,7 +449,7 @@ public class MainController {
     protected void pollMessages() {
         if (isPolling.get()) {
             isPolling.set(false);
-            pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+//            pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
             return;
         }
         TreeItem selectedTreeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
@@ -471,10 +477,10 @@ public class MainController {
         messageTable.setItems(FilteredList);
         treeMsgTableItemCache.put(selectedTreeItem, list);
         blockAppProgressInd.setVisible(true);
-        isPollingMsgProgressIndicator.setVisible(true);
-        pullMessagesBtn.setText(AppConstant.STOP_POLLING_TEXT);
+//        isPollingMsgProgressIndicator.setVisible(true);
+//        pullMessagesBtn.setText(AppConstant.STOP_POLLING_TEXT);
         Callable<Void> pollMsgTask = () -> {
-                isPolling.set(true);
+            Platform.runLater(() -> isPolling.set(true));
                 KafkaConsumerService.PollingOptions pollingOptions =
                         KafkaConsumerService.PollingOptions.builder()
                                 .pollTime(Integer.parseInt(pollTimeTextField.getText()))
@@ -510,11 +516,13 @@ public class MainController {
                 return null;
         };
         Consumer<Object> onSuccess = (val) -> {
-            displayNotPollingMessage();
+            blockAppProgressInd.setVisible(false);
+            isPolling.set(false);
             noMessages.setText(list.size() + " Messages");
         };
         Consumer<Throwable> onFailure = (exception) -> {
-            displayNotPollingMessage();
+            blockAppProgressInd.setVisible(false);
+            isPolling.set(false);
             log.error("Error when poll messages", exception);
             UIErrorHandler.showError(Thread.currentThread(), exception);
         };
@@ -527,10 +535,10 @@ public class MainController {
     }
 
     private void displayNotPollingMessage() {
-        isPollingMsgProgressIndicator.setVisible(false);
-        blockAppProgressInd.setVisible(false);
-        isPolling.set(false);
-        pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+//        isPollingMsgProgressIndicator.setVisible(false);
+//        pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+//        blockAppProgressInd.setVisible(false);
+//        isPolling.set(false);
     }
 
     private Long getPollStartTimestamp() {

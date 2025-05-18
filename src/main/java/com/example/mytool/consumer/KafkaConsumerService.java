@@ -9,6 +9,7 @@ import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.serdes.AvroUtil;
 import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.KafkaMessageTableItem;
+import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Builder;
@@ -28,7 +29,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static com.example.mytool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
@@ -234,6 +234,6 @@ public class KafkaConsumerService {
     }
 
     public record PollCallback(ObservableList<KafkaMessageTableItem> resultObservableList,
-                               AtomicBoolean isPolling) {
+                               BooleanProperty isPolling) {
     }
 }
