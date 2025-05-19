@@ -27,7 +27,7 @@
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
 
-<AnchorPane prefHeight="661.0" prefWidth="1397.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.MainController">
+<AnchorPane prefHeight="661.0" prefWidth="1397.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.MainController">
    <children>
       <SplitPane dividerPositions="0.29069767441860467" prefHeight="614.0" prefWidth="1271.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="0.0">
           <items>
@@ -127,6 +127,8 @@
                                                                               <Insets left="10.0" right="10.0" top="5.0" />
                                                                           </FlowPane.margin>
                                                                       </DateTimePicker>
+                                                      <Label text="Before" />
+                                                      <DateTimePicker prefWidth="180.0" />
                                                                       <Button fx:id="countMessagesBtn" mnemonicParsing="false" onAction="#countMessages" text="Count Msgs">
                                                                           <FlowPane.margin>
                                                                               <Insets left="10.0" top="5.0" />

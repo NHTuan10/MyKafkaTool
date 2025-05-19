@@ -46,6 +46,11 @@
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </TextField>
+                        <Label fx:id="noRowsLabel" text="0 Rows">
+                           <HBox.margin>
+                              <Insets left="10.0" top="5.0" />
+                           </HBox.margin>
+                        </Label>
                      </children>
                   </HBox>
                </children>

@@ -26,11 +26,11 @@ import java.util.function.Predicate;
 public class SchemaEditableTableControl extends EditableTableControl<SchemaTableItem> {
     private String selectedClusterName;
     private BooleanProperty isBusy;
-    public void setItems(List<SchemaMetadataFromRegistry> schemaMetadataList, String clusterName) {
-        ObservableList<SchemaTableItem> items = FXCollections.observableArrayList(schemaMetadataList.stream().map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, clusterName)).toList());
-        tableItems.setAll(items);
-        selectedClusterName = clusterName;
-    }
+//    public void setItems(List<SchemaMetadataFromRegistry> schemaMetadataList, String clusterName) {
+//        ObservableList<SchemaTableItem> items = FXCollections.observableArrayList(schemaMetadataList.stream().map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, clusterName)).toList());
+//        tableItems.setAll(items);
+//        selectedClusterName = clusterName;
+//    }
 
     static SchemaTableItem mapFromSchemaMetaData(SchemaMetadataFromRegistry schemaMetadataFromRegistry, String clusterName) {
         SchemaMetadata schemaMetadata = schemaMetadataFromRegistry.schemaMetadata();

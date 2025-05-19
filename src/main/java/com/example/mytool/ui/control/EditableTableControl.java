@@ -3,10 +3,13 @@ package com.example.mytool.ui.control;
 import com.example.mytool.Application;
 import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.util.ViewUtil;
+import javafx.application.Platform;
 import javafx.beans.NamedArg;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -47,6 +50,9 @@ public class EditableTableControl<T> extends AnchorPane {
     @FXML
     protected Label filterLabel;
 
+    @FXML
+    protected Label noRowsLabel;
+
     public EditableTableControl() {
         this(true);
     }
@@ -83,12 +89,43 @@ public class EditableTableControl<T> extends AnchorPane {
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
+
         filterTextField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
-                table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
+                var filteredList = tableItems.filtered(filterPredicate(this.filterTextField.getText()));
+                table.setItems(filteredList);
+//                noRowsIntProp.set(table.getItems().size());
+//                filteredList.addListener((ListChangeListener<? super T>) change -> {
+//
+//                });
+//                table.itemsProperty().addListener((observable, oldValue, newValue) -> {
+//                    noRowsIntProp.set(newValue.size());
+//                });
             }
         });
         table.setItems(tableItems);
+
+        SimpleIntegerProperty noRowsIntProp = new SimpleIntegerProperty();
+//        noRowsIntProp.bind(table.itemsProperty().map(List::size));
+        noRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Rows"));
+        table.itemsProperty().addListener((observable, oldValue, newValue) -> {
+            Platform.runLater(() -> noRowsIntProp.set(newValue.size()));
+        });
+        table.getItems().addListener((ListChangeListener<T>) change -> {
+            int newSize = change.getList().size();
+            Platform.runLater(() -> noRowsIntProp.set(newSize));
+        });
+
+//        tableItems.addListener((ListChangeListener<? super T>) change -> {
+//            noRowsIntProp.set(table.getItems().size());
+//        });
+//        table.itemsProperty().addListener((observable, oldValue, newValue) -> {
+//            noRowsIntProp.set(newValue.size());
+//        });
+
+
+//        noRowsIntProp.bind(table.itemsProperty().map(List::size));
+
         configureEditableControls();
     }
 
