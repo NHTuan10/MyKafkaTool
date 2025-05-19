@@ -168,7 +168,7 @@ public class KafkaConsumerService {
 
         String timestamp = Instant.ofEpochMilli(record.timestamp())
                 .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
+//                .toLocalDateTime()
                 .toString();
 
         return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, pollingOptions.valueContentType(), record.headers(), pollingOptions.schema(), false);
