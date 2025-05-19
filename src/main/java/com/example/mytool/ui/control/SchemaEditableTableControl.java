@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -26,6 +28,8 @@ import java.util.function.Predicate;
 public class SchemaEditableTableControl extends EditableTableControl<SchemaTableItem> {
     private String selectedClusterName;
     private BooleanProperty isBusy;
+    private Map<String, ObservableList<SchemaTableItem>> clusterNameToSchemaTableItemsCache;
+
 //    public void setItems(List<SchemaMetadataFromRegistry> schemaMetadataList, String clusterName) {
 //        ObservableList<SchemaTableItem> items = FXCollections.observableArrayList(schemaMetadataList.stream().map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, clusterName)).toList());
 //        tableItems.setAll(items);
@@ -56,6 +60,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                 fireEvent(selectedSchemaEvent);
             }
         });
+        clusterNameToSchemaTableItemsCache = new ConcurrentHashMap<>();
 //        addItemBtn.setVisible(false);
     }
 
@@ -78,7 +83,9 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
     public void loadAllSchemas(String clusterName, Consumer<Object> onSuccess, Consumer<Throwable> onError, BooleanProperty isBusy) {
         this.selectedClusterName = clusterName;
         this.isBusy = isBusy;
-        refresh(onSuccess, onError);
+        if (!clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName)) {
+            refresh(onSuccess, onError);
+        }
     }
 
     private void refresh(Consumer<Object> onSuccess, Consumer<Throwable> onError) {
@@ -92,6 +99,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                                 .map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, this.selectedClusterName))
                                 .toList());
                 tableItems.setAll(items);
+                clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, items);
                 this.isBusy.set(false);
             } catch (RestClientException | IOException e) {
                 log.error("Error when get schema registry subject metadata", e);
