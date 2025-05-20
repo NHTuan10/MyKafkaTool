@@ -15,7 +15,6 @@ import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.serdes.deserializer.ByteArrayDeserializer;
 import com.example.mytool.serdes.deserializer.SchemaRegistryAvroDeserializer;
 import com.example.mytool.serdes.deserializer.StringDeserializer;
-import com.example.mytool.serdes.deserializer.deprecation.DeprecatedSchemaRegistryAvroDeserializer;
 import com.example.mytool.serdes.serializer.ByteArraySerializer;
 import com.example.mytool.serdes.serializer.SchemaRegistryAvroSerializer;
 import com.example.mytool.serdes.serializer.StringSerializer;
@@ -183,15 +182,14 @@ public class MainController {
         ByteArrayDeserializer byteArrayDeserializer = new ByteArrayDeserializer();
         SchemaRegistryAvroSerializer schemaRegistryAvroSerializer = new SchemaRegistryAvroSerializer();
         SchemaRegistryAvroDeserializer schemaRegistryAvroDeserializer = new SchemaRegistryAvroDeserializer();
-        DeprecatedSchemaRegistryAvroDeserializer deprecatedSchemaRegistryAvroDeserializer = new DeprecatedSchemaRegistryAvroDeserializer();
         this.serDesHelper = new SerDesHelper(
                 ImmutableMap.of(stringSerializer.getName(), stringSerializer,
                         byteArraySerializer.getName(), byteArraySerializer,
                         schemaRegistryAvroSerializer.getName(), schemaRegistryAvroSerializer),
                 ImmutableMap.of(stringDeserializer.getName(), stringDeserializer,
                         byteArrayDeserializer.getName(), byteArrayDeserializer,
-                        schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer,
-                        deprecatedSchemaRegistryAvroDeserializer.getName(), deprecatedSchemaRegistryAvroDeserializer)
+                        schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer
+                )
         );
         this.producerUtil = new ProducerUtil(this.serDesHelper);
         this.kafkaConsumerService = new KafkaConsumerService(this.serDesHelper);
@@ -479,6 +477,11 @@ public class MainController {
         String filterText = filterMsgTextField.getText();
         filterMsgTextField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
+                configureSortAndFilterForMessageTable(list);
+            }
+        });
+        filterMsgTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
                 configureSortAndFilterForMessageTable(list);
             }
         });
