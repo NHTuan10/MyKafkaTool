@@ -24,7 +24,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -34,12 +36,6 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
     private BooleanProperty isBusy;
     private Map<String, SchemaTableItemsAndFilter> clusterNameToSchemaTableItemsCache;
     SchemaRegistryManager schemaRegistryManager = SchemaRegistryManager.getInstance();
-
-//    public void setItems(List<SchemaMetadataFromRegistry> schemaMetadataList, String clusterName) {
-//        ObservableList<SchemaTableItem> items = FXCollections.observableArrayList(schemaMetadataList.stream().map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, clusterName)).toList());
-//        tableItems.setAll(items);
-//        selectedClusterName = clusterName;
-//    }
 
     static SchemaTableItem mapFromSchemaMetaData(SchemaMetadataFromRegistry schemaMetadataFromRegistry, String clusterName) {
         // schemaMetadata is null if only subject is loaded from registry
@@ -87,10 +83,12 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
         });
         this.filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             applyFilter(newValue);
-            if (clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName.getName())) {
-                SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName());
-                schemaTableItemsAndFilter.setFilter(newValue);
-            }
+            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName()))
+                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.setFilter(newValue));
+//            if (clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName.getName())) {
+//                SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName());
+//                schemaTableItemsAndFilter.setFilter(newValue);
+//            }
         });
     }
 
@@ -111,47 +109,55 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
 //        }
 //    }
     @FXML
-    public void refresh() throws RestClientException, IOException {
+    public void refresh() throws RestClientException, IOException, ExecutionException, InterruptedException {
         if (this.selectedClusterName != null) {
-            refresh((e) -> isBusy.set(false), (e) -> {
+            ObservableList<SchemaTableItem> items = refresh((e) -> isBusy.set(false), (e) -> {
                 isBusy.set(false);
                 throw ((RuntimeException) e);
             });
+            setTableItemsAndFilter(items, this.filterTextProperty.get());
         }
     }
 
-    public void loadAllSchemas(KafkaCluster kafkaCluster, Consumer<Object> onSuccess, Consumer<Throwable> onError, BooleanProperty isBusy) {
+    public void loadAllSchemas(KafkaCluster kafkaCluster, Consumer<ObservableList<SchemaTableItem>> onSuccess, Consumer<Throwable> onError, BooleanProperty isBusy) throws ExecutionException, InterruptedException {
         this.selectedClusterName = kafkaCluster;
         this.isBusy = isBusy;
         if (!clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName.getName())) {
-            this.filterTextField.setText("");
-            refresh(onSuccess, onError);
+            setTableItemsAndFilter(refresh(onSuccess, onError), "");
         } else {
             SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName());
-            tableItems.setAll(schemaTableItemsAndFilter.getItems());
-            applyFilter(schemaTableItemsAndFilter.getFilter());
+            setTableItemsAndFilter(schemaTableItemsAndFilter.getItems(), schemaTableItemsAndFilter.getFilter());
         }
     }
 
-    private void refresh(Consumer<Object> onSuccess, Consumer<Throwable> onError) {
-        ViewUtil.runBackgroundTask(() -> {
+    private void setTableItemsAndFilter(ObservableList<SchemaTableItem> items, String filterText) {
+        tableItems.setAll(items);
+        applyFilter(filterText);
+    }
+
+    private ObservableList<SchemaTableItem> refresh(Consumer<ObservableList<SchemaTableItem>> onSuccess, Consumer<Throwable> onError) throws ExecutionException, InterruptedException {
+        ObservableList<SchemaTableItem> schemaItems;
+        Callable<ObservableList<SchemaTableItem>> getSchemaTask = () -> {
+            ObservableList<SchemaTableItem> items;
             try {
                 this.isBusy.set(true);
                 List<SchemaMetadataFromRegistry> schemaMetadataList = schemaRegistryManager.getAllSubjectMetadata(this.selectedClusterName.getName(), this.selectedClusterName.isOnlySubjectLoaded());
-                ObservableList<SchemaTableItem> items = FXCollections.observableArrayList(
+                items = FXCollections.observableArrayList(
                         schemaMetadataList
                                 .stream()
                                 .map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, this.selectedClusterName.getName()))
                                 .toList());
-                tableItems.setAll(items);
+//                tableItems.setAll(items);
                 clusterNameToSchemaTableItemsCache.put(this.selectedClusterName.getName(), new SchemaTableItemsAndFilter(items, this.filterTextField.getText()));
                 this.isBusy.set(false);
             } catch (RestClientException | IOException e) {
                 log.error("Error when get schema registry subject metadata", e);
                 throw new RuntimeException(e);
             }
-            return null;
-        }, onSuccess, onError);
+            return items;
+        };
+        schemaItems = ViewUtil.runBackgroundTask(getSchemaTask, onSuccess, onError).get();
+        return schemaItems;
     }
 
     @FXML
@@ -200,7 +206,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
 
     @Data
     @AllArgsConstructor
-    class SchemaTableItemsAndFilter {
+    static class SchemaTableItemsAndFilter {
         private ObservableList<SchemaTableItem> items;
         private String filter;
     }

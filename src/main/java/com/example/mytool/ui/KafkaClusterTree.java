@@ -133,21 +133,21 @@ public class KafkaClusterTree {
     }
 
     public void configureClusterTreeActionMenu() {
-        MenuItem addNewConnectionItem = configureAddConnectionActionMenuItem();
+        MenuItem addNewConnectionItem = createAddConnectionActionMenuItem();
         MenuItem blankItem = new MenuItem("");
 //        blankItem.setDisable(true);
         blankItem.setVisible(false);
 
-        MenuItem deleteTopicItem = configureDeleteActionMenuItem();
+        MenuItem deleteTopicItem = createDeleteActionMenuItem();
 
-        MenuItem addNewTopicItem = configureAddTopicActionMenuItem();
+        MenuItem addNewTopicItem = createAddTopicActionMenuItem();
 
-        MenuItem purgeTopicItem = configurePurgeTopicActionMenuItem();
+        MenuItem purgeTopicItem = createPurgeTopicActionMenuItem();
 
-        MenuItem purgePartitionItem = configurePurgePartitionActionMenuItem();
+        MenuItem purgePartitionItem = createPurgePartitionActionMenuItem();
 
         MenuItem deleteConnectionItem = configureDeleteConnectionActionMenuItem();
-        MenuItem editConnectionItem = configureEditConnectionActionMenuItem();
+        MenuItem editConnectionItem = createEditConnectionActionMenuItem();
 
         ContextMenu clusterTreeContextMenu = new ContextMenu(blankItem);
 
@@ -175,7 +175,7 @@ public class KafkaClusterTree {
                 refreshItem.setOnAction(actionEvent -> {
                     try {
                         schemaEditableTableControl.refresh();
-                    } catch (RestClientException | IOException e) {
+                    } catch (RestClientException | IOException | ExecutionException | InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 });
@@ -187,7 +187,7 @@ public class KafkaClusterTree {
         clusterTree.setContextMenu(clusterTreeContextMenu);
     }
 
-    private MenuItem configurePurgePartitionActionMenuItem() {
+    private MenuItem createPurgePartitionActionMenuItem() {
         MenuItem purgePartitionItem = new MenuItem("Purge Partition");
         purgePartitionItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedPartitionTreeItem) {
@@ -205,7 +205,7 @@ public class KafkaClusterTree {
         return purgePartitionItem;
     }
 
-    private MenuItem configurePurgeTopicActionMenuItem() {
+    private MenuItem createPurgeTopicActionMenuItem() {
         MenuItem purgeTopicItem = new MenuItem("Purge Topic");
         purgeTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
@@ -223,7 +223,7 @@ public class KafkaClusterTree {
         return purgeTopicItem;
     }
 
-    private MenuItem configureAddTopicActionMenuItem() {
+    private MenuItem createAddTopicActionMenuItem() {
         MenuItem addNewTopicItem = new MenuItem("Add New Topic");
         addNewTopicItem.setOnAction(ae -> {
             try {
@@ -237,7 +237,7 @@ public class KafkaClusterTree {
         return addNewTopicItem;
     }
 
-    private MenuItem configureDeleteActionMenuItem() {
+    private MenuItem createDeleteActionMenuItem() {
         MenuItem deleteTopicItem = new MenuItem("Delete");
         deleteTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
@@ -251,7 +251,7 @@ public class KafkaClusterTree {
         return deleteTopicItem;
     }
 
-    private MenuItem configureAddConnectionActionMenuItem() {
+    private MenuItem createAddConnectionActionMenuItem() {
         MenuItem addNewConnectionItem = new MenuItem("Add New Connection");
         addNewConnectionItem.setOnAction(ae -> {
             try {
@@ -282,7 +282,7 @@ public class KafkaClusterTree {
         return addNewConnectionItem;
     }
 
-    private MenuItem configureEditConnectionActionMenuItem() {
+    private MenuItem createEditConnectionActionMenuItem() {
         MenuItem editConnectionItem = new MenuItem("Edit Connection");
         editConnectionItem.setOnAction(ae -> {
 

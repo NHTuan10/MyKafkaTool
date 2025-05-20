@@ -5,9 +5,7 @@ import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.application.Platform;
 import javafx.beans.NamedArg;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -47,6 +45,8 @@ public class EditableTableControl<T> extends AnchorPane {
     @FXML
     protected TextField filterTextField;
 
+    protected StringProperty filterTextProperty;
+
     @FXML
     protected Label filterLabel;
 
@@ -58,6 +58,7 @@ public class EditableTableControl<T> extends AnchorPane {
     }
 
     public EditableTableControl(@NamedArg(value = "editable", defaultValue = "false") Boolean editable) {
+        filterTextProperty = new SimpleStringProperty("");
         this.editable.set(editable);
         itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource(
@@ -89,11 +90,12 @@ public class EditableTableControl<T> extends AnchorPane {
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
-        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
+        table.setItems(tableItems.filtered(filterPredicate(this.filterTextProperty.get())));
 
+        filterTextField.textProperty().bindBidirectional(filterTextProperty);
         filterTextField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
-                var filteredList = tableItems.filtered(filterPredicate(this.filterTextField.getText()));
+                var filteredList = tableItems.filtered(filterPredicate(this.filterTextProperty.get()));
                 table.setItems(filteredList);
 //                noRowsIntProp.set(table.getItems().size());
 //                filteredList.addListener((ListChangeListener<? super T>) change -> {
@@ -129,8 +131,10 @@ public class EditableTableControl<T> extends AnchorPane {
     }
 
     public void applyFilter(String filterText) {
-        this.filterTextField.setText(filterText);
-        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
+//        this.filterTextField.setText(filterText);
+        this.filterTextProperty.set(filterText);
+//        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
+        table.setItems(tableItems.filtered(filterPredicate(this.filterTextProperty.get())));
     }
     @FXML
     protected void addItem() {

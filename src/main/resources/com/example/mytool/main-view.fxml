@@ -134,7 +134,7 @@
                                                                               <Insets left="10.0" top="5.0" />
                                                                           </FlowPane.margin>
                                                                       </Button>
-                                                                      <Label fx:id="noMessages" text="0 Messages">
+                                                                      <Label fx:id="noMessagesLabel" text="0 Messages">
                                                                           <FlowPane.margin>
                                                                               <Insets left="10.0" top="5.0" />
                                                                           </FlowPane.margin>
