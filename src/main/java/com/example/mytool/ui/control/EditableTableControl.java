@@ -112,8 +112,7 @@ public class EditableTableControl<T> extends AnchorPane {
             Platform.runLater(() -> noRowsIntProp.set(newValue.size()));
         });
         table.getItems().addListener((ListChangeListener<T>) change -> {
-            int newSize = change.getList().size();
-            Platform.runLater(() -> noRowsIntProp.set(newSize));
+            Platform.runLater(() -> noRowsIntProp.set(table.getItems().size()));
         });
 
 //        tableItems.addListener((ListChangeListener<? super T>) change -> {
