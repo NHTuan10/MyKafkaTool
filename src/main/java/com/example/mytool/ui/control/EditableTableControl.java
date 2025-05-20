@@ -89,6 +89,7 @@ public class EditableTableControl<T> extends AnchorPane {
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
+        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
 
         filterTextField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
@@ -103,7 +104,6 @@ public class EditableTableControl<T> extends AnchorPane {
 //                });
             }
         });
-        table.setItems(tableItems);
 
         SimpleIntegerProperty noRowsIntProp = new SimpleIntegerProperty();
 //        noRowsIntProp.bind(table.itemsProperty().map(List::size));
@@ -129,7 +129,10 @@ public class EditableTableControl<T> extends AnchorPane {
         configureEditableControls();
     }
 
-
+    public void applyFilter(String filterText) {
+        this.filterTextField.setText(filterText);
+        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
+    }
     @FXML
     protected void addItem() {
     }

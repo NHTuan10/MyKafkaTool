@@ -5,6 +5,8 @@ import com.example.mytool.api.model.KafkaMessage;
 import com.example.mytool.constant.AppConstant;
 import com.example.mytool.consumer.KafkaConsumerService;
 import com.example.mytool.manager.ClusterManager;
+import com.example.mytool.manager.SchemaRegistryManager;
+import com.example.mytool.model.kafka.KafkaCluster;
 import com.example.mytool.model.kafka.KafkaPartition;
 import com.example.mytool.model.kafka.KafkaTopic;
 import com.example.mytool.producer.ProducerUtil;
@@ -203,7 +205,7 @@ public class MainController {
         partitionsTitledPane.setVisible(false);
         initPollingOptionsUI();
 
-        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaEditableTableControl);
+        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaEditableTableControl, SchemaRegistryManager.getInstance());
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
         configureTableView();
@@ -413,7 +415,7 @@ public class MainController {
                 dataTab.setDisable(false);
                 schemaSplitPane.setVisible(true);
                 messageSplitPane.setVisible(false);
-                String clusterName = selectedItem.getParent().getValue().toString();
+                KafkaCluster clusterName = (KafkaCluster) selectedItem.getParent().getValue();
                 schemaEditableTableControl.loadAllSchemas(clusterName, (e) -> blockAppProgressInd.setVisible(false), (e) -> {
                     blockAppProgressInd.setVisible(false);
                     throw ((RuntimeException) e);

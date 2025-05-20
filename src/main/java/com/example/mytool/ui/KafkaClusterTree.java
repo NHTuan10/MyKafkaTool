@@ -40,6 +40,8 @@ public class KafkaClusterTree {
 
     final SchemaEditableTableControl schemaEditableTableControl;
 
+    final SchemaRegistryManager schemaRegistryManager;
+
     public static void initClusterPanel(Stage stage) {
         TreeView clusterTree = (TreeView) stage.getScene().lookup("#clusterTree");
 
@@ -246,9 +248,8 @@ public class KafkaClusterTree {
                     }
                 }
                 if (newConnection != null) {
-                    KafkaCluster cluster = new KafkaCluster(newConnection.getName(), newConnection.getBootstrapServer(), newConnection.getSchemaRegistryUrl());
-                    connectToClusterAndSchemaRegistry(cluster, clusterTree);
-                    UserPreferenceManager.addClusterToUserPreference(cluster);
+                    connectToClusterAndSchemaRegistry(newConnection, clusterTree);
+                    UserPreferenceManager.addClusterToUserPreference(newConnection);
                 }
 
             } catch (IOException | ClusterNameExistedException e) {
@@ -288,9 +289,8 @@ public class KafkaClusterTree {
                     }
                     if (newConnection != null && !oldConnection.equals(newConnection)) {
                         deleteConnection(selectedItem);
-                        KafkaCluster cluster = new KafkaCluster(newConnection.getName(), newConnection.getBootstrapServer(), newConnection.getSchemaRegistryUrl());
-                        connectToClusterAndSchemaRegistry(cluster, clusterTree);
-                        UserPreferenceManager.addClusterToUserPreference(cluster);
+                        connectToClusterAndSchemaRegistry(newConnection, clusterTree);
+                        UserPreferenceManager.addClusterToUserPreference(newConnection);
                     }
                 } catch (IOException | ClusterNameExistedException e) {
                     log.error("Error when add new connection", e);
@@ -337,6 +337,7 @@ public class KafkaClusterTree {
     private void deleteConnection(TreeItem<KafkaCluster> selectedItem) {
         String clusterName = selectedItem.getValue().getName();
         clusterManager.closeClusterConnection(clusterName);
+        schemaRegistryManager.disconnectFromSchemaRegistry(clusterName);
         selectedItem.getParent().getChildren().remove(selectedItem);
         try {
             UserPreferenceManager.removeClusterFromUserPreference(clusterName);

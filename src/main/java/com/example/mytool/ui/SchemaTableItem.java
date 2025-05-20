@@ -1,7 +1,6 @@
 package com.example.mytool.ui;
 
 import com.example.mytool.annotation.TableColumn;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.Getter;
 
@@ -9,9 +8,9 @@ public class SchemaTableItem {
     @TableColumn
     private final SimpleStringProperty subject;
     @TableColumn
-    private final SimpleIntegerProperty schemaId;
+    private final SimpleStringProperty schemaId;
     @TableColumn
-    private final SimpleIntegerProperty latestVersion;
+    private final SimpleStringProperty latestVersion;
     @TableColumn
     private final SimpleStringProperty type;
     @TableColumn
@@ -21,9 +20,9 @@ public class SchemaTableItem {
     @Getter
     private final String clusterName;
 
-    public SchemaTableItem(String subject, int schemaId, int latestVersion, String type, String compatibility, String schema, String clusterName) {
-        this.schemaId = new SimpleIntegerProperty(schemaId);
-        this.latestVersion = new SimpleIntegerProperty(latestVersion);
+    public SchemaTableItem(String subject, String schemaId, String latestVersion, String type, String compatibility, String schema, String clusterName) {
+        this.schemaId = new SimpleStringProperty(schemaId);
+        this.latestVersion = new SimpleStringProperty(latestVersion);
         this.type = new SimpleStringProperty(type);
         this.subject = new SimpleStringProperty(subject);
         this.compatibility = new SimpleStringProperty(compatibility);
@@ -31,19 +30,19 @@ public class SchemaTableItem {
         this.clusterName = clusterName;
     }
 
-    public int getSchemaId() {
+    public String getSchemaId() {
         return schemaId.get();
     }
 
-    public void setSchemaId(int schemaId) {
+    public void setSchemaId(String schemaId) {
         this.schemaId.set(schemaId);
     }
 
-    public int getLatestVersion() {
+    public String getLatestVersion() {
         return latestVersion.get();
     }
 
-    public void setLatestVersion(int latestVersion) {
+    public void setLatestVersion(String latestVersion) {
         this.latestVersion.set(latestVersion);
     }
 
@@ -79,8 +78,8 @@ public class SchemaTableItem {
         return schema;
     }
 
-    public void setSschema(String schema) {
-        this.subject.set(schema);
+    public void setSchema(String schema) {
+        this.schema.set(schema);
     }
 
 

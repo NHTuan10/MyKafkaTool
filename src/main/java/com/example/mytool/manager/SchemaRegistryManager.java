@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -43,23 +42,32 @@ public class SchemaRegistryManager {
         return schemaRegistryClientMap.get(clusterName).getLatestSchemaMetadata(subjectName);
     }
 
-    public String getCompatibility(String clusterName, String subjectName) throws RestClientException, IOException {
-        return schemaRegistryClientMap.get(clusterName).getCompatibility(subjectName);
+    public String getCompatibility(String clusterName, String subjectName) {
+        String compatibility = DEFAULT_SCHEMA_COMPATIBILITY_LEVEL;
+        try {
+            compatibility = schemaRegistryClientMap.get(clusterName).getCompatibility(subjectName);
+        } catch (RestClientException | IOException e) {
+            log.warn("Error when get compatibility level", e);
+        }
+        return compatibility;
     }
 
 
-    public List<SchemaMetadataFromRegistry> getAllSubjectMetadata(String clusterName) throws RestClientException, IOException {
+    public List<SchemaMetadataFromRegistry> getAllSubjectMetadata(String clusterName, boolean isOnlySubjectLoaded) throws RestClientException, IOException {
         Collection<String> subjects = getAllSubjects(clusterName);
-        List<SchemaMetadataFromRegistry> result = new ArrayList<>();
-        for (String subject : subjects) {
-            String compatibility = DEFAULT_SCHEMA_COMPATIBILITY_LEVEL;
+        List<SchemaMetadataFromRegistry> result = subjects.parallelStream().map((subject) -> {
+            SchemaMetadata schemaMetadata = null;
+            String compatibility = null;
             try {
-                compatibility = getCompatibility(clusterName, subject);
+                if (!isOnlySubjectLoaded) {
+                    schemaMetadata = getSubject(clusterName, subject);
+                    compatibility = getCompatibility(clusterName, subject);
+                }
             } catch (Exception e) {
                 log.warn("Error when get compatibility level", e);
             }
-            result.add(new SchemaMetadataFromRegistry(getSubject(clusterName, subject), compatibility));
-        }
+            return new SchemaMetadataFromRegistry(subject, schemaMetadata, compatibility);
+        }).toList();
         return result;
     }
 
@@ -76,6 +84,16 @@ public class SchemaRegistryManager {
         schemaRegistryClientMap.put(clusterName, client);
     }
 
+    public void disconnectFromSchemaRegistry(String clusterName) {
+        SchemaRegistryClient client = schemaRegistryClientMap.remove(clusterName);
+        if (client != null) {
+            try {
+                client.close();
+            } catch (IOException e) {
+                log.warn("Error when close schema registry client", e);
+            }
+        }
+    }
     public static void main(String[] args) {
         String schemaRegistryUrl = "http://localhost:8081"; // Replace with your Schema Registry URL
         // Maximum number of schemas to cache

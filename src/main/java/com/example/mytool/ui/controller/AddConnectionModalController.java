@@ -3,6 +3,7 @@ package com.example.mytool.ui.controller;
 import com.example.mytool.model.kafka.KafkaCluster;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -17,6 +18,8 @@ public class AddConnectionModalController extends ModalController {
     @FXML
     private TextField schemaRegistryTextField;
     @FXML
+    private CheckBox isOnlySubjectLoadedCheckBox;
+    @FXML
     private Button addBtn;
     @FXML
     private Button cancelBtn;
@@ -24,7 +27,11 @@ public class AddConnectionModalController extends ModalController {
 
     @FXML
     protected void add() throws IOException {
-        modelRef.set(new KafkaCluster(clusterNameTextField.getText(), bootstrapServerTextField.getText(), schemaRegistryTextField.getText()));
+        modelRef.set(KafkaCluster.builder()
+                .name(clusterNameTextField.getText())
+                .bootstrapServer(bootstrapServerTextField.getText())
+                .schemaRegistryUrl(schemaRegistryTextField.getText())
+                .isOnlySubjectLoaded(isOnlySubjectLoadedCheckBox.isSelected()).build());
         Stage stage = (Stage) addBtn.getScene().getWindow();
         stage.close();
     }
