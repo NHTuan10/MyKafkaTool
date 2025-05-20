@@ -42,6 +42,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
 //    }
 
     static SchemaTableItem mapFromSchemaMetaData(SchemaMetadataFromRegistry schemaMetadataFromRegistry, String clusterName) {
+        // schemaMetadata is null if only subject is loaded from registry
         Optional<SchemaMetadata> schemaMetadataOptional = Optional.ofNullable(schemaMetadataFromRegistry.schemaMetadata());
 
         return new SchemaTableItem(
@@ -70,7 +71,6 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                     try {
                         SchemaMetadata schemaMetadata = schemaRegistryManager.getSubject(selectedClusterName.getName(), subjectName);
                         schema = schemaMetadata.getSchema();
-//                      SchemaTableItem selected = table.getSelectionModel().getSelectedItem();
                         newValue.setSchemaId(String.valueOf(schemaMetadata.getId()));
                         newValue.setSchema(schema);
                         newValue.setType(schemaMetadata.getSchemaType());
@@ -92,7 +92,6 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                 schemaTableItemsAndFilter.setFilter(newValue);
             }
         });
-//        addItemBtn.setVisible(false);
     }
 
     @Override
@@ -125,6 +124,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
         this.selectedClusterName = kafkaCluster;
         this.isBusy = isBusy;
         if (!clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName.getName())) {
+            this.filterTextField.setText("");
             refresh(onSuccess, onError);
         } else {
             SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName());

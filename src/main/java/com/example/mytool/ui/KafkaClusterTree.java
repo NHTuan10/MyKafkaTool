@@ -52,9 +52,10 @@ public class KafkaClusterTree {
         UserPreferenceManager.loadUserPreference().connections().forEach((cluster -> {
             try {
                 if (!isClusterNameExistedInTree(clusterTree, cluster.getName())) {
-                    connectToClusterAndSchemaRegistry(cluster, clusterTree);
+//                    connectToClusterAndSchemaRegistry(cluster, clusterTree);
+                    addClusterToTreeView(clusterTree, cluster);
                 }
-            } catch (IOException | ClusterNameExistedException e) {
+            } catch (ClusterNameExistedException e) {
                 log.error("Error when add new connection during loading user preferences", e);
                 throw new RuntimeException(e);
             }
@@ -66,7 +67,27 @@ public class KafkaClusterTree {
 //        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
     }
 
-    public static void addClusterConnIntoClusterTreeView(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
+    public static void addClusterToTreeView(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
+        ClusterManager.getInstance().connectToCluster(cluster);
+        String clusterName = cluster.getName();
+        if (isClusterNameExistedInTree(clusterTree, clusterName)) {
+            throw new ClusterNameExistedException(clusterName, "Cluster already exists");
+        }
+        TreeItem<Object> brokerTreeItem = new TreeItem<>(cluster);
+        TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster));
+        ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster));
+        brokerTreeItem.getChildren().add(topicListTreeItem);
+        brokerTreeItem.getChildren().add(consumerGroupListTreeItem);
+        if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
+            TreeItem<Object> schemaRegistry = new TreeItem<>(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME);
+            brokerTreeItem.getChildren().add(schemaRegistry);
+            SchemaRegistryManager.getInstance().connectToSchemaRegistry(cluster);
+        }
+        clusterTree.getRoot().getChildren().add(brokerTreeItem);
+    }
+
+    public static void connectToClusterAndLoadAllChildren(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
+        ClusterManager.getInstance().connectToCluster(cluster);
         String clusterName = cluster.getName();
         if (isClusterNameExistedInTree(clusterTree, clusterName)) {
             throw new ClusterNameExistedException(clusterName, "Cluster already exists");
@@ -85,6 +106,7 @@ public class KafkaClusterTree {
         if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
             TreeItem<Object> schemaRegistry = new TreeItem<>(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME);
             brokerTreeItem.getChildren().add(schemaRegistry);
+            SchemaRegistryManager.getInstance().connectToSchemaRegistry(cluster);
         }
 
         clusterTree.getRoot().getChildren().add(brokerTreeItem);
@@ -248,7 +270,7 @@ public class KafkaClusterTree {
                     }
                 }
                 if (newConnection != null) {
-                    connectToClusterAndSchemaRegistry(newConnection, clusterTree);
+                    connectToClusterAndSchemaRegistry(clusterTree, newConnection);
                     UserPreferenceManager.addClusterToUserPreference(newConnection);
                 }
 
@@ -272,9 +294,10 @@ public class KafkaClusterTree {
                     while (true) {
                         AtomicReference<Object> modelRef = new AtomicReference<>();
                         ViewUtil.showPopUpModal("add-connection-modal.fxml", "Edit Connection", modelRef,
-                                Map.of("clusterNameTextField", oldConnection.getName(),
-                                        "bootstrapServerTextField", oldConnection.getBootstrapServer(),
-                                        "schemaRegistryTextField", oldConnection.getSchemaRegistryUrl() != null ? oldConnection.getSchemaRegistryUrl() : ""));
+//                                Map.of("clusterNameTextField", oldConnection.getName(),
+//                                        "bootstrapServerTextField", oldConnection.getBootstrapServer(),
+//                                        "schemaRegistryTextField", oldConnection.getSchemaRegistryUrl() != null ? oldConnection.getSchemaRegistryUrl() : "")
+                                Map.of("objectProperty", oldConnection));
                         newConnection = (KafkaCluster) modelRef.get();
                         //TODO: check the new name not in existing connections
                         if (newConnection != null &&
@@ -289,7 +312,7 @@ public class KafkaClusterTree {
                     }
                     if (newConnection != null && !oldConnection.equals(newConnection)) {
                         deleteConnection(selectedItem);
-                        connectToClusterAndSchemaRegistry(newConnection, clusterTree);
+                        connectToClusterAndSchemaRegistry(clusterTree, newConnection);
                         UserPreferenceManager.addClusterToUserPreference(newConnection);
                     }
                 } catch (IOException | ClusterNameExistedException e) {
@@ -313,12 +336,8 @@ public class KafkaClusterTree {
                 .toList();
     }
 
-    private static void connectToClusterAndSchemaRegistry(KafkaCluster cluster, TreeView clusterTree) throws ClusterNameExistedException, IOException {
-        ClusterManager.getInstance().connectToCluster(cluster);
-        addClusterConnIntoClusterTreeView(clusterTree, cluster);
-        if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
-            SchemaRegistryManager.getInstance().connectToSchemaRegistry(cluster);
-        }
+    private static void connectToClusterAndSchemaRegistry(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
+        connectToClusterAndLoadAllChildren(clusterTree, cluster);
     }
 
     private MenuItem configureDeleteConnectionActionMenuItem() {

@@ -34,6 +34,11 @@ public class KafkaTopicListTreeItem<T> extends TreeItem<T> {
     }
 
     @Override
+    public boolean isLeaf() {
+        return false;
+    }
+
+    @Override
     public ObservableList<TreeItem<T>> getChildren() {
         if (loadChildren) {
             loadChildren = false;

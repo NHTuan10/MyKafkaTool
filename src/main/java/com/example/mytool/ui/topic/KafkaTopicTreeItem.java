@@ -30,6 +30,11 @@ public class KafkaTopicTreeItem<T> extends TreeItem<T> {
     private boolean isFirstTimeChildren = true;
 
     @Override
+    public boolean isLeaf() {
+        return false;
+    }
+
+    @Override
     public ObservableList<TreeItem<T>> getChildren() {
         if (isFirstTimeChildren) {
             isFirstTimeChildren = false;

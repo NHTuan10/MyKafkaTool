@@ -1,5 +1,6 @@
 package com.example.mytool.ui.controller;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import lombok.Setter;
@@ -29,6 +30,8 @@ public abstract class ModalController {
                     codeArea.replaceText(str);
                 } else if ((fieldClass.equals(TableView.class) || fieldClass.equals(ComboBox.class)) && value instanceof ObservableList) {
                     fieldClass.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
+                } else if (fieldObject instanceof ObjectProperty<?> property) {
+                    fieldClass.getDeclaredMethod("setValue", Object.class).invoke(property, value);
                 } else {
                     field.set(modalController, value);
 //                    throw new RuntimeException("Field is not supported");

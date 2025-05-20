@@ -1,6 +1,8 @@
 package com.example.mytool.ui.controller;
 
 import com.example.mytool.model.kafka.KafkaCluster;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -19,11 +21,24 @@ public class AddConnectionModalController extends ModalController {
     private TextField schemaRegistryTextField;
     @FXML
     private CheckBox isOnlySubjectLoadedCheckBox;
+
+    private final ObjectProperty<KafkaCluster> objectProperty = new SimpleObjectProperty<>();
+
     @FXML
     private Button addBtn;
     @FXML
     private Button cancelBtn;
 
+    @FXML
+    public void initialize() {
+//        clusterNameTextField.textProperty().bindBidirectional(kafkaClusterObjectProperty.map());
+        objectProperty.addListener((observable, oldValue, newValue) -> {
+            clusterNameTextField.setText(newValue.getName());
+            bootstrapServerTextField.setText(newValue.getBootstrapServer());
+            schemaRegistryTextField.setText(newValue.getSchemaRegistryUrl());
+            isOnlySubjectLoadedCheckBox.setSelected(newValue.isOnlySubjectLoaded());
+        });
+    }
 
     @FXML
     protected void add() throws IOException {
