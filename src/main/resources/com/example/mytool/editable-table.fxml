@@ -7,8 +7,10 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Tooltip?>
 
 <!-- fx:controller="com.example.mytool.ui.control.EditableTableControl" -->
 
@@ -25,6 +27,7 @@
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
+                           <tooltip><Tooltip text="Refresh" /></tooltip>
                         </Button>
                         <Button fx:id="addItemBtn" mnemonicParsing="false" onAction="#addItem" text="+">
                            <HBox.margin>
@@ -36,16 +39,32 @@
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Label fx:id="filterLabel" text="Filter">
+                        <HBox prefHeight="40.0" prefWidth="320.0" style="-fx-border-color: lightgray; -fx-border-width: 1;">
+                           <children>
+                              <Label fx:id="filterLabel" text="Filter">
+                                 <HBox.margin>
+                                    <Insets left="10.0" top="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <TextField fx:id="filterTextField" prefHeight="26.0" prefWidth="202.0">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin>
+                              </TextField>
+                              <ToggleButton fx:id="regexFilterToggleBtn" mnemonicParsing="false" text=".*">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin>
+                                 <tooltip> <Tooltip text="Regex"/> </tooltip>
+                              </ToggleButton>
+                           </children>
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
-                        </Label>
-                        <TextField fx:id="filterTextField" prefHeight="26.0" prefWidth="202.0">
-                           <HBox.margin>
-                              <Insets left="10.0" top="5.0" />
-                           </HBox.margin>
-                        </TextField>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" top="5.0" />
+                           </padding>
+                        </HBox>
                         <Label fx:id="noRowsLabel" text="0 Rows">
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />

@@ -14,6 +14,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,6 +48,9 @@ public class EditableTableControl<T> extends AnchorPane {
     protected TextField filterTextField;
 
     protected StringProperty filterTextProperty;
+
+    @FXML
+    protected ToggleButton regexFilterToggleBtn;
 
     @FXML
     protected Label filterLabel;
@@ -95,18 +100,14 @@ public class EditableTableControl<T> extends AnchorPane {
         filterTextField.textProperty().bindBidirectional(filterTextProperty);
         filterTextField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
-                var filteredList = tableItems.filtered(filterPredicate(this.filterTextProperty.get()));
-                table.setItems(filteredList);
-//                noRowsIntProp.set(table.getItems().size());
-//                filteredList.addListener((ListChangeListener<? super T>) change -> {
-//
-//                });
-//                table.itemsProperty().addListener((observable, oldValue, newValue) -> {
-//                    noRowsIntProp.set(newValue.size());
-//                });
+//                var filteredList = tableItems.filtered(filterPredicate(this.filterTextProperty.get()));
+//                table.setItems(filteredList);
+                applyFilter(new Filter(filterTextProperty.get(), regexFilterToggleBtn.isSelected()));
             }
         });
-
+        regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            applyFilter(new Filter(filterTextProperty.get(), regexFilterToggleBtn.isSelected()));
+        });
         SimpleIntegerProperty noRowsIntProp = new SimpleIntegerProperty();
 //        noRowsIntProp.bind(table.itemsProperty().map(List::size));
         noRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Rows"));
@@ -116,10 +117,10 @@ public class EditableTableControl<T> extends AnchorPane {
         table.getItems().addListener((ListChangeListener<T>) change -> {
             Platform.runLater(() -> noRowsIntProp.set(table.getItems().size()));
         });
+        tableItems.addListener((ListChangeListener<? super T>) change -> {
+            Platform.runLater(() -> noRowsIntProp.set(table.getItems().size()));
+        });
 
-//        tableItems.addListener((ListChangeListener<? super T>) change -> {
-//            noRowsIntProp.set(table.getItems().size());
-//        });
 //        table.itemsProperty().addListener((observable, oldValue, newValue) -> {
 //            noRowsIntProp.set(newValue.size());
 //        });
@@ -130,9 +131,10 @@ public class EditableTableControl<T> extends AnchorPane {
         configureEditableControls();
     }
 
-    public void applyFilter(String filterText) {
+    public void applyFilter(Filter filter) {
 //        this.filterTextField.setText(filterText);
-        this.filterTextProperty.set(filterText);
+        this.filterTextProperty.set(filter.getFilterText());
+        this.regexFilterToggleBtn.setSelected(filter.isRegexFilter());
 //        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
         table.setItems(tableItems.filtered(filterPredicate(this.filterTextProperty.get())));
     }
@@ -163,4 +165,11 @@ public class EditableTableControl<T> extends AnchorPane {
     }
 
 //    public record Filter<T> (T item, String filterText){}
+
+    @Data
+    @AllArgsConstructor
+    protected static class Filter {
+        private String filterText;
+        private boolean isRegexFilter;
+    }
 }

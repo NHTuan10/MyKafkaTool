@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class SchemaEditableTableControl extends EditableTableControl<SchemaTableItem> {
@@ -82,18 +83,29 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
             }
         });
         this.filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            applyFilter(newValue);
+            applyFilter(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
             Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName()))
-                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.setFilter(newValue));
+                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setFilterText(newValue));
 //            if (clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName.getName())) {
 //                SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName());
 //                schemaTableItemsAndFilter.setFilter(newValue);
 //            }
         });
+        this.regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
+            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName()))
+                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setRegexFilter(newValue));
+        });
     }
 
     @Override
     protected Predicate<SchemaTableItem> filterPredicate(String filterText) {
+        if (regexFilterToggleBtn.isSelected()) {
+            Pattern pattern = Pattern.compile(filterText, Pattern.CASE_INSENSITIVE);
+
+            return item -> pattern.matcher(item.getSubject()).find() ||
+                    (item.getSchema() != null && pattern.matcher(item.getSchema()).find());
+        }
         return item -> item.getSubject().toLowerCase().contains(filterText.toLowerCase()) ||
                 (item.getSchema() != null && item.getSchema().toLowerCase().contains(filterText.toLowerCase()));
     }
@@ -115,7 +127,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                 isBusy.set(false);
                 throw ((RuntimeException) e);
             });
-            setTableItemsAndFilter(items, this.filterTextProperty.get());
+            setTableItemsAndFilter(items, new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
         }
     }
 
@@ -123,16 +135,16 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
         this.selectedClusterName = kafkaCluster;
         this.isBusy = isBusy;
         if (!clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName.getName())) {
-            setTableItemsAndFilter(refresh(onSuccess, onError), "");
+            setTableItemsAndFilter(refresh(onSuccess, onError), new Filter("", this.regexFilterToggleBtn.isSelected()));
         } else {
             SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName());
             setTableItemsAndFilter(schemaTableItemsAndFilter.getItems(), schemaTableItemsAndFilter.getFilter());
         }
     }
 
-    private void setTableItemsAndFilter(ObservableList<SchemaTableItem> items, String filterText) {
+    private void setTableItemsAndFilter(ObservableList<SchemaTableItem> items, Filter filter) {
         tableItems.setAll(items);
-        applyFilter(filterText);
+        applyFilter(filter);
     }
 
     private ObservableList<SchemaTableItem> refresh(Consumer<ObservableList<SchemaTableItem>> onSuccess, Consumer<Throwable> onError) throws ExecutionException, InterruptedException {
@@ -148,7 +160,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                                 .map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, this.selectedClusterName.getName()))
                                 .toList());
 //                tableItems.setAll(items);
-                clusterNameToSchemaTableItemsCache.put(this.selectedClusterName.getName(), new SchemaTableItemsAndFilter(items, this.filterTextField.getText()));
+                clusterNameToSchemaTableItemsCache.put(this.selectedClusterName.getName(), new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
                 this.isBusy.set(false);
             } catch (RestClientException | IOException e) {
                 log.error("Error when get schema registry subject metadata", e);
@@ -206,8 +218,9 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
 
     @Data
     @AllArgsConstructor
-    static class SchemaTableItemsAndFilter {
+    private static class SchemaTableItemsAndFilter {
         private ObservableList<SchemaTableItem> items;
-        private String filter;
+        private Filter filter;
+
     }
 }
