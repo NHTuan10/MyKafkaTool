@@ -13,7 +13,7 @@ public class MessageHeaderTable extends EditableTableControl<UIPropertyTableItem
     protected void initialize() {
         super.initialize();
         this.refreshBtn.setVisible(false);
-        this.refreshBtn.setManaged(false);
+//        this.refreshBtn.setManaged(false);
         TableViewConfigurer.configureEditableTableCell(table, UIPropertyTableItem.class);
 //        headerTable.setEditable(editable);
     }
