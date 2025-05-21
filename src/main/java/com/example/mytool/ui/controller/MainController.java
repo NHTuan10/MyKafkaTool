@@ -42,6 +42,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.admin.ConfigEntry;
 import org.apache.kafka.common.Node;
@@ -510,13 +511,13 @@ public class MainController {
         });
         configureSortAndFilterForMessageTable(filterMsgTextProperty.get());
 //        messageTable.setItems(list);
-        if (maxMessagesTextField.getText().isEmpty()) {
-            maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
-        }
+//        if (maxMessagesTextField.getText().isEmpty()) {
+//            maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
+//        }
         KafkaConsumerService.PollingOptions pollingOptions =
                 KafkaConsumerService.PollingOptions.builder()
                         .pollTime(Integer.parseInt(pollTimeTextField.getText()))
-                        .noMessages(Integer.parseInt(maxMessagesTextField.getText()))
+                        .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
                         .startTimestamp(timestampMs)
                         .pollingPosition(msgPosition.getValue())
                         .valueContentType(valueContentTypeStr)

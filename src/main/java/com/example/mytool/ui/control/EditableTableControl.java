@@ -9,6 +9,7 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -97,8 +98,8 @@ public class EditableTableControl<T> extends AnchorPane {
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
-        table.setItems(tableItems.filtered(filterPredicate(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()))));
-
+//        table.setItems(tableItems.filtered(filterPredicate(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()))));
+        applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
         filterTextField.textProperty().bindBidirectional(filterTextProperty);
 //        filterTextField.setOnKeyPressed(e -> {
 //            if (e.getCode().equals(KeyCode.ENTER)) {
@@ -141,7 +142,9 @@ public class EditableTableControl<T> extends AnchorPane {
         this.filterTextProperty.set(filter.getFilterText());
         this.regexFilterToggleBtn.setSelected(filter.isRegexFilter());
 //        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
-        table.setItems(tableItems.filtered(filterPredicate(filter)));
+        SortedList<T> sortedList = new SortedList<>(tableItems.filtered(filterPredicate(filter)));
+        sortedList.comparatorProperty().bind(table.comparatorProperty());
+        table.setItems(sortedList);
     }
 
     @FXML
