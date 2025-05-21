@@ -15,9 +15,11 @@ import javafx.collections.ObservableList;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -69,48 +71,98 @@ public class KafkaConsumerService {
         Consumer consumer = ClusterManager.getInstance().getConsumer(consumerProps);
         consumers.add(consumer);
         consumer.assign(topicPartitions);
-        if (pollingOptions.timestamp() != null) {
-            seekOffsetWithTimestamp(consumer, kafkaTopic.name(), topicPartitions, pollingOptions.timestamp());
-        } else {
-            seekOffset(consumer, topicPartitions, pollingOptions.pollingPosition(), pollingOptions.noMessages());
-        }
-        List<KafkaMessageTableItem> list = pollMessages(consumer, consumerProps, pollingOptions);
+//        if (pollingOptions.startTimestamp() != null) {
+//            seekOffsetWithTimestamp(consumer, topicPartitions, pollingOptions.startTimestamp());
+//        } else {
+//            seekOffset(consumer, topicPartitions, pollingOptions.pollingPosition(), pollingOptions.noMessages());
+//        }
+        Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll = seekOffset(consumer, topicPartitions, pollingOptions);
+        List<KafkaMessageTableItem> list = pollMessages(consumer, consumerProps, pollingOptions, partitionOffsetsToPoll);
         consumer.close();
         consumers.remove(consumer);
         return list;
     }
 
-    private static void seekOffsetWithTimestamp(Consumer<String, String> consumer, String topicName, Set<TopicPartition> topicPartitions, Long timestamp) {
-        Map<TopicPartition, Long> partitionTimestampMap = topicPartitions.stream()
-                .collect(Collectors.toMap(p -> new TopicPartition(topicName, p.partition()), p -> timestamp));
-        consumer.offsetsForTimes(partitionTimestampMap)
-                .forEach((tp, offsetAndTimestamp) -> {
-                    if (offsetAndTimestamp != null) {
-                        consumer.seek(tp, offsetAndTimestamp.offset());
-                    } else
-                        consumer.seekToEnd(List.of(tp));
-                });
+    private static void seekOffsetWithTimestamp(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, Long timestamp) {
+        var offsetsForTime = getPartitionOffsetForTimestamp(consumer, topicPartitions, timestamp);
+        offsetsForTime.forEach((tp, offsetAndTimestamp) -> {
+            if (offsetAndTimestamp != null) {
+                consumer.seek(tp, offsetAndTimestamp.offset());
+            } else
+                consumer.seekToEnd(List.of(tp));
+        });
     }
 
-    private static void seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, MessagePollingPosition pollingPosition, Integer noMessages) {
-        if (pollingPosition == MessagePollingPosition.FIRST) {
+    private static Map<TopicPartition, OffsetAndTimestamp> getPartitionOffsetForTimestamp(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, Long timestamp) {
+        Map<TopicPartition, Long> partitionTimestampMap = topicPartitions.stream()
+                .collect(Collectors.toMap(p -> p, p -> timestamp));
+        var offsetsForTime = consumer.offsetsForTimes(partitionTimestampMap);
+        return offsetsForTime;
+    }
+
+//    private static Map<TopicPartition, Pair<Long, Long>> seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, MessagePollingPosition pollingPosition, Integer noMessages) {
+//        if (pollingPosition == MessagePollingPosition.FIRST) {
+////                consumer.subscribe(Collections.singleton(topicName));
+//            consumer.seekToBeginning(topicPartitions);
+//            return topicPartitions.stream().collect(Collectors.toMap(tp -> tp, partition -> Pair.of(consumer.position(partition), consumer.position(partition) + noMessages)));
+//        } else {
+
+    /// /                consumer.subscribe(Collections.singleton(topicName));
+    /// /                Set<TopicPartition> partitionSet = consumer.assignment();
+//            Map<TopicPartition, Pair<Long, Long>> partitionOffsetMap = new HashMap<>(topicPartitions.size());
+//            consumer.seekToEnd(topicPartitions);
+//            topicPartitions.forEach(topicPartition -> {
+//                long endOffset = consumer.position(topicPartition);
+//                if (endOffset < noMessages) {
+//                    consumer.seekToBeginning(List.of(topicPartition));
+//                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endOffset));
+//                } else {
+//                    consumer.seek(topicPartition, consumer.position(topicPartition) - noMessages);
+//                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endOffset));
+//                }
+//            });
+//            return partitionOffsetMap;
+//        }
+//    }
+    private static Map<TopicPartition, Pair<Long, Long>> seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, PollingOptions pollingOptions) {
+        int noMessages = pollingOptions.noMessages();
+        Long startTimestamp = pollingOptions.startTimestamp();
+
+        if (pollingOptions.pollingPosition() == MessagePollingPosition.FIRST) {
 //                consumer.subscribe(Collections.singleton(topicName));
-            consumer.seekToBeginning(topicPartitions);
-        } else if (pollingPosition == MessagePollingPosition.LAST) {
+            if (startTimestamp != null) {
+                seekOffsetWithTimestamp(consumer, topicPartitions, startTimestamp);
+            } else {
+                consumer.seekToBeginning(topicPartitions);
+            }
+            return topicPartitions.stream().collect(Collectors.toMap(tp -> tp, partition -> Pair.of(consumer.position(partition), consumer.position(partition) + noMessages)));
+        } else {
 //                consumer.subscribe(Collections.singleton(topicName));
 //                Set<TopicPartition> partitionSet = consumer.assignment();
+
+            Map<TopicPartition, Pair<Long, Long>> partitionOffsetMap = new HashMap<>(topicPartitions.size());
+            Map<TopicPartition, OffsetAndTimestamp> offsetsForTs = new HashMap<>(topicPartitions.size());
+            if (startTimestamp != null) {
+                offsetsForTs = getPartitionOffsetForTimestamp(consumer, topicPartitions, startTimestamp);
+            }
             consumer.seekToEnd(topicPartitions);
-            topicPartitions.forEach(topicPartition -> {
-                if (consumer.position(topicPartition) < noMessages) {
-                    consumer.seekToBeginning(List.of(topicPartition));
+            for (TopicPartition topicPartition : topicPartitions) {
+                long endOffset = consumer.position(topicPartition);
+                Long startTsOffset = Optional.ofNullable(offsetsForTs.get(topicPartition)).map(OffsetAndTimestamp::offset).orElse(0L);
+                if (endOffset < noMessages) {
+//                    consumer.seekToBeginning(List.of(topicPartition));
+                    consumer.seek(topicPartition, startTsOffset);
+                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endOffset));
                 } else {
-                    consumer.seek(topicPartition, consumer.position(topicPartition) - noMessages);
+                    consumer.seek(topicPartition, Math.max(startTsOffset, endOffset - noMessages));
+                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endOffset));
                 }
-            });
+            }
+            return partitionOffsetMap;
         }
     }
 
-    public List<KafkaMessageTableItem> pollMessages(Consumer<String, Object> consumer, Map<String, Object> consumerProps, PollingOptions pollingOptions) {
+    public List<KafkaMessageTableItem> pollMessages(Consumer<String, Object> consumer, Map<String, Object> consumerProps, PollingOptions pollingOptions, Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll) {
         int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_POLL_TIME_MS);
 //        List<KafkaMessageTableItem> allMessages = new ArrayList<>();
         ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
@@ -124,7 +176,7 @@ public class KafkaConsumerService {
                 if (emptyPullCountDown <= 0 && !pollingOptions.isLiveUpdate()) break;
                 if (!consumerRecords.isEmpty()) {
                     messageObservableList = pollCallback.resultObservableList();
-                    List<KafkaMessageTableItem> polledMessages = handleConsumerRecords(pollingOptions, consumerRecords, consumerProps);
+                    List<KafkaMessageTableItem> polledMessages = handleConsumerRecords(pollingOptions, consumerRecords, consumerProps, partitionOffsetsToPoll);
                     if (!polledMessages.isEmpty()) {
                         messageObservableList.addAll(polledMessages);
                     }
@@ -138,12 +190,16 @@ public class KafkaConsumerService {
 //        return filterAndSortMessages(messageObservableList, pollingOptions);
     }
 
-    private List<KafkaMessageTableItem> handleConsumerRecords(PollingOptions pollingOptions, ConsumerRecords<String, Object> consumerRecords, Map<String, Object> consumerProps) {
+    private List<KafkaMessageTableItem> handleConsumerRecords(PollingOptions pollingOptions, ConsumerRecords<String, Object> consumerRecords, Map<String, Object> consumerProps, Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll) {
         List<KafkaMessageTableItem> messages = new ArrayList<>();
         for (ConsumerRecord<String, Object> record : consumerRecords) {
             try {
-                KafkaMessageTableItem message = createMessageItem(record, pollingOptions, consumerProps);
-                messages.add(message);
+                long endOffset = partitionOffsetsToPoll.get(new TopicPartition(record.topic(), record.partition())).getRight();
+                if (record.offset() < endOffset) {
+                    KafkaMessageTableItem message = createMessageItem(record, pollingOptions, consumerProps);
+                    messages.add(message);
+                }
+
             } catch (DeserializationException e) {
                 log.error("Error processing record: key={}, partition={}, offset={}",
                         record.key(), record.partition(), record.offset(), e);
@@ -166,10 +222,7 @@ public class KafkaConsumerService {
                 pollingOptions.valueContentType,
                 record.headers(), consumerProps, others);
 
-        String timestamp = Instant.ofEpochMilli(record.timestamp())
-                .atZone(ZoneId.systemDefault())
-//                .toLocalDateTime()
-                .toString();
+        String timestamp = formatRecordTimestamp(record);
 
         return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, pollingOptions.valueContentType(), record.headers(), pollingOptions.schema(), false);
     }
@@ -177,10 +230,7 @@ public class KafkaConsumerService {
     private KafkaMessageTableItem createErrorMessageItem
             (ConsumerRecord<String, Object> record, PollingOptions pollingOptions) {
 
-        String timestamp = Instant.ofEpochMilli(record.timestamp())
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
-                .toString();
+        String timestamp = formatRecordTimestamp(record);
         String displayValue = "";
         try {
             displayValue = AvroUtil.toString(record.value());
@@ -198,6 +248,14 @@ public class KafkaConsumerService {
                 "",
                 true);
     }
+
+    private String formatRecordTimestamp(ConsumerRecord<String, Object> record) {
+        return Instant.ofEpochMilli(record.timestamp())
+                .atZone(ZoneId.systemDefault())
+//                .toLocalDateTime()
+                .toString();
+    }
+
     private List<KafkaMessageTableItem> filterAndSortMessages
             (List<KafkaMessageTableItem> messages, PollingOptions pollingOptions) {
         if (pollingOptions.noMessages() != null) {
@@ -227,7 +285,7 @@ public class KafkaConsumerService {
     }
 
     @Builder
-    public record PollingOptions(Integer pollTime, Integer noMessages, Long timestamp,
+    public record PollingOptions(Integer pollTime, Integer noMessages, Long startTimestamp,
                                  MessagePollingPosition pollingPosition, String valueContentType,
                                  String schema,
                                  java.util.function.Supplier<PollCallback> pollCallback, boolean isLiveUpdate) {

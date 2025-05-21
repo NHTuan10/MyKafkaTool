@@ -101,6 +101,7 @@ public class MainController {
 
     private ObservableList<KafkaMessageTableItem> allMsgTableItems = FXCollections.observableArrayList();
 
+    // Poll Options
     @FXML
     private TextField pollTimeTextField;
 
@@ -117,7 +118,7 @@ public class MainController {
     private TextField maxMessagesTextField;
 
     @FXML
-    private DateTimePicker timestampPicker;
+    private DateTimePicker startTimestampPicker;
 
     @FXML
     private ComboBox<String> keyContentType;
@@ -139,6 +140,13 @@ public class MainController {
 
     private StringProperty filterMsgTextProperty = new SimpleStringProperty("");
 
+    @FXML
+    private Label endTimestampLabel;
+
+    @FXML
+    private DateTimePicker endTimestampPicker;
+
+    // message buttons
     @FXML
     private Button countMessagesBtn;
 
@@ -265,7 +273,7 @@ public class MainController {
     private void initPollingOptionsUI() {
         pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME_MS));
         maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
-        timestampPicker.setDayCellFactory(param -> new DateCell() {
+        startTimestampPicker.setDayCellFactory(param -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
@@ -301,6 +309,10 @@ public class MainController {
 //                pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
             }
         });
+        endTimestampLabel.setVisible(false);
+        endTimestampLabel.setManaged(false);
+        endTimestampPicker.setVisible(false);
+        endTimestampPicker.setManaged(false);
     }
 
     private void configureClusterTreeSelectedItemChanged() {
@@ -498,11 +510,14 @@ public class MainController {
         });
         configureSortAndFilterForMessageTable(filterMsgTextProperty.get());
 //        messageTable.setItems(list);
+        if (maxMessagesTextField.getText().isEmpty()) {
+            maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
+        }
         KafkaConsumerService.PollingOptions pollingOptions =
                 KafkaConsumerService.PollingOptions.builder()
                         .pollTime(Integer.parseInt(pollTimeTextField.getText()))
                         .noMessages(Integer.parseInt(maxMessagesTextField.getText()))
-                        .timestamp(timestampMs)
+                        .startTimestamp(timestampMs)
                         .pollingPosition(msgPosition.getValue())
                         .valueContentType(valueContentTypeStr)
                         .schema(schema)
@@ -562,9 +577,9 @@ public class MainController {
     private void configureSortAndFilterForMessageTable(String filterText) {
         this.filterMsgTextProperty.set(filterText);
 //        this.allMsgTableItems.setAll(list);
-        Comparator defaultComparator = Comparator.comparing(KafkaMessageTableItem::getTimestamp).reversed();
+//        Comparator defaultComparator = Comparator.comparing(KafkaMessageTableItem::getTimestamp).reversed();
         ObservableList<KafkaMessageTableItem> filteredList = this.allMsgTableItems.filtered((item) -> isMsgTableItemMatched(item, filterText));
-        SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(filteredList, defaultComparator);
+        SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(filteredList);
         sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
         messageTable.setItems(sortedList);
     }
@@ -582,7 +597,7 @@ public class MainController {
     }
 
     private Long getPollStartTimestamp() {
-        return timestampPicker.getValue() != null ? ZonedDateTime.of(timestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
+        return startTimestampPicker.getValue() != null ? ZonedDateTime.of(startTimestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
     }
 
     @FXML

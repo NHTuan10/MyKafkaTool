@@ -106,7 +106,7 @@
                                                                               <Insets top="5.0" />
                                                                           </FlowPane.margin>
                                                                       </TextField>
-                                                                      <Label text="No Msgs/Partition">
+                                                                      <Label text="No Msgs/Partition Displayed">
                                                                           <FlowPane.margin>
                                                                               <Insets left="10.0" top="5.0" />
                                                                           </FlowPane.margin>
@@ -122,13 +122,13 @@
                                                                               <Insets left="10.0" top="5.0" />
                                                                           </FlowPane.margin>
                                                                       </Label>
-                                                                      <DateTimePicker fx:id="timestampPicker" prefWidth="180.0">
+                                                                      <DateTimePicker fx:id="startTimestampPicker" prefWidth="180.0">
                                                                           <FlowPane.margin>
                                                                               <Insets left="10.0" right="10.0" top="5.0" />
                                                                           </FlowPane.margin>
                                                                       </DateTimePicker>
-                                                      <Label text="Before" />
-                                                      <DateTimePicker disable="true" prefWidth="180.0" />
+                                                      <Label fx:id="endTimestampLabel" text="Before" visible="false" />
+                                                      <DateTimePicker fx:id="endTimestampPicker" disable="true" prefWidth="180.0" visible="false" />
                                                                       <Button fx:id="countMessagesBtn" mnemonicParsing="false" onAction="#countMessages" text="Count Msgs">
                                                                           <FlowPane.margin>
                                                                               <Insets left="10.0" top="5.0" />
