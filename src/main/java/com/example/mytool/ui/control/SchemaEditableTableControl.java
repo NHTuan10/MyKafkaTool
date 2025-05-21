@@ -99,15 +99,15 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
     }
 
     @Override
-    protected Predicate<SchemaTableItem> filterPredicate(String filterText) {
+    protected Predicate<SchemaTableItem> filterPredicate(Filter filter) {
         if (regexFilterToggleBtn.isSelected()) {
-            Pattern pattern = Pattern.compile(filterText, Pattern.CASE_INSENSITIVE);
+            Pattern pattern = Pattern.compile(filter.getFilterText(), Pattern.CASE_INSENSITIVE);
 
             return item -> pattern.matcher(item.getSubject()).find() ||
                     (item.getSchema() != null && pattern.matcher(item.getSchema()).find());
         }
-        return item -> item.getSubject().toLowerCase().contains(filterText.toLowerCase()) ||
-                (item.getSchema() != null && item.getSchema().toLowerCase().contains(filterText.toLowerCase()));
+        return item -> item.getSubject().toLowerCase().contains(filter.getFilterText().toLowerCase()) ||
+                (item.getSchema() != null && item.getSchema().toLowerCase().contains(filter.getFilterText().toLowerCase()));
     }
 
     //    @RequiredArgsConstructor

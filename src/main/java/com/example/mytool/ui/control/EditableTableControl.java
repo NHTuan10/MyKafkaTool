@@ -95,7 +95,7 @@ public class EditableTableControl<T> extends AnchorPane {
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
-        table.setItems(tableItems.filtered(filterPredicate(this.filterTextProperty.get())));
+        table.setItems(tableItems.filtered(filterPredicate(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()))));
 
         filterTextField.textProperty().bindBidirectional(filterTextProperty);
         filterTextField.setOnKeyPressed(e -> {
@@ -136,7 +136,7 @@ public class EditableTableControl<T> extends AnchorPane {
         this.filterTextProperty.set(filter.getFilterText());
         this.regexFilterToggleBtn.setSelected(filter.isRegexFilter());
 //        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
-        table.setItems(tableItems.filtered(filterPredicate(this.filterTextProperty.get())));
+        table.setItems(tableItems.filtered(filterPredicate(filter)));
     }
     @FXML
     protected void addItem() {
@@ -153,7 +153,7 @@ public class EditableTableControl<T> extends AnchorPane {
 
     }
 
-    protected Predicate<T> filterPredicate(String filterText) {
+    protected Predicate<T> filterPredicate(Filter filterText) {
         return (item) -> true;
     }
 
