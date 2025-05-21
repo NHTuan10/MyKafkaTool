@@ -5,10 +5,7 @@ import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.control.EditingTableCell;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -38,7 +35,7 @@ public class TableViewConfigurer {
             tableColumn.setCellFactory((callback) -> new ViewUtil.DragSelectionCell<>());
         });
         // Enable copy by Ctrl + C or by right click -> Copy
-        ViewUtil.enableCopyDataFromTableToClipboard(tableView, isCellSelectionEnabled);
+        ViewUtil.enableCopyDataFromTableToClipboard(tableView, isCellSelectionEnabled, SelectionMode.MULTIPLE);
 
         return tableView;
     }

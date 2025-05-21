@@ -25,10 +25,7 @@ import org.fxmisc.richtext.CodeArea;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -46,12 +43,12 @@ public final class ViewUtil {
         return result.orElse(cancel) == yes;
     }
 
-    public static void enableCopyDataFromTableToClipboard(TableView<?> tableView, boolean isCellSelectionEnabled) {
+    public static void enableCopyDataFromTableToClipboard(TableView<?> tableView, boolean isCellSelectionEnabled, SelectionMode selectionMode) {
         tableView.getSelectionModel().setCellSelectionEnabled(isCellSelectionEnabled);
-        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        tableView.getSelectionModel().setSelectionMode(selectionMode);
 
         MenuItem item = new MenuItem("Copy");
-        item.setOnAction(event -> copyTableSelectionToClipboard(tableView));
+        item.setOnAction(event -> copySelectedCellsToClipboard(tableView));
         ContextMenu menu = new ContextMenu();
         menu.getItems().add(item);
         tableView.setContextMenu(menu);
@@ -59,12 +56,16 @@ public final class ViewUtil {
         final KeyCodeCombination keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN);
         tableView.setOnKeyPressed(event -> {
             if (keyCodeCopy.match(event)) {
-                copyTableSelectionToClipboard(tableView);
+                if (isCellSelectionEnabled) {
+                    copySelectedCellsToClipboard(tableView);
+                } else {
+                    copySelectedRowsToClipboard(tableView);
+                }
             }
         });
     }
 
-    public static void copyTableSelectionToClipboard(TableView<?> tableView) {
+    public static void copySelectedCellsToClipboard(TableView<?> tableView) {
         ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
         int old_r = -1;
         StringBuilder clipboardString = new StringBuilder();
@@ -84,6 +85,33 @@ public final class ViewUtil {
         final ClipboardContent content = new ClipboardContent();
         content.putString(clipboardString.toString());
         Clipboard.getSystemClipboard().setContent(content);
+    }
+
+    public static void copySelectedRowsToClipboard(final TableView<?> table) {
+        final Set<Integer> rows = new TreeSet<>();
+        for (final TablePosition tablePosition : table.getSelectionModel().getSelectedCells()) {
+            rows.add(tablePosition.getRow());
+        }
+        final StringBuilder strb = new StringBuilder();
+        boolean firstRow = true;
+        for (final Integer row : rows) {
+            if (!firstRow) {
+                strb.append('\n');
+            }
+            firstRow = false;
+            boolean firstCol = true;
+            for (final TableColumn<?, ?> column : table.getColumns()) {
+                if (!firstCol) {
+                    strb.append('\t');
+                }
+                firstCol = false;
+                final Object cellData = column.getCellData(row);
+                strb.append(cellData == null ? "" : cellData.toString());
+            }
+        }
+        final ClipboardContent clipboardContent = new ClipboardContent();
+        clipboardContent.putString(strb.toString());
+        Clipboard.getSystemClipboard().setContent(clipboardContent);
     }
 
     public static KafkaPartitionsTableItem mapToUIPartitionTableItem(TopicPartitionInfo partitionInfo, Pair<Long, Long> partitionOffsetsInfo) {
