@@ -327,7 +327,24 @@ public class MainController {
                 propertiesTab.setDisable(true);
 
                 partitionsTitledPane.setVisible(false);
+                if (oldValue != null && oldValue != newValue && (oldValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
+                    TreeItem oldSelectedTreeItem = (TreeItem) oldValue;
+                    treeMsgTableItemCache.put(oldSelectedTreeItem, MessageTableState.builder()
+                            .items(FXCollections.observableArrayList(allMsgTableItems))
+                            .filterText(filterMsgTextProperty.get())
+                            .build());
+                }
 
+
+                if (!(newValue instanceof ConsumerGroupTreeItem)) {
+                    consumerGroupOffsetTable.setItems(FXCollections.emptyObservableList());
+                }
+                if (!(newValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
+                    topicConfigTable.setItems(FXCollections.emptyObservableList());
+                }
+            }
+
+            if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
                 // if some clear msg table
                 if (treeMsgTableItemCache.containsKey(newValue)) {
                     MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
@@ -340,15 +357,6 @@ public class MainController {
                     configureSortAndFilterForMessageTable("");
                 }
 
-                if (!(newValue instanceof ConsumerGroupTreeItem)) {
-                    consumerGroupOffsetTable.setItems(FXCollections.emptyObservableList());
-                }
-                if (!(newValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
-                    topicConfigTable.setItems(FXCollections.emptyObservableList());
-                }
-            }
-
-            if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 ObservableList<UIPropertyTableItem> config = FXCollections.observableArrayList();
                 String clusterName = topic.cluster().getName();
@@ -493,11 +501,10 @@ public class MainController {
             ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
             return;
         }
-        String valueContentTypeStr = valueContentType.getValue();
-        Long timestampMs = getPollStartTimestamp();
         String schema = schemaTextArea.getText();
         allMsgTableItems.clear();
-        ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
+        ObservableList<KafkaMessageTableItem> list = allMsgTableItems;
+//        allMsgTableItems =  list;
 //        filterMsgTextField.setOnKeyPressed(e -> {
 //            if (e.getCode().equals(KeyCode.ENTER)) {
 //                configureSortAndFilterForMessageTable(list, filterMsgTextProperty.get());
@@ -518,9 +525,9 @@ public class MainController {
                 KafkaConsumerService.PollingOptions.builder()
                         .pollTime(Integer.parseInt(pollTimeTextField.getText()))
                         .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
-                        .startTimestamp(timestampMs)
+                        .startTimestamp(getPollStartTimestamp())
                         .pollingPosition(msgPosition.getValue())
-                        .valueContentType(valueContentTypeStr)
+                        .valueContentType(valueContentType.getValue())
                         .schema(schema)
                         .pollCallback(() -> {
                             blockAppProgressInd.setVisible(false);
@@ -531,11 +538,11 @@ public class MainController {
                         .isLiveUpdate(isLiveUpdateCheckBox.isSelected())
                         .build();
 
-        treeMsgTableItemCache.put(selectedTreeItem, MessageTableState.builder()
-                .items(list)
-                .filterText(filterMsgTextProperty.get())
-                .pollingOptions(pollingOptions)
-                .build());
+//        treeMsgTableItemCache.put(selectedTreeItem, MessageTableState.builder()
+//                .items(list)
+//                .filterText(filterMsgTextProperty.get())
+//                .pollingOptions(pollingOptions)
+//                .build());
         blockAppProgressInd.setVisible(true);
         isPolling.set(true);
 //        isPollingMsgProgressIndicator.setVisible(true);
@@ -564,7 +571,7 @@ public class MainController {
             blockAppProgressInd.setVisible(false);
             isPolling.set(false);
             noMsgLongProp.set(list.size());
-            allMsgTableItems.setAll(list);
+//            allMsgTableItems.setAll(list);
         };
         Consumer<Throwable> onFailure = (exception) -> {
             blockAppProgressInd.setVisible(false);

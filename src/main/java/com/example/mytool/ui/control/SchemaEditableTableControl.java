@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 @Slf4j
 public class SchemaEditableTableControl extends EditableTableControl<SchemaTableItem> {
@@ -100,14 +99,22 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
 
     @Override
     protected Predicate<SchemaTableItem> filterPredicate(Filter filter) {
-        if (regexFilterToggleBtn.isSelected()) {
-            Pattern pattern = Pattern.compile(filter.getFilterText(), Pattern.CASE_INSENSITIVE);
+        return buildFilterPredicate(filter,
+                SchemaTableItem::getSubject,
+                SchemaTableItem::getSchema,
+                SchemaTableItem::getType,
+                SchemaTableItem::getCompatibility,
+                SchemaTableItem::getSchemaId,
+                SchemaTableItem::getLatestVersion);
+//        if (regexFilterToggleBtn.isSelected()) {
+//            Pattern pattern = Pattern.compile(filter.getFilterText(), Pattern.CASE_INSENSITIVE);
+//
+//            return item -> pattern.matcher(item.getSubject()).find() ||
+//                    (item.getSchema() != null && pattern.matcher(item.getSchema()).find());
+//        }
+//        return item -> item.getSubject().toLowerCase().contains(filter.getFilterText().toLowerCase()) ||
+//                (item.getSchema() != null && item.getSchema().toLowerCase().contains(filter.getFilterText().toLowerCase()));
 
-            return item -> pattern.matcher(item.getSubject()).find() ||
-                    (item.getSchema() != null && pattern.matcher(item.getSchema()).find());
-        }
-        return item -> item.getSubject().toLowerCase().contains(filter.getFilterText().toLowerCase()) ||
-                (item.getSchema() != null && item.getSchema().toLowerCase().contains(filter.getFilterText().toLowerCase()));
     }
 
     //    @RequiredArgsConstructor
