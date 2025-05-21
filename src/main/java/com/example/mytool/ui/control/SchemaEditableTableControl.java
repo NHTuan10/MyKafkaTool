@@ -172,20 +172,17 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
         return schemaItems;
     }
 
-    @FXML
-    public void removeItem() {
-        List<Integer> indicesToRemove = table.getSelectionModel().getSelectedIndices().reversed();
-        indicesToRemove.forEach((i) -> {
-            SchemaTableItem item = tableItems.get(i);
-            if (ViewUtil.confirmAlert("Delete Subject", "Are you sure to delete " + item.getSubject() + " ?", "Yes", "Cancel")) {
-                try {
-                    schemaRegistryManager.deleteSubject(item.getClusterName(), item.getSubject());
-                } catch (RestClientException | IOException e) {
-                    throw new RuntimeException(e);
-                }
-                tableItems.remove((int) i);
+    @Override
+    protected boolean doRemoveItem(int index, SchemaTableItem item) {
+        if (ViewUtil.confirmAlert("Delete Subject", "Are you sure to delete " + item.getSubject() + " ?", "Yes", "Cancel")) {
+            try {
+                schemaRegistryManager.deleteSubject(item.getClusterName(), item.getSubject());
+            } catch (RestClientException | IOException e) {
+                throw new RuntimeException(e);
             }
-        });
+            return true;
+        }
+        return false;
     }
 
 

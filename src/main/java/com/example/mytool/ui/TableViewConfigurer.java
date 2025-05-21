@@ -4,6 +4,7 @@ import com.example.mytool.constant.AppConstant;
 import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.control.EditingTableCell;
 import com.example.mytool.ui.util.ViewUtil;
+import javafx.beans.property.Property;
 import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -12,6 +13,7 @@ import javafx.util.Callback;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -40,34 +42,61 @@ public class TableViewConfigurer {
         return tableView;
     }
 
-    public static void configureEditableKeyValueTable(TableView<UIPropertyTableItem> headerTable) {
-        Callback<TableColumn<UIPropertyTableItem, String>,
-                TableCell<UIPropertyTableItem, String>> cellFactory
-                = (TableColumn<UIPropertyTableItem, String> p) -> new EditingTableCell<>();
+//    public static void configureEditableTableCell(TableView<UIPropertyTableItem> headerTable) {
+//        Callback<TableColumn<UIPropertyTableItem, String>,
+//                TableCell<UIPropertyTableItem, String>> cellFactory
+//                = (TableColumn<UIPropertyTableItem, String> p) -> new EditingTableCell<>();
+//
+//        TableColumn<UIPropertyTableItem, String> nameColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().getFirst();
+////            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+////            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+////            nameColumn.setCellFactory((tableColumn)-> new EditingTableCell()); // Use TextField for editing
+//        nameColumn.setCellFactory(cellFactory); // Use TextField for editing
+//        nameColumn.setOnEditCommit(event -> {
+//            // Update the model when editing is committed
+////                UIPropertyItem row = event.getRowValue();
+////                row.setName(event.getNewValue());
+//            event.getTableView().getItems().get(
+//                    event.getTablePosition().getRow()).setName(event.getNewValue());
+//        });
 
-        TableColumn<UIPropertyTableItem, String> nameColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().getFirst();
-//            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-//            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-//            nameColumn.setCellFactory((tableColumn)-> new EditingTableCell()); // Use TextField for editing
-        nameColumn.setCellFactory(cellFactory); // Use TextField for editing
-        nameColumn.setOnEditCommit(event -> {
-            // Update the model when editing is committed
+    /// /            nameColumn.setOnEditCancel(event -> {
+    /// /                event.getRowValue();
+    /// /            });
+//
+//        TableColumn<UIPropertyTableItem, String> valueColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().get(1);
+//
+//        valueColumn.setCellFactory(cellFactory);
+//        valueColumn.setOnEditCommit(event -> {
+//            // Update the model when editing is committed
+//            event.getTableView().getItems().get(
+//                    event.getTablePosition().getRow()).setValue(event.getNewValue());
+//        });
+//    }
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static <S> void configureEditableTableCell(TableView<S> tableView, Class<S> tableItemClass) {
+        Callback<TableColumn<S, String>,
+                TableCell<S, String>> cellFactory
+                = (TableColumn<S, String> p) -> new EditingTableCell<>();
+        List<Field> fields = ViewUtil.getPropertyFieldFromTableItem(tableItemClass);
+        IntStream.range(0, fields.size()).forEach(i -> {
+            Field field = fields.get(i);
+            TableColumn<S, String> tableColumn = (TableColumn<S, String>) tableView.getColumns().get(i);
+            tableColumn.setCellFactory(cellFactory);
+            tableColumn.setOnEditCommit(event -> {
+                // Update the model when editing is committed
 //                UIPropertyItem row = event.getRowValue();
 //                row.setName(event.getNewValue());
-            event.getTableView().getItems().get(
-                    event.getTablePosition().getRow()).setName(event.getNewValue());
-        });
-//            nameColumn.setOnEditCancel(event -> {
-//                event.getRowValue();
-//            });
-
-        TableColumn<UIPropertyTableItem, String> valueColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().get(1);
-
-        valueColumn.setCellFactory(cellFactory);
-        valueColumn.setOnEditCommit(event -> {
-            // Update the model when editing is committed
-            event.getTableView().getItems().get(
-                    event.getTablePosition().getRow()).setValue(event.getNewValue());
+                S row = event.getTableView().getItems().get(
+                        event.getTablePosition().getRow());
+                field.setAccessible(true);
+                try {
+                    Property property = (Property) field.get(row);
+                    property.setValue(event.getNewValue());
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         });
     }
 

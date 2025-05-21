@@ -12,17 +12,19 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class EditableTableControl<T> extends AnchorPane {
@@ -31,7 +33,7 @@ public class EditableTableControl<T> extends AnchorPane {
     protected Button addItemBtn;
 
     @FXML
-    protected Button removeItemBtn;
+    protected Button removeItemsBtn;
 
     @FXML
     protected Button refreshBtn;
@@ -98,12 +100,15 @@ public class EditableTableControl<T> extends AnchorPane {
         table.setItems(tableItems.filtered(filterPredicate(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()))));
 
         filterTextField.textProperty().bindBidirectional(filterTextProperty);
-        filterTextField.setOnKeyPressed(e -> {
-            if (e.getCode().equals(KeyCode.ENTER)) {
-//                var filteredList = tableItems.filtered(filterPredicate(this.filterTextProperty.get()));
-//                table.setItems(filteredList);
-                applyFilter(new Filter(filterTextProperty.get(), regexFilterToggleBtn.isSelected()));
-            }
+//        filterTextField.setOnKeyPressed(e -> {
+//            if (e.getCode().equals(KeyCode.ENTER)) {
+////                var filteredList = tableItems.filtered(filterPredicate(this.filterTextProperty.get()));
+////                table.setItems(filteredList);
+//                applyFilter(new Filter(filterTextProperty.get(), regexFilterToggleBtn.isSelected()));
+//            }
+//        });
+        this.filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            applyFilter(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
         });
         regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
             applyFilter(new Filter(filterTextProperty.get(), regexFilterToggleBtn.isSelected()));
@@ -138,14 +143,25 @@ public class EditableTableControl<T> extends AnchorPane {
 //        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
         table.setItems(tableItems.filtered(filterPredicate(filter)));
     }
+
     @FXML
     protected void addItem() {
     }
 
     @FXML
-    protected void removeItem() {
+    protected void removeItems() {
         List<Integer> indicesToRemove = table.getSelectionModel().getSelectedIndices().reversed();
-        indicesToRemove.forEach((i) -> tableItems.remove((int) i));
+        indicesToRemove.forEach((i) -> {
+            T item = tableItems.get(i);
+            boolean success = doRemoveItem(i, item);
+            if (success) {
+                tableItems.remove((int) i);
+            }
+        });
+    }
+
+    protected boolean doRemoveItem(int index, T item) {
+        return true;
     }
 
     @FXML
@@ -153,17 +169,50 @@ public class EditableTableControl<T> extends AnchorPane {
 
     }
 
-    protected Predicate<T> filterPredicate(Filter filterText) {
+    protected Predicate<T> filterPredicate(Filter filter) {
         return (item) -> true;
+    }
+
+    @SafeVarargs
+    protected final Predicate<T> buildFilterPredicate(@NonNull Filter filter, Function<T, String>... fieldGetters) {
+        assert (filter.getFilterText() != null);
+        if (regexFilterToggleBtn.isSelected()) {
+            Pattern pattern = Pattern.compile(filter.getFilterText(), Pattern.CASE_INSENSITIVE);
+            return item -> {
+                boolean isMatched = false;
+                for (Function<T, String> fieldGetter : fieldGetters) {
+                    isMatched = isMatched || (fieldGetter.apply(item) != null && pattern.matcher(fieldGetter.apply(item)).find());
+                }
+                return isMatched;
+            };
+        } else {
+            return item -> {
+                boolean isMatched = false;
+                for (Function<T, String> fieldGetter : fieldGetters) {
+                    isMatched = isMatched || (fieldGetter.apply(item) != null && fieldGetter.apply(item).toLowerCase().contains(filter.getFilterText().toLowerCase()));
+                }
+                return isMatched;
+            };
+
+        }
     }
 
     protected void configureEditableControls() {
         table.editableProperty().bind(editable);
         addItemBtn.disableProperty().bind(editable.not());
-        removeItemBtn.disableProperty().bind(editable.not()
+        removeItemsBtn.disableProperty().bind(editable.not()
                 .or(table.getSelectionModel().selectedItemProperty().isNull()));
     }
 
+
+    public void setItems(ObservableList<T> items) {
+        //TODO: make this setItems consistent
+        tableItems.setAll(items);
+    }
+
+    public ObservableList<T> getItems() {
+        return tableItems;
+    }
 //    public record Filter<T> (T item, String filterText){}
 
     @Data

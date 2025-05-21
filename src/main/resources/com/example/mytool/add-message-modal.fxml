@@ -18,6 +18,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.fxmisc.richtext.CodeArea?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import com.example.mytool.ui.control.MessageHeaderTable?>
 
 <AnchorPane prefHeight="489.0" prefWidth="695.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.mytool.ui.controller.AddOrViewMessageModalController">
     <children>
@@ -108,38 +109,40 @@
                           <content>
                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <SplitPane dividerPositions="0.12440944881889764" orientation="VERTICAL" prefHeight="319.5" prefWidth="598.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <items>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                       <children>
-                                          <HBox prefHeight="17.0" prefWidth="200.0">
-                                             <children>
-                                                <Button fx:id="addHeaderBtn" mnemonicParsing="false" onAction="#addHeader" text="+">
-                                                   <HBox.margin>
-                                                      <Insets left="10.0" top="5.0" />
-                                                   </HBox.margin>
-                                                </Button>
-                                                <Button fx:id="removeHeaderBtn" mnemonicParsing="false" onAction="#removeHeader" text="-">
-                                                   <HBox.margin>
-                                                      <Insets left="10.0" top="5.0" />
-                                                   </HBox.margin>
-                                                </Button>
-                                             </children>
-                                          </HBox>
-                                       </children>
-                                    </AnchorPane>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                       <children>
-                                          <TableView fx:id="headerTable" prefHeight="298.0" prefWidth="598.0">
-                                            <columns>
-                                              <TableColumn prefWidth="180.0" text="Name" />
-                                              <TableColumn prefWidth="413.0" text="Value" />
-                                            </columns>
-                                          </TableView>
-                                       </children>
-                                    </AnchorPane>
-                                </items>
-                              </SplitPane>
+                                   <MessageHeaderTable fx:id="headerTable" layoutY="7.0" minHeight="200.0" prefHeight="297.0" prefWidth="924.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+
+<!--                               <SplitPane dividerPositions="0.12440944881889764" orientation="VERTICAL" prefHeight="319.5" prefWidth="598.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+<!--                                 <items> -->
+<!--                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
+<!--                                        <children> -->
+<!--                                           <HBox prefHeight="17.0" prefWidth="200.0"> -->
+<!--                                              <children> -->
+<!--                                                 <Button fx:id="addHeaderBtn" mnemonicParsing="false" onAction="#addHeader" text="+"> -->
+<!--                                                    <HBox.margin> -->
+<!--                                                       <Insets left="10.0" top="5.0" /> -->
+<!--                                                    </HBox.margin> -->
+<!--                                                 </Button> -->
+<!--                                                 <Button fx:id="removeHeaderBtn" mnemonicParsing="false" onAction="#removeHeader" text="-"> -->
+<!--                                                    <HBox.margin> -->
+<!--                                                       <Insets left="10.0" top="5.0" /> -->
+<!--                                                    </HBox.margin> -->
+<!--                                                 </Button> -->
+<!--                                              </children> -->
+<!--                                           </HBox> -->
+<!--                                        </children> -->
+<!--                                     </AnchorPane> -->
+<!--                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
+<!--                                        <children> -->
+<!--                                           <TableView fx:id="headerTable" prefHeight="298.0" prefWidth="598.0"> -->
+<!--                                             <columns> -->
+<!--                                               <TableColumn prefWidth="180.0" text="Name" /> -->
+<!--                                               <TableColumn prefWidth="413.0" text="Value" /> -->
+<!--                                             </columns> -->
+<!--                                           </TableView> -->
+<!--                                        </children> -->
+<!--                                     </AnchorPane> -->
+<!--                                 </items> -->
+<!--                               </SplitPane> -->
                            </children>
                         </AnchorPane>
                           </content>

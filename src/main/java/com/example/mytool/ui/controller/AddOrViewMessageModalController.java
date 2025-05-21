@@ -6,12 +6,11 @@ import com.example.mytool.api.PluggableSerializer;
 import com.example.mytool.api.model.KafkaMessage;
 import com.example.mytool.serdes.AvroUtil;
 import com.example.mytool.serdes.SerDesHelper;
-import com.example.mytool.ui.TableViewConfigurer;
 import com.example.mytool.ui.UIPropertyTableItem;
 import com.example.mytool.ui.codehighlighting.JsonHighlighter;
+import com.example.mytool.ui.control.MessageHeaderTable;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -22,7 +21,6 @@ import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,11 +41,11 @@ public class AddOrViewMessageModalController extends ModalController {
     private Button okBtn;
     @FXML
     private Button cancelBtn;
-    @FXML
-    private Button addHeaderBtn;
+//    @FXML
+//    private Button addHeaderBtn;
 
-    @FXML
-    private Button removeHeaderBtn;
+    //    @FXML
+//    private Button removeHeaderBtn;
     @FXML
     private Tab headerTab;
 
@@ -58,19 +56,19 @@ public class AddOrViewMessageModalController extends ModalController {
     private ComboBox<DisplayType> valueDisplayTypeComboBox;
 
     @FXML
-    private TableView<UIPropertyTableItem> headerTable;
+    private MessageHeaderTable headerTable;
 
-    private ObservableList<UIPropertyTableItem> headerItems;
+//    private ObservableList<UIPropertyTableItem> headerItems;
 
     private final JsonHighlighter jsonHighlighter = new JsonHighlighter();
 
     @FXML
     void initialize() {
-        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, headerTable, true);
+//        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, headerTable, true);
 
-        headerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        headerItems = FXCollections.observableArrayList();
-        headerTable.setItems(headerItems);
+//        headerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+//        headerTable.setItems(headerItems);
+//        headerItems = headerTable.getItems();
         valueContentTypeComboBox.setOnAction(event -> {
             enableDisableSchemaTextArea();
         });
@@ -107,7 +105,7 @@ public class AddOrViewMessageModalController extends ModalController {
             return;
         }
 
-        Map<String, byte[]> headers = headerItems.stream().collect(Collectors.toMap(UIPropertyTableItem::getName, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
+        Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(UIPropertyTableItem::getName, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
         modelRef.set(new KafkaMessage(keyTextArea.getText(), valueText, valueContentTypeText, schemaText, headers));
         Stage stage = (Stage) okBtn.getScene().getWindow();
         stage.close();
@@ -119,22 +117,12 @@ public class AddOrViewMessageModalController extends ModalController {
         stage.close();
     }
 
-    @FXML
-    protected void addHeader() {
-        headerItems.add(new UIPropertyTableItem("", ""));
-    }
-
-    @FXML
-    protected void removeHeader() {
-        List<Integer> indicesToRemove = headerTable.getSelectionModel().getSelectedIndices().reversed();
-        indicesToRemove.forEach((i) -> headerItems.remove((int) i));
-    }
 
     public void launch(boolean editable) {
         keyTextArea.setEditable(editable);
         valueTextArea.setEditable(editable);
 //        valueContentTypeComboBox.setDisable(!editable);
-        headerTable.setEditable(editable);
+//        headerTable.setEditable(editable);
         final String initValue = valueTextArea.getText();
         valueDisplayTypeComboBox.setOnAction(event -> {
 //            enableDisableSchemaTextArea();
@@ -142,6 +130,7 @@ public class AddOrViewMessageModalController extends ModalController {
         });
         //TODO: Set value on below combox box based on the valueContentTypeComboBox
         valueContentTypeComboBox.getSelectionModel().selectFirst();
+        headerTable.setEditable(editable);
 
         DisplayType displayType;
 
@@ -151,7 +140,7 @@ public class AddOrViewMessageModalController extends ModalController {
             }
             displayType = Optional.ofNullable(serDesHelper.getPluggableSerialize(valueContentType))
                     .map(PluggableSerializer::getDisplayType).orElse(DisplayType.TEXT);
-            TableViewConfigurer.configureEditableKeyValueTable(headerTable);
+//            TableViewConfigurer.configureEditableKeyValueTable(headerTable);
             enableDisableSchemaTextArea();
         } else { // For View Message Modal
             if (valueContentType != null && serDesHelper.getPluggableDeserialize(valueContentType) != null) {
@@ -163,8 +152,8 @@ public class AddOrViewMessageModalController extends ModalController {
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(Event::consume);
             schemaTextArea.setEditable(false);
-            addHeaderBtn.setVisible(false);
-            removeHeaderBtn.setVisible(false);
+//            addHeaderBtn.setVisible(false);
+//            removeHeaderBtn.setVisible(false);
         }
         valueDisplayTypeComboBox.getSelectionModel().select(displayType);
         valueDisplayTypeToggleEventAction(true, initValue);
