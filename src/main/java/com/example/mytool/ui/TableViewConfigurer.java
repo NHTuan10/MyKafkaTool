@@ -1,23 +1,19 @@
 package com.example.mytool.ui;
 
-import com.example.mytool.constant.AppConstant;
-import com.example.mytool.serdes.SerDesHelper;
 import com.example.mytool.ui.control.EditingTableCell;
 import com.example.mytool.ui.util.ViewUtil;
 import javafx.beans.property.Property;
-import javafx.collections.FXCollections;
-import javafx.scene.control.*;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -25,7 +21,11 @@ public class TableViewConfigurer {
 
     public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage) {
         TableView<S> tableView = (TableView<S>) stage.getScene().lookup("#" + fxId);
-        return configureTableView(clazz, tableView, true);
+        return configureTableView(clazz, tableView, false);
+    }
+
+    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView) {
+        return configureTableView(clazz, tableView, false);
     }
 
 
@@ -37,7 +37,7 @@ public class TableViewConfigurer {
             tableColumn.setCellFactory((callback) -> new ViewUtil.DragSelectionCell<>());
         });
         // Enable copy by Ctrl + C or by right click -> Copy
-        ViewUtil.enableCopyDataFromTableToClipboard(tableView, isCellSelectionEnabled, SelectionMode.MULTIPLE);
+        ViewUtil.enableCopyDataFromTableToClipboard(tableView, SelectionMode.MULTIPLE, isCellSelectionEnabled);
 
         return tableView;
     }
@@ -100,50 +100,6 @@ public class TableViewConfigurer {
         });
     }
 
-    public static void configureMessageTable(TableView<KafkaMessageTableItem> messageTable, SerDesHelper serDesHelper) {
-        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable, true);
-        messageTable.setRowFactory(tv -> {
-            TableRow<KafkaMessageTableItem> row = new TableRow<>() {
-                @Override
-                protected void updateItem(KafkaMessageTableItem item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (!empty && item != null) {
-                        if (item.isErrorItem()) {
-                            setStyle("-fx-background-color: lightcoral; -fx-border-color: transparent transparent lightgray transparent;");
-                        } else {
-                            setStyle("-fx-background-color: transparent; -fx-border-color: transparent transparent lightgray transparent;");
-                        }
-                    } else {
-                        setStyle("");
-                    }
-                }
-            };
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    KafkaMessageTableItem rowData = row.getItem();
-                    log.debug("Double click on: {}", rowData.getKey());
-                    Map<String, Object> msgModalFieldMap = Map.of(
-                            "valueContentType", rowData.getValueContentType(),
-                            "serDesHelper", serDesHelper,
-                            "keyTextArea", rowData.getKey(),
-                            "valueTextArea", rowData.getValue(),
-                            "valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()),
-                            "headerTable",
-                            FXCollections.observableArrayList(
-                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
-                    try {
-                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
-//                    System.out.println("Double click on: "+rowData.getKey());
-                }
-            });
-            return row;
-        });
-//        configureErrorMessageRow((TableColumn<KafkaMessageTableItem, Object>) messageTable.getColumns().get(3));
-    }
 
 //    public static void initTableView(Stage stage) {
 //        TableView<KafkaMessageTableItem> kafkaMsgTable = TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, "messageTable", stage);

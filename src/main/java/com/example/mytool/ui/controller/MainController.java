@@ -237,23 +237,13 @@ public class MainController {
             pullMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
         });
         noMessagesLabel.textProperty().bind(noMsgLongProp.asString().concat(" Messages"));
-        messageTable.itemsProperty().addListener((observable, oldValue, newValue) -> {
-            Platform.runLater(() -> noMsgLongProp.set(newValue.size()));
-        });
-        allMsgTableItems.addListener((ListChangeListener<KafkaMessageTableItem>) change -> {
-            Platform.runLater(() -> noMsgLongProp.set(messageTable.getItems().size()));
-        });
-        messageTable.getItems().addListener((ListChangeListener<KafkaMessageTableItem>) change -> {
-            Platform.runLater(() -> noMsgLongProp.set(messageTable.getItems().size()));
-        });
     }
 
     private void configureTableView() {
-
-        TableViewConfigurer.configureMessageTable(messageTable, serDesHelper);
-        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable, true);
-        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable, true);
-        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable, true);
+        configureMessageTable(messageTable, serDesHelper);
+        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable);
+        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable);
+        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable);
         schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
                 (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));
         // Use a change listener to respond to a selection within
@@ -270,6 +260,72 @@ public class MainController {
 //        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
     }
 
+    public void configureMessageTable(TableView<KafkaMessageTableItem> messageTable, SerDesHelper serDesHelper) {
+        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable, false);
+        messageTable.setRowFactory(tv -> {
+            TableRow<KafkaMessageTableItem> row = new TableRow<>() {
+                @Override
+                protected void updateItem(KafkaMessageTableItem item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (!empty && item != null) {
+                        String color;
+                        if (isSelected()) {
+                            color = item.isErrorItem() ? "#C06666" : "lightgray";
+                        } else {
+                            color = item.isErrorItem() ? "lightcoral" : "transparent";
+                        }
+                        setStyle("-fx-background-color: %s; -fx-border-color: transparent transparent lightgray transparent;".formatted(color));
+
+//                        if (!isSelected()) {
+//                            if (item.isErrorItem()) {
+//                                setStyle("-fx-background-color: %s; -fx-border-color: transparent transparent lightgray transparent;".formatted(color));
+//                            } else {
+//                                setStyle("-fx-background-color: %s; -fx-border-color: transparent transparent lightgray transparent;".formatted(color));
+//                            }
+//                        }
+                    } else {
+                        setStyle("");
+                    }
+                }
+            };
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    KafkaMessageTableItem rowData = row.getItem();
+                    log.debug("Double click on: {}", rowData.getKey());
+                    Map<String, Object> msgModalFieldMap = Map.of(
+                            "valueContentType", rowData.getValueContentType(),
+                            "serDesHelper", serDesHelper,
+                            "keyTextArea", rowData.getKey(),
+                            "valueTextArea", rowData.getValue(),
+                            "valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()),
+                            "headerTable",
+                            FXCollections.observableArrayList(
+                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
+                    try {
+                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+//                    System.out.println("Double click on: "+rowData.getKey());
+                }
+            });
+            return row;
+        });
+        messageTable.itemsProperty().addListener((observable, oldValue, newValue) -> {
+            Platform.runLater(() -> noMsgLongProp.set(newValue.size()));
+        });
+        allMsgTableItems.addListener((ListChangeListener<KafkaMessageTableItem>) change -> {
+            Platform.runLater(() -> noMsgLongProp.set(messageTable.getItems().size()));
+        });
+        messageTable.getItems().addListener((ListChangeListener<KafkaMessageTableItem>) change -> {
+            Platform.runLater(() -> noMsgLongProp.set(messageTable.getItems().size()));
+        });
+//        configureErrorMessageRow((TableColumn<KafkaMessageTableItem, Object>) messageTable.getColumns().get(3));
+        messageTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            log.info("Selected item in msg table: {}", newValue);
+        });
+    }
 
     private void initPollingOptionsUI() {
         pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME_MS));
@@ -399,7 +455,23 @@ public class MainController {
                 messageSplitPane.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
                 TreeItem<?> topicTreeItem = selectedItem.getParent();
-                if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
+                if (treeMsgTableItemCache.containsKey(newValue)) {
+                    MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
+                    ObservableList<KafkaMessageTableItem> msgItems = messageTableState.getItems();
+                    allMsgTableItems.setAll(msgItems);
+//                    allMsgTableItems.setAll(msgItems);
+                    String filterText = messageTableState.getFilterText();
+                    this.filterMsgTextProperty.set(messageTableState.getFilterText());
+//        this.allMsgTableItems.setAll(list);
+//        Comparator defaultComparator = Comparator.comparing(KafkaMessageTableItem::getTimestamp).reversed();
+                    ObservableList<KafkaMessageTableItem> filteredList = this.allMsgTableItems
+                            .filtered(item -> item.getPartition() == partition.id())
+                            .filtered((item) -> isMsgTableItemMatched(item, filterText));
+                    SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(filteredList);
+                    sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
+                    messageTable.setItems(sortedList);
+//                    configureSortAndFilterForMessageTable(messageTableState.getFilterText());
+                } else if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
                     ObservableList<KafkaMessageTableItem> observableList = treeMsgTableItemCache.get(topicTreeItem).getItems().filtered(item -> item.getPartition() == partition.id());
                     messageTable.setItems(observableList);
                 }
@@ -503,6 +575,12 @@ public class MainController {
         }
         String schema = schemaTextArea.getText();
         allMsgTableItems.clear();
+        // clear message cache for partitions
+        treeMsgTableItemCache.forEach((treeItem, state) -> {
+            if (treeItem instanceof KafkaPartitionTreeItem<?> && treeItem.getParent() == selectedTreeItem) {
+                treeMsgTableItemCache.remove(treeItem);
+            }
+        });
         ObservableList<KafkaMessageTableItem> list = allMsgTableItems;
 //        allMsgTableItems =  list;
 //        filterMsgTextField.setOnKeyPressed(e -> {

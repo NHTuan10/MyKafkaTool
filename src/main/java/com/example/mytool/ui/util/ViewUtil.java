@@ -43,12 +43,12 @@ public final class ViewUtil {
         return result.orElse(cancel) == yes;
     }
 
-    public static void enableCopyDataFromTableToClipboard(TableView<?> tableView, boolean isCellSelectionEnabled, SelectionMode selectionMode) {
+    public static void enableCopyDataFromTableToClipboard(TableView<?> tableView, SelectionMode selectionMode, boolean isCellSelectionEnabled) {
         tableView.getSelectionModel().setCellSelectionEnabled(isCellSelectionEnabled);
         tableView.getSelectionModel().setSelectionMode(selectionMode);
 
         MenuItem item = new MenuItem("Copy");
-        item.setOnAction(event -> copySelectedCellsToClipboard(tableView));
+        item.setOnAction(event -> copySelectedInTableViewToClipboard(tableView, isCellSelectionEnabled));
         ContextMenu menu = new ContextMenu();
         menu.getItems().add(item);
         tableView.setContextMenu(menu);
@@ -56,13 +56,17 @@ public final class ViewUtil {
         final KeyCodeCombination keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN);
         tableView.setOnKeyPressed(event -> {
             if (keyCodeCopy.match(event)) {
-                if (isCellSelectionEnabled) {
-                    copySelectedCellsToClipboard(tableView);
-                } else {
-                    copySelectedRowsToClipboard(tableView);
-                }
+                copySelectedInTableViewToClipboard(tableView, isCellSelectionEnabled);
             }
         });
+    }
+
+    private static void copySelectedInTableViewToClipboard(TableView<?> tableView, boolean isCellSelectionEnabled) {
+        if (isCellSelectionEnabled) {
+            copySelectedCellsToClipboard(tableView);
+        } else {
+            copySelectedRowsToClipboard(tableView);
+        }
     }
 
     public static void copySelectedCellsToClipboard(TableView<?> tableView) {

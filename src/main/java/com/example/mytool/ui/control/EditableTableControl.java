@@ -94,7 +94,7 @@ public class EditableTableControl<T> extends AnchorPane {
             table.getColumns().add(tableColumn);
         });
 
-        TableViewConfigurer.configureTableView(itemClass, table, false);
+        TableViewConfigurer.configureTableView(itemClass, table);
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
@@ -202,9 +202,9 @@ public class EditableTableControl<T> extends AnchorPane {
 
     protected void configureEditableControls() {
         table.editableProperty().bind(editable);
-        addItemBtn.disableProperty().bind(editable.not());
-        removeItemsBtn.disableProperty().bind(editable.not()
-                .or(table.getSelectionModel().selectedItemProperty().isNull()));
+        addItemBtn.visibleProperty().bind(editable);
+        removeItemsBtn.disableProperty().bind(table.getSelectionModel().selectedItemProperty().isNull());
+        removeItemsBtn.visibleProperty().bind(editable);
     }
 
 
