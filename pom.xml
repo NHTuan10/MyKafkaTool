@@ -177,9 +177,22 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.example.mytool.Application</mainClass>
+                                    <mainClass>com.example.mytool.Main</mainClass>
                                 </transformer>
                             </transformers>
+                            <!--                            <relocations>-->
+                            <!--                                <relocation>-->
+                            <!--                                    <pattern>io.confluent.kafka.formatter</pattern>-->
+                            <!--                                    <shadedPattern>io.shaded.confluent.kafka.formatter</shadedPattern>-->
+                            <!--                                    <includes>-->
+                            <!--                                        <include>io.confluent.kafka.formatter.Schema*</include>-->
+                            <!--                                    </includes>-->
+                            <!--                                </relocation>-->
+                            <!--                                <relocation>-->
+                            <!--                                    <pattern>io.confluent.kafka.serializers.Abstract*</pattern>-->
+                            <!--                                    <shadedPattern>io.shaded.confluent.kafka.formatter.Schema*</shadedPattern>-->
+                            <!--                                </relocation>-->
+                            <!--                            </relocations>-->
                         </configuration>
                     </execution>
                 </executions>

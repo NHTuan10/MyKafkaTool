@@ -10,6 +10,11 @@ module com.example.mytool {
     requires static lombok;
     requires org.apache.avro;
     requires org.apache.commons.lang3;
+    requires kafka.schema.registry.client;
+    requires org.fxmisc.richtext;
+    requires kafka.avro.serializer;
+    requires kafka.schema.serializer;
+    requires org.slf4j;
 //    requires kafka.clients;
 //    requires kafka.clients;
 //    requires static kafka.schema.serializer;

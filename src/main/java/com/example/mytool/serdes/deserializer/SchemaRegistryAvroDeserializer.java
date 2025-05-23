@@ -10,6 +10,7 @@ import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,15 +33,16 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
     @Override
     public String deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
         KafkaAvroDeserializer kafkaAvroDeserializer;
-
-        if (!kafkaAvroDeserializerMap.containsKey(consumerProps)) {
+        boolean isKey = Boolean.getBoolean(others.getOrDefault(SerDesHelper.IS_KEY_PROP, "false"));
+        Map<String, Object> serializerMapKey = new HashMap<>();
+        serializerMapKey.putAll(Map.of(SerDesHelper.IS_KEY_PROP, isKey));
+        if (!kafkaAvroDeserializerMap.containsKey(serializerMapKey)) {
             kafkaAvroDeserializer = new KafkaAvroDeserializer();
-            kafkaAvroDeserializerMap.put(consumerProps, kafkaAvroDeserializer);
+            kafkaAvroDeserializer.configure(consumerProps, isKey);
+            kafkaAvroDeserializerMap.put(serializerMapKey, kafkaAvroDeserializer);
         } else {
             kafkaAvroDeserializer = kafkaAvroDeserializerMap.get(consumerProps);
         }
-        boolean isKey = Boolean.getBoolean(others.getOrDefault(SerDesHelper.IS_KEY_PROP, "false"));
-        kafkaAvroDeserializer.configure(consumerProps, isKey);
         Headers headers = new RecordHeaders(headerMap.entrySet().stream().map(entry -> (Header) new RecordHeader(entry.getKey(), entry.getValue())).toList());
         Object deserializedObject = kafkaAvroDeserializer.deserialize(topic, headers, payload);
         return AvroUtil.convertObjectToJsonString(deserializedObject);
