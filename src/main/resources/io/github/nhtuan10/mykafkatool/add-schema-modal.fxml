@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+
+<AnchorPane prefHeight="336.0" prefWidth="597.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddSchemaModalController">
+    <children>
+      <HBox prefHeight="276.0" prefWidth="600.0">
+         <children>
+                      <Label prefHeight="17.0" prefWidth="146.0" text="Schema" />
+            <TextArea fx:id="schemaTextArea" prefHeight="336.0" prefWidth="496.0" />
+         </children>
+      </HBox>
+      <HBox layoutX="172.0" layoutY="291.0" prefHeight="42.0" prefWidth="257.0">
+         <children>
+            <Button fx:id="okBtn" mnemonicParsing="false" onAction="#ok" prefHeight="33.0" prefWidth="44.0" text="OK">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#cancel" prefHeight="31.0" prefWidth="71.0" text="Cancel">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Button>
+         </children>
+      </HBox>
+    </children>
+</AnchorPane>

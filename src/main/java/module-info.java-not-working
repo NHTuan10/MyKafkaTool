@@ -12,14 +12,22 @@ module com.example.mytool {
     requires org.apache.commons.lang3;
     requires kafka.schema.registry.client;
     requires org.fxmisc.richtext;
-    requires kafka.avro.serializer;
-    requires kafka.schema.serializer;
+    requires kafka.avro.schema.serializer.combined;
     requires org.slf4j;
 //    requires kafka.clients;
 //    requires kafka.clients;
 //    requires static kafka.schema.serializer;
 //    requires static kafka.schema.registry.client;
 
-    opens com.example.mytool to javafx.fxml;
-    exports com.example.mytool;
+    opens io.github.nhtuan10.mykafkatool to javafx.fxml;
+    opens io.github.nhtuan10.mykafkatool.ui.controller to javafx.fxml;
+    opens io.github.nhtuan10.mykafkatool.ui.control to javafx.fxml;
+    exports io.github.nhtuan10.mykafkatool;
+    exports io.github.nhtuan10.mykafkatool.model.preference to com.fasterxml.jackson.databind;
+    exports io.github.nhtuan10.mykafkatool.model.kafka to com.fasterxml.jackson.databind;
+    opens io.github.nhtuan10.mykafkatool.ui to javafx.base;
+    opens io.github.nhtuan10.mykafkatool.ui.cg to javafx.base;
+    opens io.github.nhtuan10.mykafkatool.ui.cluster to javafx.base;
+    opens io.github.nhtuan10.mykafkatool.ui.partition to javafx.base;
+    opens io.github.nhtuan10.mykafkatool.ui.topic to javafx.base;
 }
