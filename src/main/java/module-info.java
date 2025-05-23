@@ -1,4 +1,4 @@
-module com.example.mytool {
+module io.github.nhtuan10.mykafkatool {
     requires atlantafx.base;
     requires com.fasterxml.jackson.databind;
     requires com.google.common;
