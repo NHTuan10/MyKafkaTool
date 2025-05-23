@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
-import io.github.nhtuan10.mykafkatool.Application;
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.application.Platform;
@@ -69,7 +69,7 @@ public class EditableTableControl<T> extends AnchorPane {
         filterTextProperty = new SimpleStringProperty("");
         this.editable.set(editable);
         itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource(
+        FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "editable-table.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);

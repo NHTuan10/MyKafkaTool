@@ -2,7 +2,7 @@ package io.github.nhtuan10.mykafkatool.ui.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.nhtuan10.mykafkatool.Application;
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.controller.ModalController;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionsTableItem;
@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -141,7 +142,7 @@ public final class ViewUtil {
 //                AddMessageModalController.class.getResource("add-message-modal.fxml"));
 
         FXMLLoader modalLoader = new FXMLLoader(
-                Application.class.getResource(modalFxml));
+                MyKafkaToolApplication.class.getResource(modalFxml));
         Scene scene = new Scene(modalLoader.load());
 
 //        AddMessageModalController addMessageModalController =  modalLoader.getController();
@@ -162,7 +163,7 @@ public final class ViewUtil {
 //        stage.initOwner(
 //                ((Node)event.getSource()).getScene().getWindow() );
         stage.setScene(scene);
-        URL cssResource = Application.class.getResource("style.css");
+        URL cssResource = MyKafkaToolApplication.class.getResource("style.css");
         scene.getStylesheets().add(cssResource.toExternalForm());
         stage.showAndWait();
 //        return modelRef.get();
@@ -239,7 +240,10 @@ public final class ViewUtil {
         };
         task.setOnSucceeded(workerStateEvent -> onSuccess.accept((T) workerStateEvent.getSource().getValue()));
         task.setOnFailed(workerStateEvent -> onError.accept(workerStateEvent.getSource().getException()));
-        new Thread(task).start();
+//        Thread thread =  new Thread(task);
+//        thread.setDaemon(true);
+//        thread.start();
+        CompletableFuture.runAsync(task);
         return task;
     }
 }

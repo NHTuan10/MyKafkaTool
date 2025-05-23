@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui;
 
-import io.github.nhtuan10.mykafkatool.Application;
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.ui.controller.ErrorController;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -32,7 +32,7 @@ public class UIErrorHandler {
         e.printStackTrace(new PrintWriter(errorMsg));
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
-        FXMLLoader loader = new FXMLLoader(Application.class.getResource("error.fxml"));
+        FXMLLoader loader = new FXMLLoader(MyKafkaToolApplication.class.getResource("error.fxml"));
         try {
             Parent root = loader.load();
             ((ErrorController) loader.getController()).setErrorText(errorMsg.toString());

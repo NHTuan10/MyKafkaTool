@@ -7,6 +7,8 @@ import lombok.Getter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.USER_PREF_FILENAME;
@@ -15,7 +17,7 @@ public class UserPreferenceManager {
     @Getter
     private static final String userPrefFilePath = getDefaultUserPreferenceFilePath();
     private static final UserPreferenceDao userPreferenceDao = new UserPreferenceDao(userPrefFilePath);
-
+    private static final Lock lock = new ReentrantLock();
     public static void saveUserPreference(UserPreference userPreference) throws IOException {
         userPreferenceDao.saveUserPreference(userPreference);
     }
@@ -39,15 +41,25 @@ public class UserPreferenceManager {
         return new UserPreference(new ArrayList<>());
     }
 
-    public synchronized static void addClusterToUserPreference(KafkaCluster cluster) throws IOException {
-        UserPreference userPreference = loadUserPreference();
-        userPreference.connections().add(cluster);
-        saveUserPreference(userPreference);
+    public static void addClusterToUserPreference(KafkaCluster cluster) throws IOException {
+        lock.lock();
+        try {
+            UserPreference userPreference = loadUserPreference();
+            userPreference.connections().add(cluster);
+            saveUserPreference(userPreference);
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public synchronized static void removeClusterFromUserPreference(String clusterName) throws IOException {
-        UserPreference userPreference = loadUserPreference();
-        userPreference.connections().removeIf(cluster -> cluster.getName().equals(clusterName));
-        saveUserPreference(userPreference);
+    public static void removeClusterFromUserPreference(String clusterName) throws IOException {
+        lock.lock();
+        try {
+            UserPreference userPreference = loadUserPreference();
+            userPreference.connections().removeIf(cluster -> cluster.getName().equals(clusterName));
+            saveUserPreference(userPreference);
+        } finally {
+            lock.unlock();
+        }
     }
 }
