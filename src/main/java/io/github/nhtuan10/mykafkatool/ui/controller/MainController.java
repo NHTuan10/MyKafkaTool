@@ -658,7 +658,7 @@ public class MainController {
 //
                             return new KafkaConsumerService.PollCallback(list, isPolling);
                         })
-                        .isLiveUpdate(isLiveUpdateCheckBox.isSelected())
+                        .isLiveUpdate(!isLiveUpdateCheckBox.isDisabled() && isLiveUpdateCheckBox.isSelected())
                         .build();
 
 //        treeMsgTableItemCache.put(selectedTreeItem, MessageTableState.builder()
