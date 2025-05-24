@@ -41,7 +41,7 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
             kafkaAvroDeserializer.configure(consumerProps, isKey);
             kafkaAvroDeserializerMap.put(serializerMapKey, kafkaAvroDeserializer);
         } else {
-            kafkaAvroDeserializer = kafkaAvroDeserializerMap.get(consumerProps);
+            kafkaAvroDeserializer = kafkaAvroDeserializerMap.get(serializerMapKey);
         }
         Headers headers = new RecordHeaders(headerMap.entrySet().stream().map(entry -> (Header) new RecordHeader(entry.getKey(), entry.getValue())).toList());
         Object deserializedObject = kafkaAvroDeserializer.deserialize(topic, headers, payload);

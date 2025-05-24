@@ -306,7 +306,7 @@ public class MainController {
                             FXCollections.observableArrayList(
                                     Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
                     try {
-                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false);
+                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false, true);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -716,7 +716,7 @@ public class MainController {
         AtomicReference<Object> ref = new AtomicReference<>();
         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
                 Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
-                        "schemaTextArea", schemaTextArea.getText()));
+                        "schemaTextArea", schemaTextArea.getText()), true, true);
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {
             producerUtil.sendMessage(kafkaTopic, partition, newMsg);

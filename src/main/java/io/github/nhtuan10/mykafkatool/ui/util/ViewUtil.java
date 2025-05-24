@@ -132,11 +132,11 @@ public final class ViewUtil {
     }
 
     public static void showPopUpModal(String modalFxml, String title, AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap) throws IOException {
-        showPopUpModal(modalFxml, title, modelRef, inputVarMap, true);
+        showPopUpModal(modalFxml, title, modelRef, inputVarMap, true, false);
     }
 
     //    private Tuple2<String, String> showAddMsgModalAndGetResult() throws IOException {
-    public static void showPopUpModal(String modalFxml, String title, AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable) throws IOException {
+    public static void showPopUpModal(final String modalFxml, final String title, final AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable, final boolean resizable) throws IOException {
         Stage stage = new Stage();
 //        FXMLLoader addMsgModalLoader = new FXMLLoader(
 //                AddMessageModalController.class.getResource("add-message-modal.fxml"));
@@ -154,7 +154,7 @@ public final class ViewUtil {
         stage.setTitle(title);
         stage.initModality(Modality.WINDOW_MODAL);
 
-        stage.setResizable(false);
+        stage.setResizable(resizable);
         if (editable) {
             stage.setAlwaysOnTop(true);
             stage.initModality(Modality.APPLICATION_MODAL);

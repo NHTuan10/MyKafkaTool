@@ -70,11 +70,11 @@
                                   <content>
                                       <AnchorPane minHeight="0.0" minWidth="0.0">
                                           <children>
-                                              <SplitPane fx:id="messageSplitPane" dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-8.0" AnchorPane.topAnchor="0.0">
+                                              <SplitPane fx:id="messageSplitPane" dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                   <items>
-                                                      <AnchorPane maxHeight="100.0" minHeight="30.0" minWidth="0.0" prefHeight="69.0">
+                                                      <AnchorPane maxHeight="150.0" minHeight="100.0" minWidth="0.0">
                                                           <children>
-                                                              <FlowPane prefHeight="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                              <FlowPane prefHeight="101.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                   <children>
                                                       <ProgressIndicator fx:id="isPollingMsgProgressIndicator" prefHeight="31.0" prefWidth="26.0" visible="false">
                                                          <FlowPane.margin>
@@ -156,9 +156,9 @@
                                                               </FlowPane>
                                                           </children>
                                                       </AnchorPane>
-                                                      <AnchorPane maxHeight="104.0" maxWidth="-Infinity" minHeight="15.0" minWidth="0.0" prefHeight="104.0" prefWidth="977.0">
+                                                      <AnchorPane minHeight="50.0" minWidth="0.0" prefHeight="90.0" prefWidth="993.0">
                                                                                                           <children>
-                                                <HBox AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="5.0">
+                                                <HBox prefHeight="202.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                    <children>
                                                                                                                                                                                       <Label prefHeight="17.0" prefWidth="73.0" text="Key Type">
                                                          <HBox.margin>
@@ -191,7 +191,7 @@
                                                 </HBox>
                                                                                                           </children>
                                                                                                       </AnchorPane>
-                                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="378.0" prefWidth="937.0">
+                                                      <AnchorPane minHeight="50.0" minWidth="0.0">
                                                           <children>
                                                 <StackPane AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="0.0">
                                                    <children>
@@ -210,16 +210,16 @@
                                                       </AnchorPane>
                                                   </items>
                                               </SplitPane>
-                                    <SplitPane fx:id="schemaSplitPane" dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="622.0" prefWidth="936.0" visible="false">
+                                    <SplitPane fx:id="schemaSplitPane" dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                       <items>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                             <children>
-                                               <SchemaEditableTableControl fx:id="schemaEditableTableControl" layoutY="7.0" minHeight="200.0" prefHeight="297.0" prefWidth="924.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                               <SchemaEditableTableControl fx:id="schemaEditableTableControl" layoutY="7.0" minHeight="200.0" prefHeight="295.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                             </children>
                                         </AnchorPane>
                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                          <children>
-                                             <VirtualizedScrollPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <VirtualizedScrollPane prefHeight="318.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                 <content>
                                                     <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" />
                                                 </content>
