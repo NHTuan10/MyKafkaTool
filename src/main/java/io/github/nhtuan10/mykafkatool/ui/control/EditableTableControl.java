@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
+import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.application.Platform;
@@ -14,18 +15,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 @Slf4j
 public class EditableTableControl<T> extends AnchorPane {
@@ -176,30 +172,6 @@ public class EditableTableControl<T> extends AnchorPane {
         return (item) -> true;
     }
 
-    @SafeVarargs
-    protected final Predicate<T> buildFilterPredicate(@NonNull Filter filter, Function<T, String>... fieldGetters) {
-        assert (filter.getFilterText() != null);
-        if (regexFilterToggleBtn.isSelected()) {
-            Pattern pattern = Pattern.compile(filter.getFilterText(), Pattern.CASE_INSENSITIVE);
-            return item -> {
-                boolean isMatched = false;
-                for (Function<T, String> fieldGetter : fieldGetters) {
-                    isMatched = isMatched || (fieldGetter.apply(item) != null && pattern.matcher(fieldGetter.apply(item)).find());
-                }
-                return isMatched;
-            };
-        } else {
-            return item -> {
-                boolean isMatched = false;
-                for (Function<T, String> fieldGetter : fieldGetters) {
-                    isMatched = isMatched || (fieldGetter.apply(item) != null && fieldGetter.apply(item).toLowerCase().contains(filter.getFilterText().toLowerCase()));
-                }
-                return isMatched;
-            };
-
-        }
-    }
-
     protected void configureEditableControls() {
         table.editableProperty().bind(editable);
         addItemBtn.visibleProperty().bind(editable);
@@ -218,10 +190,4 @@ public class EditableTableControl<T> extends AnchorPane {
     }
 //    public record Filter<T> (T item, String filterText){}
 
-    @Data
-    @AllArgsConstructor
-    protected static class Filter {
-        private String filterText;
-        private boolean isRegexFilter;
-    }
 }

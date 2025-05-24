@@ -19,10 +19,7 @@ import io.github.nhtuan10.mykafkatool.serdes.deserializer.StringDeserializer;
 import io.github.nhtuan10.mykafkatool.serdes.serializer.ByteArraySerializer;
 import io.github.nhtuan10.mykafkatool.serdes.serializer.SchemaRegistryAvroSerializer;
 import io.github.nhtuan10.mykafkatool.serdes.serializer.StringSerializer;
-import io.github.nhtuan10.mykafkatool.ui.KafkaMessageTableItem;
-import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
-import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
-import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
+import io.github.nhtuan10.mykafkatool.ui.*;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupOffsetTableItem;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
@@ -65,6 +62,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
@@ -144,6 +142,9 @@ public class MainController {
     private TextField filterMsgTextField;
 
     private StringProperty filterMsgTextProperty = new SimpleStringProperty("");
+
+    @FXML
+    private ToggleButton regexFilterToggleBtn;
 
     @FXML
     private Label endTimestampLabel;
@@ -394,7 +395,7 @@ public class MainController {
                     TreeItem oldSelectedTreeItem = (TreeItem) oldValue;
                     treeMsgTableItemCache.put(oldSelectedTreeItem, MessageTableState.builder()
                             .items(FXCollections.observableArrayList(allMsgTableItems))
-                            .filterText(filterMsgTextProperty.get())
+                            .filter(new Filter(filterMsgTextProperty.get(), regexFilterToggleBtn.isSelected()))
                             .build());
                 }
 
@@ -414,11 +415,11 @@ public class MainController {
                     MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
                     ObservableList<KafkaMessageTableItem> msgItems = messageTableState.getItems();
                     allMsgTableItems.setAll(msgItems);
-                    configureSortAndFilterForMessageTable(messageTableState.getFilterText());
+                    configureSortAndFilterForMessageTable(messageTableState.getFilter());
                 } else {
 //                    messageTable.setItems(FXCollections.emptyObservableList());
                     allMsgTableItems.setAll(FXCollections.emptyObservableList());
-                    configureSortAndFilterForMessageTable("");
+                    configureSortAndFilterForMessageTable(new Filter("", false));
                 }
 
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
@@ -489,13 +490,14 @@ public class MainController {
                     ObservableList<KafkaMessageTableItem> msgItems = messageTableState.getItems();
                     allMsgTableItems.setAll(msgItems);
 //                    allMsgTableItems.setAll(msgItems);
-                    String filterText = messageTableState.getFilterText();
-                    this.filterMsgTextProperty.set(messageTableState.getFilterText());
+                    Filter filter = messageTableState.getFilter();
+                    this.filterMsgTextProperty.set(filter.getFilterText());
+                    this.regexFilterToggleBtn.setSelected(filter.isRegexFilter());
 //        this.allMsgTableItems.setAll(list);
 //        Comparator defaultComparator = Comparator.comparing(KafkaMessageTableItem::getTimestamp).reversed();
                     ObservableList<KafkaMessageTableItem> filteredList = this.allMsgTableItems
                             .filtered(item -> item.getPartition() == partition.id())
-                            .filtered((item) -> isMsgTableItemMatched(item, filterText));
+                            .filtered(isMsgTableItemMatched(filter));
                     SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(filteredList);
                     sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
                     messageTable.setItems(sortedList);
@@ -635,11 +637,20 @@ public class MainController {
 //        });
         filterMsgTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                configureSortAndFilterForMessageTable(newValue);
-                Optional.ofNullable(treeMsgTableItemCache.get(clusterTree.getSelectionModel().getSelectedItem())).ifPresent(t -> t.setFilterText(newValue));
+                Filter filter = new Filter(filterMsgTextField.getText(), regexFilterToggleBtn.isSelected());
+                configureSortAndFilterForMessageTable(filter);
+                Optional.ofNullable(treeMsgTableItemCache.get(clusterTree.getSelectionModel().getSelectedItem())).ifPresent(t -> t.setFilter(filter));
             }
         });
-        configureSortAndFilterForMessageTable(filterMsgTextProperty.get());
+        regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                Filter filter = new Filter(filterMsgTextField.getText(), regexFilterToggleBtn.isSelected());
+
+                configureSortAndFilterForMessageTable(filter);
+                Optional.ofNullable(treeMsgTableItemCache.get(clusterTree.getSelectionModel().getSelectedItem())).ifPresent(t -> t.setFilter(filter));
+            }
+        });
+        configureSortAndFilterForMessageTable(new Filter(filterMsgTextProperty.get(), regexFilterToggleBtn.isSelected()));
 //        messageTable.setItems(list);
 //        if (maxMessagesTextField.getText().isEmpty()) {
 //            maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
@@ -705,11 +716,13 @@ public class MainController {
         ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
     }
 
-    private void configureSortAndFilterForMessageTable(String filterText) {
+    private void configureSortAndFilterForMessageTable(Filter filter) {
+        String filterText = filter.getFilterText();
         this.filterMsgTextProperty.set(filterText);
+        this.regexFilterToggleBtn.setSelected(filter.isRegexFilter());
 //        this.allMsgTableItems.setAll(list);
 //        Comparator defaultComparator = Comparator.comparing(KafkaMessageTableItem::getTimestamp).reversed();
-        ObservableList<KafkaMessageTableItem> filteredList = this.allMsgTableItems.filtered((item) -> isMsgTableItemMatched(item, filterText));
+        ObservableList<KafkaMessageTableItem> filteredList = this.allMsgTableItems.filtered(isMsgTableItemMatched(filter));
         SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(filteredList);
         sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
         ObservableList<TableColumn<KafkaMessageTableItem, ?>> sortOrder = messageTable.getSortOrder();
@@ -725,9 +738,10 @@ public class MainController {
 
     }
 
-    private boolean isMsgTableItemMatched(KafkaMessageTableItem item, String filterText) {
-        return (item != null && item.getKey().toLowerCase().contains(filterText.toLowerCase()))
-                || (item != null && item.getValue().toLowerCase().contains(filterText.toLowerCase()));
+    private Predicate<KafkaMessageTableItem> isMsgTableItemMatched(Filter filter) {
+        return Filter.buildFilterPredicate(filter, KafkaMessageTableItem::getKey, KafkaMessageTableItem::getValue);
+//        return (item != null && item.getKey().toLowerCase().contains(filterText.toLowerCase()))
+//                || (item != null && item.getValue().toLowerCase().contains(filterText.toLowerCase()));
     }
 
     private void displayNotPollingMessage() {
@@ -853,7 +867,7 @@ public class MainController {
     @Builder
     public static class MessageTableState {
         ObservableList<KafkaMessageTableItem> items;
-        String filterText;
+        Filter filter;
         //        Comparator<KafkaMessageTableItem> comparator;
         KafkaConsumerService.PollingOptions pollingOptions;
     }

@@ -5,6 +5,7 @@ import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientExcept
 import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
+import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.SchemaTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.BooleanProperty;
@@ -99,7 +100,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
 
     @Override
     protected Predicate<SchemaTableItem> filterPredicate(Filter filter) {
-        return buildFilterPredicate(filter,
+        return Filter.buildFilterPredicate(filter,
                 SchemaTableItem::getSubject,
                 SchemaTableItem::getSchema,
                 SchemaTableItem::getType,

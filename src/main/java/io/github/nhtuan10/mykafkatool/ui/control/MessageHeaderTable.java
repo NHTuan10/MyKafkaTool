@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
+import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
 import javafx.fxml.FXML;
@@ -25,7 +26,7 @@ public class MessageHeaderTable extends EditableTableControl<UIPropertyTableItem
 
     @Override
     protected Predicate<UIPropertyTableItem> filterPredicate(Filter filter) {
-        return buildFilterPredicate(filter, UIPropertyTableItem::getName, UIPropertyTableItem::getValue);
+        return Filter.buildFilterPredicate(filter, UIPropertyTableItem::getName, UIPropertyTableItem::getValue);
     }
 
     public void setEditable(boolean editable) {
