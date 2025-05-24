@@ -371,6 +371,9 @@ public class MainController {
 //                pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
             }
         });
+        isLiveUpdateCheckBox.disableProperty()
+                .bind(msgPosition.valueProperty().map(
+                        v -> v != KafkaConsumerService.MessagePollingPosition.LAST));
         endTimestampLabel.setVisible(false);
         endTimestampLabel.setManaged(false);
         endTimestampPicker.setVisible(false);
@@ -710,6 +713,15 @@ public class MainController {
         SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(filteredList);
         sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
         messageTable.setItems(sortedList);
+        ObservableList<TableColumn<KafkaMessageTableItem, ?>> sortOrder = messageTable.getSortOrder();
+        if (sortOrder == null || sortOrder.isEmpty()) {
+            TableColumn<KafkaMessageTableItem, ?> timestampColumn = messageTable.getColumns().get(4);
+            timestampColumn.setSortType(msgPosition.getValue() == KafkaConsumerService.MessagePollingPosition.FIRST
+                    ? TableColumn.SortType.ASCENDING
+                    : TableColumn.SortType.DESCENDING);
+            messageTable.getSortOrder().add(timestampColumn);
+            messageTable.sort();
+        }
     }
 
     private boolean isMsgTableItemMatched(KafkaMessageTableItem item, String filterText) {

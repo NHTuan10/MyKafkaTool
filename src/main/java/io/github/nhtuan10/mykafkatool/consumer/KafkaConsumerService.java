@@ -152,9 +152,12 @@ public class KafkaConsumerService {
                 if (endOffset < noMessages) {
 //                    consumer.seekToBeginning(List.of(topicPartition));
                     consumer.seek(topicPartition, startTsOffset);
-                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endOffset));
                 } else {
                     consumer.seek(topicPartition, Math.max(startTsOffset, endOffset - noMessages));
+                }
+                if (pollingOptions.isLiveUpdate()) {
+                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), Long.MAX_VALUE));
+                } else {
                     partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endOffset));
                 }
             }
