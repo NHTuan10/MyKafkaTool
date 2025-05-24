@@ -16,6 +16,7 @@ import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -120,7 +121,11 @@ public class SerDesHelper {
                 throw new DeserializationException("Internal Error: custom deserialize non byte array is not supported yet", payload);
             }
         } else {
-            return payload != null ? payload.toString() : null;
+            if (payload instanceof byte[] payloadBytes) {
+                return Base64.getEncoder().encodeToString(payloadBytes);
+            } else {
+                return payload.toString();
+            }
         }
 
     }
