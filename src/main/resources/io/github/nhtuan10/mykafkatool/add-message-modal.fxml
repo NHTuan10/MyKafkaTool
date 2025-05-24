@@ -20,7 +20,7 @@
 
 <AnchorPane prefHeight="522.0" prefWidth="738.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController">
     <children>
-      <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="498.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="522.0" prefWidth="738.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
               <TabPane prefHeight="385.0" prefWidth="634.0" tabClosingPolicy="UNAVAILABLE">
                   <tabs>

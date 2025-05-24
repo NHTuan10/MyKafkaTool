@@ -53,4 +53,8 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
         return DisplayType.JSON;
     }
 
+//    @Override
+//    public boolean mayNeedUserInputForSchema() {
+//        return true;
+//    }
 }

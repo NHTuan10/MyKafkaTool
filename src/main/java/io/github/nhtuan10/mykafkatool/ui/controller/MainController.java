@@ -235,6 +235,7 @@ public class MainController {
 //                totalMessagesInTheTopicProperty.asString("%,d Messages")
         );
         isPollingMsgProgressIndicator.visibleProperty().bindBidirectional(isPolling);
+        isPollingMsgProgressIndicator.managedProperty().bindBidirectional(isPolling);
 //        pullMessagesBtn.textProperty().bind(isPolling.map((isPolling) ->
 //                isPolling ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT));
         isPolling.addListener((observable, oldValue, newValue) -> {
@@ -380,11 +381,10 @@ public class MainController {
         clusterTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             // Display the selection and its complete path from the root.
             if (newValue != null && newValue != oldValue) {
-                isPolling.set(false);
                 // disable/hide UI tab and titled
-                cgOffsetsTab.setDisable(true);
+//                cgOffsetsTab.setDisable(true);
 //                dataTab.setDisable(true);
-                propertiesTab.setDisable(true);
+//                propertiesTab.setDisable(true);
 
                 partitionsTitledPane.setVisible(false);
                 if (oldValue != null && oldValue != newValue && (oldValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
@@ -405,6 +405,7 @@ public class MainController {
             }
 
             if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
+                isPolling.set(false);
                 // if some clear msg table
                 if (treeMsgTableItemCache.containsKey(newValue)) {
                     MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
@@ -422,10 +423,19 @@ public class MainController {
                 String clusterName = topic.cluster().getName();
                 String topicName = topic.name();
                 // Enable the data tab and show/hide titled panes in the tab
+                tabPane.getTabs().remove(cgOffsetsTab);
+                if (!tabPane.getTabs().contains(dataTab)) {
+                    tabPane.getTabs().add(dataTab);
+                }
+                if (!tabPane.getTabs().contains(propertiesTab)) {
+                    tabPane.getTabs().add(propertiesTab);
+                }
+                if (tabPane.getSelectionModel().getSelectedItem() != dataTab && tabPane.getSelectionModel().getSelectedItem() != propertiesTab) {
+                    tabPane.getSelectionModel().select(dataTab);
+                }
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
                 partitionsTitledPane.setVisible(true);
-                tabPane.getSelectionModel().select(dataTab);
                 schemaSplitPane.setVisible(false);
                 messageSplitPane.setVisible(true);
                 Callable<Void> getTopicAndPartitionProperties = () -> {
@@ -452,9 +462,21 @@ public class MainController {
                 refreshPartitionsTbl(clusterName, topicName);
 
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
+                isPolling.set(false);
+                tabPane.getTabs().remove(cgOffsetsTab);
+                if (!tabPane.getTabs().contains(dataTab)) {
+                    tabPane.getTabs().add(dataTab);
+                }
+                if (!tabPane.getTabs().contains(propertiesTab)) {
+                    tabPane.getTabs().add(propertiesTab);
+                }
+                if (tabPane.getSelectionModel().getSelectedItem() != dataTab && tabPane.getSelectionModel().getSelectedItem() != propertiesTab) {
+                    tabPane.getSelectionModel().select(dataTab);
+                }
+//                tabPane.getTabs().add(dataTab);
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
-                tabPane.getSelectionModel().select(dataTab);
+//                tabPane.getSelectionModel().select(dataTab);
                 schemaSplitPane.setVisible(false);
                 messageSplitPane.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
@@ -509,12 +531,18 @@ public class MainController {
                 ViewUtil.runBackgroundTask(getPartitionInfo, onSuccess, onFailure);
 
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
+                if (!tabPane.getTabs().contains(cgOffsetsTab)) {
+                    tabPane.getTabs().add(cgOffsetsTab);
+                }
+                cgOffsetsTab.setDisable(false);
+                tabPane.getTabs().remove(dataTab);
+                tabPane.getTabs().remove(propertiesTab);
+                tabPane.getSelectionModel().select(cgOffsetsTab);
                 blockAppProgressInd.setVisible(true);
                 ViewUtil.runBackgroundTask(() -> {
                     try {
-                        cgOffsetsTab.setDisable(false);
-                        dataTab.setDisable(true);
-                        tabPane.getSelectionModel().select(cgOffsetsTab);
+//                        dataTab.setDisable(true);
+//                        tabPane.getSelectionModel().select(cgOffsetsTab);
                         consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
 
                     } catch (ExecutionException | InterruptedException e) {
@@ -530,6 +558,12 @@ public class MainController {
 
             } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equals(selectedItem.getValue())) {
 //                blockAppProgressInd.setVisible(true);
+                if (!tabPane.getTabs().contains(dataTab)) {
+                    tabPane.getTabs().add(dataTab);
+                }
+                tabPane.getSelectionModel().select(dataTab);
+                tabPane.getTabs().remove(cgOffsetsTab);
+                tabPane.getTabs().remove(propertiesTab);
                 dataTab.setDisable(false);
                 schemaSplitPane.setVisible(true);
                 messageSplitPane.setVisible(false);
@@ -545,6 +579,10 @@ public class MainController {
                     throw new RuntimeException(e);
                 }
 
+            } else {
+                cgOffsetsTab.setDisable(true);
+                dataTab.setDisable(true);
+                propertiesTab.setDisable(true);
             }
         });
     }
