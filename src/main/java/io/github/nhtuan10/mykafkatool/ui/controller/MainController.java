@@ -654,7 +654,7 @@ public class MainController {
                         .schema(schema)
                         .pollCallback(() -> {
                             blockAppProgressInd.setVisible(false);
-                            Platform.runLater(() -> noMsgLongProp.set(list.size()));
+                            Platform.runLater(() -> noMsgLongProp.set(messageTable.getItems().size()));
 //
                             return new KafkaConsumerService.PollCallback(list, isPolling);
                         })
@@ -693,7 +693,7 @@ public class MainController {
         Consumer<Void> onSuccess = (val) -> {
             blockAppProgressInd.setVisible(false);
             isPolling.set(false);
-            noMsgLongProp.set(list.size());
+            noMsgLongProp.set(messageTable.getItems().size());
 //            allMsgTableItems.setAll(list);
         };
         Consumer<Throwable> onFailure = (exception) -> {
@@ -712,7 +712,6 @@ public class MainController {
         ObservableList<KafkaMessageTableItem> filteredList = this.allMsgTableItems.filtered((item) -> isMsgTableItemMatched(item, filterText));
         SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(filteredList);
         sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
-        messageTable.setItems(sortedList);
         ObservableList<TableColumn<KafkaMessageTableItem, ?>> sortOrder = messageTable.getSortOrder();
         if (sortOrder == null || sortOrder.isEmpty()) {
             TableColumn<KafkaMessageTableItem, ?> timestampColumn = messageTable.getColumns().get(4);
@@ -722,6 +721,8 @@ public class MainController {
             messageTable.getSortOrder().add(timestampColumn);
             messageTable.sort();
         }
+        messageTable.setItems(sortedList);
+
     }
 
     private boolean isMsgTableItemMatched(KafkaMessageTableItem item, String filterText) {
@@ -780,16 +781,17 @@ public class MainController {
     @FXML
     protected void countMessages() {
         try {
+            long count = 0;
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
                 Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.topic().cluster().getName(), new TopicPartition(partition.topic().name(), partition.id()), getPollStartTimestamp());
-                noMsgLongProp.set(partitionInfo.getLeft() >= 0 ? (partitionInfo.getRight() - partitionInfo.getLeft()) : 0);
+                count = partitionInfo.getLeft() >= 0 ? (partitionInfo.getRight() - partitionInfo.getLeft()) : 0;
             } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                long count = clusterManager.getAllPartitionOffsetInfo(topic.cluster().getName(), topic.name(), getPollStartTimestamp()).values()
+                count = clusterManager.getAllPartitionOffsetInfo(topic.cluster().getName(), topic.name(), getPollStartTimestamp()).values()
                         .stream().mapToLong(t -> t.getLeft() >= 0 ? t.getRight() - t.getLeft() : 0).sum();
-                noMsgLongProp.set(count);
             }
+            countMessagesBtn.setText("Count: " + count);
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
             log.error("Error when count messages", e);
             throw new RuntimeException(e);
