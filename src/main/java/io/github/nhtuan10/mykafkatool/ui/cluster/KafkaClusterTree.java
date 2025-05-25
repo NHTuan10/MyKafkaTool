@@ -19,6 +19,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
@@ -34,13 +35,16 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @RequiredArgsConstructor
 public class KafkaClusterTree {
-    final ClusterManager clusterManager;
+    final private ClusterManager clusterManager;
 
-    final TreeView clusterTree;
+    final private TreeView clusterTree;
 
-    final SchemaEditableTableControl schemaEditableTableControl;
+    final private SchemaEditableTableControl schemaEditableTableControl;
 
-    final SchemaRegistryManager schemaRegistryManager;
+    final private SchemaRegistryManager schemaRegistryManager;
+
+    @Setter
+    private Stage stage;
 
     public static void initClusterPanel(Stage stage) {
         TreeView clusterTree = (TreeView) stage.getScene().lookup("#clusterTree");
@@ -121,7 +125,7 @@ public class KafkaClusterTree {
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
             String clusterName = ((KafkaTopicListTreeItem.KafkaTopicListTreeItemValue) topicListTreeItem.getValue()).getCluster().getName();
             AtomicReference<Object> modelRef = new AtomicReference<>();
-            ViewUtil.showPopUpModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of());
+            ViewUtil.showPopUpModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of(), stage);
             NewTopic newTopic = (NewTopic) modelRef.get();
             if (newTopic != null) {
                 CreateTopicsResult result = clusterManager.addTopic(clusterName, newTopic);
@@ -258,7 +262,7 @@ public class KafkaClusterTree {
                 KafkaCluster newConnection;
                 while (true) {
                     AtomicReference<Object> modelRef = new AtomicReference<>();
-                    ViewUtil.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of());
+                    ViewUtil.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of(), stage);
                     newConnection = (KafkaCluster) modelRef.get();
 
                     if (newConnection != null && (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInTree(clusterTree, newConnection.getName()))) {
@@ -297,7 +301,7 @@ public class KafkaClusterTree {
 //                                Map.of("clusterNameTextField", oldConnection.getName(),
 //                                        "bootstrapServerTextField", oldConnection.getBootstrapServer(),
 //                                        "schemaRegistryTextField", oldConnection.getSchemaRegistryUrl() != null ? oldConnection.getSchemaRegistryUrl() : "")
-                                Map.of("objectProperty", oldConnection));
+                                Map.of("objectProperty", oldConnection), stage);
                         newConnection = (KafkaCluster) modelRef.get();
                         //TODO: check the new name not in existing connections
                         if (newConnection != null &&

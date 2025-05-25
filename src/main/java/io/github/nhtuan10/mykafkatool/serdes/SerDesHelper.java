@@ -70,7 +70,7 @@ public class SerDesHelper {
     }
 
     public Set<String> getSupportedValueSerializer() {
-        return deserializerMap.keySet();
+        return serializerMap.keySet();
     }
 
     public Set<String> getSupportedKeyDeserializer() {

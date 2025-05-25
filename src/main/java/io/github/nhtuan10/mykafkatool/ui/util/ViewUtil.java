@@ -16,6 +16,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.Node;
@@ -131,12 +132,12 @@ public final class ViewUtil {
                 FXCollections.observableArrayList(partitionInfo.replicas().stream().filter(r -> r != leader && !partitionInfo.isr().contains(r)).map(replica -> replica.host() + ":" + replica.port()).toList()));
     }
 
-    public static void showPopUpModal(String modalFxml, String title, AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap) throws IOException {
-        showPopUpModal(modalFxml, title, modelRef, inputVarMap, true, false);
+    public static void showPopUpModal(String modalFxml, String title, AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, Window parentWindow) throws IOException {
+        showPopUpModal(modalFxml, title, modelRef, inputVarMap, true, false, parentWindow);
     }
 
     //    private Tuple2<String, String> showAddMsgModalAndGetResult() throws IOException {
-    public static void showPopUpModal(final String modalFxml, final String title, final AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable, final boolean resizable) throws IOException {
+    public static void showPopUpModal(final String modalFxml, final String title, final AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable, final boolean resizable, Window parentWindow) throws IOException {
         Stage stage = new Stage();
 //        FXMLLoader addMsgModalLoader = new FXMLLoader(
 //                AddMessageModalController.class.getResource("add-message-modal.fxml"));
@@ -153,12 +154,13 @@ public final class ViewUtil {
         modalController.launch(editable);
         stage.setTitle(title);
         stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(parentWindow);
 
         stage.setResizable(resizable);
-        if (editable) {
-            stage.setAlwaysOnTop(true);
-            stage.initModality(Modality.APPLICATION_MODAL);
-        }
+//        if (editable) {
+//            stage.setAlwaysOnTop(true);
+//            stage.initModality(Modality.APPLICATION_MODAL);
+//        }
 //        ActionEvent event
 //        stage.initOwner(
 //                ((Node)event.getSource()).getScene().getWindow() );

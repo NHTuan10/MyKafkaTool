@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool;
 import atlantafx.base.theme.PrimerLight;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
+import io.github.nhtuan10.mykafkatool.ui.controller.MainController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -18,6 +19,8 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         Thread.setDefaultUncaughtExceptionHandler(UIErrorHandler::showError);
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource("main-view.fxml"));
         Parent parent = fxmlLoader.load();
+        MainController mainController = fxmlLoader.getController();
+        mainController.setStage(stage);
         Scene scene = new Scene(parent);
 //        parent.setStyle("-fx-base: rgba(60, 60, 60, 255);");
         javafx.application.Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());

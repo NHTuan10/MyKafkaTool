@@ -38,6 +38,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -197,6 +198,13 @@ public class MainController {
     @FXML
     private TitledPane partitionsTitledPane;
 
+    private Stage stage;
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+        this.kafkaClusterTree.setStage(stage);
+    }
+
     public MainController() {
         StringSerializer stringSerializer = new StringSerializer();
         StringDeserializer stringDeserializer = new StringDeserializer();
@@ -243,6 +251,7 @@ public class MainController {
             pullMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
         });
         noMessagesLabel.textProperty().bind(noMsgLongProp.asString().concat(" Messages"));
+//        stage = tabPane.getScene().getWindow();
     }
 
     private void configureTableView() {
@@ -308,7 +317,7 @@ public class MainController {
                             FXCollections.observableArrayList(
                                     Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
                     try {
-                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false, true);
+                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false, true, stage);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -781,7 +790,7 @@ public class MainController {
         AtomicReference<Object> ref = new AtomicReference<>();
         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
                 Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
-                        "schemaTextArea", schemaTextArea.getText()), true, true);
+                        "schemaTextArea", schemaTextArea.getText()), true, true, stage);
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {
             producerUtil.sendMessage(kafkaTopic, partition, newMsg);
