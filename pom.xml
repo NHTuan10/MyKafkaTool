@@ -89,7 +89,7 @@
         <dependency>
             <groupId>org.fxmisc.richtext</groupId>
             <artifactId>richtextfx</artifactId>
-            <version>0.11.5</version>
+            <version>0.10.5</version>
         </dependency>
         <dependency>
             <groupId>io.github.mkpaz</groupId>
@@ -106,7 +106,7 @@
         <dependency>
             <groupId>org.fxmisc.flowless</groupId>
             <artifactId>flowless</artifactId>
-            <version>0.7.4</version>
+            <version>0.6.1</version>
         </dependency>
         <!-- Testing -->
         <dependency>
@@ -163,39 +163,61 @@
                 </executions>
             </plugin>
 
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-shade-plugin</artifactId>-->
+            <!--                <version>3.5.1</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <phase>package</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>shade</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <transformers>-->
+            <!--                                <transformer-->
+            <!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+            <!--                                    <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher</mainClass>-->
+            <!--                                </transformer>-->
+            <!--                            </transformers>-->
+            <!--                            &lt;!&ndash;                            <relocations>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                <relocation>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                    <pattern>io.confluent.kafka.formatter</pattern>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                    <shadedPattern>io.shaded.confluent.kafka.formatter</shadedPattern>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                    <includes>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                        <include>io.confluent.kafka.formatter.Schema*</include>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                    </includes>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                </relocation>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                <relocation>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                    <pattern>io.confluent.kafka.serializers.Abstract*</pattern>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                    <shadedPattern>io.shaded.confluent.kafka.formatter.Schema*</shadedPattern>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                                </relocation>&ndash;&gt;-->
+            <!--                            &lt;!&ndash;                            </relocations>&ndash;&gt;-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
+
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher</mainClass>
-                                </transformer>
-                            </transformers>
-                            <!--                            <relocations>-->
-                            <!--                                <relocation>-->
-                            <!--                                    <pattern>io.confluent.kafka.formatter</pattern>-->
-                            <!--                                    <shadedPattern>io.shaded.confluent.kafka.formatter</shadedPattern>-->
-                            <!--                                    <includes>-->
-                            <!--                                        <include>io.confluent.kafka.formatter.Schema*</include>-->
-                            <!--                                    </includes>-->
-                            <!--                                </relocation>-->
-                            <!--                                <relocation>-->
-                            <!--                                    <pattern>io.confluent.kafka.serializers.Abstract*</pattern>-->
-                            <!--                                    <shadedPattern>io.shaded.confluent.kafka.formatter.Schema*</shadedPattern>-->
-                            <!--                                </relocation>-->
-                            <!--                            </relocations>-->
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
             </plugin>
 
             <plugin>
