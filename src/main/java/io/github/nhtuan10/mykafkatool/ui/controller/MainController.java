@@ -198,11 +198,12 @@ public class MainController {
     @FXML
     private TitledPane partitionsTitledPane;
 
-    private Stage stage;
+    private StageHolder stageHolder;
 
     public void setStage(Stage stage) {
-        this.stage = stage;
+        this.stageHolder.setStage(stage);
         this.kafkaClusterTree.setStage(stage);
+//        this.schemaEditableTableControl.setStage(stage);
     }
 
     public MainController() {
@@ -224,6 +225,7 @@ public class MainController {
         this.producerUtil = new ProducerUtil(this.serDesHelper);
         this.kafkaConsumerService = new KafkaConsumerService(this.serDesHelper);
         this.jsonHighlighter = new JsonHighlighter();
+        this.stageHolder = new StageHolder();
     }
 
     @FXML
@@ -256,9 +258,9 @@ public class MainController {
 
     private void configureTableView() {
         configureMessageTable(messageTable, serDesHelper);
-        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable);
-        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable);
-        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable);
+        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable, stageHolder);
+        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable, stageHolder);
+        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable, stageHolder);
         schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
                 (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));
         // Use a change listener to respond to a selection within
@@ -276,7 +278,7 @@ public class MainController {
     }
 
     public void configureMessageTable(TableView<KafkaMessageTableItem> messageTable, SerDesHelper serDesHelper) {
-        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable, false);
+        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, messageTable, stageHolder);
         messageTable.setRowFactory(tv -> {
             TableRow<KafkaMessageTableItem> row = new TableRow<>() {
                 @Override
@@ -317,7 +319,7 @@ public class MainController {
                             FXCollections.observableArrayList(
                                     Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
                     try {
-                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false, true, stage);
+                        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false, true, stageHolder.getStage());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -736,7 +738,7 @@ public class MainController {
         sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
         ObservableList<TableColumn<KafkaMessageTableItem, ?>> sortOrder = messageTable.getSortOrder();
         if (sortOrder == null || sortOrder.isEmpty()) {
-            TableColumn<KafkaMessageTableItem, ?> timestampColumn = messageTable.getColumns().get(4);
+            TableColumn<KafkaMessageTableItem, ?> timestampColumn = messageTable.getColumns().get(5);
             timestampColumn.setSortType(msgPosition.getValue() == KafkaConsumerService.MessagePollingPosition.FIRST
                     ? TableColumn.SortType.ASCENDING
                     : TableColumn.SortType.DESCENDING);
@@ -790,7 +792,7 @@ public class MainController {
         AtomicReference<Object> ref = new AtomicReference<>();
         ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
                 Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
-                        "schemaTextArea", schemaTextArea.getText()), true, true, stage);
+                        "schemaTextArea", schemaTextArea.getText()), true, true, stageHolder.getStage());
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {
             producerUtil.sendMessage(kafkaTopic, partition, newMsg);

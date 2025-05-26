@@ -119,6 +119,8 @@ public class AddOrViewMessageModalController extends ModalController {
 
 
     public void launch(boolean editable) {
+        super.launch(editable);
+        this.headerTable.setStage(stage);
         keyTextArea.setEditable(editable);
         valueTextArea.setEditable(editable);
 //        valueContentTypeComboBox.setDisable(!editable);

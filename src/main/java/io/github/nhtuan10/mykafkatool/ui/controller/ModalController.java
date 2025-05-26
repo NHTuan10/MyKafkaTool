@@ -5,6 +5,7 @@ import io.github.nhtuan10.mykafkatool.ui.control.MessageHeaderTable;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import lombok.Setter;
 import org.fxmisc.richtext.CodeArea;
 
@@ -18,8 +19,10 @@ public abstract class ModalController {
 
     protected AtomicReference<Object> modelRef;
 
+    protected Stage stage;
 
-    public void setTextFieldOrAreaText(ModalController modalController, Map<String, Object> text) {
+    public void setFields(ModalController modalController, Stage stage, Map<String, Object> text) {
+        this.stage = stage;
         text.forEach((fieldName, value) -> {
             try {
                 Field field = this.getClass().getDeclaredField(fieldName);

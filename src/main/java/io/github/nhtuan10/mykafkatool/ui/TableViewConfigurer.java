@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -10,6 +11,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -19,28 +21,55 @@ import java.util.stream.IntStream;
 @Slf4j
 public class TableViewConfigurer {
 
-    public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage) {
+    public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage, StageHolder stageHolder) {
         TableView<S> tableView = (TableView<S>) stage.getScene().lookup("#" + fxId);
-        return configureTableView(clazz, tableView, false);
+        return configureTableView(clazz, tableView, stageHolder);
     }
 
-    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView) {
-        return configureTableView(clazz, tableView, false);
-    }
+//    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView) {
+//        return configureTableView(clazz, tableView);
+//    }
 
 
-    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView, boolean isCellSelectionEnabled) {
+    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView, @NonNull StageHolder stageHolder) {
+        TableColumn<S, String> numberCol = buildNumberTableColumn();
+        tableView.getColumns().addFirst(numberCol);
+
         List<String> fieldNames = ViewUtil.getPropertyFieldNamesFromTableItem(clazz);
         IntStream.range(0, fieldNames.size()).forEach(i -> {
-            TableColumn<S, ?> tableColumn = tableView.getColumns().get(i);
+            TableColumn<S, ?> tableColumn = tableView.getColumns().get(i + 1);
             tableColumn.setCellValueFactory(new PropertyValueFactory<>(fieldNames.get(i)));
-            tableColumn.setCellFactory((callback) -> new ViewUtil.DragSelectionCell<>());
+            tableColumn.setCellFactory((column) -> new ViewUtil.DragSelectionCell<>());
         });
         // Enable copy by Ctrl + C or by right click -> Copy
-        ViewUtil.enableCopyDataFromTableToClipboard(tableView, SelectionMode.MULTIPLE, isCellSelectionEnabled);
-
+        ViewUtil.enableCopyAndExportDataFromTable(tableView, SelectionMode.MULTIPLE, stageHolder);
         return tableView;
     }
+
+    private static <S> TableColumn<S, String> buildNumberTableColumn() {
+        TableColumn<S, String> numberCol = new TableColumn<>("#");
+        numberCol.setCellValueFactory(p -> {
+            return new ReadOnlyObjectWrapper("");
+        });
+
+        numberCol.setCellFactory((column) -> {
+            return new TableCell<S, String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+
+                    if (this.getTableRow() != null && item != null) {
+                        setText(String.valueOf(this.getTableRow().getIndex() + 1));
+                    } else {
+                        setText("");
+                    }
+                }
+            };
+        });
+        numberCol.setSortable(false);
+        return numberCol;
+    }
+
 
 //    public static void configureEditableTableCell(TableView<UIPropertyTableItem> headerTable) {
 //        Callback<TableColumn<UIPropertyTableItem, String>,
@@ -81,7 +110,7 @@ public class TableViewConfigurer {
         List<Field> fields = ViewUtil.getPropertyFieldFromTableItem(tableItemClass);
         IntStream.range(0, fields.size()).forEach(i -> {
             Field field = fields.get(i);
-            TableColumn<S, String> tableColumn = (TableColumn<S, String>) tableView.getColumns().get(i);
+            TableColumn<S, String> tableColumn = (TableColumn<S, String>) tableView.getColumns().get(i + 1);
             tableColumn.setCellFactory(cellFactory);
             tableColumn.setOnEditCommit(event -> {
                 // Update the model when editing is committed

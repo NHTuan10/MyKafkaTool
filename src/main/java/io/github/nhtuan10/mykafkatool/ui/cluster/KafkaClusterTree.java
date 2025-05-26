@@ -303,7 +303,6 @@ public class KafkaClusterTree {
 //                                        "schemaRegistryTextField", oldConnection.getSchemaRegistryUrl() != null ? oldConnection.getSchemaRegistryUrl() : "")
                                 Map.of("objectProperty", oldConnection), stage);
                         newConnection = (KafkaCluster) modelRef.get();
-                        //TODO: check the new name not in existing connections
                         if (newConnection != null &&
                                 (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInParentTree(selectedItem, newConnection.getName()))) {
                             String clusterName = newConnection.getName();

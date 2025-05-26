@@ -2,6 +2,7 @@ package io.github.nhtuan10.mykafkatool.ui.control;
 
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
+import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.application.Platform;
@@ -15,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,7 +44,7 @@ public class EditableTableControl<T> extends AnchorPane {
 
     protected Class<T> itemClass;
 
-    protected BooleanProperty editable = new SimpleBooleanProperty(true);
+    protected BooleanProperty editable;
     @FXML
     protected TextField filterTextField;
 
@@ -57,14 +59,22 @@ public class EditableTableControl<T> extends AnchorPane {
     @FXML
     protected Label noRowsLabel;
 
+    protected StageHolder stageHolder;
+
+    public void setStage(Stage stage) {
+        stageHolder.setStage(stage);
+    }
+
     public EditableTableControl() {
         this(true);
     }
 
     public EditableTableControl(@NamedArg(value = "editable", defaultValue = "false") Boolean editable) {
-        filterTextProperty = new SimpleStringProperty("");
+        this.editable = new SimpleBooleanProperty(true);
+        this.stageHolder = new StageHolder();
+        this.filterTextProperty = new SimpleStringProperty("");
         this.editable.set(editable);
-        itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        this.itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "editable-table.fxml"));
         fxmlLoader.setRoot(this);
@@ -89,8 +99,7 @@ public class EditableTableControl<T> extends AnchorPane {
             TableColumn<T, ?> tableColumn = new TableColumn<>(columnName);
             table.getColumns().add(tableColumn);
         });
-
-        TableViewConfigurer.configureTableView(itemClass, table);
+        TableViewConfigurer.configureTableView(itemClass, table, stageHolder);
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
