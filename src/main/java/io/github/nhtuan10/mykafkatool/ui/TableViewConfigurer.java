@@ -48,23 +48,19 @@ public class TableViewConfigurer {
 
     private static <S> TableColumn<S, S> buildNumberTableColumn() {
         TableColumn<S, S> numberCol = new TableColumn<>("#");
-        numberCol.setCellValueFactory(p -> {
-            return new ReadOnlyObjectWrapper(p.getValue());
-        });
+        numberCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper(p.getValue()));
 
-        numberCol.setCellFactory((column) -> {
-            return new TableCell<S, S>() {
-                @Override
-                protected void updateItem(S item, boolean empty) {
-                    super.updateItem(item, empty);
+        numberCol.setCellFactory((column) -> new TableCell<S, S>() {
+            @Override
+            protected void updateItem(S item, boolean empty) {
+                super.updateItem(item, empty);
 
-                    if (this.getTableRow() != null && item != null) {
-                        setText(String.valueOf(this.getTableRow().getIndex() + 1));
-                    } else {
-                        setText("");
-                    }
+                if (this.getTableRow() != null && item != null) {
+                    setText(String.valueOf(this.getTableRow().getIndex() + 1));
+                } else {
+                    setText("");
                 }
-            };
+            }
         });
         numberCol.setSortable(false);
         return numberCol;
