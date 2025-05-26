@@ -21,7 +21,7 @@ public class MessageHeaderTable extends EditableTableControl<UIPropertyTableItem
 
     @FXML
     protected void addItem() {
-        tableItems.add(new UIPropertyTableItem("", ""));
+        addItem(new UIPropertyTableItem("", ""));
     }
 
     @Override
@@ -29,7 +29,4 @@ public class MessageHeaderTable extends EditableTableControl<UIPropertyTableItem
         return Filter.buildFilterPredicate(filter, UIPropertyTableItem::getName, UIPropertyTableItem::getValue);
     }
 
-    public void setEditable(boolean editable) {
-        this.editable.set(editable);
-    }
 }

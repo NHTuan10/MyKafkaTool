@@ -28,6 +28,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable?>
 
 <AnchorPane prefHeight="661.0" prefWidth="1418.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.MainController">
    <children>
@@ -277,12 +279,16 @@
                                                           <content>
                                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                                   <children>
-                                                                      <TableView fx:id="topicConfigTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                          <columns>
-                                                                              <TableColumn prefWidth="428.0" text="Name" />
-                                                                               <TableColumn prefWidth="300.0" text="Value" />
-                                                                          </columns>
-                                                                      </TableView>
+<!--                                                                       <TableView fx:id="topicConfigTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+<!--                                                                           <columns> -->
+<!--                                                                               <TableColumn prefWidth="428.0" text="Name" /> -->
+<!--                                                                                <TableColumn prefWidth="300.0" text="Value" /> -->
+<!--                                                                           </columns> -->
+<!--                                                                       </TableView> -->
+
+                                                                    <TopicOrPartitionPropertyTable  fx:id="topicConfigTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<!--                                                                         <editable> <Boolean fx:value="false"/> </editable> -->
+                                                                    </TopicOrPartitionPropertyTable>
                                                                   </children>
                                                               </AnchorPane>
                                                           </content>
@@ -295,7 +301,7 @@
                                                         <items>
                                                             <HBox prefHeight="36.0" prefWidth="934.0">
                                                                <children>
-                                                                  <Button mnemonicParsing="false" onAction="#refreshPartitionsTblAction" prefHeight="26.0" prefWidth="72.0" text="Refresh" />
+<!--                                                                   <Button mnemonicParsing="false" onAction="#refreshPartitionsTblAction" prefHeight="26.0" prefWidth="72.0" text="Refresh" /> -->
                                                                   <Label fx:id="totalMessagesInTheTopicLabel" prefHeight="28.0" prefWidth="106.0" text="0 Messages">
                                                                      <HBox.margin>
                                                                         <Insets left="10.0" />
@@ -303,17 +309,17 @@
                                                                   </Label>
                                                                </children>
                                                             </HBox>
-                                                            <TableView fx:id="kafkaPartitionsTable" minHeight="-Infinity" minWidth="-Infinity" prefHeight="210.0" prefWidth="795.0">
-                                                              <columns>
-                                                                  <TableColumn prefWidth="75.0" text="Parttion" />
-                                                                <TableColumn prefWidth="98.0" text="Start Offset" />
-                                                                  <TableColumn prefWidth="83.0" text="End Offset" />
-                                                                  <TableColumn prefWidth="108.0" text="No Messages" />
-                                                                  <TableColumn prefWidth="190.0" text="Leader" />
-                                                                  <TableColumn prefWidth="204.0" text="Replica [In-Sync]" />
-                                                                  <TableColumn prefWidth="217.0" text="Replica [Not-In-Sync]" />
-                                                              </columns>
-                                                            </TableView>
+                                                            <TopicPartitionsTable fx:id="kafkaPartitionsTable" minHeight="-Infinity" minWidth="-Infinity" prefHeight="210.0" prefWidth="795.0">
+<!--                                                               <columns> -->
+<!--                                                                   <TableColumn prefWidth="75.0" text="Parttion" /> -->
+<!--                                                                 <TableColumn prefWidth="98.0" text="Start Offset" /> -->
+<!--                                                                   <TableColumn prefWidth="83.0" text="End Offset" /> -->
+<!--                                                                   <TableColumn prefWidth="108.0" text="No Messages" /> -->
+<!--                                                                   <TableColumn prefWidth="190.0" text="Leader" /> -->
+<!--                                                                   <TableColumn prefWidth="204.0" text="Replica [In-Sync]" /> -->
+<!--                                                                   <TableColumn prefWidth="217.0" text="Replica [Not-In-Sync]" /> -->
+<!--                                                               </columns> -->
+                                                            </TopicPartitionsTable>
                                                         </items>
                                                       </SplitPane>
                                                    </children>

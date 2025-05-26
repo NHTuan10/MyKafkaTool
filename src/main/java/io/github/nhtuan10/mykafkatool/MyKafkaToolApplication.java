@@ -27,7 +27,7 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         URL cssResource = MyKafkaToolApplication.class.getResource("style.css");
         scene.getStylesheets().add(cssResource.toExternalForm());
 //        Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet()); //PrimerDark
-        stage.setTitle("MyTool");
+        stage.setTitle("MyKafkaTool");
         stage.setScene(scene);
         stage.show();
         KafkaClusterTree.initClusterPanel(stage);

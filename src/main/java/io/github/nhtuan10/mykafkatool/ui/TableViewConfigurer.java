@@ -32,7 +32,7 @@ public class TableViewConfigurer {
 
 
     public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView, @NonNull StageHolder stageHolder) {
-        TableColumn<S, S> numberCol = buildNumberTableColumn();
+        TableColumn<S, S> numberCol = buildIndexTableColumn();
         tableView.getColumns().addFirst(numberCol);
 
         List<String> fieldNames = ViewUtil.getPropertyFieldNamesFromTableItem(clazz);
@@ -46,7 +46,7 @@ public class TableViewConfigurer {
         return tableView;
     }
 
-    private static <S> TableColumn<S, S> buildNumberTableColumn() {
+    private static <S> TableColumn<S, S> buildIndexTableColumn() {
         TableColumn<S, S> numberCol = new TableColumn<>("#");
         numberCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper(p.getValue()));
 
@@ -57,6 +57,7 @@ public class TableViewConfigurer {
 
                 if (this.getTableRow() != null && item != null) {
                     setText(String.valueOf(this.getTableRow().getIndex() + 1));
+                    setStyle("-fx-text-fill: darkgray");
                 } else {
                     setText("");
                 }

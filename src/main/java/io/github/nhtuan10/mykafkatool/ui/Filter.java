@@ -17,8 +17,9 @@ public class Filter {
     @SafeVarargs
     public static <T> Predicate<T> buildFilterPredicate(@NonNull Filter filter, Function<T, String>... fieldGetters) {
         assert (filter.getFilterText() != null);
+        String filterText = filter.getFilterText().trim();
         if (filter.isRegexFilter()) {
-            Pattern pattern = Pattern.compile(filter.getFilterText(), Pattern.CASE_INSENSITIVE);
+            Pattern pattern = Pattern.compile(filterText, Pattern.CASE_INSENSITIVE);
             return item -> {
                 boolean isMatched = false;
                 for (Function<T, String> fieldGetter : fieldGetters) {
@@ -30,7 +31,7 @@ public class Filter {
             return item -> {
                 boolean isMatched = false;
                 for (Function<T, String> fieldGetter : fieldGetters) {
-                    isMatched = isMatched || (fieldGetter.apply(item) != null && fieldGetter.apply(item).toLowerCase().contains(filter.getFilterText().toLowerCase()));
+                    isMatched = isMatched || (fieldGetter.apply(item) != null && fieldGetter.apply(item).toLowerCase().contains(filterText.toLowerCase()));
                 }
                 return isMatched;
             };

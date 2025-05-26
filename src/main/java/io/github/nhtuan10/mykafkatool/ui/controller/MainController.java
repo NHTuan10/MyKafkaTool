@@ -26,8 +26,9 @@ import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
 import io.github.nhtuan10.mykafkatool.ui.control.SchemaEditableTableControl;
+import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable;
+import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionsTableItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.application.Platform;
@@ -46,17 +47,16 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.kafka.clients.admin.ConfigEntry;
-import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.TopicPartitionInfo;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -68,6 +68,7 @@ import java.util.function.Predicate;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
+// TODO: refactor this class
 @Slf4j
 public class MainController {
     private final ClusterManager clusterManager = ClusterManager.getInstance();
@@ -184,7 +185,7 @@ public class MainController {
 
     // Topic/Partition properties
     @FXML
-    private TableView<UIPropertyTableItem> topicConfigTable;
+    private TopicOrPartitionPropertyTable topicConfigTable;
 
     @FXML
     private TabPane tabPane;
@@ -193,7 +194,7 @@ public class MainController {
     private Tab propertiesTab;
 
     @FXML
-    private TableView<KafkaPartitionsTableItem> kafkaPartitionsTable;
+    private TopicPartitionsTable kafkaPartitionsTable;
 
     @FXML
     private TitledPane partitionsTitledPane;
@@ -203,7 +204,8 @@ public class MainController {
     public void setStage(Stage stage) {
         this.stageHolder.setStage(stage);
         this.kafkaClusterTree.setStage(stage);
-//        this.schemaEditableTableControl.setStage(stage);
+        this.schemaEditableTableControl.setStage(stage);
+        this.topicConfigTable.setStage(stage);
     }
 
     public MainController() {
@@ -259,8 +261,8 @@ public class MainController {
     private void configureTableView() {
         configureMessageTable(messageTable, serDesHelper);
         TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable, stageHolder);
-        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable, stageHolder);
-        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable, stageHolder);
+//        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable, stageHolder);
+//        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable, stageHolder);
         schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
                 (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));
         // Use a change listener to respond to a selection within
@@ -434,7 +436,7 @@ public class MainController {
                 }
 
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                ObservableList<UIPropertyTableItem> config = FXCollections.observableArrayList();
+//                ObservableList<UIPropertyTableItem> config = FXCollections.observableArrayList();
                 String clusterName = topic.cluster().getName();
                 String topicName = topic.name();
                 // Enable the data tab and show/hide titled panes in the tab
@@ -453,28 +455,30 @@ public class MainController {
                 partitionsTitledPane.setVisible(true);
                 schemaSplitPane.setVisible(false);
                 messageSplitPane.setVisible(true);
-                Callable<Void> getTopicAndPartitionProperties = () -> {
-                    try {
-                        // topic config table
-                        Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
-                        configEntries.forEach(entry -> config.add(new UIPropertyTableItem(entry.name(), entry.value())));
-                        topicConfigTable.setItems(config);
-                    } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                        log.error("Error when get topic config properties", e);
-//                            topicConfigTable.setItems(FXCollections.emptyObservableList());
-//                            throw new RuntimeException(e);
-                    }
-                    return null;
-                };
-                Consumer<Void> onSuccess = (val) -> {
-                    log.info("Successfully get topic config & partitions properties for cluster {} and topic {}", clusterName, topicName);
-                };
-                Consumer<Throwable> onFailure = (exception) -> {
-                    log.error("Error when getting topic config & partitions properties for cluster {} and topic {}", clusterName, topicName, exception);
-                };
-                ViewUtil.runBackgroundTask(getTopicAndPartitionProperties, onSuccess, onFailure);
+                this.topicConfigTable.loadTopicConfig(topic);
+                this.kafkaPartitionsTable.loadTopicPartitions(topic, this.totalMessagesInTheTopicStringProperty, this.isBlockingAppUINeeded);
+//                Callable<Void> getTopicAndPartitionProperties = () -> {
+//                    try {
+//                        // topic config table
+//                        Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
+//                        configEntries.forEach(entry -> config.add(new UIPropertyTableItem(entry.name(), entry.value())));
+//                        topicConfigTable.setItems(config);
+//                    } catch (ExecutionException | InterruptedException | TimeoutException e) {
+//                        log.error("Error when get topic config properties", e);
+////                            topicConfigTable.setItems(FXCollections.emptyObservableList());
+////                            throw new RuntimeException(e);
+//                    }
+//                    return null;
+//                };
+//                Consumer<Void> onSuccess = (val) -> {
+//                    log.info("Successfully get topic config & partitions properties for cluster {} and topic {}", clusterName, topicName);
+//                };
+//                Consumer<Throwable> onFailure = (exception) -> {
+//                    log.error("Error when getting topic config & partitions properties for cluster {} and topic {}", clusterName, topicName, exception);
+//                };
+//                ViewUtil.runBackgroundTask(getTopicAndPartitionProperties, onSuccess, onFailure);
 
-                refreshPartitionsTbl(clusterName, topicName);
+//                refreshPartitionsTbl(clusterName, topicName);
 
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 isPolling.set(false);
@@ -517,34 +521,35 @@ public class MainController {
                     ObservableList<KafkaMessageTableItem> observableList = treeMsgTableItemCache.get(topicTreeItem).getItems().filtered(item -> item.getPartition() == partition.id());
                     messageTable.setItems(observableList);
                 }
-                final String clusterName = partition.topic().cluster().getName();
-                final String topic = partition.topic().name();
-                Callable<Void> getPartitionInfo = () -> {
-                    try {
-
-                        Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.id()), null);
-                        ObservableList<UIPropertyTableItem> list = FXCollections.observableArrayList(
-                                new UIPropertyTableItem(UIPropertyTableItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
-                                , new UIPropertyTableItem(UIPropertyTableItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
-                                , new UIPropertyTableItem(UIPropertyTableItem.NO_MESSAGES, String.valueOf(partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft())));
-
-                        TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, partition.id());
-                        list.addAll(getPartitionInfoForUI(partitionInfo));
-
-                        topicConfigTable.setItems(list);
-                        return null;
-                    } catch (ExecutionException | InterruptedException e) {
-                        log.error("Error when get partition info", e);
-                        throw new RuntimeException(e);
-                    }
-                };
-                Consumer<Void> onSuccess = (val) -> {
-                    log.info("Successfully get topic config & partitions properties for cluster {}, topic {} and partition", clusterName, topic, partition.id());
-                };
-                Consumer<Throwable> onFailure = (exception) -> {
-                    log.error("Error when getting topic config & partitions properties for cluster {} and topic {} and partition", clusterName, topic, partition.id(), exception);
-                };
-                ViewUtil.runBackgroundTask(getPartitionInfo, onSuccess, onFailure);
+                this.topicConfigTable.loadPartitionConfig(partition);
+//                final String clusterName = partition.topic().cluster().getName();
+//                final String topic = partition.topic().name();
+//                Callable<Void> getPartitionInfo = () -> {
+//                    try {
+//
+//                        Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, partition.id()), null);
+//                        ObservableList<UIPropertyTableItem> list = FXCollections.observableArrayList(
+//                                new UIPropertyTableItem(UIPropertyTableItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
+//                                , new UIPropertyTableItem(UIPropertyTableItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
+//                                , new UIPropertyTableItem(UIPropertyTableItem.NO_MESSAGES, String.valueOf(partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft())));
+//
+//                        TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, partition.id());
+//                        list.addAll(TopicOrPartitionPropertyTable.getPartitionInfoForUI(partitionInfo));
+//
+//                        topicConfigTable.setItems(list);
+//                        return null;
+//                    } catch (ExecutionException | InterruptedException e) {
+//                        log.error("Error when get partition info", e);
+//                        throw new RuntimeException(e);
+//                    }
+//                };
+//                Consumer<Void> onSuccess = (val) -> {
+//                    log.info("Successfully get topic config & partitions properties for cluster {}, topic {} and partition", clusterName, topic, partition.id());
+//                };
+//                Consumer<Throwable> onFailure = (exception) -> {
+//                    log.error("Error when getting topic config & partitions properties for cluster {} and topic {} and partition", clusterName, topic, partition.id(), exception);
+//                };
+//                ViewUtil.runBackgroundTask(getPartitionInfo, onSuccess, onFailure);
 
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 if (!tabPane.getTabs().contains(cgOffsetsTab)) {
@@ -601,21 +606,6 @@ public class MainController {
                 propertiesTab.setDisable(true);
             }
         });
-    }
-
-
-    private static List<UIPropertyTableItem> getPartitionInfoForUI(TopicPartitionInfo partitionInfo) {
-        List<UIPropertyTableItem> list = new ArrayList<>();
-        Node leader = partitionInfo.leader();
-        list.add(new UIPropertyTableItem(leader.host() + ":" + leader.port(), UIPropertyTableItem.LEADER));
-        list.addAll(partitionInfo.replicas().stream().filter(r -> r != leader).map(replica -> {
-            if (partitionInfo.isr().contains(replica)) {
-                return new UIPropertyTableItem(replica.host() + ":" + replica.port(), UIPropertyTableItem.REPLICA_IN_SYNC);
-            } else {
-                return new UIPropertyTableItem(replica.host() + ":" + replica.port(), UIPropertyTableItem.REPLICA_NOT_IN_SYNC);
-            }
-        }).toList());
-        return list;
     }
 
     @FXML
@@ -823,55 +813,56 @@ public class MainController {
         }
     }
 
-    @FXML
-    public void refreshPartitionsTblAction() {
-        if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> topicTreeItem) {
-            KafkaTopic topic = (KafkaTopic) topicTreeItem.getValue();
-            blockAppProgressInd.setVisible(true);
-            refreshPartitionsTbl(topic.cluster().getName(), topic.name());
-        }
-    }
+//    @FXML
+//    public void refreshPartitionsTblAction() {
+//        if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> topicTreeItem) {
+//            KafkaTopic topic = (KafkaTopic) topicTreeItem.getValue();
+//            blockAppProgressInd.setVisible(true);
+//            refreshPartitionsTbl(topic.cluster().getName(), topic.name());
+//        }
+//    }
+//
+//    public void refreshPartitionsTbl(String clusterName, String topicName) {
+//        Callable<Long> task = () -> {
+//            ObservableList<KafkaPartitionsTableItem> partitionsTableItems = FXCollections.observableArrayList();
+//            kafkaPartitionsTable.setItems(partitionsTableItems);
+//            List<TopicPartitionInfo> topicPartitionInfos = null;
+//            try {
+//                topicPartitionInfos = clusterManager.getTopicPartitions(clusterName, topicName);
+//            } catch (ExecutionException | InterruptedException | TimeoutException e) {
+//                log.error("Error when get partition info for cluster {} and topic {}", clusterName, topicName, e);
+//                throw new RuntimeException(e);
+//            }
+//            topicPartitionInfos.forEach(partitionInfo -> {
+//                try {
+//                    Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, partitionInfo.partition()), null);
+//                    KafkaPartitionsTableItem partitionsTableItem = ViewUtil.mapToUIPartitionTableItem(partitionInfo, partitionOffsetsInfo);
+//                    partitionsTableItems.add(partitionsTableItem);
+//                } catch (ExecutionException | InterruptedException e) {
+//                    log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);
+//                    throw new RuntimeException(e);
+//                }
+//            });
+//            long totalMsg = partitionsTableItems.stream().mapToLong(KafkaPartitionsTableItem::getNoMessage).sum();
+////        totalMessagesInTheTopicProperty.set(totalMsg);
+//            return totalMsg;
+//        };
+//        Consumer<Long> onSuccess = (val) -> {
+//            totalMessagesInTheTopicStringProperty.set(val + " Messages");
+//            if (blockAppProgressInd.isVisible())
+//                blockAppProgressInd.setVisible(false);
+//            log.info("Successfully get partitions properties for cluster {} and topic {}", clusterName, topicName);
+//        };
+//        Consumer<Throwable> onFailure = (exception) -> {
+//            if (blockAppProgressInd.isVisible())
+//                blockAppProgressInd.setVisible(false);
+//            throw new RuntimeException(exception);
+//        };
+//        ViewUtil.runBackgroundTask(task, onSuccess, onFailure);
 
-    public void refreshPartitionsTbl(String clusterName, String topicName) {
-        Callable<Long> task = () -> {
-            ObservableList<KafkaPartitionsTableItem> partitionsTableItems = FXCollections.observableArrayList();
-            kafkaPartitionsTable.setItems(partitionsTableItems);
-            List<TopicPartitionInfo> topicPartitionInfos = null;
-            try {
-                topicPartitionInfos = clusterManager.getTopicPartitions(clusterName, topicName);
-            } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                log.error("Error when get partition info for cluster {} and topic {}", clusterName, topicName, e);
-                throw new RuntimeException(e);
-            }
-            topicPartitionInfos.forEach(partitionInfo -> {
-                try {
-                    Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, partitionInfo.partition()), null);
-                    KafkaPartitionsTableItem partitionsTableItem = ViewUtil.mapToUIPartitionTableItem(partitionInfo, partitionOffsetsInfo);
-                    partitionsTableItems.add(partitionsTableItem);
-                } catch (ExecutionException | InterruptedException e) {
-                    log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);
-                    throw new RuntimeException(e);
-                }
-            });
-            long totalMsg = partitionsTableItems.stream().mapToLong(KafkaPartitionsTableItem::getNoMessage).sum();
-//        totalMessagesInTheTopicProperty.set(totalMsg);
-            return totalMsg;
-        };
-        Consumer<Long> onSuccess = (val) -> {
-            totalMessagesInTheTopicStringProperty.set(val + " Messages");
-            if (blockAppProgressInd.isVisible())
-                blockAppProgressInd.setVisible(false);
-            log.info("Successfully get partitions properties for cluster {} and topic {}", clusterName, topicName);
-        };
-        Consumer<Throwable> onFailure = (exception) -> {
-            if (blockAppProgressInd.isVisible())
-                blockAppProgressInd.setVisible(false);
-            throw new RuntimeException(exception);
-        };
-        ViewUtil.runBackgroundTask(task, onSuccess, onFailure);
-//        ;
-//        totalMessagesInTheTopicLabel.setText(totalMsg + " Messages");
-    }
+    /// /        ;
+    /// /        totalMessagesInTheTopicLabel.setText(totalMsg + " Messages");
+//    }
 
     @Data
     @AllArgsConstructor

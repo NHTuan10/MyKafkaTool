@@ -16,7 +16,7 @@ public class ProducerCreator {
     public static KafkaProducer createProducer(ProducerCreatorConfig producerCreatorConfig) {
         Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerCreatorConfig.cluster.getBootstrapServer());
-        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "MyTool");
+        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "MyKafkaTool");
         String schemaRegistryUrl = producerCreatorConfig.cluster.getSchemaRegistryUrl();
         if (StringUtils.isNotBlank(schemaRegistryUrl)) {
             properties.put("schema.registry.url", schemaRegistryUrl);

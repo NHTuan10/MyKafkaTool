@@ -69,11 +69,10 @@ public class EditableTableControl<T> extends AnchorPane {
         this(true);
     }
 
-    public EditableTableControl(@NamedArg(value = "editable", defaultValue = "false") Boolean editable) {
-        this.editable = new SimpleBooleanProperty(true);
+    public EditableTableControl(@NamedArg(value = "editable", defaultValue = "true") Boolean editable) {
+        this.editable = new SimpleBooleanProperty(editable);
         this.stageHolder = new StageHolder();
         this.filterTextProperty = new SimpleStringProperty("");
-        this.editable.set(editable);
         this.itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "editable-table.fxml"));
@@ -100,7 +99,12 @@ public class EditableTableControl<T> extends AnchorPane {
             table.getColumns().add(tableColumn);
         });
         TableViewConfigurer.configureTableView(itemClass, table, stageHolder);
-
+//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.getColumns().forEach(tableColumn -> {
+//            tableColumn.setMinWidth(USE_COMPUTED_SIZE);
+//            tableColumn.setPrefWidth(USE_COMPUTED_SIZE);
+//            tableColumn.setMaxWidth(5000);
+        });
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
 //        table.setItems(tableItems.filtered(filterPredicate(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()))));
@@ -156,6 +160,10 @@ public class EditableTableControl<T> extends AnchorPane {
     protected void addItem() {
     }
 
+    public void addItem(T item) {
+        tableItems.add(item);
+    }
+
     @FXML
     protected void removeItems() {
         List<Integer> indicesToRemove = table.getSelectionModel().getSelectedIndices().reversed();
@@ -199,4 +207,7 @@ public class EditableTableControl<T> extends AnchorPane {
     }
 //    public record Filter<T> (T item, String filterText){}
 
+    public void setEditable(boolean editable) {
+        this.editable.set(editable);
+    }
 }

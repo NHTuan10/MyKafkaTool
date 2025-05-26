@@ -17,7 +17,7 @@ public class KafkaPartitionsTableItem {
     @TableColumn
     private final SimpleLongProperty endOffset;
     @TableColumn
-    private final SimpleLongProperty noMessage;
+    private final SimpleLongProperty numOfMessages;
     @TableColumn
     private final SimpleStringProperty leader;
     @TableColumn
@@ -26,11 +26,11 @@ public class KafkaPartitionsTableItem {
     private final SimpleListProperty<String> replicasNotInSync;
 
 
-    public KafkaPartitionsTableItem(int partition, long startOffset, long endOffset, long noMessage, String leader, ObservableList<String> replicasInSync, ObservableList<String> replicasNotInSync) {
+    public KafkaPartitionsTableItem(int partition, long startOffset, long endOffset, long numOfMessages, String leader, ObservableList<String> replicasInSync, ObservableList<String> replicasNotInSync) {
         this.partition = new SimpleIntegerProperty(partition);
         this.startOffset = new SimpleLongProperty(startOffset);
         this.endOffset = new SimpleLongProperty(endOffset);
-        this.noMessage = new SimpleLongProperty(noMessage);
+        this.numOfMessages = new SimpleLongProperty(numOfMessages);
         this.leader = new SimpleStringProperty(leader);
         this.replicasInSync = new SimpleListProperty<>(replicasInSync);
         this.replicasNotInSync = new SimpleListProperty<>(replicasNotInSync);
@@ -60,12 +60,12 @@ public class KafkaPartitionsTableItem {
         return endOffset;
     }
 
-    public long getNoMessage() {
-        return noMessage.get();
+    public long getNumOfMessages() {
+        return numOfMessages.get();
     }
 
-    public SimpleLongProperty noMessageProperty() {
-        return noMessage;
+    public SimpleLongProperty numOfMessagesProperty() {
+        return numOfMessages;
     }
 
     public String getLeader() {
@@ -105,8 +105,8 @@ public class KafkaPartitionsTableItem {
         this.endOffset.set(endOffset);
     }
 
-    public void setNoMessage(long noMessage) {
-        this.noMessage.set(noMessage);
+    public void setNumOfMessages(long numOfMessages) {
+        this.numOfMessages.set(numOfMessages);
     }
 
     public void setLeader(String leader) {
