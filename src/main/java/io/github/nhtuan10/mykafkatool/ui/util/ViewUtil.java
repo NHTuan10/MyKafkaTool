@@ -169,7 +169,9 @@ public final class ViewUtil {
             }
             firstRow = false;
             boolean firstCol = true;
-            for (final TableColumn<?, ?> column : table.getColumns()) {
+            // exclude first column which is index column
+            var columns = table.getColumns().subList(1, table.getColumns().size());
+            for (final TableColumn<?, ?> column : columns) {
                 if (!firstCol) {
                     strb.append(COLUMN_SEPERATOR);
                 }
@@ -181,7 +183,7 @@ public final class ViewUtil {
     }
 
     private static String getHeaderText(TableView<?> table, String columnSeperator) {
-        String header = table.getColumns().stream().map(TableColumn::getText).collect(Collectors.joining(columnSeperator));
+        String header = table.getColumns().subList(1, table.getColumns().size()).stream().map(TableColumn::getText).collect(Collectors.joining(columnSeperator));
         return header;
     }
 

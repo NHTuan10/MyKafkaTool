@@ -32,7 +32,7 @@ public class TableViewConfigurer {
 
 
     public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView, @NonNull StageHolder stageHolder) {
-        TableColumn<S, String> numberCol = buildNumberTableColumn();
+        TableColumn<S, S> numberCol = buildNumberTableColumn();
         tableView.getColumns().addFirst(numberCol);
 
         List<String> fieldNames = ViewUtil.getPropertyFieldNamesFromTableItem(clazz);
@@ -46,16 +46,16 @@ public class TableViewConfigurer {
         return tableView;
     }
 
-    private static <S> TableColumn<S, String> buildNumberTableColumn() {
-        TableColumn<S, String> numberCol = new TableColumn<>("#");
+    private static <S> TableColumn<S, S> buildNumberTableColumn() {
+        TableColumn<S, S> numberCol = new TableColumn<>("#");
         numberCol.setCellValueFactory(p -> {
-            return new ReadOnlyObjectWrapper("");
+            return new ReadOnlyObjectWrapper(p.getValue());
         });
 
         numberCol.setCellFactory((column) -> {
-            return new TableCell<S, String>() {
+            return new TableCell<S, S>() {
                 @Override
-                protected void updateItem(String item, boolean empty) {
+                protected void updateItem(S item, boolean empty) {
                     super.updateItem(item, empty);
 
                     if (this.getTableRow() != null && item != null) {
