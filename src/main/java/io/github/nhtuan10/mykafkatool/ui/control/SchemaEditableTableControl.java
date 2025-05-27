@@ -151,7 +151,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
     }
 
     private void setTableItemsAndFilter(ObservableList<SchemaTableItem> items, Filter filter) {
-        tableItems.setAll(items);
+        setItems(items);
         applyFilter(filter);
     }
 

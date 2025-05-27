@@ -41,7 +41,7 @@ public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffset
         isBusy.set(true);
         ViewUtil.runBackgroundTask(() -> {
             try {
-                table.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(consumerGroupTreeItem.getClusterName(), consumerGroupTreeItem.getConsumerGroupId())));
+                setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(consumerGroupTreeItem.getClusterName(), consumerGroupTreeItem.getConsumerGroupId())));
             } catch (ExecutionException | InterruptedException e) {
                 isBusy.set(false);
                 log.error("Error when get consumer group offsets", e);

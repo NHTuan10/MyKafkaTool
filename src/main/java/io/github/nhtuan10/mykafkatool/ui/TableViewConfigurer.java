@@ -4,6 +4,7 @@ import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -46,19 +47,19 @@ public class TableViewConfigurer {
         ViewUtil.enableCopyAndExportDataFromTable(tableView, SelectionMode.MULTIPLE, stageHolder);
 
         //Set the auto-resize policy
-//        tableView.itemsProperty().addListener((observable, oldValue, newValue) -> {
-//            autoResizeColumns(tableView);
-//
-//        });
-//        tableView.getItems().addListener((ListChangeListener<? super S>) (change) -> {
-//            autoResizeColumns(tableView);
-//        });
+        tableView.itemsProperty().addListener((observable, oldValue, newValue) -> {
+            autoResizeColumns(tableView);
+
+        });
+        tableView.getItems().addListener((ListChangeListener<? super S>) (change) -> {
+            autoResizeColumns(tableView);
+        });
         return tableView;
     }
 
     private static <S> void autoResizeColumns(TableView<S> tableView) {
         tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        tableView.getColumns().forEach((column) ->
+        tableView.getColumns().subList(1, tableView.getColumns().size() - 1).forEach((column) ->
         {
             //Minimal width = columnheader
             Text t = new Text(column.getText());
@@ -75,7 +76,7 @@ public class TableViewConfigurer {
                 }
             }
             //set the new max-widht with some extra space
-            column.setPrefWidth(Math.min(500, max) + 10.0d);
+            column.setPrefWidth(Math.min(500, max) + 50.0d);
         });
     }
 

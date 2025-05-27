@@ -80,7 +80,6 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
             log.info("Successfully get partitions properties for cluster {} and topic {}", clusterName, topicName);
         };
         Consumer<Throwable> onFailure = (exception) -> {
-
             isBusy.set(false);
             throw new RuntimeException(exception);
         };

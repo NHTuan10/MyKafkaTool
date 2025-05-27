@@ -198,8 +198,10 @@ public class EditableTableControl<T> extends AnchorPane {
 
 
     public void setItems(ObservableList<T> items) {
-        //TODO: make this setItems consistent
-        tableItems.setAll(items);
+//        tableItems.setAll(items);
+//        table.setItems(items);
+        tableItems = items;
+        applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
     }
 
     public ObservableList<T> getItems() {
