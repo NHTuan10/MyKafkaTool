@@ -9,6 +9,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import lombok.NonNull;
@@ -43,7 +44,39 @@ public class TableViewConfigurer {
         });
         // Enable copy by Ctrl + C or by right click -> Copy
         ViewUtil.enableCopyAndExportDataFromTable(tableView, SelectionMode.MULTIPLE, stageHolder);
+
+        //Set the auto-resize policy
+//        tableView.itemsProperty().addListener((observable, oldValue, newValue) -> {
+//            autoResizeColumns(tableView);
+//
+//        });
+//        tableView.getItems().addListener((ListChangeListener<? super S>) (change) -> {
+//            autoResizeColumns(tableView);
+//        });
         return tableView;
+    }
+
+    private static <S> void autoResizeColumns(TableView<S> tableView) {
+        tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        tableView.getColumns().forEach((column) ->
+        {
+            //Minimal width = columnheader
+            Text t = new Text(column.getText());
+            double max = t.getLayoutBounds().getWidth();
+            for (int i = 0; i < tableView.getItems().size(); i++) {
+                //cell must not be empty
+                if (column.getCellData(i) != null) {
+                    t = new Text(column.getCellData(i).toString());
+                    double calcwidth = t.getLayoutBounds().getWidth();
+                    //remember new max-width
+                    if (calcwidth > max) {
+                        max = calcwidth;
+                    }
+                }
+            }
+            //set the new max-widht with some extra space
+            column.setPrefWidth(Math.min(500, max) + 10.0d);
+        });
     }
 
     private static <S> TableColumn<S, S> buildIndexTableColumn() {

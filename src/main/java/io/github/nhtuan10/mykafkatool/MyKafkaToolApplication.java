@@ -4,6 +4,7 @@ import atlantafx.base.theme.PrimerLight;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.controller.MainController;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -31,6 +32,7 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         stage.setScene(scene);
         stage.show();
         KafkaClusterTree.initClusterPanel(stage);
+        stage.setOnCloseRequest(event -> Platform.exit());
 //        TableViewConfigurer.initTableView(stage);
     }
 

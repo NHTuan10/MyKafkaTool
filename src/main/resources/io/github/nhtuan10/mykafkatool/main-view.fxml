@@ -2,6 +2,9 @@
 
 <?import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.SchemaEditableTableControl?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
@@ -28,8 +31,6 @@
 <?import javafx.scene.layout.StackPane?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
-<?import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable?>
-<?import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable?>
 
 <AnchorPane prefHeight="661.0" prefWidth="1418.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.MainController">
    <children>
@@ -250,31 +251,6 @@
                                           <children>
                                               <Accordion prefHeight="614.0" prefWidth="936.0">
                                                   <panes>
-                                                      <TitledPane animated="false" text="Content Types" visible="false">
-                                                          <content>
-                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                                  <children>
-                                                                      <GridPane>
-                                                                          <columnConstraints>
-                                                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                                          </columnConstraints>
-                                                                          <rowConstraints>
-                                                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                          </rowConstraints>
-                                                                          <children>
-                                                                              <Label text="Key" />
-                                                                              <ComboBox prefWidth="150.0" GridPane.columnIndex="1" />
-                                                                              <Label text="Value" GridPane.rowIndex="1" />
-                                                                              <ComboBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                                          </children>
-                                                                      </GridPane>
-                                                                  </children>
-                                                              </AnchorPane>
-                                                          </content>
-                                                      </TitledPane>
                                                       <TitledPane animated="false" text="Properties">
                                                           <content>
                                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -286,7 +262,7 @@
 <!--                                                                           </columns> -->
 <!--                                                                       </TableView> -->
 
-                                                                    <TopicOrPartitionPropertyTable  fx:id="topicConfigTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                    <TopicOrPartitionPropertyTable fx:id="topicConfigTable" prefHeight="535.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 <!--                                                                         <editable> <Boolean fx:value="false"/> </editable> -->
                                                                     </TopicOrPartitionPropertyTable>
                                                                   </children>
@@ -297,9 +273,9 @@
                                             <content>
                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                    <children>
-                                                      <SplitPane dividerPositions="0.05898876404494382" orientation="VERTICAL" prefHeight="536.0" prefWidth="936.0">
+                                                      <SplitPane dividerPositions="0.05898876404494382" orientation="VERTICAL" prefHeight="0.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <items>
-                                                            <HBox prefHeight="36.0" prefWidth="934.0">
+                                                            <HBox prefHeight="17.0" prefWidth="911.0">
                                                                <children>
 <!--                                                                   <Button mnemonicParsing="false" onAction="#refreshPartitionsTblAction" prefHeight="26.0" prefWidth="72.0" text="Refresh" /> -->
                                                                   <Label fx:id="totalMessagesInTheTopicLabel" prefHeight="28.0" prefWidth="106.0" text="0 Messages">
@@ -354,17 +330,17 @@
                                                   <items>
                                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0" prefWidth="727.0">
                                                           <children>
-                                                              <TableView fx:id="consumerGroupOffsetTable" layoutX="-2.0" layoutY="-58.0" prefHeight="484.0" prefWidth="729.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
-                                                                  <columns>
-                                                                      <TableColumn prefWidth="75.0" text="Topic" />
-                                                                      <TableColumn prefWidth="75.0" text="Partition" />
-                                                                      <TableColumn prefWidth="75.0" text="Start" />
-                                                                      <TableColumn prefWidth="75.0" text="End" />
-                                                                      <TableColumn prefWidth="75.0" text="Offset" />
-                                                                      <TableColumn prefWidth="75.0" text="Lag" />
-                                                                      <TableColumn prefWidth="75.0" text="Last Commit" />
-                                                                  </columns>
-                                                              </TableView>
+                                                              <ConsumerGroupTable fx:id="consumerGroupOffsetTable" layoutX="-2.0" layoutY="-58.0" prefHeight="484.0" prefWidth="729.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
+<!--                                                                   <columns> -->
+<!--                                                                       <TableColumn prefWidth="75.0" text="Topic" /> -->
+<!--                                                                       <TableColumn prefWidth="75.0" text="Partition" /> -->
+<!--                                                                       <TableColumn prefWidth="75.0" text="Start" /> -->
+<!--                                                                       <TableColumn prefWidth="75.0" text="End" /> -->
+<!--                                                                       <TableColumn prefWidth="75.0" text="Offset" /> -->
+<!--                                                                       <TableColumn prefWidth="75.0" text="Lag" /> -->
+<!--                                                                       <TableColumn prefWidth="75.0" text="Last Commit" /> -->
+<!--                                                                   </columns> -->
+                                                              </ConsumerGroupTable>
                                                           </children>
                                                       </AnchorPane>
                                                   </items>

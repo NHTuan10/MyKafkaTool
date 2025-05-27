@@ -20,14 +20,10 @@ import io.github.nhtuan10.mykafkatool.serdes.serializer.ByteArraySerializer;
 import io.github.nhtuan10.mykafkatool.serdes.serializer.SchemaRegistryAvroSerializer;
 import io.github.nhtuan10.mykafkatool.serdes.serializer.StringSerializer;
 import io.github.nhtuan10.mykafkatool.ui.*;
-import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupOffsetTableItem;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
-import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
-import io.github.nhtuan10.mykafkatool.ui.control.SchemaEditableTableControl;
-import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable;
-import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable;
+import io.github.nhtuan10.mykafkatool.ui.control.*;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
@@ -178,8 +174,8 @@ public class MainController {
 
     // Consumer Groups
     @FXML
-    private TableView<ConsumerGroupOffsetTableItem> consumerGroupOffsetTable;
-
+//    private TableView<ConsumerGroupOffsetTableItem> consumerGroupOffsetTable;
+    private ConsumerGroupTable consumerGroupOffsetTable;
     @FXML
     private Tab cgOffsetsTab;
 
@@ -260,7 +256,7 @@ public class MainController {
 
     private void configureTableView() {
         configureMessageTable(messageTable, serDesHelper);
-        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable, stageHolder);
+//        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable, stageHolder);
 //        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable, stageHolder);
 //        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable, stageHolder);
         schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
@@ -436,9 +432,6 @@ public class MainController {
                 }
 
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-//                ObservableList<UIPropertyTableItem> config = FXCollections.observableArrayList();
-                String clusterName = topic.cluster().getName();
-                String topicName = topic.name();
                 // Enable the data tab and show/hide titled panes in the tab
                 tabPane.getTabs().remove(cgOffsetsTab);
                 if (!tabPane.getTabs().contains(dataTab)) {
@@ -560,22 +553,23 @@ public class MainController {
                 tabPane.getTabs().remove(propertiesTab);
                 tabPane.getSelectionModel().select(cgOffsetsTab);
                 blockAppProgressInd.setVisible(true);
-                ViewUtil.runBackgroundTask(() -> {
-                    try {
-//                        dataTab.setDisable(true);
-//                        tabPane.getSelectionModel().select(cgOffsetsTab);
-                        consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
-
-                    } catch (ExecutionException | InterruptedException e) {
-                        blockAppProgressInd.setVisible(false);
-                        log.error("Error when get consumer group offsets", e);
-                        throw new RuntimeException(e);
-                    }
-                    return null;
-                }, (e) -> blockAppProgressInd.setVisible(false), (e) -> {
-                    blockAppProgressInd.setVisible(false);
-                    throw ((RuntimeException) e);
-                });
+                this.consumerGroupOffsetTable.loadCG(selected, this.isBlockingAppUINeeded);
+//                ViewUtil.runBackgroundTask(() -> {
+//                    try {
+////                        dataTab.setDisable(true);
+////                        tabPane.getSelectionModel().select(cgOffsetsTab);
+//                        consumerGroupOffsetTable.setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(selected.getClusterName(), selected.getConsumerGroupId())));
+//
+//                    } catch (ExecutionException | InterruptedException e) {
+//                        blockAppProgressInd.setVisible(false);
+//                        log.error("Error when get consumer group offsets", e);
+//                        throw new RuntimeException(e);
+//                    }
+//                    return null;
+//                }, (e) -> blockAppProgressInd.setVisible(false), (e) -> {
+//                    blockAppProgressInd.setVisible(false);
+//                    throw ((RuntimeException) e);
+//                });
 
             } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equals(selectedItem.getValue())) {
 //                blockAppProgressInd.setVisible(true);

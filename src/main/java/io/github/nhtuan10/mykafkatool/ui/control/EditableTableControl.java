@@ -100,11 +100,11 @@ public class EditableTableControl<T> extends AnchorPane {
         });
         TableViewConfigurer.configureTableView(itemClass, table, stageHolder);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.getColumns().forEach(tableColumn -> {
+//        table.getColumns().forEach(tableColumn -> {
 //            tableColumn.setMinWidth(USE_COMPUTED_SIZE);
 //            tableColumn.setPrefWidth(USE_COMPUTED_SIZE);
 //            tableColumn.setMaxWidth(5000);
-        });
+//        });
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
 //        table.setItems(tableItems.filtered(filterPredicate(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()))));

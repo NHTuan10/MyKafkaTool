@@ -220,9 +220,10 @@ public final class ViewUtil {
         modalController.setFields(modalController, stage, inputVarMap);
         modalController.launch(editable);
         stage.setTitle(title);
-        stage.initModality(Modality.WINDOW_MODAL);
-        stage.initOwner(parentWindow);
-
+        if (editable) {
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(parentWindow);
+        }
         stage.setResizable(resizable);
 //        if (editable) {
 //            stage.setAlwaysOnTop(true);
@@ -296,6 +297,7 @@ public final class ViewUtil {
                 setText(null);
             } else {
                 setText(item != null ? item.toString() : null);
+                setTooltip(new Tooltip(item != null ? item.toString() : null));
             }
         }
     }
