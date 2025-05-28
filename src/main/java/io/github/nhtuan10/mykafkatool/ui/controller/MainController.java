@@ -448,6 +448,8 @@ public class MainController {
                 partitionsTitledPane.setVisible(true);
                 schemaSplitPane.setVisible(false);
                 messageSplitPane.setVisible(true);
+
+                countMessages();
                 this.topicConfigTable.loadTopicConfig(topic);
                 this.kafkaPartitionsTable.loadTopicPartitions(topic, this.totalMessagesInTheTopicStringProperty, this.isBlockingAppUINeeded);
 //                Callable<Void> getTopicAndPartitionProperties = () -> {
@@ -514,6 +516,8 @@ public class MainController {
                     ObservableList<KafkaMessageTableItem> observableList = treeMsgTableItemCache.get(topicTreeItem).getItems().filtered(item -> item.getPartition() == partition.id());
                     messageTable.setItems(observableList);
                 }
+
+                countMessages();
                 this.topicConfigTable.loadPartitionConfig(partition);
 //                final String clusterName = partition.topic().cluster().getName();
 //                final String topic = partition.topic().name();
@@ -789,22 +793,29 @@ public class MainController {
 
     @FXML
     protected void countMessages() {
-        try {
-            long count = 0;
-            if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
-                KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.topic().cluster().getName(), new TopicPartition(partition.topic().name(), partition.id()), getPollStartTimestamp());
-                count = partitionInfo.getLeft() >= 0 ? (partitionInfo.getRight() - partitionInfo.getLeft()) : 0;
-            } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
-                KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                count = clusterManager.getAllPartitionOffsetInfo(topic.cluster().getName(), topic.name(), getPollStartTimestamp()).values()
-                        .stream().mapToLong(t -> t.getLeft() >= 0 ? t.getRight() - t.getLeft() : 0).sum();
+        Callable<Long> callable = () -> {
+            try {
+                long count;
+                if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
+                    KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
+                    Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.topic().cluster().getName(), new TopicPartition(partition.topic().name(), partition.id()), getPollStartTimestamp());
+                    count = partitionInfo.getLeft() >= 0 ? (partitionInfo.getRight() - partitionInfo.getLeft()) : 0;
+                } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
+                    KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
+                    count = clusterManager.getAllPartitionOffsetInfo(topic.cluster().getName(), topic.name(), getPollStartTimestamp()).values()
+                            .stream().mapToLong(t -> t.getLeft() >= 0 ? t.getRight() - t.getLeft() : 0).sum();
+                } else {
+                    count = 0;
+                }
+                return count;
+            } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                log.error("Error when count messages", e);
+                throw new RuntimeException(e);
             }
-            countMessagesBtn.setText("Count: " + count);
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            log.error("Error when count messages", e);
-            throw new RuntimeException(e);
-        }
+        };
+        ViewUtil.runBackgroundTask(callable, (count) -> countMessagesBtn.setText("Count: " + count), (e) -> {
+            throw ((RuntimeException) e);
+        });
     }
 
 //    @FXML
