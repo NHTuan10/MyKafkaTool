@@ -10,7 +10,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupListTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.controller.SchemaRegistryControl;
+import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;

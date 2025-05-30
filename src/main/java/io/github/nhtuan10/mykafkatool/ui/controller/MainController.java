@@ -25,8 +25,8 @@ import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable;
 import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
-import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable;
-import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable;
+import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl;
+import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyView;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
@@ -89,7 +89,7 @@ public class MainController {
     private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
 //    private final SimpleLongProperty totalMessagesInTheTopicProperty = new SimpleLongProperty(0);
 
-    private final SimpleStringProperty totalMessagesInTheTopicStringProperty = new SimpleStringProperty("0 Messages");
+    //    private final SimpleStringProperty totalMessagesInTheTopicStringProperty = new SimpleStringProperty("0 Messages");
     @FXML
     private TreeView clusterTree;
 
@@ -115,8 +115,8 @@ public class MainController {
     @FXML
     private SimpleLongProperty noMsgLongProp = new SimpleLongProperty();
 
-    @FXML
-    private Label totalMessagesInTheTopicLabel;
+//    @FXML
+//    private Label totalMessagesInTheTopicLabel;
 
     @FXML
     private TextField maxMessagesTextField;
@@ -183,8 +183,8 @@ public class MainController {
     private Tab cgOffsetsTab;
 
     // Topic/Partition properties
-    @FXML
-    private TopicOrPartitionPropertyTable topicConfigTable;
+//    @FXML
+//    private TopicOrPartitionPropertyTable topicConfigTable;
 
     @FXML
     private TabPane tabPane;
@@ -193,10 +193,12 @@ public class MainController {
     private Tab propertiesTab;
 
     @FXML
-    private TopicPartitionsTable kafkaPartitionsTable;
+    private TopicOrPartitionPropertyView topicOrPartitionPropertyView;
+//    @FXML
+//    private TopicPartitionsTable kafkaPartitionsTable;
 
-    @FXML
-    private TitledPane partitionsTitledPane;
+//    @FXML
+//    private TitledPane partitionsTitledPane;
 
     @FXML
     private SchemaRegistryControl schemaRegistryControl;
@@ -207,7 +209,7 @@ public class MainController {
         this.stageHolder.setStage(stage);
         this.kafkaClusterTree.setStage(stage);
 //        this.schemaEditableTableControl.setStage(stage);
-        this.topicConfigTable.setStage(stage);
+//        this.topicConfigTable.setStage(stage);
         this.schemaRegistryControl.setStage(stage);
     }
 
@@ -237,7 +239,7 @@ public class MainController {
     public void initialize() {
 
         blockAppProgressInd.visibleProperty().bindBidirectional(isBlockingAppUINeeded);
-        partitionsTitledPane.setVisible(false);
+//        partitionsTitledPane.setVisible(false);
         initPollingOptionsUI();
         this.filterMsgTextField.textProperty().bindBidirectional(filterMsgTextProperty);
         this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaRegistryControl, SchemaRegistryManager.getInstance());
@@ -247,9 +249,9 @@ public class MainController {
 //        schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
 //            ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
 //        });
-        totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty
+//        totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty
 //                totalMessagesInTheTopicProperty.asString("%,d Messages")
-        );
+//        );
         isPollingMsgProgressIndicator.visibleProperty().bindBidirectional(isPolling);
         isPollingMsgProgressIndicator.managedProperty().bindBidirectional(isPolling);
 //        pullMessagesBtn.textProperty().bind(isPolling.map((isPolling) ->
@@ -406,7 +408,7 @@ public class MainController {
 //                dataTab.setDisable(true);
 //                propertiesTab.setDisable(true);
 
-                partitionsTitledPane.setVisible(false);
+//                partitionsTitledPane.setVisible(false);
                 if (oldValue != null && oldValue != newValue && (oldValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
                     TreeItem oldSelectedTreeItem = (TreeItem) oldValue;
                     treeMsgTableItemCache.put(oldSelectedTreeItem, MessageTableState.builder()
@@ -419,9 +421,9 @@ public class MainController {
                 if (!(newValue instanceof ConsumerGroupTreeItem)) {
                     consumerGroupOffsetTable.setItems(FXCollections.emptyObservableList());
                 }
-                if (!(newValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
-                    topicConfigTable.setItems(FXCollections.emptyObservableList());
-                }
+//                if (!(newValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
+//                    topicConfigTable.setItems(FXCollections.emptyObservableList());
+//                }
             }
 
             if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
@@ -452,14 +454,14 @@ public class MainController {
                 }
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
-                partitionsTitledPane.setVisible(true);
+//                partitionsTitledPane.setVisible(true);
 //                schemaSplitPane.setVisible(false);
                 schemaRegistryControl.setVisible(false);
                 messageSplitPane.setVisible(true);
 
                 countMessages();
-                this.topicConfigTable.loadTopicConfig(topic, isBlockingAppUINeeded);
-                this.kafkaPartitionsTable.loadTopicPartitions(topic, this.totalMessagesInTheTopicStringProperty, this.isBlockingAppUINeeded);
+                this.topicOrPartitionPropertyView.loadTopicConfig(topic, isBlockingAppUINeeded);
+                this.topicOrPartitionPropertyView.loadTopicPartitions(topic, this.isBlockingAppUINeeded);
 //                Callable<Void> getTopicAndPartitionProperties = () -> {
 //                    try {
 //                        // topic config table
@@ -527,7 +529,7 @@ public class MainController {
                 }
 
                 countMessages();
-                this.topicConfigTable.loadPartitionConfig(partition, isBlockingAppUINeeded);
+                this.topicOrPartitionPropertyView.loadPartitionConfig(partition, isBlockingAppUINeeded);
 //                final String clusterName = partition.topic().cluster().getName();
 //                final String topic = partition.topic().name();
 //                Callable<Void> getPartitionInfo = () -> {

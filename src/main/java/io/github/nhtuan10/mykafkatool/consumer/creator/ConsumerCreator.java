@@ -54,7 +54,7 @@ public class ConsumerCreator {
         @Builder.Default
         private Class<? extends Deserializer> valueDeserializer = StringDeserializer.class;
         @Builder.Default
-        private String groupId = "MyTool-UI-CG";
+        private String groupId = "MyKafkaTool-UI-CG";
 
         public static ConsumerCreatorConfigBuilder builder(KafkaCluster cluster) {
             return new ConsumerCreatorConfigBuilder().cluster(cluster);

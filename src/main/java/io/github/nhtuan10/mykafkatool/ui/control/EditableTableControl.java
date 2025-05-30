@@ -4,7 +4,6 @@ import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.application.Platform;
 import javafx.beans.NamedArg;
 import javafx.beans.property.*;
@@ -89,7 +88,7 @@ public class EditableTableControl<T> extends AnchorPane {
     @FXML
     protected void initialize() {
         table.getColumns().clear();
-        List<String> itemClassFields = ViewUtil.getPropertyFieldNamesFromTableItem(itemClass);
+        List<String> itemClassFields = TableViewConfigurer.getPropertyFieldNamesFromTableItem(itemClass);
         itemClassFields.forEach(fieldName -> {
             String columnName = StringUtils.capitalize(StringUtils.join(
                     StringUtils.splitByCharacterTypeCamelCase(fieldName),
@@ -127,15 +126,20 @@ public class EditableTableControl<T> extends AnchorPane {
 //        noRowsIntProp.bind(table.itemsProperty().map(List::size));
         noRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Rows"));
         table.itemsProperty().addListener((observable, oldValue, newValue) -> {
+//            TableViewConfigurer.configureTableViewHeaderTooltip(table);
+
             Platform.runLater(() -> noRowsIntProp.set(newValue.size()));
         });
         table.getItems().addListener((ListChangeListener<T>) change -> {
+            TableViewConfigurer.configureTableViewHeaderTooltip(table);
+
             Platform.runLater(() -> noRowsIntProp.set(table.getItems().size()));
         });
         tableItems.addListener((ListChangeListener<? super T>) change -> {
             Platform.runLater(() -> noRowsIntProp.set(table.getItems().size()));
         });
 
+        table.layout();
 //        table.itemsProperty().addListener((observable, oldValue, newValue) -> {
 //            noRowsIntProp.set(newValue.size());
 //        });

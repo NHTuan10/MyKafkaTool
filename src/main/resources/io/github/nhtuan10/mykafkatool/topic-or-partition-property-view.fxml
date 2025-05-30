@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Accordion?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TitledPane?>
+
+<fx:root type="AnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"  xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+                                          <children>
+                                              <Accordion prefHeight="614.0" prefWidth="936.0">
+                                                  <panes>
+                                                      <TitledPane animated="false" text="Properties">
+                                                          <content>
+                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                  <children>
+<!--                                                                       <TableView fx:id="topicConfigTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+<!--                                                                           <columns> -->
+<!--                                                                               <TableColumn prefWidth="428.0" text="Name" /> -->
+<!--                                                                                <TableColumn prefWidth="300.0" text="Value" /> -->
+<!--                                                                           </columns> -->
+<!--                                                                       </TableView> -->
+
+                                                                    <TopicOrPartitionPropertyTable fx:id="topicConfigTable" prefHeight="535.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<!--                                                                         <editable> <Boolean fx:value="false"/> </editable> -->
+                                                                    </TopicOrPartitionPropertyTable>
+                                                                  </children>
+                                                              </AnchorPane>
+                                                          </content>
+                                                      </TitledPane>
+                                          <TitledPane fx:id="partitionsTitledPane" animated="false" text="Partitions">
+                                            <content>
+                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                   <children>
+                                                      <SplitPane dividerPositions="0.05898876404494382" orientation="VERTICAL" prefHeight="0.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <items>
+                                                            <HBox prefHeight="17.0" prefWidth="911.0">
+                                                               <children>
+<!--                                                                   <Button mnemonicParsing="false" onAction="#refreshPartitionsTblAction" prefHeight="26.0" prefWidth="72.0" text="Refresh" /> -->
+                                                                  <Label fx:id="totalMessagesInTheTopicLabel" prefHeight="28.0" prefWidth="106.0" text="0 Messages">
+                                                                     <HBox.margin>
+                                                                        <Insets left="10.0" />
+                                                                     </HBox.margin>
+                                                                  </Label>
+                                                               </children>
+                                                            </HBox>
+                                                            <TopicPartitionsTable fx:id="kafkaPartitionsTable" minHeight="-Infinity" minWidth="-Infinity" prefHeight="210.0" prefWidth="795.0">
+<!--                                                               <columns> -->
+<!--                                                                   <TableColumn prefWidth="75.0" text="Parttion" /> -->
+<!--                                                                 <TableColumn prefWidth="98.0" text="Start Offset" /> -->
+<!--                                                                   <TableColumn prefWidth="83.0" text="End Offset" /> -->
+<!--                                                                   <TableColumn prefWidth="108.0" text="No Messages" /> -->
+<!--                                                                   <TableColumn prefWidth="190.0" text="Leader" /> -->
+<!--                                                                   <TableColumn prefWidth="204.0" text="Replica [In-Sync]" /> -->
+<!--                                                                   <TableColumn prefWidth="217.0" text="Replica [Not-In-Sync]" /> -->
+<!--                                                               </columns> -->
+                                                            </TopicPartitionsTable>
+                                                        </items>
+                                                      </SplitPane>
+                                                   </children>
+                                                </AnchorPane>
+                                            </content>
+                                          </TitledPane>
+                                                      <!--                                  <TitledPane animated="false" text="Properties">-->
+                                                      <!--                                    <content>-->
+                                                      <!--                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" >-->
+                                                      <!--                                            <children>-->
+                                                      <!--                                                <TableView fx:id="propertiesTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
+                                                      <!--                                                    <columns>-->
+                                                      <!--                                                        <TableColumn prefWidth="138.0" text="Name" />-->
+                                                      <!--                                                        <TableColumn prefWidth="290.0" text="Value" />-->
+                                                      <!--                                                    </columns>-->
+                                                      <!--                                                </TableView>-->
+                                                      <!--                                            </children>-->
+                                                      <!--                                        </AnchorPane>-->
+                                                      <!--                                    </content>-->
+                                                      <!--                                  </TitledPane>-->
+                                                  </panes>
+                                              </Accordion>
+                                          </children>
+                                      </fx:root>

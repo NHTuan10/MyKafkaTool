@@ -1,11 +1,10 @@
-package io.github.nhtuan10.mykafkatool.ui.controller;
+package io.github.nhtuan10.mykafkatool.ui.control;
 
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
-import io.github.nhtuan10.mykafkatool.ui.control.SchemaEditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
