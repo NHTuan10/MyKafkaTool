@@ -6,6 +6,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -31,6 +32,7 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
     private KafkaPartition kafkaPartition;
     private ConsumerType type;
     private final ClusterManager clusterManager;
+    private BooleanProperty isBlockingUINeeded;
 
     public TopicOrPartitionPropertyTable() {
         super(false);
@@ -47,16 +49,18 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
         return Filter.buildFilterPredicate(filter, UIPropertyTableItem::getName, UIPropertyTableItem::getValue);
     }
 
-    public void loadTopicConfig(KafkaTopic kafkaTopic) {
+    public void loadTopicConfig(KafkaTopic kafkaTopic, BooleanProperty isBlockingUINeeded) {
         this.kafkaTopic = kafkaTopic;
         this.type = ConsumerType.TOPIC;
-        refresh();
+        this.isBlockingUINeeded = isBlockingUINeeded;
+        refreshTopicConfig(false);
     }
 
-    public void loadPartitionConfig(KafkaPartition kafkaPartition) {
+    public void loadPartitionConfig(KafkaPartition kafkaPartition, BooleanProperty isBlockingUINeeded) {
         this.kafkaPartition = kafkaPartition;
         this.type = ConsumerType.PARTITION;
-        refresh();
+        this.isBlockingUINeeded = isBlockingUINeeded;
+        refreshPartitionConfig(false);
     }
 
 
@@ -64,13 +68,14 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
     @FXML
     public void refresh() {
         if (type == ConsumerType.TOPIC) {
-            refreshTopicConfig();
+            refreshTopicConfig(true);
         } else if (type == ConsumerType.PARTITION) {
-            refreshPartitionConfig();
+            refreshPartitionConfig(true);
         }
     }
 
-    private void refreshPartitionConfig() {
+    private void refreshPartitionConfig(boolean isFocused) {
+        isBlockingUINeeded.set(isFocused);
         final String clusterName = kafkaPartition.topic().cluster().getName();
         final String topic = kafkaPartition.topic().name();
         Callable<Void> getPartitionInfo = () -> {
@@ -92,15 +97,18 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
             }
         };
         Consumer<Void> onSuccess = (val) -> {
+            isBlockingUINeeded.set(false);
             log.info("Successfully get topic config & partitions properties for cluster {}, topic {} and partition {}", clusterName, topic, kafkaPartition.id());
         };
         Consumer<Throwable> onFailure = (exception) -> {
+            isBlockingUINeeded.set(false);
             log.error("Error when getting topic config & partitions properties for cluster {} and topic {} and partition {}", clusterName, topic, kafkaPartition.id(), exception);
         };
         ViewUtil.runBackgroundTask(getPartitionInfo, onSuccess, onFailure);
     }
 
-    private void refreshTopicConfig() {
+    private void refreshTopicConfig(boolean isFocused) {
+        isBlockingUINeeded.set(isFocused);
         String clusterName = kafkaTopic.cluster().getName();
         String topicName = kafkaTopic.name();
         Callable<Void> getTopicAndPartitionProperties = () -> {
@@ -113,14 +121,16 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
             } catch (ExecutionException | InterruptedException | TimeoutException e) {
                 log.error("Error when get topic config properties", e);
 //                            topicConfigTable.setItems(FXCollections.emptyObservableList());
-//                            throw new RuntimeException(e);
+                throw new RuntimeException(e);
             }
             return null;
         };
         Consumer<Void> onSuccess = (val) -> {
+            isBlockingUINeeded.set(false);
             log.info("Successfully get topic config & partitions properties for cluster {} and topic {}", clusterName, topicName);
         };
         Consumer<Throwable> onFailure = (exception) -> {
+            isBlockingUINeeded.set(false);
             log.error("Error when getting topic config & partitions properties for cluster {} and topic {}", clusterName, topicName, exception);
         };
         ViewUtil.runBackgroundTask(getTopicAndPartitionProperties, onSuccess, onFailure);

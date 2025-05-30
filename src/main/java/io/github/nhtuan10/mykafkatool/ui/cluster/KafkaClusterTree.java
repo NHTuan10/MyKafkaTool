@@ -10,7 +10,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupListTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.control.SchemaEditableTableControl;
+import io.github.nhtuan10.mykafkatool.ui.controller.SchemaRegistryControl;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
@@ -39,7 +39,7 @@ public class KafkaClusterTree {
 
     final private TreeView clusterTree;
 
-    final private SchemaEditableTableControl schemaEditableTableControl;
+    final private SchemaRegistryControl schemaRegistryControl;
 
     final private SchemaRegistryManager schemaRegistryManager;
 
@@ -178,7 +178,7 @@ public class KafkaClusterTree {
                 MenuItem refreshItem = new MenuItem("Refresh");
                 refreshItem.setOnAction(actionEvent -> {
                     try {
-                        schemaEditableTableControl.refresh();
+                        schemaRegistryControl.refresh();
                     } catch (RestClientException | IOException | ExecutionException | InterruptedException e) {
                         throw new RuntimeException(e);
                     }

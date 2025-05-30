@@ -23,7 +23,10 @@ import io.github.nhtuan10.mykafkatool.ui.*;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
-import io.github.nhtuan10.mykafkatool.ui.control.*;
+import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable;
+import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
+import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable;
+import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
@@ -160,17 +163,17 @@ public class MainController {
     @FXML
     private ProgressIndicator isPollingMsgProgressIndicator;
 
-    @FXML
-    private SplitPane schemaSplitPane;
+//    @FXML
+//    private SplitPane schemaSplitPane;
 
     @FXML
     private SplitPane messageSplitPane;
 
-    @FXML
-    private SchemaEditableTableControl schemaEditableTableControl;
+//    @FXML
+//    private SchemaEditableTableControl schemaEditableTableControl;
 
-    @FXML
-    private CodeArea schemaRegistryTextArea;
+//    @FXML
+//    private CodeArea schemaRegistryTextArea;
 
     // Consumer Groups
     @FXML
@@ -195,13 +198,17 @@ public class MainController {
     @FXML
     private TitledPane partitionsTitledPane;
 
+    @FXML
+    private SchemaRegistryControl schemaRegistryControl;
+
     private StageHolder stageHolder;
 
     public void setStage(Stage stage) {
         this.stageHolder.setStage(stage);
         this.kafkaClusterTree.setStage(stage);
-        this.schemaEditableTableControl.setStage(stage);
+//        this.schemaEditableTableControl.setStage(stage);
         this.topicConfigTable.setStage(stage);
+        this.schemaRegistryControl.setStage(stage);
     }
 
     public MainController() {
@@ -233,13 +240,13 @@ public class MainController {
         partitionsTitledPane.setVisible(false);
         initPollingOptionsUI();
         this.filterMsgTextField.textProperty().bindBidirectional(filterMsgTextProperty);
-        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaEditableTableControl, SchemaRegistryManager.getInstance());
+        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaRegistryControl, SchemaRegistryManager.getInstance());
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
         configureTableView();
-        schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
-        });
+//        schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
+//            ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+//        });
         totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty
 //                totalMessagesInTheTopicProperty.asString("%,d Messages")
         );
@@ -259,8 +266,8 @@ public class MainController {
 //        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, consumerGroupOffsetTable, stageHolder);
 //        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, kafkaPartitionsTable, stageHolder);
 //        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, topicConfigTable, stageHolder);
-        schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
-                (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));
+//        schemaEditableTableControl.addEventHandler(SchemaEditableTableControl.SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
+//                (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));
         // Use a change listener to respond to a selection within
         // a tree view
 //        clusterTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem<String>>) (changed, oldVal, newVal) -> {
@@ -446,11 +453,12 @@ public class MainController {
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
                 partitionsTitledPane.setVisible(true);
-                schemaSplitPane.setVisible(false);
+//                schemaSplitPane.setVisible(false);
+                schemaRegistryControl.setVisible(false);
                 messageSplitPane.setVisible(true);
 
                 countMessages();
-                this.topicConfigTable.loadTopicConfig(topic);
+                this.topicConfigTable.loadTopicConfig(topic, isBlockingAppUINeeded);
                 this.kafkaPartitionsTable.loadTopicPartitions(topic, this.totalMessagesInTheTopicStringProperty, this.isBlockingAppUINeeded);
 //                Callable<Void> getTopicAndPartitionProperties = () -> {
 //                    try {
@@ -491,7 +499,8 @@ public class MainController {
                 dataTab.setDisable(false);
                 propertiesTab.setDisable(false);
 //                tabPane.getSelectionModel().select(dataTab);
-                schemaSplitPane.setVisible(false);
+//                schemaSplitPane.setVisible(false);
+                schemaRegistryControl.setVisible(false);
                 messageSplitPane.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
                 TreeItem<?> topicTreeItem = selectedItem.getParent();
@@ -518,7 +527,7 @@ public class MainController {
                 }
 
                 countMessages();
-                this.topicConfigTable.loadPartitionConfig(partition);
+                this.topicConfigTable.loadPartitionConfig(partition, isBlockingAppUINeeded);
 //                final String clusterName = partition.topic().cluster().getName();
 //                final String topic = partition.topic().name();
 //                Callable<Void> getPartitionInfo = () -> {
@@ -584,16 +593,18 @@ public class MainController {
                 tabPane.getTabs().remove(cgOffsetsTab);
                 tabPane.getTabs().remove(propertiesTab);
                 dataTab.setDisable(false);
-                schemaSplitPane.setVisible(true);
+//                schemaSplitPane.setVisible(true);
+                schemaRegistryControl.setVisible(true);
                 messageSplitPane.setVisible(false);
-                KafkaCluster clusterName = (KafkaCluster) selectedItem.getParent().getValue();
+                KafkaCluster cluster = (KafkaCluster) selectedItem.getParent().getValue();
+//                    schemaEditableTableControl.loadAllSchemas(clusterName,
+//                            (e) -> isBlockingAppUINeeded.set(false),
+//                            (e) -> {
+//                                isBlockingAppUINeeded.set(false);
+//                                throw ((RuntimeException) e);
+//                            }, isBlockingAppUINeeded);
                 try {
-                    schemaEditableTableControl.loadAllSchemas(clusterName,
-                            (e) -> blockAppProgressInd.setVisible(false),
-                            (e) -> {
-                                blockAppProgressInd.setVisible(false);
-                                throw ((RuntimeException) e);
-                            }, isBlockingAppUINeeded);
+                    schemaRegistryControl.loadAllSchema(cluster, isBlockingAppUINeeded);
                 } catch (ExecutionException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }

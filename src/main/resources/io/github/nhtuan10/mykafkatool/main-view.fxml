@@ -5,6 +5,7 @@
 <?import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.controller.SchemaRegistryControl?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
@@ -223,24 +224,26 @@
                                                       </AnchorPane>
                                                   </items>
                                               </SplitPane>
-                                    <SplitPane fx:id="schemaSplitPane" dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                      <items>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                            <children>
-                                               <SchemaEditableTableControl fx:id="schemaEditableTableControl" layoutY="7.0" minHeight="200.0" prefHeight="295.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                            </children>
-                                        </AnchorPane>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                         <children>
-                                             <VirtualizedScrollPane prefHeight="318.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                <content>
-                                                    <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" />
-                                                </content>
-                                             </VirtualizedScrollPane>
-                                         </children>
-                                         </AnchorPane>
-                                      </items>
-                                    </SplitPane>
+                                    <SchemaRegistryControl  fx:id="schemaRegistryControl" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    </SchemaRegistryControl>
+<!--                                     <SplitPane fx:id="schemaSplitPane" dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+<!--                                       <items> -->
+<!--                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
+<!--                                             <children> -->
+<!--                                                <SchemaEditableTableControl fx:id="schemaEditableTableControl" layoutY="7.0" minHeight="200.0" prefHeight="295.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" /> -->
+<!--                                             </children> -->
+<!--                                         </AnchorPane> -->
+<!--                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
+<!--                                          <children> -->
+<!--                                              <VirtualizedScrollPane prefHeight="318.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+<!--                                                 <content> -->
+<!--                                                     <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" /> -->
+<!--                                                 </content> -->
+<!--                                              </VirtualizedScrollPane> -->
+<!--                                          </children> -->
+<!--                                          </AnchorPane> -->
+<!--                                       </items> -->
+<!--                                     </SplitPane> -->
                                           </children>
                                       </AnchorPane>
                                   </content>

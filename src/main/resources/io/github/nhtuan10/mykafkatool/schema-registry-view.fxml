@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.SchemaEditableTableControl?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import org.fxmisc.richtext.CodeArea?>
+
+<!-- fx:controller="control.ui.io.github.nhtuan10.mykafkatool.EditableTableControl" -->
+
+<fx:root type="SplitPane" dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+        <children>
+           <SchemaEditableTableControl fx:id="schemaEditableTableControl" layoutY="7.0" minHeight="200.0" prefHeight="295.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+        </children>
+    </AnchorPane>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+     <children>
+         <VirtualizedScrollPane prefHeight="318.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <content>
+                <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" />
+            </content>
+         </VirtualizedScrollPane>
+     </children>
+     </AnchorPane>
+  </items>
+
+</fx:root>

@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTableItem> {
     private KafkaTopic kafkaTopic;
     private final ClusterManager clusterManager;
-    private BooleanProperty isBusy;
+    private BooleanProperty isBlockingUINeeded;
     private StringProperty totalMessages;
 
     public TopicPartitionsTable() {
@@ -41,17 +41,21 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
 
     public void loadTopicPartitions(KafkaTopic kafkaTopic, StringProperty totalMessages, BooleanProperty isBusy) {
         this.kafkaTopic = kafkaTopic;
-        this.isBusy = isBusy;
+        this.isBlockingUINeeded = isBusy;
         this.totalMessages = totalMessages;
-        refresh();
+        refresh(false);
     }
 
     @Override
     @FXML
     public void refresh() {
+        refresh(true);
+    }
+
+    public void refresh(boolean isFocused) {
         String clusterName = kafkaTopic.cluster().getName();
         String topicName = kafkaTopic.name();
-        isBusy.set(true);
+        isBlockingUINeeded.set(isFocused);
         ObservableList<KafkaPartitionsTableItem> partitionsTableItems = FXCollections.observableArrayList();
         Callable<Long> task = () -> {
             List<TopicPartitionInfo> topicPartitionInfos;
@@ -76,11 +80,11 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
         Consumer<Long> onSuccess = (val) -> {
             setItems(partitionsTableItems);
             totalMessages.set(val + " Messages");
-            isBusy.set(false);
+            isBlockingUINeeded.set(false);
             log.info("Successfully get partitions properties for cluster {} and topic {}", clusterName, topicName);
         };
         Consumer<Throwable> onFailure = (exception) -> {
-            isBusy.set(false);
+            isBlockingUINeeded.set(false);
             throw new RuntimeException(exception);
         };
         ViewUtil.runBackgroundTask(task, onSuccess, onFailure);

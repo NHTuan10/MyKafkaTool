@@ -34,7 +34,7 @@ import java.util.function.Predicate;
 @Slf4j
 public class SchemaEditableTableControl extends EditableTableControl<SchemaTableItem> {
     private KafkaCluster selectedClusterName;
-    private BooleanProperty isBusy;
+    private BooleanProperty isBlockingUINeeded;
     private Map<String, SchemaTableItemsAndFilter> clusterNameToSchemaTableItemsCache;
     SchemaRegistryManager schemaRegistryManager = SchemaRegistryManager.getInstance();
 
@@ -131,8 +131,8 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
     @FXML
     public void refresh() throws RestClientException, IOException, ExecutionException, InterruptedException {
         if (this.selectedClusterName != null) {
-            ObservableList<SchemaTableItem> items = refresh((e) -> isBusy.set(false), (e) -> {
-                isBusy.set(false);
+            ObservableList<SchemaTableItem> items = refresh((e) -> isBlockingUINeeded.set(false), (e) -> {
+                isBlockingUINeeded.set(false);
                 throw ((RuntimeException) e);
             });
             setTableItemsAndFilter(items, new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
@@ -141,7 +141,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
 
     public void loadAllSchemas(KafkaCluster kafkaCluster, Consumer<ObservableList<SchemaTableItem>> onSuccess, Consumer<Throwable> onError, BooleanProperty isBusy) throws ExecutionException, InterruptedException {
         this.selectedClusterName = kafkaCluster;
-        this.isBusy = isBusy;
+        this.isBlockingUINeeded = isBusy;
         if (!clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName.getName())) {
             setTableItemsAndFilter(refresh(onSuccess, onError), new Filter("", this.regexFilterToggleBtn.isSelected()));
         } else {
@@ -160,7 +160,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
         Callable<ObservableList<SchemaTableItem>> getSchemaTask = () -> {
             ObservableList<SchemaTableItem> items;
             try {
-                this.isBusy.set(true);
+                this.isBlockingUINeeded.set(true);
                 List<SchemaMetadataFromRegistry> schemaMetadataList = schemaRegistryManager.getAllSubjectMetadata(this.selectedClusterName.getName(), this.selectedClusterName.isOnlySubjectLoaded());
                 items = FXCollections.observableArrayList(
                         schemaMetadataList
@@ -169,7 +169,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                                 .toList());
 //                tableItems.setAll(items);
                 clusterNameToSchemaTableItemsCache.put(this.selectedClusterName.getName(), new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
-                this.isBusy.set(false);
+                this.isBlockingUINeeded.set(false);
             } catch (RestClientException | IOException e) {
                 log.error("Error when get schema registry subject metadata", e);
                 throw new RuntimeException(e);
