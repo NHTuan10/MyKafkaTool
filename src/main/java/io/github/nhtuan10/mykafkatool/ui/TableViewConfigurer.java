@@ -87,9 +87,10 @@ public class TableViewConfigurer {
         });
     }
 
-    private static <S> void autoResizeColumns(TableView<S> tableView) {
+    public static <S> void autoResizeColumns(TableView<S> tableView) {
         tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        tableView.getColumns().subList(1, tableView.getColumns().size() - 1).forEach((column) ->
+        // ignore first column, which is index column
+        tableView.getColumns().subList(1, tableView.getColumns().size()).forEach((column) ->
         {
             //Minimal width = columnheader
             Text t = new Text(column.getText());

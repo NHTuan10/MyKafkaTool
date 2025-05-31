@@ -11,7 +11,7 @@ public class AppConstant {
     public static final String OFFSET_RESET_LATEST = "latest";
     public static final int DEFAULT_POLL_TIME_MS = 100;
 
-    public static final int DEFAULT_MAX_POLL_RECORDS = 1000;
+    public static final int DEFAULT_MAX_POLL_RECORDS = 10000;
     public static final String POLL_MESSAGES_TEXT = "Poll Msgs";
     public static final String STOP_POLLING_TEXT = "Stop Polling";
     public static final String ADD_MESSAGE_MODAL_FXML = "add-or-view-message-modal.fxml";
