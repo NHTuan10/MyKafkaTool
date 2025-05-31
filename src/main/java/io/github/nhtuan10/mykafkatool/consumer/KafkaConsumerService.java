@@ -1,6 +1,5 @@
 package io.github.nhtuan10.mykafkatool.consumer;
 
-import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
 import io.github.nhtuan10.mykafkatool.exception.DeserializationException;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
@@ -169,22 +168,44 @@ public class KafkaConsumerService {
         int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_POLL_TIME_MS);
 //        List<KafkaMessageTableItem> allMessages = new ArrayList<>();
         ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
-        int emptyPullCountDown = AppConstant.EMPTY_PULL_STILL_STOP;
+//        int emptyPullCountDown = AppConstant.EMPTY_PULL_STILL_STOP;
+        Map<TopicPartition, Boolean> isAllMsgPulled = partitionOffsetsToPoll.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> false));
         try (consumer) {
             while (true) {
                 ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
                 PollCallback pollCallback = pollingOptions.pollCallback().get();
                 if (!pollCallback.isPolling().get()) break;
-                if (consumerRecords.isEmpty()) emptyPullCountDown--;
-                if (emptyPullCountDown <= 0 && !pollingOptions.isLiveUpdate()) break;
+//                if (consumerRecords.isEmpty()) emptyPullCountDown--;
+//                if (emptyPullCountDown <= 0 && !pollingOptions.isLiveUpdate()) break;
                 if (!consumerRecords.isEmpty()) {
                     messageObservableList = pollCallback.resultObservableList();
-                    List<KafkaMessageTableItem> polledMessages = handleConsumerRecords(pollingOptions, consumerRecords, consumerProps, partitionOffsetsToPoll);
-                    if (!polledMessages.isEmpty()) {
-                        messageObservableList.addAll(polledMessages);
+                    List<KafkaMessageTableItem> messages = new ArrayList<>();
+                    for (ConsumerRecord<String, Object> record : consumerRecords) {
+                        try {
+                            TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
+                            long endOffset = partitionOffsetsToPoll.get(topicPartition).getRight();
+                            if (record.offset() < endOffset) {
+                                KafkaMessageTableItem message = createMessageItem(record, pollingOptions, consumerProps);
+                                messages.add(message);
+                            }
+                            if (record.offset() >= endOffset - 1) {
+                                isAllMsgPulled.put(topicPartition, true);
+                            }
+
+                        } catch (DeserializationException e) {
+                            log.error("Error processing record: key={}, partition={}, offset={}",
+                                    record.key(), record.partition(), record.offset(), e);
+                            KafkaMessageTableItem message = createErrorMessageItem(record, pollingOptions);
+                            messages.add(message);
+                        }
+                    }
+                    if (!messages.isEmpty()) {
+                        messageObservableList.addAll(messages);
                     }
 //                    sortMessages(messageObservableList, pollingOptions);
                 }
+                if (isAllMsgPulled.entrySet().stream().allMatch(Map.Entry::getValue) && !pollingOptions.isLiveUpdate())
+                    break;
             }
         } catch (WakeupException e) {
 

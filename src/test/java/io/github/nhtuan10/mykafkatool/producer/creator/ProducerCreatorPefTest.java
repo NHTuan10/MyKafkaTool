@@ -12,8 +12,9 @@ class ProducerCreatorPefTest {
         Producer producer = ProducerCreator.createProducer(config);
         for (int i = 0; i < 100_000; i++) {
             Thread.sleep(500);
-            ProducerRecord record = new ProducerRecord("perf", String.valueOf(i) + "-new", "new-new-test-msg-second-times" + i);
+            ProducerRecord record = new ProducerRecord("perf", String.valueOf(i) + "-new", "liveupdate-test-msg-second-times" + i);
             producer.send(record);
         }
+        producer.close();
     }
 }

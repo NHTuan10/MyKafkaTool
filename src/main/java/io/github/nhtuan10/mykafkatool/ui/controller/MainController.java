@@ -106,8 +106,8 @@ public class MainController {
 //    private ObservableList<KafkaMessageTableItem> allMsgTableItems = FXCollections.observableArrayList();
 
     // Poll Options
-    @FXML
-    private TextField pollTimeTextField;
+//    @FXML
+//    private TextField pollTimeTextField;
 
     @FXML
     private Label noMessagesLabel;
@@ -158,7 +158,7 @@ public class MainController {
     private Button countMessagesBtn;
 
     @FXML
-    private Button pullMessagesBtn;
+    private Button pollMessagesBtn;
 
     @FXML
     private ProgressIndicator isPollingMsgProgressIndicator;
@@ -258,7 +258,7 @@ public class MainController {
 //        pullMessagesBtn.textProperty().bind(isPolling.map((isPolling) ->
 //                isPolling ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT));
         isPolling.addListener((observable, oldValue, newValue) -> {
-            pullMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
+            pollMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
         });
 //        noMessagesLabel.textProperty().bind(noMsgLongProp.asString().concat(" Messages"));
 //        stage = tabPane.getScene().getWindow();
@@ -353,7 +353,7 @@ public class MainController {
 //        });
 //    }
     private void initPollingOptionsUI() {
-        pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME_MS));
+//        pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME_MS));
         maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
         startTimestampPicker.setDayCellFactory(param -> new DateCell() {
             @Override
@@ -644,7 +644,7 @@ public class MainController {
             return;
         }
         String schema = schemaTextArea.getText();
-        ObservableList<KafkaMessageTableItem> list = FXCollections.observableArrayList();
+        ObservableList<KafkaMessageTableItem> list = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
         messageTable.setItems(list);
         // clear message cache for partitions
         treeMsgTableItemCache.forEach((treeItem, state) -> {
@@ -682,7 +682,8 @@ public class MainController {
 //        }
         KafkaConsumerService.PollingOptions pollingOptions =
                 KafkaConsumerService.PollingOptions.builder()
-                        .pollTime(Integer.parseInt(pollTimeTextField.getText()))
+//                        .pollTime(Integer.parseInt(pollTimeTextField.getText()))
+                        .pollTime(DEFAULT_POLL_TIME_MS)
                         .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
                         .startTimestamp(getPollStartTimestamp())
                         .pollingPosition(messagePollingPosition)
@@ -719,7 +720,7 @@ public class MainController {
 //                        list.addAll(kafkaConsumerService.consumeMessages(topic, pollingOptions));
                     kafkaConsumerService.consumeMessages(topic, pollingOptions);
                 } catch (Exception e) {
-                    log.error("Error when poll messages", e);
+                    log.error("Error when polling messages", e);
                     throw new RuntimeException(e);
                 }
             }
@@ -735,7 +736,7 @@ public class MainController {
         Consumer<Throwable> onFailure = (exception) -> {
             blockAppProgressInd.setVisible(false);
             isPolling.set(false);
-            log.error("Error when poll messages", exception);
+            log.error("Error when polling messages", exception);
             UIErrorHandler.showError(Thread.currentThread(), exception);
         };
         ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
