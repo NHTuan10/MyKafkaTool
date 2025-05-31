@@ -38,9 +38,6 @@ import java.util.function.Consumer;
 @Slf4j
 public final class ViewUtil {
 
-    public static final String COLUMN_SEPERATOR = "\t";
-    public static final String LINE_SEPARATOR = System.lineSeparator();
-
     public static boolean confirmAlert(String title, String text, String okDoneText, String cancelCloseText) {
         ButtonType yes = new ButtonType(okDoneText, ButtonBar.ButtonData.OK_DONE);
         ButtonType cancel = new ButtonType(cancelCloseText, ButtonBar.ButtonData.CANCEL_CLOSE);

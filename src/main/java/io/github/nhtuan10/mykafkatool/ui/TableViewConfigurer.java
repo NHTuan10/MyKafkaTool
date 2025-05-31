@@ -1,12 +1,13 @@
 package io.github.nhtuan10.mykafkatool.ui;
 
+import com.fasterxml.jackson.databind.SequenceWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.skin.TableColumnHeader;
@@ -18,17 +19,18 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
 public class TableViewConfigurer {
+    public static final String COLUMN_SEPERATOR = "\t";
+    public static final String LINE_SEPARATOR = System.lineSeparator();
+    private final static CsvMapper CSV_MAPPER = new CsvMapper();
 
     public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage, StageHolder stageHolder) {
         TableView<S> tableView = (TableView<S>) stage.getScene().lookup("#" + fxId);
@@ -232,46 +234,46 @@ public class TableViewConfigurer {
 
     private static void copySelectedInTableViewToClipboard(TableView<?> tableView, boolean isCellSelectionEnabled) {
         if (isCellSelectionEnabled) {
-            copySelectedCellsToClipboard(tableView);
+//            copySelectedCellsToClipboard(tableView);
         } else {
             copySelectedRowsToClipboard(tableView);
         }
     }
 
     private static String getTableDataInCSV(TableView<?> tableView) {
-        StringBuilder strb = new StringBuilder();
-        strb.append(getHeaderText(tableView, ViewUtil.COLUMN_SEPERATOR)).append(ViewUtil.LINE_SEPARATOR);
+//        StringBuilder strb = new StringBuilder();
+//        strb.append(getHeaderText(tableView, ViewUtil.COLUMN_SEPERATOR)).append(ViewUtil.LINE_SEPARATOR);
         Set<Integer> rows = IntStream.range(0, tableView.getItems().size()).boxed().collect(Collectors.toSet());
-        getRowData(tableView, rows, strb);
-        return strb.toString();
+        return getRowData(tableView, rows, true);
+//        return strb.toString();
     }
 
-    public static void copySelectedCellsToClipboard(TableView<?> tableView) {
-        String selectedData = getSelectedCellsData(tableView);
-        final ClipboardContent content = new ClipboardContent();
-        content.putString(selectedData);
-        Clipboard.getSystemClipboard().setContent(content);
-    }
+//    public static void copySelectedCellsToClipboard(TableView<?> tableView) {
+//        String selectedData = getSelectedCellsData(tableView);
+//        final ClipboardContent content = new ClipboardContent();
+//        content.putString(selectedData);
+//        Clipboard.getSystemClipboard().setContent(content);
+//    }
 
-    private static String getSelectedCellsData(TableView<?> tableView) {
-        ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
-        int old_r = -1;
-        StringBuilder selectedString = new StringBuilder();
-        for (TablePosition<?, ?> p : posList) {
-            int r = p.getRow();
-            int c = p.getColumn();
-            Object cell = tableView.getColumns().get(c).getCellData(r);
-            if (cell == null)
-                cell = "";
-            if (old_r == r)
-                selectedString.append('\t');
-            else if (old_r != -1)
-                selectedString.append(System.lineSeparator());
-            selectedString.append(cell);
-            old_r = r;
-        }
-        return selectedString.toString();
-    }
+//    private static String getSelectedCellsData(TableView<?> tableView) {
+//        ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
+//        int old_r = -1;
+//        StringBuilder selectedString = new StringBuilder();
+//        for (TablePosition<?, ?> p : posList) {
+//            int r = p.getRow();
+//            int c = p.getColumn();
+//            Object cell = tableView.getColumns().get(c).getCellData(r);
+//            if (cell == null)
+//                cell = "";
+//            if (old_r == r)
+//                selectedString.append('\t');
+//            else if (old_r != -1)
+//                selectedString.append(System.lineSeparator());
+//            selectedString.append(cell);
+//            old_r = r;
+//        }
+//        return selectedString.toString();
+//    }
 
     public static void copySelectedRowsToClipboard(final TableView<?> table) {
         final String data = getSelectedRowsData(table, true);
@@ -281,45 +283,75 @@ public class TableViewConfigurer {
     }
 
     private static String getSelectedRowsData(TableView<?> table, boolean isHeaderIncluded) {
-        final StringBuilder strb = new StringBuilder();
-        // get table header
-        if (isHeaderIncluded) {
-            String header = getHeaderText(table, ViewUtil.COLUMN_SEPERATOR);
-            strb.append(header).append(ViewUtil.LINE_SEPARATOR);
-        }
-
+//        final StringBuilder strb = new StringBuilder();
+//        // get table header
+//        if (isHeaderIncluded) {
+//            String header = getHeaderText(table, ViewUtil.COLUMN_SEPERATOR);
+//            strb.append(header).append(ViewUtil.LINE_SEPARATOR);
+//        }
         final Set<Integer> rows = new TreeSet<>();
         for (final TablePosition tablePosition : table.getSelectionModel().getSelectedCells()) {
             rows.add(tablePosition.getRow());
         }
-        getRowData(table, rows, strb);
-        return strb.toString();
+        return getRowData(table, rows, isHeaderIncluded);
+//        return strb.toString();
     }
 
-    private static void getRowData(TableView<?> table, Set<Integer> rows, StringBuilder strb) {
-        boolean firstRow = true;
-        for (final Integer row : rows) {
-            if (!firstRow) {
-                strb.append(ViewUtil.LINE_SEPARATOR);
+    private static String getRowData(TableView<?> table, Set<Integer> rows, boolean isHeaderIncluded) {
+        try (StringWriter strWriter = new StringWriter()) {
+            SequenceWriter seqWriter = CSV_MAPPER.writer()
+                    .writeValues(strWriter);
+            if (isHeaderIncluded) {
+                // get table header
+                seqWriter.write(getHeaders(table));
             }
-            firstRow = false;
-            boolean firstCol = true;
-            // exclude first column which is index column
-            var columns = table.getColumns().subList(1, table.getColumns().size());
-            for (final TableColumn<?, ?> column : columns) {
-                if (!firstCol) {
-                    strb.append(ViewUtil.COLUMN_SEPERATOR);
+
+            for (final Integer row : rows) {
+                // exclude first column which is index column
+                List<? extends TableColumn<?, ?>> columns = table.getColumns().subList(1, table.getColumns().size());
+                List<String> csvRow = new ArrayList<>(columns.size());
+                for (final TableColumn<?, ?> column : columns) {
+                    final Object cellData = column.getCellData(row);
+                    csvRow.add(cellData == null ? "" : cellData.toString());
                 }
-                firstCol = false;
-                final Object cellData = column.getCellData(row);
-                strb.append(cellData == null ? "" : cellData.toString());
+                seqWriter.write(csvRow);
             }
+            seqWriter.flush();
+            seqWriter.close();
+            return strWriter.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
     }
+
+//    private static void getRowData(TableView<?> table, Set<Integer> rows, StringBuilder strb) {
+//        boolean firstRow = true;
+//        for (final Integer row : rows) {
+//            if (!firstRow) {
+//                strb.append(ViewUtil.LINE_SEPARATOR);
+//            }
+//            firstRow = false;
+//            boolean firstCol = true;
+//            // exclude first column which is index column
+//            var columns = table.getColumns().subList(1, table.getColumns().size());
+//            for (final TableColumn<?, ?> column : columns) {
+//                if (!firstCol) {
+//                    strb.append(ViewUtil.COLUMN_SEPERATOR);
+//                }
+//                firstCol = false;
+//                final Object cellData = column.getCellData(row);
+//                strb.append(cellData == null ? "" : cellData.toString());
+//            }
+//        }
+//    }
 
     private static String getHeaderText(TableView<?> table, String columnSeperator) {
-        String header = table.getColumns().subList(1, table.getColumns().size()).stream().map(TableColumn::getText).collect(Collectors.joining(columnSeperator));
-        return header;
+        return String.join(columnSeperator, getHeaders(table));
+    }
+
+    private static List<String> getHeaders(TableView<?> table) {
+        return table.getColumns().subList(1, table.getColumns().size()).stream().map(TableColumn::getText).toList();
     }
 
     public static List<String> getPropertyFieldNamesFromTableItem(Class<?> tableIemClass) {
