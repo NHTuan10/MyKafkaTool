@@ -147,11 +147,11 @@ public class MainController {
 //    @FXML
 //    private ToggleButton regexFilterToggleBtn;
 
-    @FXML
-    private Label endTimestampLabel;
+//    @FXML
+//    private Label endTimestampLabel;
 
-    @FXML
-    private DateTimePicker endTimestampPicker;
+//    @FXML
+//    private DateTimePicker endTimestampPicker;
 
     // message buttons
     @FXML
@@ -394,10 +394,10 @@ public class MainController {
         isLiveUpdateCheckBox.disableProperty()
                 .bind(msgPollingPosition.valueProperty().map(
                         v -> v != KafkaConsumerService.MessagePollingPosition.LAST));
-        endTimestampLabel.setVisible(false);
-        endTimestampLabel.setManaged(false);
-        endTimestampPicker.setVisible(false);
-        endTimestampPicker.setManaged(false);
+//        endTimestampLabel.setVisible(false);
+//        endTimestampLabel.setManaged(false);
+//        endTimestampPicker.setVisible(false);
+//        endTimestampPicker.setManaged(false);
     }
 
     private void configureClusterTreeSelectedItemChanged() {
