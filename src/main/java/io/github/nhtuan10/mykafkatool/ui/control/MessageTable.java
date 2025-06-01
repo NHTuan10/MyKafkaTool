@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.constant.CssClassConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
@@ -46,22 +47,19 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
 
     public void configureMessageTable(SerDesHelper serDesHelper) {
         this.serDesHelper = serDesHelper;
-//        TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, table, stageHolder);
         table.setRowFactory(tv -> {
             TableRow<KafkaMessageTableItem> row = new TableRow<>() {
                 @Override
                 protected void updateItem(KafkaMessageTableItem item, boolean empty) {
                     super.updateItem(item, empty);
+                    getStyleClass().removeAll(CssClassConstant.ERROR_ROW);
                     if (!empty && item != null) {
-                        String color;
-                        if (isSelected()) {
-                            color = item.isErrorItem() ? "#C06666" : "lightgray";
-                        } else {
-                            color = item.isErrorItem() ? "lightcoral" : "transparent";
+                        if (item.isErrorItem()) {
+                            getStyleClass().add(CssClassConstant.ERROR_ROW);
                         }
-                        setStyle("-fx-background-color: %s; -fx-border-color: transparent transparent lightgray transparent;".formatted(color));
+                        getStyleClass().add(CssClassConstant.TABLE_ROW_BORDER);
                     } else {
-                        setStyle("");
+                        getStyleClass().removeAll(CssClassConstant.ERROR_ROW, CssClassConstant.TABLE_ROW_BORDER);
                     }
                 }
             };
