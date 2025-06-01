@@ -64,19 +64,14 @@ public final class ViewUtil {
         showPopUpModal(modalFxml, title, modelRef, inputVarMap, true, false, parentWindow);
     }
 
-    //    private Tuple2<String, String> showAddMsgModalAndGetResult() throws IOException {
     public static void showPopUpModal(final String modalFxml, final String title, final AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable, final boolean resizable, Window parentWindow) throws IOException {
         Stage stage = new Stage();
-//        FXMLLoader addMsgModalLoader = new FXMLLoader(
-//                AddMessageModalController.class.getResource("add-or-view-message-modal.fxml"));
 
         FXMLLoader modalLoader = new FXMLLoader(
                 MyKafkaToolApplication.class.getResource(modalFxml));
         Scene scene = new Scene(modalLoader.load());
 
-//        AddMessageModalController addMessageModalController =  modalLoader.getController();
         ModalController modalController = modalLoader.getController();
-//        modalController.setParentController(parentController);
         modalController.setModelRef(modelRef);
         modalController.setFields(modalController, stage, inputVarMap);
         modalController.launch(editable);
@@ -86,18 +81,10 @@ public final class ViewUtil {
             stage.initOwner(parentWindow);
         }
         stage.setResizable(resizable);
-//        if (editable) {
-//            stage.setAlwaysOnTop(true);
-//            stage.initModality(Modality.APPLICATION_MODAL);
-//        }
-//        ActionEvent event
-//        stage.initOwner(
-//                ((Node)event.getSource()).getScene().getWindow() );
         stage.setScene(scene);
         URL cssResource = MyKafkaToolApplication.class.getResource("style.css");
         scene.getStylesheets().add(cssResource.toExternalForm());
         stage.showAndWait();
-//        return modelRef.get();
     }
 
 
@@ -135,9 +122,6 @@ public final class ViewUtil {
         };
         task.setOnSucceeded(workerStateEvent -> onSuccess.accept((T) workerStateEvent.getSource().getValue()));
         task.setOnFailed(workerStateEvent -> onError.accept(workerStateEvent.getSource().getException()));
-//        Thread thread =  new Thread(task);
-//        thread.setDaemon(true);
-//        thread.start();
         CompletableFuture.runAsync(task);
         return task;
     }

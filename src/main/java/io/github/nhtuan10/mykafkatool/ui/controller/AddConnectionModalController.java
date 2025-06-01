@@ -31,7 +31,6 @@ public class AddConnectionModalController extends ModalController {
 
     @FXML
     public void initialize() {
-//        clusterNameTextField.textProperty().bindBidirectional(kafkaClusterObjectProperty.map());
         objectProperty.addListener((observable, oldValue, newValue) -> {
             clusterNameTextField.setText(newValue.getName());
             bootstrapServerTextField.setText(newValue.getBootstrapServer());

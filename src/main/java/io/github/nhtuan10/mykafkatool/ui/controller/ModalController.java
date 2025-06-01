@@ -41,7 +41,6 @@ public abstract class ModalController {
                     fieldClass.getDeclaredMethod("setValue", Object.class).invoke(property, value);
                 } else {
                     field.set(modalController, value);
-//                    throw new RuntimeException("Field is not supported");
                 }
             } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException |
                      InvocationTargetException e) {

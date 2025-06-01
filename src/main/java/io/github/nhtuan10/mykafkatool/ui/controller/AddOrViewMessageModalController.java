@@ -41,11 +41,7 @@ public class AddOrViewMessageModalController extends ModalController {
     private Button okBtn;
     @FXML
     private Button cancelBtn;
-//    @FXML
-//    private Button addHeaderBtn;
 
-    //    @FXML
-//    private Button removeHeaderBtn;
     @FXML
     private Tab headerTab;
 
@@ -58,29 +54,16 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private MessageHeaderTable headerTable;
 
-//    private ObservableList<UIPropertyTableItem> headerItems;
-
     private final JsonHighlighter jsonHighlighter = new JsonHighlighter();
 
     @FXML
     void initialize() {
-//        TableViewConfigurer.configureTableView(UIPropertyTableItem.class, headerTable, true);
-
-//        headerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//        headerTable.setItems(headerItems);
-//        headerItems = headerTable.getItems();
         valueContentTypeComboBox.setOnAction(event -> {
             enableDisableSchemaTextArea();
         });
         valueDisplayTypeComboBox.setItems(FXCollections.observableArrayList(DisplayType.values()));
         valueTextArea.textProperty().addListener((obs, oldText, newText) -> {
             refreshDisplayValue(newText, valueTextArea, valueDisplayTypeComboBox.getValue(), false);
-//                    if (valueDisplayTypeComboBox.getValue() == DisplayType.JSON) {
-////                       && !newText.equals(oldText)){
-//                        textArea.setStyleSpans(0, json.highlight(newText));
-//                    } else if (valueDisplayTypeComboBox.getValue() == DisplayType.TEXT) {
-//                        textArea.clearStyle(0, newText.length() - 1);
-//                    }
         });
         schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
             refreshDisplayValue(newText, schemaTextArea, DisplayType.JSON, false);
@@ -123,11 +106,8 @@ public class AddOrViewMessageModalController extends ModalController {
         this.headerTable.setStage(stage);
         keyTextArea.setEditable(editable);
         valueTextArea.setEditable(editable);
-//        valueContentTypeComboBox.setDisable(!editable);
-//        headerTable.setEditable(editable);
         final String initValue = valueTextArea.getText();
         valueDisplayTypeComboBox.setOnAction(event -> {
-//            enableDisableSchemaTextArea();
             valueDisplayTypeToggleEventAction(editable, initValue);
         });
         //TODO: Set value on below combox box based on the valueContentTypeComboBox
@@ -142,7 +122,6 @@ public class AddOrViewMessageModalController extends ModalController {
             }
             displayType = Optional.ofNullable(serDesHelper.getPluggableSerialize(valueContentType))
                     .map(PluggableSerializer::getDisplayType).orElse(DisplayType.TEXT);
-//            TableViewConfigurer.configureEditableKeyValueTable(headerTable);
             enableDisableSchemaTextArea();
         } else { // For View Message Modal
             if (valueContentType != null && serDesHelper.getPluggableDeserialize(valueContentType) != null) {
@@ -154,8 +133,6 @@ public class AddOrViewMessageModalController extends ModalController {
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(Event::consume);
             schemaTextArea.setEditable(false);
-//            addHeaderBtn.setVisible(false);
-//            removeHeaderBtn.setVisible(false);
         }
         valueDisplayTypeComboBox.getSelectionModel().select(displayType);
         valueDisplayTypeToggleEventAction(true, initValue);

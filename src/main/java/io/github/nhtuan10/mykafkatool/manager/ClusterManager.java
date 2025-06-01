@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class ClusterManager {
 
     private final Map<String, Admin> adminMap;
-    //    private Map<Pair<String, ConsumerType>, Consumer<String, String>> consumerMap;
     private final Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap;
 
     private static class InstanceHolder {
@@ -42,7 +41,6 @@ public class ClusterManager {
 
     private ClusterManager(Map<String, Admin> adminMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
         this.adminMap = adminMap;
-//        this.consumerMap = consumerMap;
         this.producerMap = producerMap;
     }
 
@@ -56,10 +54,6 @@ public class ClusterManager {
         properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, AppConstant.DEFAULT_ADMIN_REQUEST_TIMEOUT);
         Admin adminClient = Admin.create(properties);
         adminMap.put(clusterName, adminClient);
-//        Consumer<String, String> partitionConsumer = ConsumerCreator.createConsumer(cluster, null);
-//        Consumer<String, String> topicConsumer = ConsumerCreator.createConsumer(cluster, null);
-//        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.PARTITION), partitionConsumer);
-//        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.TOPIC), topicConsumer);
         ProducerCreator.ProducerCreatorConfig producerCreatorConfig = ProducerCreator.ProducerCreatorConfig.builder().cluster(cluster).build();
         KafkaProducer producer = ProducerCreator.createProducer(producerCreatorConfig);
         producerMap.put(producerCreatorConfig, producer);
@@ -69,10 +63,6 @@ public class ClusterManager {
 
         Admin adminClient = adminMap.get(clusterName);
         adminClient.close();
-//        Consumer<String, String> partitionConsumer = ConsumerCreator.createConsumer(cluster, null);
-//        Consumer<String, String> topicConsumer = ConsumerCreator.createConsumer(cluster, null);
-//        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.PARTITION), partitionConsumer);
-//        consumerMap.put(Tuples.of(cluster.getName(), ConsumerType.TOPIC), topicConsumer);
         new HashMap<>(producerMap).forEach((producerCreatorConfig, producer) -> {
             if (producerCreatorConfig.getClusterName().equals(clusterName)) {
                 producer.close();
@@ -84,14 +74,12 @@ public class ClusterManager {
     public Set<String> getAllTopics(String clusterName) throws ExecutionException, InterruptedException, TimeoutException {
         Admin adminClient = adminMap.get(clusterName);
         ListTopicsResult result = adminClient.listTopics();
-//        adminClient.close(Duration.ofSeconds(30));
         return result.names().get(60, TimeUnit.SECONDS);
     }
 
     public TopicDescription getTopicDesc(String clusterName, String topic) throws ExecutionException, InterruptedException {
         Admin adminClient = adminMap.get(clusterName);
         DescribeTopicsResult result = adminClient.describeTopics(Set.of(topic));
-//        adminClient.close(Duration.ofSeconds(30));
         return result.topicNameValues().get(topic).get();
     }
 
@@ -108,10 +96,6 @@ public class ClusterManager {
         Config config = (Config) adminClient.describeConfigs(Set.of(new ConfigResource(ConfigResource.Type.TOPIC, topic))).all().get().values().toArray()[0];
         return config.entries();
     }
-
-//    public Consumer<String, String> getConsumer(String clusterName, ConsumerType consumerType) {
-//        return consumerMap.get(Tuples.of(clusterName, consumerType));
-//    }
 
     public Consumer getConsumer(Map<String, Object> consumerProperties) {
         return ConsumerCreator.createConsumer(consumerProperties);

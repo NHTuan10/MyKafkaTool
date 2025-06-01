@@ -55,15 +55,10 @@ public class ProducerUtil {
                                                                        KafkaMessage kafkaMessage) throws IOException {
         Integer partitionId = partition != null ? partition.id() : null;
         String key = StringUtils.isBlank(kafkaMessage.key()) ? null : kafkaMessage.key();
-//        String contentType = kafkaMessage.valueContentType();
         Object value = serDesHelper.convertStringToObjectBeforeSerialize(kafkaTopic.name(), partitionId, kafkaMessage, false);
 
         List<Header> headers = kafkaMessage.headers().entrySet().stream().map(entry -> new RecordHeader(entry.getKey(), entry.getValue())).collect(Collectors.toList());
 
-//        if (partition != null) {
         return new ProducerRecord<>(kafkaTopic.name(), partitionId, key, value, headers);
-//        } else {
-//            return new ProducerRecord<>(kafkaTopic.getName(), key, value);
-//        }
     }
 }

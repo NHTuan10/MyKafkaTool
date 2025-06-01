@@ -86,10 +86,6 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
             applyFilter(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
             Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName()))
                     .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setFilterText(newValue));
-//            if (clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName.getName())) {
-//                SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName());
-//                schemaTableItemsAndFilter.setFilter(newValue);
-//            }
         });
         this.regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
             applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
@@ -107,15 +103,6 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                 SchemaTableItem::getCompatibility,
                 SchemaTableItem::getSchemaId,
                 SchemaTableItem::getLatestVersion);
-//        if (regexFilterToggleBtn.isSelected()) {
-//            Pattern pattern = Pattern.compile(filter.getFilterText(), Pattern.CASE_INSENSITIVE);
-//
-//            return item -> pattern.matcher(item.getSubject()).find() ||
-//                    (item.getSchema() != null && pattern.matcher(item.getSchema()).find());
-//        }
-//        return item -> item.getSubject().toLowerCase().contains(filter.getFilterText().toLowerCase()) ||
-//                (item.getSchema() != null && item.getSchema().toLowerCase().contains(filter.getFilterText().toLowerCase()));
-
     }
 
     //    @RequiredArgsConstructor
@@ -167,7 +154,6 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                                 .stream()
                                 .map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, this.selectedClusterName.getName()))
                                 .toList());
-//                tableItems.setAll(items);
                 clusterNameToSchemaTableItemsCache.put(this.selectedClusterName.getName(), new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
                 this.isBlockingUINeeded.set(false);
             } catch (RestClientException | IOException e) {

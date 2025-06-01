@@ -44,7 +44,6 @@ public class KafkaConsumerService {
         this.serDesHelper = serDesHelper;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             consumers.forEach(Consumer::wakeup);
-//            consumers.clear();
         }));
     }
 
@@ -70,11 +69,6 @@ public class KafkaConsumerService {
         Consumer consumer = ClusterManager.getInstance().getConsumer(consumerProps);
         consumers.add(consumer);
         consumer.assign(topicPartitions);
-//        if (pollingOptions.startTimestamp() != null) {
-//            seekOffsetWithTimestamp(consumer, topicPartitions, pollingOptions.startTimestamp());
-//        } else {
-//            seekOffset(consumer, topicPartitions, pollingOptions.pollingPosition(), pollingOptions.noMessages());
-//        }
         Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll = seekOffset(consumer, topicPartitions, pollingOptions);
         List<KafkaMessageTableItem> list = pollMessages(consumer, consumerProps, pollingOptions, partitionOffsetsToPoll);
         consumer.close();
@@ -99,36 +93,11 @@ public class KafkaConsumerService {
         return offsetsForTime;
     }
 
-//    private static Map<TopicPartition, Pair<Long, Long>> seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, MessagePollingPosition pollingPosition, Integer noMessages) {
-//        if (pollingPosition == MessagePollingPosition.FIRST) {
-////                consumer.subscribe(Collections.singleton(topicName));
-//            consumer.seekToBeginning(topicPartitions);
-//            return topicPartitions.stream().collect(Collectors.toMap(tp -> tp, partition -> Pair.of(consumer.position(partition), consumer.position(partition) + noMessages)));
-//        } else {
-
-    /// /                consumer.subscribe(Collections.singleton(topicName));
-    /// /                Set<TopicPartition> partitionSet = consumer.assignment();
-//            Map<TopicPartition, Pair<Long, Long>> partitionOffsetMap = new HashMap<>(topicPartitions.size());
-//            consumer.seekToEnd(topicPartitions);
-//            topicPartitions.forEach(topicPartition -> {
-//                long endOffset = consumer.position(topicPartition);
-//                if (endOffset < noMessages) {
-//                    consumer.seekToBeginning(List.of(topicPartition));
-//                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endOffset));
-//                } else {
-//                    consumer.seek(topicPartition, consumer.position(topicPartition) - noMessages);
-//                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endOffset));
-//                }
-//            });
-//            return partitionOffsetMap;
-//        }
-//    }
     private static Map<TopicPartition, Pair<Long, Long>> seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, PollingOptions pollingOptions) {
         int noMessages = pollingOptions.noMessages();
         Long startTimestamp = pollingOptions.startTimestamp();
 
         if (pollingOptions.pollingPosition() == MessagePollingPosition.FIRST) {
-//                consumer.subscribe(Collections.singleton(topicName));
             if (startTimestamp != null) {
                 seekOffsetWithTimestamp(consumer, topicPartitions, startTimestamp);
             } else {
@@ -136,8 +105,6 @@ public class KafkaConsumerService {
             }
             return topicPartitions.stream().collect(Collectors.toMap(tp -> tp, partition -> Pair.of(consumer.position(partition), consumer.position(partition) + noMessages)));
         } else {
-//                consumer.subscribe(Collections.singleton(topicName));
-//                Set<TopicPartition> partitionSet = consumer.assignment();
 
             Map<TopicPartition, Pair<Long, Long>> partitionOffsetMap = new HashMap<>(topicPartitions.size());
             Map<TopicPartition, OffsetAndTimestamp> offsetsForTs = new HashMap<>(topicPartitions.size());
@@ -149,7 +116,6 @@ public class KafkaConsumerService {
                 long endOffset = consumer.position(topicPartition);
                 Long startTsOffset = Optional.ofNullable(offsetsForTs.get(topicPartition)).map(OffsetAndTimestamp::offset).orElse(0L);
                 if (endOffset < noMessages) {
-//                    consumer.seekToBeginning(List.of(topicPartition));
                     consumer.seek(topicPartition, startTsOffset);
                 } else {
                     consumer.seek(topicPartition, Math.max(startTsOffset, endOffset - noMessages));
@@ -166,17 +132,13 @@ public class KafkaConsumerService {
 
     public List<KafkaMessageTableItem> pollMessages(Consumer<String, Object> consumer, Map<String, Object> consumerProps, PollingOptions pollingOptions, Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll) {
         int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_POLL_TIME_MS);
-//        List<KafkaMessageTableItem> allMessages = new ArrayList<>();
         ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
-//        int emptyPullCountDown = AppConstant.EMPTY_PULL_STILL_STOP;
         Map<TopicPartition, Boolean> isAllMsgPulled = partitionOffsetsToPoll.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> (entry.getValue().getRight() - entry.getValue().getLeft() <= 0)));
         try (consumer) {
             while (true) {
                 ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
                 PollCallback pollCallback = pollingOptions.pollCallback().get();
                 if (!pollCallback.isPolling().get()) break;
-//                if (consumerRecords.isEmpty()) emptyPullCountDown--;
-//                if (emptyPullCountDown <= 0 && !pollingOptions.isLiveUpdate()) break;
                 if (!consumerRecords.isEmpty()) {
                     messageObservableList = pollCallback.resultObservableList();
                     List<KafkaMessageTableItem> messages = new ArrayList<>();
@@ -202,7 +164,6 @@ public class KafkaConsumerService {
                     if (!messages.isEmpty()) {
                         messageObservableList.addAll(messages);
                     }
-//                    sortMessages(messageObservableList, pollingOptions);
                 }
                 if (isAllMsgPulled.entrySet().stream().allMatch(Map.Entry::getValue) && !pollingOptions.isLiveUpdate())
                     break;
@@ -211,7 +172,6 @@ public class KafkaConsumerService {
 
         }
         return messageObservableList;
-//        return filterAndSortMessages(messageObservableList, pollingOptions);
     }
 
     private List<KafkaMessageTableItem> handleConsumerRecords(PollingOptions pollingOptions, ConsumerRecords<String, Object> consumerRecords, Map<String, Object> consumerProps, Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll) {
@@ -237,10 +197,6 @@ public class KafkaConsumerService {
     private KafkaMessageTableItem createMessageItem
             (ConsumerRecord<String, Object> record, PollingOptions pollingOptions, Map<String, Object> consumerProps) throws DeserializationException {
         String key = record.key() != null ? record.key() : "";
-//        String value = SerdeUtil.SERDE_AVRO.equals(pollingOptions.valueContentType())
-//                ? AvroUtil.deserializeAsJsonString((byte[]) record.value(), pollingOptions.schema())
-//                : (String) record.value();
-//        String value = record.value().toString();
         Map<String, String> others = Map.of(SerDesHelper.IS_KEY_PROP, Boolean.toString(false), SerDesHelper.SCHEMA_PROP, pollingOptions.schema());
         String value = serDesHelper.deserializeToJsonString(record,
                 pollingOptions.valueContentType,
@@ -264,7 +220,6 @@ public class KafkaConsumerService {
         return new KafkaMessageTableItem(record.partition(),
                 record.offset(),
                 record.key() != null ? record.key() : "",
-//                "Error when deserialize message: " + displayValue,
                 displayValue,
                 timestamp,
                 pollingOptions.valueContentType(),
@@ -276,7 +231,6 @@ public class KafkaConsumerService {
     private String formatRecordTimestamp(ConsumerRecord<String, Object> record) {
         return Instant.ofEpochMilli(record.timestamp())
                 .atZone(ZoneId.systemDefault())
-//                .toLocalDateTime()
                 .toString();
     }
 

@@ -50,9 +50,7 @@ public class TopicOrPartitionPropertyView extends AnchorPane {
 
     @FXML
     private void initialize() {
-        totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty
-//                totalMessagesInTheTopicProperty.asString("%,d Messages")
-        );
+        totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty);
         partitionsTitledPane.setVisible(false);
 
     }

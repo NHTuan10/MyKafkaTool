@@ -9,7 +9,6 @@ import javafx.collections.ObservableList;
 
 
 public class KafkaPartitionsTableItem {
-    //    public static final List<String> FIELD_NAMES = List.of("partitionx", "startOffset", "endOffset", "noMessage", "leader", "replicasInSync", "replicasNotInSync");
     @TableColumn
     private final SimpleIntegerProperty partition;
     @TableColumn

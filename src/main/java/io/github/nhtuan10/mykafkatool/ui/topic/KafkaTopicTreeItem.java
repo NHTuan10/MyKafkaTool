@@ -54,7 +54,6 @@ public class KafkaTopicTreeItem<T> extends TreeItem<T> {
                 List<TopicPartitionInfo> partitionInfoList = ClusterManager.getInstance().getTopicPartitions(topic.cluster().getName(), topic.name());
 
                 partitionInfoList.forEach(partitionInfo -> {
-//                    KafkaPartition partition = new KafkaPartition(partitionInfo.partition(), topic, partitionInfo);
                     KafkaPartition partition = new KafkaPartition(partitionInfo.partition(), topic);
                     children.add(new KafkaPartitionTreeItem<>((T) partition));
                 });

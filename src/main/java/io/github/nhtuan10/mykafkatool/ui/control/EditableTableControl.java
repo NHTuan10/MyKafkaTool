@@ -101,35 +101,18 @@ public class EditableTableControl<T> extends AnchorPane {
             table.getColumns().add(tableColumn);
         });
         TableViewConfigurer.configureTableView(itemClass, table, stageHolder);
-//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-//        table.getColumns().forEach(tableColumn -> {
-//            tableColumn.setMinWidth(USE_COMPUTED_SIZE);
-//            tableColumn.setPrefWidth(USE_COMPUTED_SIZE);
-//            tableColumn.setMaxWidth(5000);
-//        });
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableItems = FXCollections.observableArrayList();
-//        table.setItems(tableItems.filtered(filterPredicate(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()))));
         applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
         filterTextField.textProperty().bindBidirectional(filterTextProperty);
-//        filterTextField.setOnKeyPressed(e -> {
-//            if (e.getCode().equals(KeyCode.ENTER)) {
-////                var filteredList = tableItems.filtered(filterPredicate(this.filterTextProperty.get()));
-////                table.setItems(filteredList);
-//                applyFilter(new Filter(filterTextProperty.get(), regexFilterToggleBtn.isSelected()));
-//            }
-//        });
         this.filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             applyFilter(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
         });
         regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
             applyFilter(new Filter(filterTextProperty.get(), regexFilterToggleBtn.isSelected()));
         });
-//        noRowsIntProp.bind(table.itemsProperty().map(List::size));
         numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Rows"));
         table.itemsProperty().addListener((observable, oldValue, newValue) -> {
-//            TableViewConfigurer.configureTableViewHeaderTooltip(table);
-
             Platform.runLater(() -> noRowsIntProp.set(newValue.size()));
         });
         table.getItems().addListener((ListChangeListener<T>) change -> {
@@ -141,21 +124,12 @@ public class EditableTableControl<T> extends AnchorPane {
             Platform.runLater(() -> noRowsIntProp.set(table.getItems().size()));
         });
 
-//        table.itemsProperty().addListener((observable, oldValue, newValue) -> {
-//            noRowsIntProp.set(newValue.size());
-//        });
-
-
-//        noRowsIntProp.bind(table.itemsProperty().map(List::size));
-
         configureEditableControls();
     }
 
     public void applyFilter(Filter filter, Predicate<T>... extraPredicates) {
-//        this.filterTextField.setText(filterText);
         this.filterTextProperty.set(filter.getFilterText());
         this.regexFilterToggleBtn.setSelected(filter.isRegexFilter());
-//        table.setItems(tableItems.filtered(filterPredicate(this.filterTextField.getText())));
         Predicate<T> predicate = Arrays.stream(extraPredicates).reduce(filterPredicate(filter), Predicate::and);
         SortedList<T> sortedList = new SortedList<>(tableItems.filtered(predicate));
         sortedList.comparatorProperty().bind(table.comparatorProperty());
@@ -208,8 +182,6 @@ public class EditableTableControl<T> extends AnchorPane {
     }
 
     public void setItems(ObservableList<T> items, boolean doesApplyFilter) {
-//        tableItems.setAll(items);
-//        table.setItems(items);
         tableItems = items;
         if (doesApplyFilter) {
             applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));

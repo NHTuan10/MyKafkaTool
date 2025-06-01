@@ -29,7 +29,6 @@ public class SerDesHelper {
     public static final String IS_KEY_PROP = "isKey";
     public static final String SERDE_AVRO = "AVRO";
     public static final String SCHEMA_PROP = "schema";
-    //    public static final ObservableList<String> SUPPORT_VALUE_CONTENT_TYPES = FXCollections.observableArrayList(SerdeUtil.SERDE_STRING, SerdeUtil.SERDE_AVRO);
     private final Map<String, PluggableSerializer> serializerMap;
     private final Map<String, PluggableDeserializer> deserializerMap;
 
@@ -77,16 +76,6 @@ public class SerDesHelper {
         return Set.of(SERDE_STRING);
     }
 
-//    public static Class<? extends Deserializer> getDeserializeClass(String contentType) {
-//        switch (contentType) {
-//            case SERDE_AVRO:
-
-    /// /                return ByteArrayDeserializer.class.getName();
-//                return KafkaAvroDeserializer.class;
-//            default:
-//                return StringDeserializer.class;
-//        }
-//    }
     public Class<? extends Deserializer> getDeserializeClass(String contentType) {
         try {
             return (Class<? extends Deserializer>) Class.forName(getPluggableDeserialize(contentType).getDeserializerClass());

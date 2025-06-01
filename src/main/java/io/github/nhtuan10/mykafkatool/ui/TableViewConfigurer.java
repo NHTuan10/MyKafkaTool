@@ -37,11 +37,6 @@ public class TableViewConfigurer {
         return configureTableView(clazz, tableView, stageHolder);
     }
 
-//    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView) {
-//        return configureTableView(clazz, tableView);
-//    }
-
-
     public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView, @NonNull StageHolder stageHolder) {
         TableColumn<S, S> numberCol = buildIndexTableColumn();
         tableView.getColumns().addFirst(numberCol);
@@ -50,10 +45,6 @@ public class TableViewConfigurer {
         IntStream.range(0, fieldNames.size()).forEach(i -> {
             TableColumn<S, ?> tableColumn = tableView.getColumns().get(i + 1);
             tableColumn.setId(fieldNames.get(i) + "Col");
-
-//            Platform.runLater(() -> {
-
-//            });
 //            tableColumn.setText(null);
 //            Label label = new Label();
 //            label.setTooltip(new Tooltip(columnHeader));
@@ -108,7 +99,7 @@ public class TableViewConfigurer {
                     }
                 }
             }
-            //set the new max-widht with some extra space
+            //set the new max-width with some extra space
             column.setPrefWidth(Math.min(500, max) + 50.0d);
         });
     }
@@ -135,38 +126,6 @@ public class TableViewConfigurer {
         return numberCol;
     }
 
-
-//    public static void configureEditableTableCell(TableView<UIPropertyTableItem> headerTable) {
-//        Callback<TableColumn<UIPropertyTableItem, String>,
-//                TableCell<UIPropertyTableItem, String>> cellFactory
-//                = (TableColumn<UIPropertyTableItem, String> p) -> new EditingTableCell<>();
-//
-//        TableColumn<UIPropertyTableItem, String> nameColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().getFirst();
-////            nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-////            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-////            nameColumn.setCellFactory((tableColumn)-> new EditingTableCell()); // Use TextField for editing
-//        nameColumn.setCellFactory(cellFactory); // Use TextField for editing
-//        nameColumn.setOnEditCommit(event -> {
-//            // Update the model when editing is committed
-////                UIPropertyItem row = event.getRowValue();
-////                row.setName(event.getNewValue());
-//            event.getTableView().getItems().get(
-//                    event.getTablePosition().getRow()).setName(event.getNewValue());
-//        });
-
-    /// /            nameColumn.setOnEditCancel(event -> {
-    /// /                event.getRowValue();
-    /// /            });
-//
-//        TableColumn<UIPropertyTableItem, String> valueColumn = (TableColumn<UIPropertyTableItem, String>) headerTable.getColumns().get(1);
-//
-//        valueColumn.setCellFactory(cellFactory);
-//        valueColumn.setOnEditCommit(event -> {
-//            // Update the model when editing is committed
-//            event.getTableView().getItems().get(
-//                    event.getTablePosition().getRow()).setValue(event.getNewValue());
-//        });
-//    }
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static <S> void configureEditableTableCell(TableView<S> tableView, Class<S> tableItemClass) {
         Callback<TableColumn<S, String>,
@@ -244,11 +203,8 @@ public class TableViewConfigurer {
     }
 
     private static String getTableDataInCSV(TableView<?> tableView) {
-//        StringBuilder strb = new StringBuilder();
-//        strb.append(getHeaderText(tableView, ViewUtil.COLUMN_SEPERATOR)).append(ViewUtil.LINE_SEPARATOR);
         Set<Integer> rows = IntStream.range(0, tableView.getItems().size()).boxed().collect(Collectors.toSet());
         return getRowData(tableView, rows, true);
-//        return strb.toString();
     }
 
 //    public static void copySelectedCellsToClipboard(TableView<?> tableView) {
@@ -286,18 +242,11 @@ public class TableViewConfigurer {
     }
 
     private static String getSelectedRowsData(TableView<?> table, boolean isHeaderIncluded) {
-//        final StringBuilder strb = new StringBuilder();
-//        // get table header
-//        if (isHeaderIncluded) {
-//            String header = getHeaderText(table, ViewUtil.COLUMN_SEPERATOR);
-//            strb.append(header).append(ViewUtil.LINE_SEPARATOR);
-//        }
         final Set<Integer> rows = new TreeSet<>();
         for (final TablePosition tablePosition : table.getSelectionModel().getSelectedCells()) {
             rows.add(tablePosition.getRow());
         }
         return getRowData(table, rows, isHeaderIncluded);
-//        return strb.toString();
     }
 
     private static String getRowData(TableView<?> table, Set<Integer> rows, boolean isHeaderIncluded) {
@@ -328,27 +277,6 @@ public class TableViewConfigurer {
 
     }
 
-//    private static void getRowData(TableView<?> table, Set<Integer> rows, StringBuilder strb) {
-//        boolean firstRow = true;
-//        for (final Integer row : rows) {
-//            if (!firstRow) {
-//                strb.append(ViewUtil.LINE_SEPARATOR);
-//            }
-//            firstRow = false;
-//            boolean firstCol = true;
-//            // exclude first column which is index column
-//            var columns = table.getColumns().subList(1, table.getColumns().size());
-//            for (final TableColumn<?, ?> column : columns) {
-//                if (!firstCol) {
-//                    strb.append(ViewUtil.COLUMN_SEPERATOR);
-//                }
-//                firstCol = false;
-//                final Object cellData = column.getCellData(row);
-//                strb.append(cellData == null ? "" : cellData.toString());
-//            }
-//        }
-//    }
-
     private static String getHeaderText(TableView<?> table, String columnSeperator) {
         return String.join(columnSeperator, getHeaders(table));
     }
@@ -369,24 +297,4 @@ public class TableViewConfigurer {
                 .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(io.github.nhtuan10.mykafkatool.annotation.TableColumn.class))
                 .toList();
     }
-
-
-//    public static void initTableView(Stage stage) {
-//        TableView<KafkaMessageTableItem> kafkaMsgTable = TableViewConfigurer.configureTableView(KafkaMessageTableItem.class, "messageTable", stage);
-//        TableViewConfigurer.configureTableView(ConsumerGroupOffsetTableItem.class, "consumerGroupOffsetTable", stage);
-//        TableViewConfigurer.configureTableView(KafkaPartitionsTableItem.class, "kafkaPartitionsTable", stage);
-//        TableViewConfigurer.configureTableView(UIPropertyItem.class, "topicConfigTable", stage);
-//        // Use a change listener to respond to a selection within
-//        // a tree view
-//        clusterTree.getSelectionModel().selectedItemProperty().addListener((ChangeListener<TreeItem<String>>) (changed, oldVal, newVal) -> {
-//
-//
-//        });
-
-
-//        TreeView<String> tree = new TreeView<String> (rootItem);
-
-//        clusterTree.setEditable(true);
-//        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
-//    }
 }

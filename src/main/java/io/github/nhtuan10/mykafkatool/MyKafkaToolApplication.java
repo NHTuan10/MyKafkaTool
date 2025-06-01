@@ -23,17 +23,15 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         MainController mainController = fxmlLoader.getController();
         mainController.setStage(stage);
         Scene scene = new Scene(parent);
-//        parent.setStyle("-fx-base: rgba(60, 60, 60, 255);");
         javafx.application.Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+//        Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet()); //PrimerDark
         URL cssResource = MyKafkaToolApplication.class.getResource("style.css");
         scene.getStylesheets().add(cssResource.toExternalForm());
-//        Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet()); //PrimerDark
         stage.setTitle("MyKafkaTool");
         stage.setScene(scene);
         stage.show();
         KafkaClusterTree.initClusterPanel(stage);
         stage.setOnCloseRequest(event -> Platform.exit());
-//        TableViewConfigurer.initTableView(stage);
     }
 
     public static void main(String[] args) {

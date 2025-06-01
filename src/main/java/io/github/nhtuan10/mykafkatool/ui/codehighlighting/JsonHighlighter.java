@@ -42,7 +42,6 @@ public class JsonHighlighter {
                 }
             }
         } catch (IOException e) {
-            // System.err.printf("JSON Error: %s%n", e.getMessage());
         }
 
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();

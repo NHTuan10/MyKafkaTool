@@ -60,14 +60,6 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
                             color = item.isErrorItem() ? "lightcoral" : "transparent";
                         }
                         setStyle("-fx-background-color: %s; -fx-border-color: transparent transparent lightgray transparent;".formatted(color));
-
-//                        if (!isSelected()) {
-//                            if (item.isErrorItem()) {
-//                                setStyle("-fx-background-color: %s; -fx-border-color: transparent transparent lightgray transparent;".formatted(color));
-//                            } else {
-//                                setStyle("-fx-background-color: %s; -fx-border-color: transparent transparent lightgray transparent;".formatted(color));
-//                            }
-//                        }
                     } else {
                         setStyle("");
                     }
@@ -91,25 +83,10 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-
-//                    System.out.println("Double click on: "+rowData.getKey());
                 }
             });
             return row;
         });
-//        messageTable.itemsProperty().addListener((observable, oldValue, newValue) -> {
-//            Platform.runLater(() -> noMsgLongProp.set(newValue.size()));
-//        });
-//        allMsgTableItems.addListener((ListChangeListener<KafkaMessageTableItem>) change -> {
-//            Platform.runLater(() -> noMsgLongProp.set(messageTable.getItems().size()));
-//        });
-//        messageTable.getItems().addListener((ListChangeListener<KafkaMessageTableItem>) change -> {
-//            Platform.runLater(() -> noMsgLongProp.set(messageTable.getItems().size()));
-//        });
-//        configureErrorMessageRow((TableColumn<KafkaMessageTableItem, Object>) messageTable.getColumns().get(3));
-//        messageTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//            log.info("Selected item in msg table: {}", newValue);
-//        });
     }
 
     @Override

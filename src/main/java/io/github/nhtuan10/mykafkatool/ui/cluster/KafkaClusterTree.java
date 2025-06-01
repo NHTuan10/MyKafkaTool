@@ -56,7 +56,6 @@ public class KafkaClusterTree {
         UserPreferenceManager.loadUserPreference().connections().forEach((cluster -> {
             try {
                 if (!isClusterNameExistedInTree(clusterTree, cluster.getName())) {
-//                    connectToClusterAndSchemaRegistry(cluster, clusterTree);
                     addClusterToTreeView(clusterTree, cluster);
                 }
             } catch (ClusterNameExistedException e) {
@@ -139,7 +138,6 @@ public class KafkaClusterTree {
     public void configureClusterTreeActionMenu() {
         MenuItem addNewConnectionItem = createAddConnectionActionMenuItem();
         MenuItem blankItem = new MenuItem("");
-//        blankItem.setDisable(true);
         blankItem.setVisible(false);
 
         MenuItem deleteTopicItem = createDeleteActionMenuItem();
@@ -160,7 +158,6 @@ public class KafkaClusterTree {
             if ((treeItem == null) || (treeItem.getParent() == null && AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue()))) {
                 clusterTreeContextMenu.getItems().setAll(addNewConnectionItem);
             } else if (treeItem.getValue() instanceof KafkaCluster) { // tree item for a connection
-//                && treeItem.getParent() != null && treeItem.getParent().getParent() == null) {
                 clusterTreeContextMenu.getItems().setAll(editConnectionItem, deleteConnectionItem);
             } else if (treeItem instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
                 MenuItem refreshItem = new MenuItem("Refresh");
@@ -298,9 +295,6 @@ public class KafkaClusterTree {
                     while (true) {
                         AtomicReference<Object> modelRef = new AtomicReference<>();
                         ViewUtil.showPopUpModal("add-connection-modal.fxml", "Edit Connection", modelRef,
-//                                Map.of("clusterNameTextField", oldConnection.getName(),
-//                                        "bootstrapServerTextField", oldConnection.getBootstrapServer(),
-//                                        "schemaRegistryTextField", oldConnection.getSchemaRegistryUrl() != null ? oldConnection.getSchemaRegistryUrl() : "")
                                 Map.of("objectProperty", oldConnection), stage);
                         newConnection = (KafkaCluster) modelRef.get();
                         if (newConnection != null &&

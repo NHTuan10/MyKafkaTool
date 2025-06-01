@@ -121,7 +121,6 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
                 setItems(config);
             } catch (ExecutionException | InterruptedException | TimeoutException e) {
                 log.error("Error when get topic config properties", e);
-//                            topicConfigTable.setItems(FXCollections.emptyObservableList());
                 throw new RuntimeException(e);
             }
             return null;
