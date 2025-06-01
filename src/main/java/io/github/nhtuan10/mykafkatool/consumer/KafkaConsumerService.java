@@ -143,22 +143,23 @@ public class KafkaConsumerService {
                     messageObservableList = pollCallback.resultObservableList();
                     List<KafkaMessageTableItem> messages = new ArrayList<>();
                     for (ConsumerRecord<String, Object> record : consumerRecords) {
-                        try {
                             TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
                             long endOffset = partitionOffsetsToPoll.get(topicPartition).getRight();
-                            if (record.offset() < endOffset) {
+                        if (record.offset() >= endOffset) {
+                            isAllMsgPulled.put(topicPartition, true);
+                        } else {
+                            try {
                                 KafkaMessageTableItem message = createMessageItem(record, pollingOptions, consumerProps);
                                 messages.add(message);
+                            } catch (DeserializationException e) {
+                                log.error("Error processing record: key={}, partition={}, offset={}",
+                                        record.key(), record.partition(), record.offset(), e);
+                                KafkaMessageTableItem message = createErrorMessageItem(record, pollingOptions);
+                                messages.add(message);
                             }
-                            if (record.offset() >= endOffset - 1) {
+                            if (record.offset() == endOffset - 1) {
                                 isAllMsgPulled.put(topicPartition, true);
                             }
-
-                        } catch (DeserializationException e) {
-                            log.error("Error processing record: key={}, partition={}, offset={}",
-                                    record.key(), record.partition(), record.offset(), e);
-                            KafkaMessageTableItem message = createErrorMessageItem(record, pollingOptions);
-                            messages.add(message);
                         }
                     }
                     if (!messages.isEmpty()) {
