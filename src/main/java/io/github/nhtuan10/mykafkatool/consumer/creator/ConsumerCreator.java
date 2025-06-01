@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.consumer.creator;
 
+import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -54,7 +55,7 @@ public class ConsumerCreator {
         @Builder.Default
         private Class<? extends Deserializer> valueDeserializer = StringDeserializer.class;
         @Builder.Default
-        private String groupId = "MyKafkaTool-UI-CG";
+        private String groupId = AppConstant.APP_NAME + "-CG";
 
         public static ConsumerCreatorConfigBuilder builder(KafkaCluster cluster) {
             return new ConsumerCreatorConfigBuilder().cluster(cluster);

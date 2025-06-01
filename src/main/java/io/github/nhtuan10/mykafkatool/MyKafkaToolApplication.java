@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool;
 
 import atlantafx.base.theme.PrimerLight;
+import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.controller.MainController;
@@ -27,7 +28,7 @@ public class MyKafkaToolApplication extends javafx.application.Application {
 //        Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet()); //PrimerDark
         URL cssResource = MyKafkaToolApplication.class.getResource("style.css");
         scene.getStylesheets().add(cssResource.toExternalForm());
-        stage.setTitle("MyKafkaTool");
+        stage.setTitle(AppConstant.APP_NAME);
         stage.setScene(scene);
         stage.show();
         KafkaClusterTree.initClusterPanel(stage);

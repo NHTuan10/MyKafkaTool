@@ -9,20 +9,23 @@ import java.nio.file.Paths;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class UserPreferenceDao {
+public class UserPreferenceRepoImpl implements UserPreferenceRepo {
     private final String filePath;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     Lock lock = new ReentrantLock();
-    public UserPreferenceDao(String filePath) {
+
+    public UserPreferenceRepoImpl(String filePath) {
         this.filePath = filePath;
     }
 
+    @Override
     public UserPreference loadUserPreference() throws IOException {
 //        String data = Files.asCharSource(new File(filePath), StandardCharsets.UTF_8).read();
         String data = Files.readString(Paths.get(filePath));
         return objectMapper.readValue(data, UserPreference.class);
     }
 
+    @Override
     public void saveUserPreference(UserPreference userPreference) throws IOException {
         lock.lock();
         try {
