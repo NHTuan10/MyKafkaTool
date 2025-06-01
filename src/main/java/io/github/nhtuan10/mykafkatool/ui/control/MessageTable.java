@@ -8,6 +8,7 @@ import io.github.nhtuan10.mykafkatool.ui.KafkaMessageTableItem;
 import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Slf4j
@@ -30,7 +32,7 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
     protected void initialize() {
         super.initialize();
         messagePollingPosition = KafkaConsumerService.MessagePollingPosition.LAST;
-        numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Messages"));
+        numberOfRowsLabel.textProperty().bind(new SimpleStringProperty("Showing: ").concat(noRowsIntProp.asString().concat(" Messages")));
     }
 
     @Override
@@ -137,5 +139,18 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
     public void handleNumOfMsgChanged(int numOfMsgLongProp) {
         this.noRowsIntProp.set(numOfMsgLongProp);
         TableViewConfigurer.autoResizeColumns(table);
+    }
+
+    public void addFilterListener(Consumer<Filter> runnable) {
+        this.filterTextProperty.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                runnable.accept(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
+            }
+        });
+        this.regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                runnable.accept(new Filter(this.filterTextField.getText(), newValue));
+            }
+        });
     }
 }

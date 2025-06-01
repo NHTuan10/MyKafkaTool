@@ -10,9 +10,9 @@ class ProducerCreatorPefTest {
                 .cluster(new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false))
                 .build();
         Producer producer = ProducerCreator.createProducer(config);
-        for (int i = 0; i < 100_000; i++) {
+        for (int i = 0; i < 100; i++) {
             Thread.sleep(500);
-            ProducerRecord record = new ProducerRecord("perf", String.valueOf(i) + "-new", "liveupdate-test-msg-second-times" + i);
+            ProducerRecord record = new ProducerRecord("perf", String.valueOf(i) + "-new", "liveupdate-2-test-msg-second-times" + i);
             producer.send(record);
         }
         producer.close();

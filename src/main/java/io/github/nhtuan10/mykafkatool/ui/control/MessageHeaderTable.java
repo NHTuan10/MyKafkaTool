@@ -16,7 +16,7 @@ public class MessageHeaderTable extends EditableTableControl<UIPropertyTableItem
         this.refreshBtn.setVisible(false);
 //        this.refreshBtn.setManaged(false);
         TableViewConfigurer.configureEditableTableCell(table, UIPropertyTableItem.class);
-//        headerTable.setEditable(editable);
+        numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Headers"));
     }
 
     @FXML

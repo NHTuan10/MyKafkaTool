@@ -219,6 +219,10 @@ public class EditableTableControl<T> extends AnchorPane {
     public ObservableList<T> getItems() {
         return tableItems;
     }
+
+    public ObservableList<T> getShownItems() {
+        return table.getItems();
+    }
 //    public record Filter<T> (T item, String filterText){}
 
     public void setEditable(boolean editable) {

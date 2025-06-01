@@ -371,14 +371,14 @@ public class MainController {
 //                propertiesTab.setDisable(true);
 
 //                partitionsTitledPane.setVisible(false);
-//                if (oldValue != null && oldValue != newValue && (oldValue instanceof KafkaTopicTreeItem<?> || oldValue instanceof KafkaPartitionTreeItem<?>)) {
+            if (oldValue != null && oldValue != newValue && (oldValue instanceof KafkaTopicTreeItem<?> || oldValue instanceof KafkaPartitionTreeItem<?>)) {
 //                    TreeItem oldSelectedTreeItem = (TreeItem) oldValue;
 //                    treeMsgTableItemCache.put(oldSelectedTreeItem, MessageView.MessageTableState.builder()
 //                            .items(messageTable.getItems())
 //                            .filter(messageTable.getFilter())
 //                            .build());
-//                    messageView.switchTopicOrPartition((TreeItem) oldValue, (TreeItem) newValue);
-//                }
+                messageView.cacheMessages((TreeItem) oldValue);
+            }
 
 
 //                if (!(newValue instanceof ConsumerGroupTreeItem)) {
@@ -406,7 +406,7 @@ public class MainController {
 //                    messageTable.configureSortAndFilterForMessageTable(new Filter("", false), messagePollingPosition);
 //                }
 
-                messageView.switchTopicOrPartition((TreeItem) oldValue, (TreeItem) newValue);
+                messageView.switchTopicOrPartition((TreeItem) newValue);
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 // Enable the data tab and show/hide titled panes in the tab
                 tabPane.getTabs().remove(cgOffsetsTab);
@@ -454,7 +454,7 @@ public class MainController {
 //                refreshPartitionsTbl(clusterName, topicName);
 
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
-                messageView.switchTopicOrPartition((TreeItem) oldValue, (TreeItem) newValue);
+                messageView.switchTopicOrPartition((TreeItem) newValue);
 //                isPolling.set(false);
                 tabPane.getTabs().remove(cgOffsetsTab);
                 if (!tabPane.getTabs().contains(dataTab)) {

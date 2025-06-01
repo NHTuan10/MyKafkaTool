@@ -34,6 +34,12 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
         clusterManager = ClusterManager.getInstance();
     }
 
+    @FXML
+    protected void initialize() {
+        super.initialize();
+        numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Partitions"));
+    }
+
     @Override
     protected Predicate<KafkaPartitionsTableItem> filterPredicate(Filter filter) {
         return Filter.buildFilterPredicate(filter, KafkaPartitionsTableItem::getLeader);

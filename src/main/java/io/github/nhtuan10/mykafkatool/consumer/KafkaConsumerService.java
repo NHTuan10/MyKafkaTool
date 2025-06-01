@@ -169,7 +169,7 @@ public class KafkaConsumerService {
 //        List<KafkaMessageTableItem> allMessages = new ArrayList<>();
         ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
 //        int emptyPullCountDown = AppConstant.EMPTY_PULL_STILL_STOP;
-        Map<TopicPartition, Boolean> isAllMsgPulled = partitionOffsetsToPoll.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> false));
+        Map<TopicPartition, Boolean> isAllMsgPulled = partitionOffsetsToPoll.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> (entry.getValue().getRight() - entry.getValue().getLeft() <= 0)));
         try (consumer) {
             while (true) {
                 ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));

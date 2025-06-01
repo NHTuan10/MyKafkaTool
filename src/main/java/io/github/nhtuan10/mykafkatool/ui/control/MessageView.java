@@ -29,8 +29,6 @@ import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -102,9 +100,6 @@ public class MessageView extends SplitPane {
     @FXML
     private CheckBox isLiveUpdateCheckBox;
 
-
-    private StringProperty filterMsgTextProperty = new SimpleStringProperty("");
-
     // message buttons
     @FXML
     private Button countMessagesBtn;
@@ -172,6 +167,15 @@ public class MessageView extends SplitPane {
         isPolling.addListener((observable, oldValue, newValue) -> {
             pollMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
         });
+        messageTable.addFilterListener((filter) -> {
+            if (selectedTreeItem instanceof KafkaTopicTreeItem<?>) {
+                treeMsgTableItemCache.forEach((treeItem, state) -> {
+                    if (treeItem instanceof KafkaPartitionTreeItem<?> && treeItem.getParent() == selectedTreeItem) {
+                        state.setFilter(filter);
+                    }
+                });
+            }
+        });
     }
 
     private void initPollingOptionsUI() {
@@ -184,6 +188,7 @@ public class MessageView extends SplitPane {
                 setDisable(empty || date.isAfter(LocalDate.now()));
             }
         });
+        startTimestampPicker.valueProperty().addListener(event -> countMessages());
         keyContentType.setItems(FXCollections.observableArrayList(serDesHelper.getSupportedKeyDeserializer()));
         keyContentType.getSelectionModel().selectFirst();
 //        valueContentType.setItems(SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES);
@@ -226,15 +231,21 @@ public class MessageView extends SplitPane {
         this.stageHolder.setStage(stage);
     }
 
-    public void switchTopicOrPartition(TreeItem oldValue, TreeItem newValue) {
+    public void cacheMessages(TreeItem oldValue) {
         treeMsgTableItemCache.put(oldValue, MessageView.MessageTableState.builder()
                 .items(messageTable.getItems())
                 .filter(messageTable.getFilter())
                 .build());
+    }
+
+    public void switchTopicOrPartition(TreeItem newValue) {
+        if (!(newValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
+            return;
+        }
         this.selectedTreeItem = newValue;
         KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
         isPolling.set(false);
-        if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
+        if (newValue instanceof KafkaTopicTreeItem<?>) {
             // if some clear msg table
             if (treeMsgTableItemCache.containsKey(newValue)) {
                 MessageView.MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
@@ -249,10 +260,10 @@ public class MessageView extends SplitPane {
                 messageTable.configureSortAndFilterForMessageTable(new Filter("", false), messagePollingPosition);
             }
             countMessages();
-        } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
-            KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
+        } else if (newValue instanceof KafkaPartitionTreeItem<?>) {
+            KafkaPartition partition = (KafkaPartition) newValue.getValue();
             Predicate<KafkaMessageTableItem> partitionPredicate = item -> item.getPartition() == partition.id();
-            TreeItem<?> topicTreeItem = selectedItem.getParent();
+            TreeItem<?> topicTreeItem = newValue.getParent();
             ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList();
             MessageView.MessageTableState messageTableState = null;
             if (treeMsgTableItemCache.containsKey(newValue)) {
@@ -280,6 +291,7 @@ public class MessageView extends SplitPane {
 //                    configureSortAndFilterForMessageTable(messageTableState.getFilterText());
             }
             messageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition, partitionPredicate);
+            countMessages();
         }
     }
 
@@ -343,7 +355,7 @@ public class MessageView extends SplitPane {
                         .schema(schema)
                         .pollCallback(() -> {
                             isBlockingAppUINeeded.set(false);
-                            Platform.runLater(() -> messageTable.handleNumOfMsgChanged(messageTable.getItems().size()));
+                            Platform.runLater(() -> messageTable.handleNumOfMsgChanged(messageTable.getShownItems().size()));
 //
                             return new KafkaConsumerService.PollCallback(list, isPolling);
                         })
@@ -382,7 +394,7 @@ public class MessageView extends SplitPane {
         Consumer<Void> onSuccess = (val) -> {
             isBlockingAppUINeeded.set(false);
             isPolling.set(false);
-            messageTable.handleNumOfMsgChanged(messageTable.getItems().size());
+            messageTable.handleNumOfMsgChanged(messageTable.getShownItems().size());
 //            allMsgTableItems.setAll(list);
         };
         Consumer<Throwable> onFailure = (exception) -> {

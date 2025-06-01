@@ -39,10 +39,11 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
         clusterManager = ClusterManager.getInstance();
     }
 
-//    @FXML
-//    protected void initialize() {
-//        super.initialize();
-//    }
+    @FXML
+    protected void initialize() {
+        super.initialize();
+        numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Properties"));
+    }
 
     @Override
     protected Predicate<UIPropertyTableItem> filterPredicate(Filter filter) {

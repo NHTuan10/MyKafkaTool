@@ -82,8 +82,10 @@ public class TableViewConfigurer {
     public static <S> void configureTableViewHeaderTooltip(TableView<S> tableView) {
         tableView.getColumns().forEach((tableColumn) -> {
             TableColumnHeader header = (TableColumnHeader) tableView.lookup("#" + tableColumn.getId());
-            Label label = (Label) header.lookup(".label");
-            label.setTooltip(new Tooltip(tableColumn.getText()));
+            if (header != null) {
+                Label label = (Label) header.lookup(".label");
+                label.setTooltip(new Tooltip(tableColumn.getText()));
+            }
         });
     }
 
