@@ -1,70 +1,28 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
-import com.google.common.collect.ImmutableMap;
-import io.github.nhtuan10.mykafkatool.api.PluggableDeserializer;
-import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
-import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
-import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
-import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
-import io.github.nhtuan10.mykafkatool.serdes.deserializer.ByteArrayDeserializer;
-import io.github.nhtuan10.mykafkatool.serdes.deserializer.SchemaRegistryAvroDeserializer;
-import io.github.nhtuan10.mykafkatool.serdes.deserializer.StringDeserializer;
-import io.github.nhtuan10.mykafkatool.serdes.serializer.ByteArraySerializer;
-import io.github.nhtuan10.mykafkatool.serdes.serializer.SchemaRegistryAvroSerializer;
-import io.github.nhtuan10.mykafkatool.serdes.serializer.StringSerializer;
-import io.github.nhtuan10.mykafkatool.ui.Filter;
-import io.github.nhtuan10.mykafkatool.ui.KafkaMessageTableItem;
-import io.github.nhtuan10.mykafkatool.ui.StageHolder;
-import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
-import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
-import io.github.nhtuan10.mykafkatool.ui.control.*;
+import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable;
+import io.github.nhtuan10.mykafkatool.ui.control.MessageView;
+import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl;
+import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyView;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.kafka.common.TopicPartition;
-import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 // TODO: refactor this class
 
@@ -72,19 +30,19 @@ import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_T
 public class MainController {
     private final ClusterManager clusterManager = ClusterManager.getInstance();
 
-    private final KafkaConsumerService kafkaConsumerService;
+//    private final KafkaConsumerService kafkaConsumerService;
 
-    private final ProducerUtil producerUtil;
+//    private final ProducerUtil producerUtil;
 
-    private final SerDesHelper serDesHelper;
+//    private final SerDesHelper serDesHelper;
 
-    private final JsonHighlighter jsonHighlighter;
+//    private final JsonHighlighter jsonHighlighter;
 
     private KafkaClusterTree kafkaClusterTree;
 
-    private final Map<TreeItem, MessageTableState> treeMsgTableItemCache = new ConcurrentHashMap<>();
+//    private final Map<TreeItem, MessageView.MessageTableState> treeMsgTableItemCache = new ConcurrentHashMap<>();
 
-    private final BooleanProperty isPolling = new SimpleBooleanProperty(false);
+//    private final BooleanProperty isPolling = new SimpleBooleanProperty(false);
 
     private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
 //    private final SimpleLongProperty totalMessagesInTheTopicProperty = new SimpleLongProperty(0);
@@ -100,17 +58,19 @@ public class MainController {
     @FXML
     private Tab dataTab;
 
-    @FXML
-    private MessageTable messageTable;
+//    @FXML
+//    private MessageTable messageTable;
 
+    @FXML
+    private MessageView messageView;
 //    private ObservableList<KafkaMessageTableItem> allMsgTableItems = FXCollections.observableArrayList();
 
     // Poll Options
 //    @FXML
 //    private TextField pollTimeTextField;
 
-    @FXML
-    private Label noMessagesLabel;
+//    @FXML
+//    private Label noMessagesLabel;
 
 //    @FXML
 //    private SimpleLongProperty noMsgLongProp = new SimpleLongProperty();
@@ -118,31 +78,31 @@ public class MainController {
 //    @FXML
 //    private Label totalMessagesInTheTopicLabel;
 
-    @FXML
-    private TextField maxMessagesTextField;
+//    @FXML
+//    private TextField maxMessagesTextField;
 
-    @FXML
-    private DateTimePicker startTimestampPicker;
+//    @FXML
+//    private DateTimePicker startTimestampPicker;
 
-    @FXML
-    private ComboBox<String> keyContentType;
+//    @FXML
+//    private ComboBox<String> keyContentType;
 
-    @FXML
-    private ComboBox<String> valueContentType;
+//    @FXML
+//    private ComboBox<String> valueContentType;
 
-    @FXML
-    private ComboBox<KafkaConsumerService.MessagePollingPosition> msgPollingPosition;
+//    @FXML
+//    private ComboBox<KafkaConsumerService.MessagePollingPosition> msgPollingPosition;
 
-    @FXML
-    private CodeArea schemaTextArea;
+//    @FXML
+//    private CodeArea schemaTextArea;
 
-    @FXML
-    private CheckBox isLiveUpdateCheckBox;
+//    @FXML
+//    private CheckBox isLiveUpdateCheckBox;
 
 //    @FXML
 //    private TextField filterMsgTextField;
 
-    private StringProperty filterMsgTextProperty = new SimpleStringProperty("");
+//    private StringProperty filterMsgTextProperty = new SimpleStringProperty("");
 
 //    @FXML
 //    private ToggleButton regexFilterToggleBtn;
@@ -154,20 +114,20 @@ public class MainController {
 //    private DateTimePicker endTimestampPicker;
 
     // message buttons
-    @FXML
-    private Button countMessagesBtn;
+//    @FXML
+//    private Button countMessagesBtn;
 
-    @FXML
-    private Button pollMessagesBtn;
+//    @FXML
+//    private Button pollMessagesBtn;
 
-    @FXML
-    private ProgressIndicator isPollingMsgProgressIndicator;
+//    @FXML
+//    private ProgressIndicator isPollingMsgProgressIndicator;
 
 //    @FXML
 //    private SplitPane schemaSplitPane;
 
-    @FXML
-    private SplitPane messageSplitPane;
+//    @FXML
+//    private SplitPane messageSplitPane;
 
 //    @FXML
 //    private SchemaEditableTableControl schemaEditableTableControl;
@@ -203,10 +163,10 @@ public class MainController {
     @FXML
     private SchemaRegistryControl schemaRegistryControl;
 
-    private StageHolder stageHolder;
+//    private StageHolder stageHolder;
 
     public void setStage(Stage stage) {
-        this.stageHolder.setStage(stage);
+//        this.stageHolder.setStage(stage);
         this.kafkaClusterTree.setStage(stage);
 //        this.schemaEditableTableControl.setStage(stage);
 //        this.topicConfigTable.setStage(stage);
@@ -214,25 +174,25 @@ public class MainController {
     }
 
     public MainController() {
-        StringSerializer stringSerializer = new StringSerializer();
-        StringDeserializer stringDeserializer = new StringDeserializer();
-        ByteArraySerializer byteArraySerializer = new ByteArraySerializer();
-        ByteArrayDeserializer byteArrayDeserializer = new ByteArrayDeserializer();
-        SchemaRegistryAvroSerializer schemaRegistryAvroSerializer = new SchemaRegistryAvroSerializer();
-        SchemaRegistryAvroDeserializer schemaRegistryAvroDeserializer = new SchemaRegistryAvroDeserializer();
-        this.serDesHelper = new SerDesHelper(
-                ImmutableMap.of(stringSerializer.getName(), stringSerializer,
-                        byteArraySerializer.getName(), byteArraySerializer,
-                        schemaRegistryAvroSerializer.getName(), schemaRegistryAvroSerializer),
-                ImmutableMap.of(stringDeserializer.getName(), stringDeserializer,
-                        byteArrayDeserializer.getName(), byteArrayDeserializer,
-                        schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer
-                )
-        );
-        this.producerUtil = new ProducerUtil(this.serDesHelper);
-        this.kafkaConsumerService = new KafkaConsumerService(this.serDesHelper);
-        this.jsonHighlighter = new JsonHighlighter();
-        this.stageHolder = new StageHolder();
+//        StringSerializer stringSerializer = new StringSerializer();
+//        StringDeserializer stringDeserializer = new StringDeserializer();
+//        ByteArraySerializer byteArraySerializer = new ByteArraySerializer();
+//        ByteArrayDeserializer byteArrayDeserializer = new ByteArrayDeserializer();
+//        SchemaRegistryAvroSerializer schemaRegistryAvroSerializer = new SchemaRegistryAvroSerializer();
+//        SchemaRegistryAvroDeserializer schemaRegistryAvroDeserializer = new SchemaRegistryAvroDeserializer();
+//        this.serDesHelper = new SerDesHelper(
+//                ImmutableMap.of(stringSerializer.getName(), stringSerializer,
+//                        byteArraySerializer.getName(), byteArraySerializer,
+//                        schemaRegistryAvroSerializer.getName(), schemaRegistryAvroSerializer),
+//                ImmutableMap.of(stringDeserializer.getName(), stringDeserializer,
+//                        byteArrayDeserializer.getName(), byteArrayDeserializer,
+//                        schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer
+//                )
+//        );
+//        this.producerUtil = new ProducerUtil(this.serDesHelper);
+//        this.kafkaConsumerService = new KafkaConsumerService(this.serDesHelper);
+//        this.jsonHighlighter = new JsonHighlighter();
+//        this.stageHolder = new StageHolder();
     }
 
     @FXML
@@ -240,26 +200,26 @@ public class MainController {
 
         blockAppProgressInd.visibleProperty().bindBidirectional(isBlockingAppUINeeded);
 //        partitionsTitledPane.setVisible(false);
-        initPollingOptionsUI();
+//        initPollingOptionsUI();
 //        this.filterMsgTextField.textProperty().bindBidirectional(filterMsgTextProperty);
         this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaRegistryControl, SchemaRegistryManager.getInstance());
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
 //        configureTableView();
-        messageTable.configureMessageTable(serDesHelper);
+//        messageTable.configureMessageTable(serDesHelper);
 //        schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
 //            ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
 //        });
 //        totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty
 //                totalMessagesInTheTopicProperty.asString("%,d Messages")
 //        );
-        isPollingMsgProgressIndicator.visibleProperty().bindBidirectional(isPolling);
-        isPollingMsgProgressIndicator.managedProperty().bindBidirectional(isPolling);
+//        isPollingMsgProgressIndicator.visibleProperty().bindBidirectional(isPolling);
+//        isPollingMsgProgressIndicator.managedProperty().bindBidirectional(isPolling);
 //        pullMessagesBtn.textProperty().bind(isPolling.map((isPolling) ->
 //                isPolling ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT));
-        isPolling.addListener((observable, oldValue, newValue) -> {
-            pollMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
-        });
+//        isPolling.addListener((observable, oldValue, newValue) -> {
+//            pollMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
+//        });
 //        noMessagesLabel.textProperty().bind(noMsgLongProp.asString().concat(" Messages"));
 //        stage = tabPane.getScene().getWindow();
     }
@@ -352,98 +312,101 @@ public class MainController {
 //            log.info("Selected item in msg table: {}", newValue);
 //        });
 //    }
-    private void initPollingOptionsUI() {
-//        pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME_MS));
-        maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
-        startTimestampPicker.setDayCellFactory(param -> new DateCell() {
-            @Override
-            public void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                setDisable(empty || date.isAfter(LocalDate.now()));
-            }
-        });
-        keyContentType.setItems(FXCollections.observableArrayList(serDesHelper.getSupportedKeyDeserializer()));
-        keyContentType.getSelectionModel().selectFirst();
-//        valueContentType.setItems(SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES);
-        valueContentType.setItems(FXCollections.observableArrayList(serDesHelper.getSupportedValueDeserializer()));
-//        valueContentType.setValue(SerdeUtil.SERDE_STRING);
-        valueContentType.getSelectionModel().selectFirst();
-        msgPollingPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
-        msgPollingPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
-        valueContentType.setOnAction(event -> {
-            PluggableDeserializer deserializer = serDesHelper.getPluggableDeserialize(valueContentType.getValue());
-            schemaTextArea.setDisable(!deserializer.mayNeedUserInputForSchema());
-            isPolling.set(false);
-        });
-        schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
-        schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtil.highlightJsonInCodeArea(newText, schemaTextArea, false, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
-//                    if (valueDisplayTypeComboBox.getValue() == DisplayType.JSON) {
-////                       && !newText.equals(oldText)){
-//                        textArea.setStyleSpans(0, json.highlight(newText));
-//                    } else if (valueDisplayTypeComboBox.getValue() == DisplayType.TEXT) {
-//                        textArea.clearStyle(0, newText.length() - 1);
-//                    }
-        });
-        isLiveUpdateCheckBox.setOnAction(event -> {
-            if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
-                isPolling.set(false);
-//                pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
-            }
-        });
-        isLiveUpdateCheckBox.disableProperty()
-                .bind(msgPollingPosition.valueProperty().map(
-                        v -> v != KafkaConsumerService.MessagePollingPosition.LAST));
-//        endTimestampLabel.setVisible(false);
-//        endTimestampLabel.setManaged(false);
-//        endTimestampPicker.setVisible(false);
-//        endTimestampPicker.setManaged(false);
-    }
+//    private void initPollingOptionsUI() {
+////        pollTimeTextField.setText(String.valueOf(DEFAULT_POLL_TIME_MS));
+//        maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
+//        startTimestampPicker.setDayCellFactory(param -> new DateCell() {
+//            @Override
+//            public void updateItem(LocalDate date, boolean empty) {
+//                super.updateItem(date, empty);
+//                setDisable(empty || date.isAfter(LocalDate.now()));
+//            }
+//        });
+//        keyContentType.setItems(FXCollections.observableArrayList(serDesHelper.getSupportedKeyDeserializer()));
+//        keyContentType.getSelectionModel().selectFirst();
+////        valueContentType.setItems(SerdeUtil.SUPPORT_VALUE_CONTENT_TYPES);
+//        valueContentType.setItems(FXCollections.observableArrayList(serDesHelper.getSupportedValueDeserializer()));
+////        valueContentType.setValue(SerdeUtil.SERDE_STRING);
+//        valueContentType.getSelectionModel().selectFirst();
+//        msgPollingPosition.setItems(FXCollections.observableArrayList(KafkaConsumerService.MessagePollingPosition.values()));
+//        msgPollingPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
+//        valueContentType.setOnAction(event -> {
+//            PluggableDeserializer deserializer = serDesHelper.getPluggableDeserialize(valueContentType.getValue());
+//            schemaTextArea.setDisable(!deserializer.mayNeedUserInputForSchema());
+//            isPolling.set(false);
+//        });
+//        schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
+//        schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
+//            ViewUtil.highlightJsonInCodeArea(newText, schemaTextArea, false, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+////                    if (valueDisplayTypeComboBox.getValue() == DisplayType.JSON) {
+//////                       && !newText.equals(oldText)){
+////                        textArea.setStyleSpans(0, json.highlight(newText));
+////                    } else if (valueDisplayTypeComboBox.getValue() == DisplayType.TEXT) {
+////                        textArea.clearStyle(0, newText.length() - 1);
+////                    }
+//        });
+//        isLiveUpdateCheckBox.setOnAction(event -> {
+//            if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
+//                isPolling.set(false);
+////                pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+//            }
+//        });
+//        isLiveUpdateCheckBox.disableProperty()
+//                .bind(msgPollingPosition.valueProperty().map(
+//                        v -> v != KafkaConsumerService.MessagePollingPosition.LAST));
+
+    /// /        endTimestampLabel.setVisible(false);
+    /// /        endTimestampLabel.setManaged(false);
+    /// /        endTimestampPicker.setVisible(false);
+    /// /        endTimestampPicker.setManaged(false);
+//    }
 
     private void configureClusterTreeSelectedItemChanged() {
         clusterTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             // Display the selection and its complete path from the root.
-            if (newValue != null && newValue != oldValue) {
+//            if (newValue != null && newValue != oldValue) {
                 // disable/hide UI tab and titled
 //                cgOffsetsTab.setDisable(true);
 //                dataTab.setDisable(true);
 //                propertiesTab.setDisable(true);
 
 //                partitionsTitledPane.setVisible(false);
-                if (oldValue != null && oldValue != newValue && (oldValue instanceof KafkaTopicTreeItem<?> || oldValue instanceof KafkaPartitionTreeItem<?>)) {
-                    TreeItem oldSelectedTreeItem = (TreeItem) oldValue;
-                    treeMsgTableItemCache.put(oldSelectedTreeItem, MessageTableState.builder()
-                            .items(messageTable.getItems())
-                            .filter(messageTable.getFilter())
-                            .build());
-                }
+//                if (oldValue != null && oldValue != newValue && (oldValue instanceof KafkaTopicTreeItem<?> || oldValue instanceof KafkaPartitionTreeItem<?>)) {
+//                    TreeItem oldSelectedTreeItem = (TreeItem) oldValue;
+//                    treeMsgTableItemCache.put(oldSelectedTreeItem, MessageView.MessageTableState.builder()
+//                            .items(messageTable.getItems())
+//                            .filter(messageTable.getFilter())
+//                            .build());
+//                    messageView.switchTopicOrPartition((TreeItem) oldValue, (TreeItem) newValue);
+//                }
 
 
-                if (!(newValue instanceof ConsumerGroupTreeItem)) {
-                    consumerGroupOffsetTable.setItems(FXCollections.observableArrayList());
-                }
+//                if (!(newValue instanceof ConsumerGroupTreeItem)) {
+//                    consumerGroupOffsetTable.setItems(FXCollections.observableArrayList());
+//                }
 //                if (!(newValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
 //                    topicConfigTable.setItems(FXCollections.emptyObservableList());
 //                }
-            }
+//            }
 
-            KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
+//            KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
             if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
-                isPolling.set(false);
-                // if some clear msg table
-                if (treeMsgTableItemCache.containsKey(newValue)) {
-                    MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
-                    ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList(messageTableState.getItems());
-//                    allMsgTableItems.setAll(msgItems);
-//                    configureSortAndFilterForMessageTable(messageTableState.getFilter());
-                    messageTable.setItems(msgItems, false);
-                    messageTable.configureSortAndFilterForMessageTable(messageTableState.filter, messagePollingPosition);
-                } else {
-//                    messageTable.setItems(FXCollections.emptyObservableList());
-                    messageTable.setItems(FXCollections.observableArrayList(), false);
-                    messageTable.configureSortAndFilterForMessageTable(new Filter("", false), messagePollingPosition);
-                }
+//                isPolling.set(false);
+//                // if some clear msg table
+//                if (treeMsgTableItemCache.containsKey(newValue)) {
+//                    MessageView.MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
+//                    ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList(messageTableState.getItems());
+////                    allMsgTableItems.setAll(msgItems);
+////                    configureSortAndFilterForMessageTable(messageTableState.getFilter());
+//                    messageTable.setItems(msgItems, false);
+//                    messageTable.configureSortAndFilterForMessageTable(messageTableState.getFilter(), messagePollingPosition);
+//                } else {
+////                    messageTable.setItems(FXCollections.emptyObservableList());
+//                    messageTable.setItems(FXCollections.observableArrayList(), false);
+//                    messageTable.configureSortAndFilterForMessageTable(new Filter("", false), messagePollingPosition);
+//                }
 
+                messageView.switchTopicOrPartition((TreeItem) oldValue, (TreeItem) newValue);
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 // Enable the data tab and show/hide titled panes in the tab
                 tabPane.getTabs().remove(cgOffsetsTab);
@@ -461,9 +424,10 @@ public class MainController {
 //                partitionsTitledPane.setVisible(true);
 //                schemaSplitPane.setVisible(false);
                 schemaRegistryControl.setVisible(false);
-                messageSplitPane.setVisible(true);
+//                messageSplitPane.setVisible(true);
+                messageView.setVisible(true);
 
-                countMessages();
+//                countMessages();
                 this.topicOrPartitionPropertyView.loadTopicConfig(topic, isBlockingAppUINeeded);
                 this.topicOrPartitionPropertyView.loadTopicPartitions(topic, this.isBlockingAppUINeeded);
 //                Callable<Void> getTopicAndPartitionProperties = () -> {
@@ -490,7 +454,8 @@ public class MainController {
 //                refreshPartitionsTbl(clusterName, topicName);
 
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
-                isPolling.set(false);
+                messageView.switchTopicOrPartition((TreeItem) oldValue, (TreeItem) newValue);
+//                isPolling.set(false);
                 tabPane.getTabs().remove(cgOffsetsTab);
                 if (!tabPane.getTabs().contains(dataTab)) {
                     tabPane.getTabs().add(dataTab);
@@ -507,39 +472,40 @@ public class MainController {
 //                tabPane.getSelectionModel().select(dataTab);
 //                schemaSplitPane.setVisible(false);
                 schemaRegistryControl.setVisible(false);
-                messageSplitPane.setVisible(true);
+//                messageSplitPane.setVisible(true);
+                messageView.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                Predicate<KafkaMessageTableItem> partitionPredicate = item -> item.getPartition() == partition.id();
-                TreeItem<?> topicTreeItem = selectedItem.getParent();
-                ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList();
-                MessageTableState messageTableState = null;
-                if (treeMsgTableItemCache.containsKey(newValue)) {
-                    messageTableState = treeMsgTableItemCache.get(newValue);
-                    msgItems = FXCollections.observableArrayList(messageTableState.getItems());
-                } else if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
-                    messageTableState = treeMsgTableItemCache.get(topicTreeItem);
-                    msgItems = FXCollections.observableArrayList(treeMsgTableItemCache.get(topicTreeItem).getItems());
-                }
-                Filter filter = new Filter("", false);
-                messageTable.setItems(msgItems, false);
-//                    allMsgTableItems.setAll(msgItems);
-                if (messageTableState != null) {
-                    filter = messageTableState.getFilter();
-//                    this.filterMsgTextProperty.set(filter.getFilterText());
-//                    this.regexFilterToggleBtn.setSelected(filter.isRegexFilter());
-//        this.allMsgTableItems.setAll(list);
-//        Comparator defaultComparator = Comparator.comparing(KafkaMessageTableItem::getTimestamp).reversed();
-//                    ObservableList<KafkaMessageTableItem> filteredList = this.allMsgTableItems
-//                            .filtered(item -> item.getPartition() == partition.id())
-//                            .filtered(isMsgTableItemMatched(filter));
-//                    SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(filteredList);
-//                    sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
-//                    messageTable.setItems(sortedList);
-//                    configureSortAndFilterForMessageTable(messageTableState.getFilterText());
-                }
-                messageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition, partitionPredicate);
+//                Predicate<KafkaMessageTableItem> partitionPredicate = item -> item.getPartition() == partition.id();
+//                TreeItem<?> topicTreeItem = selectedItem.getParent();
+//                ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList();
+//                MessageView.MessageTableState messageTableState = null;
+//                if (treeMsgTableItemCache.containsKey(newValue)) {
+//                    messageTableState = treeMsgTableItemCache.get(newValue);
+//                    msgItems = FXCollections.observableArrayList(messageTableState.getItems());
+//                } else if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
+//                    messageTableState = treeMsgTableItemCache.get(topicTreeItem);
+//                    msgItems = FXCollections.observableArrayList(treeMsgTableItemCache.get(topicTreeItem).getItems());
+//                }
+//                Filter filter = new Filter("", false);
+//                messageTable.setItems(msgItems, false);
+////                    allMsgTableItems.setAll(msgItems);
+//                if (messageTableState != null) {
+//                    filter = messageTableState.getFilter();
+////                    this.filterMsgTextProperty.set(filter.getFilterText());
+////                    this.regexFilterToggleBtn.setSelected(filter.isRegexFilter());
+////        this.allMsgTableItems.setAll(list);
+////        Comparator defaultComparator = Comparator.comparing(KafkaMessageTableItem::getTimestamp).reversed();
+////                    ObservableList<KafkaMessageTableItem> filteredList = this.allMsgTableItems
+////                            .filtered(item -> item.getPartition() == partition.id())
+////                            .filtered(isMsgTableItemMatched(filter));
+////                    SortedList<KafkaMessageTableItem> sortedList = new SortedList<>(filteredList);
+////                    sortedList.comparatorProperty().bind(messageTable.comparatorProperty());
+////                    messageTable.setItems(sortedList);
+////                    configureSortAndFilterForMessageTable(messageTableState.getFilterText());
+//                }
+//                messageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition, partitionPredicate);
 
-                countMessages();
+//                countMessages();
                 this.topicOrPartitionPropertyView.loadPartitionConfig(partition, isBlockingAppUINeeded);
 //                final String clusterName = partition.topic().cluster().getName();
 //                final String topic = partition.topic().name();
@@ -608,7 +574,8 @@ public class MainController {
                 dataTab.setDisable(false);
 //                schemaSplitPane.setVisible(true);
                 schemaRegistryControl.setVisible(true);
-                messageSplitPane.setVisible(false);
+                messageView.setVisible(false);
+//                messageSplitPane.setVisible(false);
                 KafkaCluster cluster = (KafkaCluster) selectedItem.getParent().getValue();
 //                    schemaEditableTableControl.loadAllSchemas(clusterName,
 //                            (e) -> isBlockingAppUINeeded.set(false),
@@ -630,117 +597,117 @@ public class MainController {
         });
     }
 
-    @FXML
-    protected void pollMessages() {
-        if (isPolling.get()) {
-            isPolling.set(false);
-//            pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
-            return;
-        }
-        TreeItem selectedTreeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
-        if (!(selectedTreeItem instanceof KafkaTopicTreeItem<?>)
-                && !(selectedTreeItem instanceof KafkaPartitionTreeItem<?>)) {
-            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
-            return;
-        }
-        String schema = schemaTextArea.getText();
-        ObservableList<KafkaMessageTableItem> list = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
-        messageTable.setItems(list);
-        // clear message cache for partitions
-        treeMsgTableItemCache.forEach((treeItem, state) -> {
-            if (treeItem instanceof KafkaPartitionTreeItem<?> && treeItem.getParent() == selectedTreeItem) {
-                treeMsgTableItemCache.remove(treeItem);
-            }
-        });
-//        ObservableList<KafkaMessageTableItem> list = messageTable.getItems();
-//        allMsgTableItems =  list;
-//        filterMsgTextField.setOnKeyPressed(e -> {
-//            if (e.getCode().equals(KeyCode.ENTER)) {
-//                configureSortAndFilterForMessageTable(list, filterMsgTextProperty.get());
-//            }
-//        });
-        KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
-//        filterMsgTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//                Filter filter = new Filter(filterMsgTextField.getText(), regexFilterToggleBtn.isSelected());
-//                messageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition);
-//                Optional.ofNullable(treeMsgTableItemCache.get(clusterTree.getSelectionModel().getSelectedItem())).ifPresent(t -> t.setFilter(filter));
-//            }
-//        });
-//        regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//                Filter filter = new Filter(filterMsgTextField.getText(), regexFilterToggleBtn.isSelected());
-//
-//                messageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition);
-//                Optional.ofNullable(treeMsgTableItemCache.get(clusterTree.getSelectionModel().getSelectedItem())).ifPresent(t -> t.setFilter(filter));
-//            }
-//        });
-//        messageTable.configureSortAndFilterForMessageTable(new Filter(filterMsgTextProperty.get(), regexFilterToggleBtn.isSelected()), messagePollingPosition);
-//        messageTable.setItems(list);
-//        if (maxMessagesTextField.getText().isEmpty()) {
-//            maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
+//    @FXML
+//    protected void pollMessages() {
+//        if (isPolling.get()) {
+//            isPolling.set(false);
+////            pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
+//            return;
 //        }
-        KafkaConsumerService.PollingOptions pollingOptions =
-                KafkaConsumerService.PollingOptions.builder()
-//                        .pollTime(Integer.parseInt(pollTimeTextField.getText()))
-                        .pollTime(DEFAULT_POLL_TIME_MS)
-                        .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
-                        .startTimestamp(getPollStartTimestamp())
-                        .pollingPosition(messagePollingPosition)
-                        .valueContentType(valueContentType.getValue())
-                        .schema(schema)
-                        .pollCallback(() -> {
-                            blockAppProgressInd.setVisible(false);
-                            Platform.runLater(() -> messageTable.handleNumOfMsgChanged(messageTable.getItems().size()));
+//        TreeItem selectedTreeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
+//        if (!(selectedTreeItem instanceof KafkaTopicTreeItem<?>)
+//                && !(selectedTreeItem instanceof KafkaPartitionTreeItem<?>)) {
+//            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
+//            return;
+//        }
+//        String schema = schemaTextArea.getText();
+//        ObservableList<KafkaMessageTableItem> list = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+//        messageTable.setItems(list);
+//        // clear message cache for partitions
+//        treeMsgTableItemCache.forEach((treeItem, state) -> {
+//            if (treeItem instanceof KafkaPartitionTreeItem<?> && treeItem.getParent() == selectedTreeItem) {
+//                treeMsgTableItemCache.remove(treeItem);
+//            }
+//        });
+////        ObservableList<KafkaMessageTableItem> list = messageTable.getItems();
+////        allMsgTableItems =  list;
+////        filterMsgTextField.setOnKeyPressed(e -> {
+////            if (e.getCode().equals(KeyCode.ENTER)) {
+////                configureSortAndFilterForMessageTable(list, filterMsgTextProperty.get());
+////            }
+////        });
+//        KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
+////        filterMsgTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+////            if (newValue != null) {
+////                Filter filter = new Filter(filterMsgTextField.getText(), regexFilterToggleBtn.isSelected());
+////                messageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition);
+////                Optional.ofNullable(treeMsgTableItemCache.get(clusterTree.getSelectionModel().getSelectedItem())).ifPresent(t -> t.setFilter(filter));
+////            }
+////        });
+////        regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+////            if (newValue != null) {
+////                Filter filter = new Filter(filterMsgTextField.getText(), regexFilterToggleBtn.isSelected());
+////
+////                messageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition);
+////                Optional.ofNullable(treeMsgTableItemCache.get(clusterTree.getSelectionModel().getSelectedItem())).ifPresent(t -> t.setFilter(filter));
+////            }
+////        });
+////        messageTable.configureSortAndFilterForMessageTable(new Filter(filterMsgTextProperty.get(), regexFilterToggleBtn.isSelected()), messagePollingPosition);
+////        messageTable.setItems(list);
+////        if (maxMessagesTextField.getText().isEmpty()) {
+////            maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
+////        }
+//        KafkaConsumerService.PollingOptions pollingOptions =
+//                KafkaConsumerService.PollingOptions.builder()
+////                        .pollTime(Integer.parseInt(pollTimeTextField.getText()))
+//                        .pollTime(DEFAULT_POLL_TIME_MS)
+//                        .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
+//                        .startTimestamp(getPollStartTimestamp())
+//                        .pollingPosition(messagePollingPosition)
+//                        .valueContentType(valueContentType.getValue())
+//                        .schema(schema)
+//                        .pollCallback(() -> {
+//                            blockAppProgressInd.setVisible(false);
+//                            Platform.runLater(() -> messageTable.handleNumOfMsgChanged(messageTable.getItems().size()));
+////
+//                            return new KafkaConsumerService.PollCallback(list, isPolling);
+//                        })
+//                        .isLiveUpdate(!isLiveUpdateCheckBox.isDisabled() && isLiveUpdateCheckBox.isSelected())
+//                        .build();
 //
-                            return new KafkaConsumerService.PollCallback(list, isPolling);
-                        })
-                        .isLiveUpdate(!isLiveUpdateCheckBox.isDisabled() && isLiveUpdateCheckBox.isSelected())
-                        .build();
-
-//        treeMsgTableItemCache.put(selectedTreeItem, MessageTableState.builder()
-//                .items(list)
-//                .filterText(filterMsgTextProperty.get())
-//                .pollingOptions(pollingOptions)
-//                .build());
-        blockAppProgressInd.setVisible(true);
-        isPolling.set(true);
-//        isPollingMsgProgressIndicator.setVisible(true);
-//        pullMessagesBtn.setText(AppConstant.STOP_POLLING_TEXT);
-        Callable<Void> pollMsgTask = () -> {
-
-            if (selectedTreeItem instanceof KafkaPartitionTreeItem<?> selectedItem) {
-                KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-//                    list.addAll(kafkaConsumerService.consumeMessages(partition, pollingOptions));
-                kafkaConsumerService.consumeMessages(partition, pollingOptions);
-            } else {
-                KafkaTopicTreeItem<?> selectedItem = (KafkaTopicTreeItem<?>) selectedTreeItem;
-                KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                try {
-//                        list.addAll(kafkaConsumerService.consumeMessages(topic, pollingOptions));
-                    kafkaConsumerService.consumeMessages(topic, pollingOptions);
-                } catch (Exception e) {
-                    log.error("Error when polling messages", e);
-                    throw new RuntimeException(e);
-                }
-            }
-
-            return null;
-        };
-        Consumer<Void> onSuccess = (val) -> {
-            blockAppProgressInd.setVisible(false);
-            isPolling.set(false);
-            messageTable.handleNumOfMsgChanged(messageTable.getItems().size());
-//            allMsgTableItems.setAll(list);
-        };
-        Consumer<Throwable> onFailure = (exception) -> {
-            blockAppProgressInd.setVisible(false);
-            isPolling.set(false);
-            log.error("Error when polling messages", exception);
-            UIErrorHandler.showError(Thread.currentThread(), exception);
-        };
-        ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
-    }
+////        treeMsgTableItemCache.put(selectedTreeItem, MessageTableState.builder()
+////                .items(list)
+////                .filterText(filterMsgTextProperty.get())
+////                .pollingOptions(pollingOptions)
+////                .build());
+//        blockAppProgressInd.setVisible(true);
+//        isPolling.set(true);
+////        isPollingMsgProgressIndicator.setVisible(true);
+////        pullMessagesBtn.setText(AppConstant.STOP_POLLING_TEXT);
+//        Callable<Void> pollMsgTask = () -> {
+//
+//            if (selectedTreeItem instanceof KafkaPartitionTreeItem<?> selectedItem) {
+//                KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
+////                    list.addAll(kafkaConsumerService.consumeMessages(partition, pollingOptions));
+//                kafkaConsumerService.consumeMessages(partition, pollingOptions);
+//            } else {
+//                KafkaTopicTreeItem<?> selectedItem = (KafkaTopicTreeItem<?>) selectedTreeItem;
+//                KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
+//                try {
+////                        list.addAll(kafkaConsumerService.consumeMessages(topic, pollingOptions));
+//                    kafkaConsumerService.consumeMessages(topic, pollingOptions);
+//                } catch (Exception e) {
+//                    log.error("Error when polling messages", e);
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//
+//            return null;
+//        };
+//        Consumer<Void> onSuccess = (val) -> {
+//            blockAppProgressInd.setVisible(false);
+//            isPolling.set(false);
+//            messageTable.handleNumOfMsgChanged(messageTable.getItems().size());
+////            allMsgTableItems.setAll(list);
+//        };
+//        Consumer<Throwable> onFailure = (exception) -> {
+//            blockAppProgressInd.setVisible(false);
+//            isPolling.set(false);
+//            log.error("Error when polling messages", exception);
+//            UIErrorHandler.showError(Thread.currentThread(), exception);
+//        };
+//        ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
+//    }
 
 //    private void configureSortAndFilterForMessageTable(Filter filter) {
 //        String filterText = filter.getFilterText();
@@ -770,80 +737,80 @@ public class MainController {
     /// /        return (item != null && item.getKey().toLowerCase().contains(filterText.toLowerCase()))
     /// /                || (item != null && item.getValue().toLowerCase().contains(filterText.toLowerCase()));
 //    }
-    private void displayNotPollingMessage() {
+//    private void displayNotPollingMessage() {
 //        isPollingMsgProgressIndicator.setVisible(false);
 //        pullMessagesBtn.setText(AppConstant.POLL_MESSAGES_TEXT);
 //        blockAppProgressInd.setVisible(false);
 //        isPolling.set(false);
-    }
+//    }
 
-    private Long getPollStartTimestamp() {
-        return startTimestampPicker.getValue() != null ? ZonedDateTime.of(startTimestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
-    }
+//    private Long getPollStartTimestamp() {
+//        return startTimestampPicker.getValue() != null ? ZonedDateTime.of(startTimestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
+//    }
 
     @FXML
     protected void addTopic() throws IOException, ExecutionException, InterruptedException {
         kafkaClusterTree.addTopic();
     }
 
-    @FXML
-    protected void addMessage() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
-            KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-            KafkaTopic topic = partition.topic();
-            addMessage(topic, partition, keyContentType.getValue(), valueContentType.getValue(), schemaTextArea.getText());
-        } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
-            KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-            addMessage(topic, null, keyContentType.getValue(), valueContentType.getValue(), schemaTextArea.getText());
-        } else {
-            new Alert(Alert.AlertType.WARNING, "Please choose a topic or partition to add messages", ButtonType.OK)
-                    .show();
-        }
-    }
+//    @FXML
+//    protected void addMessage() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+//        if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
+//            KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
+//            KafkaTopic topic = partition.topic();
+//            addMessage(topic, partition, keyContentType.getValue(), valueContentType.getValue(), schemaTextArea.getText());
+//        } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
+//            KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
+//            addMessage(topic, null, keyContentType.getValue(), valueContentType.getValue(), schemaTextArea.getText());
+//        } else {
+//            new Alert(Alert.AlertType.WARNING, "Please choose a topic or partition to add messages", ButtonType.OK)
+//                    .show();
+//        }
+//    }
+//
+//
+//    public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException {
+//
+//        AtomicReference<Object> ref = new AtomicReference<>();
+//        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
+//                Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
+//                        "schemaTextArea", schemaTextArea.getText()), true, true, stageHolder.getStage());
+//        KafkaMessage newMsg = (KafkaMessage) ref.get();
+//        if (newMsg != null) {
+//            producerUtil.sendMessage(kafkaTopic, partition, newMsg);
+//            if (!isPolling.get())
+//                pollMessages();
+//            ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
+//                    ButtonType.OK);
+//        }
+//    }
 
-
-    public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException {
-
-        AtomicReference<Object> ref = new AtomicReference<>();
-        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
-                Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
-                        "schemaTextArea", schemaTextArea.getText()), true, true, stageHolder.getStage());
-        KafkaMessage newMsg = (KafkaMessage) ref.get();
-        if (newMsg != null) {
-            producerUtil.sendMessage(kafkaTopic, partition, newMsg);
-            if (!isPolling.get())
-                pollMessages();
-            ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
-                    ButtonType.OK);
-        }
-    }
-
-    @FXML
-    protected void countMessages() {
-        Callable<Long> callable = () -> {
-            try {
-                long count;
-                if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
-                    KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                    Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.topic().cluster().getName(), new TopicPartition(partition.topic().name(), partition.id()), getPollStartTimestamp());
-                    count = partitionInfo.getLeft() >= 0 ? (partitionInfo.getRight() - partitionInfo.getLeft()) : 0;
-                } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
-                    KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
-                    count = clusterManager.getAllPartitionOffsetInfo(topic.cluster().getName(), topic.name(), getPollStartTimestamp()).values()
-                            .stream().mapToLong(t -> t.getLeft() >= 0 ? t.getRight() - t.getLeft() : 0).sum();
-                } else {
-                    count = 0;
-                }
-                return count;
-            } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                log.error("Error when count messages", e);
-                throw new RuntimeException(e);
-            }
-        };
-        ViewUtil.runBackgroundTask(callable, (count) -> countMessagesBtn.setText("Count: " + count), (e) -> {
-            throw ((RuntimeException) e);
-        });
-    }
+//    @FXML
+//    protected void countMessages() {
+//        Callable<Long> callable = () -> {
+//            try {
+//                long count;
+//                if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedItem) {
+//                    KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
+//                    Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.topic().cluster().getName(), new TopicPartition(partition.topic().name(), partition.id()), getPollStartTimestamp());
+//                    count = partitionInfo.getLeft() >= 0 ? (partitionInfo.getRight() - partitionInfo.getLeft()) : 0;
+//                } else if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedItem) {
+//                    KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
+//                    count = clusterManager.getAllPartitionOffsetInfo(topic.cluster().getName(), topic.name(), getPollStartTimestamp()).values()
+//                            .stream().mapToLong(t -> t.getLeft() >= 0 ? t.getRight() - t.getLeft() : 0).sum();
+//                } else {
+//                    count = 0;
+//                }
+//                return count;
+//            } catch (ExecutionException | InterruptedException | TimeoutException e) {
+//                log.error("Error when count messages", e);
+//                throw new RuntimeException(e);
+//            }
+//        };
+//        ViewUtil.runBackgroundTask(callable, (count) -> countMessagesBtn.setText("Count: " + count), (e) -> {
+//            throw ((RuntimeException) e);
+//        });
+//    }
 
 //    @FXML
 //    public void refreshPartitionsTblAction() {
@@ -892,17 +859,4 @@ public class MainController {
 //        };
 //        ViewUtil.runBackgroundTask(task, onSuccess, onFailure);
 
-    /// /        ;
-    /// /        totalMessagesInTheTopicLabel.setText(totalMsg + " Messages");
-//    }
-
-    @Data
-    @AllArgsConstructor
-    @Builder
-    public static class MessageTableState {
-        ObservableList<KafkaMessageTableItem> items;
-        Filter filter;
-        //        Comparator<KafkaMessageTableItem> comparator;
-        KafkaConsumerService.PollingOptions pollingOptions;
-    }
 }
