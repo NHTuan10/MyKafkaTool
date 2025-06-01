@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <?import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.MessageTable?>
 <?import javafx.geometry.*?>
@@ -5,47 +7,33 @@
 <?import javafx.scene.layout.*?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
-<fx:root type="SplitPane" dividerPositions="0.1662971175166297, 0.5"
-         orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0"
-         AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-         xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0"
+         type="SplitPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+         AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
     <items>
-        <AnchorPane maxHeight="50.0" minHeight="39.0" minWidth="0.0"
-                    prefHeight="50.0" prefWidth="993.0">
+        <AnchorPane maxHeight="70.0" minHeight="40.0" minWidth="0.0" prefHeight="50.0" prefWidth="993.0">
             <children>
-                <FlowPane minHeight="40.0" prefHeight="50.0"
-                          prefWidth="993.0"
-                          AnchorPane.bottomAnchor="61.0"
-                          AnchorPane.leftAnchor="0.0"
-                          AnchorPane.rightAnchor="0.0"
-                          AnchorPane.topAnchor="0.0">
+                <FlowPane minHeight="40.0" prefHeight="50.0" prefWidth="993.0" AnchorPane.bottomAnchor="61.0"
+                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
-                        <ProgressIndicator
-                                fx:id="isPollingMsgProgressIndicator"
-                                prefHeight="31.0" prefWidth="26.0"
-                                visible="false">
+                        <ProgressIndicator fx:id="isPollingMsgProgressIndicator" prefHeight="31.0" prefWidth="26.0"
+                                           visible="false">
                             <FlowPane.margin>
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </ProgressIndicator>
-                        <Button fx:id="pollMessagesBtn"
-                                mnemonicParsing="false"
-                                onAction="#pollMessages"
+                        <Button fx:id="pollMessagesBtn" mnemonicParsing="false" onAction="#pollMessages"
                                 text="Poll Msgs">
                             <FlowPane.margin>
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </Button>
-                        <CheckBox fx:id="isLiveUpdateCheckBox"
-                                  mnemonicParsing="false"
-                                  text="Live Update">
+                        <CheckBox fx:id="isLiveUpdateCheckBox" mnemonicParsing="false" text="Live Update">
                             <FlowPane.margin>
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </CheckBox>
-                        <Button mnemonicParsing="false"
-                                onAction="#addMessage" text="Add Msg">
+                        <Button mnemonicParsing="false" onAction="#addMessage" text="Add Msg">
                             <FlowPane.margin>
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
@@ -67,18 +55,14 @@
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </Label>
-                        <DateTimePicker fx:id="startTimestampPicker"
-                                        prefWidth="180.0">
+                        <DateTimePicker fx:id="startTimestampPicker" prefWidth="180.0">
                             <FlowPane.margin>
-                                <Insets left="10.0" right="10.0"
-                                        top="5.0"/>
+                                <Insets left="10.0" right="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </DateTimePicker>
                         <!--                                                                        <Label fx:id="endTimestampLabel" text="Before" visible="false" />-->
                         <!--                                                                        <DateTimePicker fx:id="endTimestampPicker" disable="true" prefWidth="180.0" visible="false" />-->
-                        <Button fx:id="countMessagesBtn"
-                                mnemonicParsing="false"
-                                onAction="#countMessages"
+                        <Button fx:id="countMessagesBtn" mnemonicParsing="false" onAction="#countMessages"
                                 text="Count: 0">
                             <FlowPane.margin>
                                 <Insets left="10.0" top="5.0"/>
@@ -89,15 +73,12 @@
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </Label>
-                        <ComboBox fx:id="msgPollingPosition"
-                                  promptText="LAST">
+                        <ComboBox fx:id="msgPollingPosition" promptText="LAST">
                             <FlowPane.margin>
                                 <Insets left="5.0"/>
                             </FlowPane.margin>
                         </ComboBox>
-                        <TextField fx:id="maxMessagesTextField"
-                                   prefHeight="26.0" prefWidth="72.0"
-                                   text="1000">
+                        <TextField fx:id="maxMessagesTextField" prefHeight="26.0" prefWidth="72.0" text="1000">
                             <FlowPane.margin>
                                 <Insets left="10.0"/>
                             </FlowPane.margin>
@@ -129,17 +110,12 @@
                 </FlowPane>
             </children>
         </AnchorPane>
-        <AnchorPane maxHeight="200.0" minHeight="50.0" minWidth="0.0"
-                    prefHeight="100.0" prefWidth="993.0">
+        <AnchorPane maxHeight="200.0" minHeight="50.0" minWidth="0.0" prefHeight="100.0" prefWidth="993.0">
             <children>
-                <HBox prefHeight="100.0" prefWidth="993.0"
-                      AnchorPane.bottomAnchor="0.0"
-                      AnchorPane.leftAnchor="0.0"
-                      AnchorPane.rightAnchor="0.0"
-                      AnchorPane.topAnchor="0.0">
+                <HBox prefHeight="100.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
-                        <Label prefHeight="17.0" prefWidth="73.0"
-                               text="Key Type">
+                        <Label prefHeight="17.0" prefWidth="73.0" text="Key Type">
                             <HBox.margin>
                                 <Insets right="10.0"/>
                             </HBox.margin>
@@ -147,18 +123,14 @@
                                 <Insets left="5.0"/>
                             </padding>
                         </Label>
-                        <ComboBox fx:id="keyContentType"
-                                  prefHeight="26.0" prefWidth="130.0"/>
-                        <Label prefHeight="17.0" prefWidth="72.0"
-                               text="Value Type">
+                        <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="130.0"/>
+                        <Label prefHeight="17.0" prefWidth="72.0" text="Value Type">
                             <HBox.margin>
                                 <Insets left="10.0" right="10.0"/>
                             </HBox.margin>
                         </Label>
-                        <ComboBox fx:id="valueContentType"
-                                  prefHeight="26.0" prefWidth="130.0"/>
-                        <Label prefHeight="17.0" prefWidth="87.0"
-                               text="Value Schema">
+                        <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="130.0"/>
+                        <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema">
                             <HBox.margin>
                                 <Insets left="10.0" right="10.0"/>
                             </HBox.margin>
@@ -168,10 +140,7 @@
                                 <Insets right="5.0"/>
                             </HBox.margin>
                             <content>
-                                <CodeArea fx:id="schemaTextArea"
-                                          disable="true"
-                                          prefHeight="93.0"
-                                          prefWidth="388.0"
+                                <CodeArea fx:id="schemaTextArea" disable="true" prefHeight="93.0" prefWidth="388.0"
                                           style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"
                                           wrapText="true">
                                 </CodeArea>
@@ -181,12 +150,10 @@
                 </HBox>
             </children>
         </AnchorPane>
-        <AnchorPane maxHeight="1.7976931348623157E308" minHeight="50.0"
-                    minWidth="0.0" prefHeight="461.0" prefWidth="993.0">
+        <AnchorPane maxHeight="1.7976931348623157E308" minHeight="50.0" minWidth="0.0" prefHeight="461.0"
+                    prefWidth="993.0">
             <children>
-                <StackPane AnchorPane.bottomAnchor="4.0"
-                           AnchorPane.leftAnchor="0.0"
-                           AnchorPane.rightAnchor="6.0"
+                <StackPane AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0"
                            AnchorPane.topAnchor="0.0">
                     <children>
                         <MessageTable fx:id="messageTable"/>
