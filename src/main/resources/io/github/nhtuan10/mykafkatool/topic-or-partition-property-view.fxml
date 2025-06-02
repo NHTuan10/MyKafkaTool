@@ -5,10 +5,12 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<fx:root minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" type="AnchorPane"
-         xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root minHeight="0.0" minWidth="0.0" prefHeight="451.0" prefWidth="772.0" type="AnchorPane"
+         xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
                                           <children>
-                                              <Accordion prefHeight="614.0" prefWidth="936.0">
+                                              <Accordion prefHeight="180.0" prefWidth="200.0"
+                                                         AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                   <panes>
                                                       <TitledPane animated="false" text="Properties">
                                                           <content>
@@ -21,7 +23,13 @@
 <!--                                                                           </columns> -->
 <!--                                                                       </TableView> -->
 
-                                                                    <TopicOrPartitionPropertyTable fx:id="topicConfigTable" prefHeight="535.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                      <TopicOrPartitionPropertyTable
+                                                                              fx:id="topicOrPartitionPropertyTable"
+                                                                              prefHeight="535.0" prefWidth="934.0"
+                                                                              AnchorPane.bottomAnchor="0.0"
+                                                                              AnchorPane.leftAnchor="0.0"
+                                                                              AnchorPane.rightAnchor="0.0"
+                                                                              AnchorPane.topAnchor="0.0">
 <!--                                                                         <editable> <Boolean fx:value="false"/> </editable> -->
                                                                     </TopicOrPartitionPropertyTable>
                                                                   </children>

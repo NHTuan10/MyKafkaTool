@@ -6,6 +6,7 @@ import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionsTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,11 +28,17 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
     private KafkaTopic kafkaTopic;
     private final ClusterManager clusterManager;
     private BooleanProperty isBlockingUINeeded;
+    private ReadOnlyBooleanProperty isShownOnWindow;
     private StringProperty totalMessages;
 
     public TopicPartitionsTable() {
         super(false);
         clusterManager = ClusterManager.getInstance();
+    }
+
+    public void setProperties(BooleanProperty isBlockingAppUINeeded, ReadOnlyBooleanProperty isShownOnWindow) {
+        this.isBlockingUINeeded = isBlockingAppUINeeded;
+        this.isShownOnWindow = isShownOnWindow;
     }
 
     @FXML
@@ -45,23 +52,18 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
         return Filter.buildFilterPredicate(filter, KafkaPartitionsTableItem::getLeader);
     }
 
-    public void loadTopicPartitions(KafkaTopic kafkaTopic, StringProperty totalMessages, BooleanProperty isBusy) {
+    public void loadTopicPartitions(KafkaTopic kafkaTopic, StringProperty totalMessages) {
         this.kafkaTopic = kafkaTopic;
-        this.isBlockingUINeeded = isBusy;
         this.totalMessages = totalMessages;
-        refresh(false);
+        refresh();
     }
 
     @Override
     @FXML
     public void refresh() {
-        refresh(true);
-    }
-
-    public void refresh(boolean isFocused) {
         String clusterName = kafkaTopic.cluster().getName();
         String topicName = kafkaTopic.name();
-        isBlockingUINeeded.set(isFocused);
+        isBlockingUINeeded.set(isShownOnWindow.get());
         ObservableList<KafkaPartitionsTableItem> partitionsTableItems = FXCollections.observableArrayList();
         Callable<Long> task = () -> {
             List<TopicPartitionInfo> topicPartitionInfos;

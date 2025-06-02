@@ -12,6 +12,8 @@ import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable;
 import io.github.nhtuan10.mykafkatool.ui.control.MessageView;
 import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl;
 import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyView;
+import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
+import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import javafx.beans.property.BooleanProperty;
@@ -23,14 +25,16 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.SubmissionPublisher;
 
 // TODO: refactor this class
 
 @Slf4j
 public class MainController {
-    private final ClusterManager clusterManager = ClusterManager.getInstance();
-
+    public static final int SUBSCRIBER_MAX_BUFFER_CAPACITY = 1000;
+    private final ClusterManager clusterManager;
     private KafkaClusterTree kafkaClusterTree;
+    private final EventDispatcher eventDispatcher;
 
     private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
 
@@ -73,13 +77,21 @@ public class MainController {
     }
 
     public MainController() {
+        this.clusterManager = ClusterManager.getInstance();
+        this.eventDispatcher = new EventDispatcher(new SubmissionPublisher<>()
+                , new SubmissionPublisher<>());
     }
 
     @FXML
     public void initialize() {
+        topicOrPartitionPropertyView.setProperties(isBlockingAppUINeeded, this.propertiesTab.selectedProperty());
+        this.eventDispatcher.addTopicEventSubscriber(topicOrPartitionPropertyView.getTopicEventSubscriber());
+
+        schemaRegistryControl.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
+        this.eventDispatcher.addSchemaRegistryEventSubscriber(schemaRegistryControl.getSchemaRegistryEventSubscriber());
 
         blockAppProgressInd.visibleProperty().bindBidirectional(isBlockingAppUINeeded);
-        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaRegistryControl, SchemaRegistryManager.getInstance());
+        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, SchemaRegistryManager.getInstance(), eventDispatcher);
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
     }
@@ -108,9 +120,7 @@ public class MainController {
                 propertiesTab.setDisable(false);
                 schemaRegistryControl.setVisible(false);
                 messageView.setVisible(true);
-
-                this.topicOrPartitionPropertyView.loadTopicConfig(topic, isBlockingAppUINeeded);
-                this.topicOrPartitionPropertyView.loadTopicPartitions(topic, this.isBlockingAppUINeeded);
+                eventDispatcher.publishEvent(new UIEvent.TopicEvent(topic, UIEvent.Action.REFRESH_TOPIC));
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 messageView.switchTopicOrPartition((TreeItem) newValue);
                 tabPane.getTabs().remove(cgOffsetsTab);
@@ -128,7 +138,7 @@ public class MainController {
                 schemaRegistryControl.setVisible(false);
                 messageView.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
-                this.topicOrPartitionPropertyView.loadPartitionConfig(partition, isBlockingAppUINeeded);
+                this.topicOrPartitionPropertyView.loadPartitionConfig(partition);
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 if (!tabPane.getTabs().contains(cgOffsetsTab)) {
                     tabPane.getTabs().add(cgOffsetsTab);
@@ -151,11 +161,13 @@ public class MainController {
                 schemaRegistryControl.setVisible(true);
                 messageView.setVisible(false);
                 KafkaCluster cluster = (KafkaCluster) selectedItem.getParent().getValue();
-                try {
-                    schemaRegistryControl.loadAllSchema(cluster, isBlockingAppUINeeded);
-                } catch (ExecutionException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                this.eventDispatcher.publishEvent(new UIEvent.SchemaRegistryEvent(cluster, UIEvent.Action.REFRESH_SCHEMA_REGISTRY));
+//                try {
+//                    schemaRegistryControl.loadAllSchema(cluster, isBlockingAppUINeeded);
+
+//                } catch (ExecutionException | InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
 
             } else {
                 cgOffsetsTab.setDisable(true);

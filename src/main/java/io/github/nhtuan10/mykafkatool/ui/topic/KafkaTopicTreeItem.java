@@ -46,6 +46,11 @@ public class KafkaTopicTreeItem<T> extends TreeItem<T> {
         return super.getChildren();
     }
 
+    public void reloadChildren() {
+        super.getChildren().setAll(buildChildren(this));
+        isFirstTimeChildren = false;
+    }
+
     private ObservableList<TreeItem<T>> buildChildren(TreeItem<T> treeItem) {
 
         if (treeItem.getValue() instanceof KafkaTopic topic) {

@@ -1,6 +1,5 @@
 package io.github.nhtuan10.mykafkatool.ui.cluster;
 
-import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
@@ -10,7 +9,8 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupListTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl;
+import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
+import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
@@ -39,9 +39,9 @@ public class KafkaClusterTree {
 
     final private TreeView clusterTree;
 
-    final private SchemaRegistryControl schemaRegistryControl;
-
     final private SchemaRegistryManager schemaRegistryManager;
+
+    final private EventDispatcher eventDispatcher;
 
     @Setter
     private Stage stage;
@@ -148,6 +148,8 @@ public class KafkaClusterTree {
 
         MenuItem purgeTopicItem = createPurgeTopicActionMenuItem();
 
+        MenuItem refreshTopicItem = createRefreshTopicActionMenuItem();
+
         MenuItem purgePartitionItem = createPurgePartitionActionMenuItem();
 
         MenuItem deleteConnectionItem = configureDeleteConnectionActionMenuItem();
@@ -168,7 +170,7 @@ public class KafkaClusterTree {
                 clusterTreeContextMenu.getItems().setAll(addNewTopicItem, refreshItem);
             } else if (treeItem instanceof KafkaTopicTreeItem<?>) {
                 // TODO: add refresh, copy topic name, edit topic menu item
-                clusterTreeContextMenu.getItems().setAll(deleteTopicItem, purgeTopicItem);
+                clusterTreeContextMenu.getItems().setAll(refreshTopicItem, deleteTopicItem, purgeTopicItem);
             } else if (treeItem instanceof KafkaPartitionTreeItem<?>) {
                 clusterTreeContextMenu.getItems().setAll(purgePartitionItem);
             } else if (treeItem instanceof ConsumerGroupListTreeItem<?> consumerGroupListTreeItem) {
@@ -177,12 +179,14 @@ public class KafkaClusterTree {
                 clusterTreeContextMenu.getItems().setAll(refreshItem);
             } else if (AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue())) {
                 MenuItem refreshItem = new MenuItem("Refresh");
+                KafkaCluster kafkaCluster = (KafkaCluster) treeItem.getParent().getValue();
                 refreshItem.setOnAction(actionEvent -> {
-                    try {
-                        schemaRegistryControl.refresh();
-                    } catch (RestClientException | IOException | ExecutionException | InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+//                    try {
+//                        schemaRegistryControl.refresh();
+//                    } catch (RestClientException | IOException | ExecutionException | InterruptedException e) {
+//                        throw new RuntimeException(e);
+//                    }
+                    this.eventDispatcher.publishEvent(new UIEvent.SchemaRegistryEvent(kafkaCluster, UIEvent.Action.REFRESH_SCHEMA_REGISTRY));
                 });
                 clusterTreeContextMenu.getItems().setAll(refreshItem);
             } else {
@@ -227,6 +231,18 @@ public class KafkaClusterTree {
             }
         });
         return purgeTopicItem;
+    }
+
+    private MenuItem createRefreshTopicActionMenuItem() {
+        MenuItem refreshTopicItem = new MenuItem("Refresh");
+        refreshTopicItem.setOnAction(ae -> {
+            if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
+                KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
+                selectedTopicTreeItem.reloadChildren();
+                eventDispatcher.publishEvent(new UIEvent.TopicEvent(topic, UIEvent.Action.REFRESH_TOPIC));
+            }
+        });
+        return refreshTopicItem;
     }
 
     private MenuItem createAddTopicActionMenuItem() {

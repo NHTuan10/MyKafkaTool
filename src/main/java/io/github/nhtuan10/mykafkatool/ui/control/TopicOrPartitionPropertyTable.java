@@ -7,6 +7,7 @@ import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -33,6 +34,7 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
     private ConsumerType type;
     private final ClusterManager clusterManager;
     private BooleanProperty isBlockingUINeeded;
+    private ReadOnlyBooleanProperty isShownOnWindow;
 
     public TopicOrPartitionPropertyTable() {
         super(false);
@@ -44,6 +46,15 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
         // TODO: For topic, need to make properties editable. a table to list all CG for this topic
         super.initialize();
         numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Properties"));
+//        isShownOnWindow = new SimpleBooleanProperty(false);
+//        isShownOnWindow.bind(this.sceneProperty().map(Scene::windowProperty)
+//                .map((windowReadOnlyObjectProperty) ->  windowReadOnlyObjectProperty.get().showingProperty().get())
+//                .orElse(false));
+    }
+
+    public void setProperties(BooleanProperty isBlockingAppUINeeded, ReadOnlyBooleanProperty isShownOnWindow) {
+        this.isBlockingUINeeded = isBlockingAppUINeeded;
+        this.isShownOnWindow = isShownOnWindow;
     }
 
     @Override
@@ -51,18 +62,16 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
         return Filter.buildFilterPredicate(filter, UIPropertyTableItem::getName, UIPropertyTableItem::getValue);
     }
 
-    public void loadTopicConfig(KafkaTopic kafkaTopic, BooleanProperty isBlockingUINeeded) {
+    public void loadTopicConfig(KafkaTopic kafkaTopic) {
         this.kafkaTopic = kafkaTopic;
         this.type = ConsumerType.TOPIC;
-        this.isBlockingUINeeded = isBlockingUINeeded;
-        refreshTopicConfig(false);
+        refreshTopicConfig();
     }
 
-    public void loadPartitionConfig(KafkaPartition kafkaPartition, BooleanProperty isBlockingUINeeded) {
+    public void loadPartitionConfig(KafkaPartition kafkaPartition) {
         this.kafkaPartition = kafkaPartition;
         this.type = ConsumerType.PARTITION;
-        this.isBlockingUINeeded = isBlockingUINeeded;
-        refreshPartitionConfig(false);
+        refreshPartitionConfig();
     }
 
 
@@ -70,14 +79,15 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
     @FXML
     public void refresh() {
         if (type == ConsumerType.TOPIC) {
-            refreshTopicConfig(true);
+            refreshTopicConfig();
         } else if (type == ConsumerType.PARTITION) {
-            refreshPartitionConfig(true);
+            refreshPartitionConfig();
         }
     }
 
-    private void refreshPartitionConfig(boolean isFocused) {
-        isBlockingUINeeded.set(isFocused);
+    private void refreshPartitionConfig() {
+        isBlockingUINeeded.set(isShownOnWindow.get());
+//        isBlockingUINeeded.set(isFocused);
         final String clusterName = kafkaPartition.topic().cluster().getName();
         final String topic = kafkaPartition.topic().name();
         Callable<Void> getPartitionInfo = () -> {
@@ -109,8 +119,9 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
         ViewUtil.runBackgroundTask(getPartitionInfo, onSuccess, onFailure);
     }
 
-    private void refreshTopicConfig(boolean isFocused) {
-        isBlockingUINeeded.set(isFocused);
+    private void refreshTopicConfig() {
+        isBlockingUINeeded.set(isShownOnWindow.get());
+//        isBlockingUINeeded.set(isFocused);
         String clusterName = kafkaTopic.cluster().getName();
         String topicName = kafkaTopic.name();
         Callable<Void> getTopicAndPartitionProperties = () -> {

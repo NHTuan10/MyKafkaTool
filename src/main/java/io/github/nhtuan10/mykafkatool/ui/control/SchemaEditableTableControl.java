@@ -12,13 +12,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventTarget;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -78,7 +74,7 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
                         throw new RuntimeException("Error when loading subject {} from Schema Registry", e);
                     }
                 }
-                SelectedSchemaEvent selectedSchemaEvent = new SelectedSchemaEvent(new SimpleStringProperty(schema));
+                SchemaRegistryControl.SelectedSchemaEvent selectedSchemaEvent = new SchemaRegistryControl.SelectedSchemaEvent(new SimpleStringProperty(schema));
                 fireEvent(selectedSchemaEvent);
             }
         });
@@ -179,33 +175,6 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
         return false;
     }
 
-
-    @Getter
-    public static class SelectedSchemaEvent extends Event {
-        // Define event type
-        public static final EventType<SelectedSchemaEvent> SELECTED_SCHEMA_EVENT_TYPE =
-                new EventType<>(Event.ANY, "SELECTED_SCHEMA_EVENT_TYPE");
-
-        // Getter for custom data
-        private final SimpleStringProperty data;
-
-        public SelectedSchemaEvent(SimpleStringProperty data) {
-            super(SELECTED_SCHEMA_EVENT_TYPE);
-            this.data = data;
-        }
-
-        // Override copy method (required for event system)
-        @Override
-        public SelectedSchemaEvent copyFor(Object newSource, EventTarget newTarget) {
-            return new SelectedSchemaEvent(this.data);
-        }
-
-        // Override event type method (required for event system)
-        @Override
-        public EventType<? extends SelectedSchemaEvent> getEventType() {
-            return SELECTED_SCHEMA_EVENT_TYPE;
-        }
-    }
 
     @Data
     @AllArgsConstructor
