@@ -54,14 +54,14 @@ public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffset
             isBusy.set(false);
             setItems(items);
             ObservableList<TableColumn<ConsumerGroupOffsetTableItem, ?>> sortOrder = table.getSortOrder();
+            final List<String> sortedColumnNames = List.of(ConsumerGroupOffsetTableItem.CLIENT_ID, ConsumerGroupOffsetTableItem.TOPIC, ConsumerGroupOffsetTableItem.PARTITION);
             if (sortOrder.isEmpty()) {
-                TableColumn<ConsumerGroupOffsetTableItem, ?> clientIdCol = table.getColumns().get(1);
-                TableColumn<ConsumerGroupOffsetTableItem, ?> topicCol = table.getColumns().get(2);
-                TableColumn<ConsumerGroupOffsetTableItem, ?> partitionCol = table.getColumns().get(3);
-                clientIdCol.setSortType(TableColumn.SortType.ASCENDING);
-                topicCol.setSortType(TableColumn.SortType.ASCENDING);
-                partitionCol.setSortType(TableColumn.SortType.ASCENDING);
-                table.getSortOrder().addAll(List.of(clientIdCol, topicCol, partitionCol));
+                List<TableColumn<ConsumerGroupOffsetTableItem, ?>> sortedColumns = table.getColumns().stream()
+                        .filter(c -> sortedColumnNames.contains(c.getText()))
+                        .peek(c -> c.setSortType(TableColumn.SortType.ASCENDING))
+                        .toList();
+
+                table.getSortOrder().addAll(sortedColumns);
                 table.sort();
             }
         }, (e) -> {

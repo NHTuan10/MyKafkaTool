@@ -26,15 +26,15 @@ public class ConsumerGroupOffsetTableItem {
     @TableColumn
     private final SimpleStringProperty host;
 
-    private static final String CLIENT_ID = "Client Id";
-    private static final String TOPIC = "Topic";
-    private static final String PARTITION = "Partition";
-    private static final String START = "Start";
-    private static final String END = "End";
-    private static final String COMMITTED_OFFSET = "Committed Offset";
-    private static final String LAG = "Lag";
-    private static final String LAST_COMMIT = "Last commit";
-    private static final String HOST = "Host";
+    public static final String CLIENT_ID = "Client ID";
+    public static final String TOPIC = "Topic";
+    public static final String PARTITION = "Partition";
+    public static final String START = "Start";
+    public static final String END = "End";
+    public static final String COMMITTED_OFFSET = "Committed Offset";
+    public static final String LAG = "Lag";
+    public static final String LAST_COMMIT = "Last Commit";
+    public static final String HOST = "Host";
 
     public ConsumerGroupOffsetTableItem(String clientID, String topic, int partition, long start, long end, String committedOffset, String lag, String lastCommit, String host) {
         this.clientID = new SimpleStringProperty(clientID);

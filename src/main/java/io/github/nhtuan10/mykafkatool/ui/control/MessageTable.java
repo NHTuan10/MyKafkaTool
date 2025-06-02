@@ -98,12 +98,13 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
         super.applyFilter(filter, extraPredicates);
         ObservableList<TableColumn<KafkaMessageTableItem, ?>> sortOrder = table.getSortOrder();
         if (sortOrder == null || sortOrder.isEmpty()) {
-            TableColumn<KafkaMessageTableItem, ?> timestampColumn = table.getColumns().get(5);
-            timestampColumn.setSortType(pollingPosition == KafkaConsumerService.MessagePollingPosition.FIRST
-                    ? TableColumn.SortType.ASCENDING
-                    : TableColumn.SortType.DESCENDING);
-            table.getSortOrder().add(timestampColumn);
-            table.sort();
+            table.getColumns().stream().filter(c -> c.getText().equals(KafkaMessageTableItem.TIMESTAMP)).findFirst().ifPresent((timestampColumn) -> {
+                timestampColumn.setSortType(pollingPosition == KafkaConsumerService.MessagePollingPosition.FIRST
+                        ? TableColumn.SortType.ASCENDING
+                        : TableColumn.SortType.DESCENDING);
+                table.getSortOrder().add(timestampColumn);
+                table.sort();
+            });
         }
     }
 
