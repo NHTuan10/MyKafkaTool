@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.dao;
+package io.github.nhtuan10.mykafkatool.repo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;

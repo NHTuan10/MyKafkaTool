@@ -27,15 +27,18 @@ public class ConsumerTest {
                 .build();
         Map<String, Object> consumerProps = ConsumerCreator.buildConsumerConfigs(consumerCreatorConfig);
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_RESET_LATEST);
-        Consumer<String, Object> consumer = ClusterManager.getInstance().getConsumer(consumerProps);
-        consumer.subscribe(List.of("perf"));
+        Consumer<String, Object> consumer = ClusterManager.getInstance().createConsumer(consumerProps);
+        Consumer<String, Object> consumer2 = ClusterManager.getInstance().createConsumer(consumerProps);
+        consumer.subscribe(List.of("perf", "test2"));
+        consumer2.subscribe(List.of("perf", "test2"));
         //            consumers.clear();
         Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
         while (true) {
-            ConsumerRecords<String, Object> records = consumer.poll(Duration.ofSeconds(1));
+            ConsumerRecords<String, Object> records = consumer.poll(Duration.ofSeconds(5));
             for (ConsumerRecord<String, Object> record : records) {
                 log.info("Record, key: {}, value: {}", record.key(), record.value());
             }
+            consumer2.poll(Duration.ofSeconds(5));
         }
     }
 }

@@ -7,9 +7,12 @@ import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.TableColumn;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 
@@ -41,15 +44,29 @@ public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffset
         isBusy.set(true);
         ViewUtil.runBackgroundTask(() -> {
             try {
-                setItems(FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(consumerGroupTreeItem.getClusterName(), consumerGroupTreeItem.getConsumerGroupId())));
+                return FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(consumerGroupTreeItem.getClusterName(), consumerGroupTreeItem.getConsumerGroupId()));
             } catch (ExecutionException | InterruptedException e) {
                 isBusy.set(false);
                 log.error("Error when get consumer group offsets", e);
                 throw new RuntimeException(e);
             }
-            return null;
-        }, (e) -> isBusy.set(false), (e) -> {
+        }, (items) -> {
             isBusy.set(false);
+            setItems(items);
+            ObservableList<TableColumn<ConsumerGroupOffsetTableItem, ?>> sortOrder = table.getSortOrder();
+            if (sortOrder.isEmpty()) {
+                TableColumn<ConsumerGroupOffsetTableItem, ?> clientIdCol = table.getColumns().get(1);
+                TableColumn<ConsumerGroupOffsetTableItem, ?> topicCol = table.getColumns().get(2);
+                TableColumn<ConsumerGroupOffsetTableItem, ?> partitionCol = table.getColumns().get(3);
+                clientIdCol.setSortType(TableColumn.SortType.ASCENDING);
+                topicCol.setSortType(TableColumn.SortType.ASCENDING);
+                partitionCol.setSortType(TableColumn.SortType.ASCENDING);
+                table.getSortOrder().addAll(List.of(clientIdCol, topicCol, partitionCol));
+                table.sort();
+            }
+        }, (e) -> {
+            isBusy.set(false);
+            setItems(FXCollections.emptyObservableList());
             throw ((RuntimeException) e);
         });
     }

@@ -66,7 +66,7 @@ public class KafkaConsumerService {
                 .valueDeserializer(serDesHelper.getDeserializeClass(pollingOptions.valueContentType()))
                 .build();
         Map<String, Object> consumerProps = ConsumerCreator.buildConsumerConfigs(consumerCreatorConfig);
-        Consumer consumer = ClusterManager.getInstance().getConsumer(consumerProps);
+        Consumer consumer = ClusterManager.getInstance().createConsumer(consumerProps);
         consumers.add(consumer);
         consumer.assign(topicPartitions);
         Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll = seekOffset(consumer, topicPartitions, pollingOptions);

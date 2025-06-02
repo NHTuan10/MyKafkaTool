@@ -1,8 +1,8 @@
 package io.github.nhtuan10.mykafkatool.manager;
 
-import io.github.nhtuan10.mykafkatool.dao.UserPreferenceRepoImpl;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;
+import io.github.nhtuan10.mykafkatool.repo.UserPreferenceRepoImpl;
 import lombok.Getter;
 
 import java.io.IOException;
