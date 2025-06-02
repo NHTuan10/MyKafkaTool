@@ -161,9 +161,9 @@ public class TableViewConfigurer {
 //        tableView.getSelectionModel().setCellSelectionEnabled(isCellSelectionEnabled);
         tableView.getSelectionModel().setSelectionMode(selectionMode);
 
-        MenuItem copyItem = new MenuItem("Copy");
+        MenuItem copyItem = new MenuItem("Copy Row");
         copyItem.setOnAction(event -> copySelectedInTableViewToClipboard(tableView, false));
-
+        // TODO: add copy only 1 cell
         MenuItem exportTableItem = new MenuItem("Export Table");
         exportTableItem.setOnAction(event -> {
             String data = getTableDataInCSV(tableView);

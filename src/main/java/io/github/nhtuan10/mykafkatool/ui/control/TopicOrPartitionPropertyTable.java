@@ -41,6 +41,7 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
 
     @FXML
     protected void initialize() {
+        // TODO: For topic, need to make properties editable. a table to list all CG for this topic
         super.initialize();
         numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Properties"));
     }

@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 
+//TODO: create a new CG view which includes this table. Then add info such as number of topic, members, partition, members, total lag, topics, etc.
+
 @Slf4j
 public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffsetTableItem> {
     private ConsumerGroupTreeItem consumerGroupTreeItem;

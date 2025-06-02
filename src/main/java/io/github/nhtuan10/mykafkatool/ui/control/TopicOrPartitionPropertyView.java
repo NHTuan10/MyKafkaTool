@@ -50,6 +50,8 @@ public class TopicOrPartitionPropertyView extends AnchorPane {
 
     @FXML
     private void initialize() {
+        //TODO: this view is not fit to parent. Don't use Accordion
+
         totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty);
         partitionsTitledPane.setVisible(false);
 

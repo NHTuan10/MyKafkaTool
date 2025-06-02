@@ -160,6 +160,7 @@ public class MessageView extends SplitPane {
 
     @FXML
     private void initialize() {
+        // TODO: need to think about pagination for message table, may implement it if it's a good option
         initPollingOptionsUI();
         messageTable.configureMessageTable(serDesHelper);
         isPollingMsgProgressIndicator.visibleProperty().bindBidirectional(isPolling);

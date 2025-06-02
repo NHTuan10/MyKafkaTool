@@ -63,6 +63,8 @@ public class KafkaClusterTree {
                 throw new RuntimeException(e);
             }
         }));
+        //TODO: add  search topic, cluster, consumer groups function. Also show brokers & topic table, in-sync replicas, total topics, partitions
+
 
 //        TreeView<String> tree = new TreeView<String> (rootItem);
 
@@ -160,10 +162,12 @@ public class KafkaClusterTree {
             } else if (treeItem.getValue() instanceof KafkaCluster) { // tree item for a connection
                 clusterTreeContextMenu.getItems().setAll(editConnectionItem, deleteConnectionItem);
             } else if (treeItem instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
+                // TODO: create a view with topic table or have a search topic function in topic list tree item
                 MenuItem refreshItem = new MenuItem("Refresh");
                 refreshItem.setOnAction(actionEvent -> topicListTreeItem.reloadChildren());
                 clusterTreeContextMenu.getItems().setAll(addNewTopicItem, refreshItem);
             } else if (treeItem instanceof KafkaTopicTreeItem<?>) {
+                // TODO: add refresh, copy topic name, edit topic menu item
                 clusterTreeContextMenu.getItems().setAll(deleteTopicItem, purgeTopicItem);
             } else if (treeItem instanceof KafkaPartitionTreeItem<?>) {
                 clusterTreeContextMenu.getItems().setAll(purgePartitionItem);
@@ -184,6 +188,7 @@ public class KafkaClusterTree {
             } else {
                 clusterTreeContextMenu.getItems().setAll(blankItem);
             }
+            // TODO: Add refresh & copy CG name menu action item for consumer group too
         });
         clusterTree.setContextMenu(clusterTreeContextMenu);
     }

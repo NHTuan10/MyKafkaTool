@@ -48,6 +48,7 @@ public class SchemaRegistryControl extends SplitPane {
 
     @FXML
     public void initialize() {
+        // TODO: Multiple version for an schema, make the schema table editable
         schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
             ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
         });

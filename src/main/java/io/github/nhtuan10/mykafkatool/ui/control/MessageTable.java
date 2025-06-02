@@ -46,6 +46,7 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
     }
 
     public void configureMessageTable(SerDesHelper serDesHelper) {
+        //TODO: for message table, allow copy more details such as key, offset, partition, timestamp, headers, serialized size, etc.
         this.serDesHelper = serDesHelper;
         table.setRowFactory(tv -> {
             TableRow<KafkaMessageTableItem> row = new TableRow<>() {
