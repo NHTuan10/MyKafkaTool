@@ -32,6 +32,8 @@ public class TableViewConfigurer {
     public static final String COLUMN_SEPERATOR = "\t";
     public static final String LINE_SEPARATOR = System.lineSeparator();
     private final static CsvMapper CSV_MAPPER = new CsvMapper();
+    public static final int MAX_TABLE_COLUMN_WIDTH = 500;
+    public static final double TABLE_COLUMN_WIDTH_MARGIN = 40.0d;
 
     public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage, StageHolder stageHolder) {
         TableView<S> tableView = (TableView<S>) stage.getScene().lookup("#" + fxId);
@@ -101,7 +103,7 @@ public class TableViewConfigurer {
                 }
             }
             //set the new max-width with some extra space
-            column.setPrefWidth(Math.min(500, max) + 50.0d);
+            column.setPrefWidth(Math.min(MAX_TABLE_COLUMN_WIDTH, max) + TABLE_COLUMN_WIDTH_MARGIN);
         });
     }
 
