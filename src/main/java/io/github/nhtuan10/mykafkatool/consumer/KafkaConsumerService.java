@@ -114,7 +114,10 @@ public class KafkaConsumerService {
             consumer.seekToEnd(topicPartitions);
             for (TopicPartition topicPartition : topicPartitions) {
                 long endOffset = consumer.position(topicPartition);
-                Long startTsOffset = Optional.ofNullable(offsetsForTs.get(topicPartition)).map(OffsetAndTimestamp::offset).orElse(0L);
+                Long startTsOffset = Optional.ofNullable(offsetsForTs.get(topicPartition)).map(OffsetAndTimestamp::offset).orElseGet(() -> {
+                    consumer.seekToBeginning(List.of(topicPartition));
+                    return consumer.position(topicPartition);
+                });
                 if (endOffset < noMessages) {
                     consumer.seek(topicPartition, startTsOffset);
                 } else {

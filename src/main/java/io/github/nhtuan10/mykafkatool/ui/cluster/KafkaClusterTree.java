@@ -156,16 +156,8 @@ public class KafkaClusterTree {
     }
 
     public void configureClusterTreeActionMenu() {
-        MenuItem addNewConnectionItem = createAddConnectionActionMenuItem();
         MenuItem blankItem = new MenuItem("");
         blankItem.setVisible(false);
-
-        MenuItem addNewTopicItem = createAddTopicActionMenuItem();
-
-        MenuItem purgePartitionItem = createPurgePartitionActionMenuItem();
-
-        MenuItem deleteConnectionItem = configureDeleteConnectionActionMenuItem();
-        MenuItem editConnectionItem = createEditConnectionActionMenuItem();
 
         ContextMenu clusterTreeContextMenu = new ContextMenu(blankItem);
 
@@ -180,20 +172,21 @@ public class KafkaClusterTree {
             });
 
             if ((treeItem == null) || (treeItem.getParent() == null && AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue()))) {
-                clusterTreeContextMenu.getItems().setAll(addNewConnectionItem);
+                clusterTreeContextMenu.getItems().setAll(createAddingConnectionActionMenuItem());
             } else if (treeItem.getValue() instanceof KafkaCluster) { // tree item for a connection
-                clusterTreeContextMenu.getItems().setAll(editConnectionItem, deleteConnectionItem);
+                clusterTreeContextMenu.getItems().setAll(createEditingConnectionActionMenuItem(treeItem), createDeletingConnectionActionMenuItem(treeItem));
             } else if (treeItem instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
                 // TODO: create a view with topic table or have a search topic function in topic list tree item
                 MenuItem refreshItem = new MenuItem("Refresh");
                 refreshItem.setOnAction(actionEvent -> topicListTreeItem.reloadChildren());
-                clusterTreeContextMenu.getItems().setAll(addNewTopicItem, refreshItem);
+                clusterTreeContextMenu.getItems().setAll(createAddingTopicActionMenuItem(), refreshItem);
             } else if (treeItem instanceof KafkaTopicTreeItem<?>) {
                 // TODO:  edit topic menu item
                 clusterTreeContextMenu.getItems().setAll(getTopicActionMenuItems());
                 clusterTreeContextMenu.getItems().add(copyTreeItemNameMenuItem);
-            } else if (treeItem instanceof KafkaPartitionTreeItem<?>) {
-                clusterTreeContextMenu.getItems().setAll(purgePartitionItem);
+            } else if (treeItem instanceof KafkaPartitionTreeItem<?> selectedPartitionTreeItem) {
+                KafkaPartition partition = (KafkaPartition) selectedPartitionTreeItem.getValue();
+                clusterTreeContextMenu.getItems().setAll(createPurgingPartitionActionMenuItem(partition));
             } else if (treeItem instanceof ConsumerGroupListTreeItem<?> consumerGroupListTreeItem) {
                 MenuItem refreshItem = new MenuItem("Refresh");
                 refreshItem.setOnAction(actionEvent -> consumerGroupListTreeItem.reloadChildren());
@@ -221,26 +214,26 @@ public class KafkaClusterTree {
     }
 
     private List<MenuItem> getTopicActionMenuItems() {
-        MenuItem deleteTopicItem = createDeleteActionMenuItem();
+        MenuItem deleteTopicItem = createDeleteTopicActionMenuItem();
         MenuItem purgeTopicItem = createPurgeTopicActionMenuItem();
         MenuItem refreshTopicItem = createRefreshTopicActionMenuItem();
         return List.of(deleteTopicItem, purgeTopicItem, refreshTopicItem);
     }
 
-    private MenuItem createPurgePartitionActionMenuItem() {
+    private MenuItem createPurgingPartitionActionMenuItem(KafkaPartition partition) {
         MenuItem purgePartitionItem = new MenuItem("Purge Partition");
         purgePartitionItem.setOnAction(ae -> {
-            if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedPartitionTreeItem) {
-                KafkaPartition partition = (KafkaPartition) selectedPartitionTreeItem.getValue();
-                if (ViewUtil.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.id() + " ?", "Yes", "Cancel")) {
-                    try {
-                        clusterManager.purgePartition(partition);
-                    } catch (ExecutionException | InterruptedException e) {
-                        log.error("Error when purge partition", e);
-                        throw new RuntimeException(e);
-                    }
+//            if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedPartitionTreeItem) {
+//            KafkaPartition partition = (KafkaPartition) selectedPartitionTreeItem.getValue();
+            if (ViewUtil.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.id() + " ?", "Yes", "Cancel")) {
+                try {
+                    clusterManager.purgePartition(partition);
+                } catch (ExecutionException | InterruptedException e) {
+                    log.error("Error when purge partition", e);
+                    throw new RuntimeException(e);
                 }
             }
+//            }
         });
         return purgePartitionItem;
     }
@@ -264,7 +257,7 @@ public class KafkaClusterTree {
     }
 
     private MenuItem createRefreshTopicActionMenuItem() {
-        MenuItem refreshTopicItem = new MenuItem("Refresh");
+        MenuItem refreshTopicItem = new MenuItem("Refresh Metadata");
         refreshTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
@@ -275,7 +268,7 @@ public class KafkaClusterTree {
         return refreshTopicItem;
     }
 
-    private MenuItem createAddTopicActionMenuItem() {
+    private MenuItem createAddingTopicActionMenuItem() {
         MenuItem addNewTopicItem = new MenuItem("Add New Topic");
         addNewTopicItem.setOnAction(ae -> {
             try {
@@ -289,7 +282,7 @@ public class KafkaClusterTree {
         return addNewTopicItem;
     }
 
-    private MenuItem createDeleteActionMenuItem() {
+    private MenuItem createDeleteTopicActionMenuItem() {
         MenuItem deleteTopicItem = new MenuItem("Delete");
         deleteTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
@@ -303,7 +296,7 @@ public class KafkaClusterTree {
         return deleteTopicItem;
     }
 
-    private MenuItem createAddConnectionActionMenuItem() {
+    private MenuItem createAddingConnectionActionMenuItem() {
         MenuItem addNewConnectionItem = new MenuItem("Add New Connection");
         addNewConnectionItem.setOnAction(ae -> {
             try {
@@ -334,11 +327,10 @@ public class KafkaClusterTree {
         return addNewConnectionItem;
     }
 
-    private MenuItem createEditConnectionActionMenuItem() {
+    private MenuItem createEditingConnectionActionMenuItem(TreeItem<KafkaCluster> selectedItem) {
         MenuItem editConnectionItem = new MenuItem("Edit Connection");
         editConnectionItem.setOnAction(ae -> {
 
-            TreeItem<KafkaCluster> selectedItem = (TreeItem<KafkaCluster>) clusterTree.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
                 KafkaCluster oldConnection = selectedItem.getValue();
                 KafkaCluster newConnection;
@@ -388,15 +380,11 @@ public class KafkaClusterTree {
         connectToClusterAndLoadAllChildren(clusterTree, cluster);
     }
 
-    private MenuItem configureDeleteConnectionActionMenuItem() {
+    private MenuItem createDeletingConnectionActionMenuItem(TreeItem<KafkaCluster> selectedItem) {
         MenuItem deleteConnectionItem = new MenuItem("Delete Connection");
         deleteConnectionItem.setOnAction(ae -> {
-            TreeItem<KafkaCluster> selectedItem = (TreeItem<KafkaCluster>) clusterTree.getSelectionModel().getSelectedItem();
-            if (selectedItem != null && selectedItem.getParent() != null) {
-                // Remove the selected item from its parent's children
-                deleteConnection(selectedItem);
-            }
-
+            // Remove the selected item from its parent's children
+            deleteConnection(selectedItem);
         });
         return deleteConnectionItem;
     }
