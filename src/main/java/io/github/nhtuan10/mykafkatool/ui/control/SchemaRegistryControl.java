@@ -4,6 +4,7 @@ import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientExcept
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
+import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
@@ -25,6 +26,7 @@ import org.fxmisc.richtext.CodeArea;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Flow;
+import java.util.function.Consumer;
 
 public class SchemaRegistryControl extends SplitPane {
 
@@ -47,7 +49,8 @@ public class SchemaRegistryControl extends SplitPane {
 
     public SchemaRegistryControl() {
         jsonHighlighter = new JsonHighlighter();
-        schemaRegistryEventSubscriber = new SchemaRegistryEventSubscriber(this);
+        schemaRegistryEventSubscriber = new SchemaRegistryEventSubscriber(this, (ex) -> UIErrorHandler.showError(Thread.currentThread(), ex)
+        );
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "schema-registry-view.fxml"));
         fxmlLoader.setRoot(this);
@@ -119,6 +122,7 @@ public class SchemaRegistryControl extends SplitPane {
     public static class SchemaRegistryEventSubscriber implements Flow.Subscriber<UIEvent.SchemaRegistryEvent> {
         protected Flow.Subscription subscription = null;
         private final SchemaRegistryControl schemaRegistryControl;
+        private final Consumer<Exception> onFailure;
 
         @Override
         public void onSubscribe(Flow.Subscription subscription) {
@@ -130,17 +134,17 @@ public class SchemaRegistryControl extends SplitPane {
         public void onNext(UIEvent.SchemaRegistryEvent item) {
             try {
                 schemaRegistryControl.loadAllSchema(item.cluster());
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (ExecutionException | InterruptedException ex) {
+                onFailure.accept(ex);
+            } finally {
+                subscription.request(1);
             }
-            subscription.request(1);
         }
 
 
         @Override
         public void onError(Throwable throwable) {
             log.error("Error when refresh schema registry", throwable);
-            throw new RuntimeException(throwable);
         }
 
         @Override

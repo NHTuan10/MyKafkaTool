@@ -8,6 +8,7 @@ import io.github.nhtuan10.mykafkatool.manager.UserPreferenceManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
+import io.github.nhtuan10.mykafkatool.ui.CopyTextMenuItem;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
@@ -17,7 +18,6 @@ import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -164,7 +164,7 @@ public class KafkaClusterTree {
         clusterTreeContextMenu.setOnShowing(ae -> {
             TreeItem treeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
 
-            CopyTreeItemNameMenuItem copyTreeItemNameMenuItem = new CopyTreeItemNameMenuItem(MessageFormat.format("Copy \"{0}\"", treeItem.getValue().toString()));
+            CopyTextMenuItem copyTreeItemNameMenuItem = new CopyTextMenuItem(MessageFormat.format("Copy \"{0}\"", treeItem.getValue().toString()));
             copyTreeItemNameMenuItem.setOnAction(actionEvent -> {
                 final ClipboardContent clipboardContent = new ClipboardContent();
                 clipboardContent.putString(treeItem.getValue().toString());
@@ -208,7 +208,7 @@ public class KafkaClusterTree {
             } else {
                 clusterTreeContextMenu.getItems().setAll(blankItem);
             }
-            // TODO: Add refresh & copy CG name menu action item for consumer group too
+            // TODO: Add refresh for consumer group too
         });
         clusterTree.setContextMenu(clusterTreeContextMenu);
     }
@@ -402,17 +402,5 @@ public class KafkaClusterTree {
         }
     }
 
-    private static class CopyTreeItemNameMenuItem extends MenuItem {
-        public CopyTreeItemNameMenuItem() {
-        }
-
-        public CopyTreeItemNameMenuItem(String text) {
-            super(text);
-        }
-
-        public CopyTreeItemNameMenuItem(String text, Node graphic) {
-            super(text, graphic);
-        }
-    }
 }
 

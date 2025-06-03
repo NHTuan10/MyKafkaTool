@@ -55,10 +55,11 @@ public class TableViewConfigurer {
 //            label.setTooltip(new Tooltip(columnHeader));
 //            tableColumn.setGraphic(label);
             tableColumn.setCellValueFactory(new PropertyValueFactory<>(fieldNames.get(i)));
-            tableColumn.setCellFactory((column) -> new DragSelectionCell<>());
+            tableColumn.setCellFactory((column) -> new DragSelectionCell<>(stageHolder));
         });
         // Enable copy by Ctrl + C or by right click -> Copy
-        enableCopyAndExportDataFromTable(tableView, SelectionMode.MULTIPLE, stageHolder);
+        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        enableCopyDataFromTableByShortcutKeys(tableView);
         AtomicReference<Boolean> tooltipConfigured = new AtomicReference<>(false);
         //Set the auto-resize policy
         tableView.itemsProperty().addListener((observable, oldValue, newValue) -> {
@@ -100,7 +101,7 @@ public class TableViewConfigurer {
                 return;
             }
             String maxStr = IntStream.range(0, tableView.getItems().size())
-                    .mapToObj(i -> column.getCellData(i).toString())
+                    .mapToObj(i -> String.valueOf(column.getCellData(i)))
                     .max(Comparator.comparing(String::length)).orElse("");
             max = new Text(maxStr).getLayoutBounds().getWidth();
 //            for (int i = 0; i < tableView.getItems().size(); i++) {
@@ -173,13 +174,19 @@ public class TableViewConfigurer {
         });
     }
 
-    public static void enableCopyAndExportDataFromTable(TableView<?> tableView, SelectionMode selectionMode, StageHolder stage) {
-//        tableView.getSelectionModel().setCellSelectionEnabled(isCellSelectionEnabled);
-        tableView.getSelectionModel().setSelectionMode(selectionMode);
+    private static void enableCopyDataFromTableByShortcutKeys(TableView<?> tableView) {
+        final KeyCodeCombination keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN);
+        tableView.setOnKeyPressed(event -> {
+            if (keyCodeCopy.match(event)) {
+                copySelectedInTableViewToClipboard(tableView, false);
+            }
+        });
+    }
 
-        MenuItem copyItem = new MenuItem("Copy Row");
-        copyItem.setOnAction(event -> copySelectedInTableViewToClipboard(tableView, false));
-        // TODO: add copy only 1 cell
+    public static List<MenuItem> getTableContextMenuItems(TableView<?> tableView, String cellText, StageHolder stage) {
+        MenuItem copyRowItem = new MenuItem("Copy Row");
+        copyRowItem.setOnAction(event -> copySelectedInTableViewToClipboard(tableView, false));
+
         MenuItem exportTableItem = new MenuItem("Export Table");
         exportTableItem.setOnAction(event -> {
             String data = getTableDataInCSV(tableView);
@@ -200,18 +207,11 @@ public class TableViewConfigurer {
             }
         });
 
-        ContextMenu menu = new ContextMenu();
-        menu.getItems().add(copyItem);
-        menu.getItems().add(exportTableItem);
-        menu.getItems().add(exportSelectedItem);
-        tableView.setContextMenu(menu);
+        String truncatedText = cellText.length() > 21 ? cellText.substring(0, 21) + "..." : cellText;
+        MenuItem copyHoverCell = new CopyTextMenuItem("Copy '%s'".formatted(truncatedText));
+        copyHoverCell.setOnAction(event -> ViewUtil.copyTextToClipboard(cellText));
 
-        final KeyCodeCombination keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN);
-        tableView.setOnKeyPressed(event -> {
-            if (keyCodeCopy.match(event)) {
-                copySelectedInTableViewToClipboard(tableView, false);
-            }
-        });
+        return List.of(copyRowItem, exportTableItem, exportSelectedItem, copyHoverCell);
     }
 
     private static void copySelectedInTableViewToClipboard(TableView<?> tableView, boolean isCellSelectionEnabled) {
