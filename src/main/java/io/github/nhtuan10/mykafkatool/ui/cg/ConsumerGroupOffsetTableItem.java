@@ -8,7 +8,7 @@ import lombok.ToString;
 
 public class ConsumerGroupOffsetTableItem {
     @TableViewColumn
-    private final SimpleStringProperty clientID;
+    private final SimpleStringProperty consumerID;
     @TableViewColumn
     private final SimpleStringProperty topic;
     @TableViewColumn
@@ -26,7 +26,7 @@ public class ConsumerGroupOffsetTableItem {
     @TableViewColumn
     private final SimpleStringProperty host;
 
-    public static final String CLIENT_ID = "Client ID";
+    public static final String MEMBER_ID = "Member ID";
     public static final String TOPIC = "Topic";
     public static final String PARTITION = "Partition";
     public static final String START = "Start";
@@ -36,8 +36,8 @@ public class ConsumerGroupOffsetTableItem {
     public static final String LAST_COMMIT = "Last Commit";
     public static final String HOST = "Host";
 
-    public ConsumerGroupOffsetTableItem(String clientID, String topic, int partition, long start, long end, String committedOffset, String lag, String lastCommit, String host) {
-        this.clientID = new SimpleStringProperty(clientID);
+    public ConsumerGroupOffsetTableItem(String consumerID, String topic, int partition, long start, long end, String committedOffset, String lag, String lastCommit, String host) {
+        this.consumerID = new SimpleStringProperty(consumerID);
         this.topic = new SimpleStringProperty(topic);
         this.partition = new SimpleIntegerProperty(partition);
         this.start = new SimpleLongProperty(start);
@@ -116,17 +116,17 @@ public class ConsumerGroupOffsetTableItem {
         this.host.set(host);
     }
 
-    public String getClientID() {
-        return clientID.get();
+    public String getConsumerID() {
+        return consumerID.get();
     }
 
-    public void setClientID(String clientID) {
-        this.clientID.set(clientID);
+    public void setConsumerID(String consumerID) {
+        this.consumerID.set(consumerID);
     }
 
     @ToString
     public static class ConsumerGroupOffsetTableItemBuilder {
-        String clientId;
+        String consumerID;
         String topic;
         int partition;
         long start;
@@ -139,8 +139,8 @@ public class ConsumerGroupOffsetTableItem {
         ConsumerGroupOffsetTableItemBuilder() {
         }
 
-        public ConsumerGroupOffsetTableItemBuilder clientId(String clientId) {
-            this.clientId = clientId;
+        public ConsumerGroupOffsetTableItemBuilder consumerID(String consumerID) {
+            this.consumerID = consumerID;
             return this;
         }
 
@@ -186,7 +186,7 @@ public class ConsumerGroupOffsetTableItem {
         }
 
         public ConsumerGroupOffsetTableItem build() {
-            return new ConsumerGroupOffsetTableItem(this.clientId, this.topic, this.partition, this.start, this.end, this.committedOffset, this.lag, this.lastCommit, this.host);
+            return new ConsumerGroupOffsetTableItem(this.consumerID, this.topic, this.partition, this.start, this.end, this.committedOffset, this.lag, this.lastCommit, this.host);
         }
 
     }

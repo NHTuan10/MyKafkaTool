@@ -191,7 +191,7 @@ public class ClusterManager {
                             lag = String.valueOf(endOffset - metadata.offset());
                             leaderEpoch = metadata.leaderEpoch().orElse(0).toString();
                         }
-                        return new ConsumerGroupOffsetTableItem(member.clientId(), tp.topic(), tp.partition(), startAndEndOffset.getLeft(), endOffset, offset, lag, leaderEpoch, member.host());
+                        return new ConsumerGroupOffsetTableItem(member.consumerId(), tp.topic(), tp.partition(), startAndEndOffset.getLeft(), endOffset, offset, lag, leaderEpoch, member.host());
                     })).toList();
                 }
             } catch (InterruptedException | ExecutionException e) {
