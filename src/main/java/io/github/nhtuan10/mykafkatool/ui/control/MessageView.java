@@ -291,7 +291,7 @@ public class MessageView extends SplitPane {
                 treeMsgTableItemCache.remove(treeItem);
             }
         });
-
+        BooleanProperty firstPoll = new SimpleBooleanProperty(true);
         KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
         KafkaConsumerService.PollingOptions pollingOptions =
                 KafkaConsumerService.PollingOptions.builder()
@@ -302,6 +302,9 @@ public class MessageView extends SplitPane {
                         .valueContentType(valueContentType.getValue())
                         .schema(schema)
                         .pollCallback(() -> {
+                            if (firstPoll.get()) {
+                                messageTable.resizeColumn();
+                            }
                             isBlockingAppUINeeded.set(false);
                             Platform.runLater(() -> messageTable.handleNumOfMsgChanged(messageTable.getShownItems().size()));
                             return new KafkaConsumerService.PollCallback(list, isPolling);

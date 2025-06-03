@@ -117,9 +117,11 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
 
     public void handleNumOfMsgChanged(int numOfMsgLongProp) {
         this.noRowsIntProp.set(numOfMsgLongProp);
-        TableViewConfigurer.autoResizeColumns(table);
     }
 
+    public void resizeColumn() {
+        TableViewConfigurer.autoResizeColumns(table);
+    }
     public void addFilterListener(Consumer<Filter> runnable) {
         this.filterTextProperty.addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {

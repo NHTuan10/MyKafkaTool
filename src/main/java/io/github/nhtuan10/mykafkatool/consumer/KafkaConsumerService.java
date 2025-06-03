@@ -30,6 +30,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
@@ -138,12 +139,21 @@ public class KafkaConsumerService {
         ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
         Map<TopicPartition, Boolean> isAllMsgPulled = partitionOffsetsToPoll.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> (entry.getValue().getRight() - entry.getValue().getLeft() <= 0)));
         try (consumer) {
+//            boolean firstPoll = true;
+            ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
+            Supplier<PollCallback> pollCallbackSupplier = pollingOptions.pollCallback();
+//            PollCallback pollCallback = pollingOptions.pollCallback().get();
+            messageObservableList = pollCallbackSupplier.get().resultObservableList();
+
             while (true) {
-                ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
-                PollCallback pollCallback = pollingOptions.pollCallback().get();
-                if (!pollCallback.isPolling().get()) break;
+//                ConsumerRecords<String, Object> consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
+//                Supplier<PollCallback> pollCallbackSupplier = pollingOptions.pollCallback();
+//                if (firstPoll){
+////                    pollCallback = pollCallbackSupplier.get();
+//                    messageObservableList = pollCallbackSupplier.get().resultObservableList();
+//                    firstPoll = false;
+//                }
                 if (!consumerRecords.isEmpty()) {
-                    messageObservableList = pollCallback.resultObservableList();
                     List<KafkaMessageTableItem> messages = new ArrayList<>();
                     for (ConsumerRecord<String, Object> record : consumerRecords) {
                             TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
@@ -168,9 +178,11 @@ public class KafkaConsumerService {
                     if (!messages.isEmpty()) {
                         messageObservableList.addAll(messages);
                     }
+                    if (!pollCallbackSupplier.get().isPolling().get()) break;
                 }
                 if (isAllMsgPulled.entrySet().stream().allMatch(Map.Entry::getValue) && !pollingOptions.isLiveUpdate())
                     break;
+                consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
             }
         } catch (WakeupException e) {
 

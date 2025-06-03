@@ -42,6 +42,7 @@ public class TableViewConfigurer {
     }
 
     public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView, @NonNull StageHolder stageHolder) {
+        tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         TableColumn<S, S> numberCol = buildIndexTableColumn();
         tableView.getColumns().addFirst(numberCol);
 
@@ -85,26 +86,40 @@ public class TableViewConfigurer {
     }
 
     public static <S> void autoResizeColumns(TableView<S> tableView) {
-        tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         // ignore first column, which is index column
         tableView.getColumns().subList(1, tableView.getColumns().size()).forEach((column) ->
         {
+            if (column.getWidth() >= MAX_TABLE_COLUMN_WIDTH + TABLE_COLUMN_WIDTH_MARGIN) {
+                return;
+            }
             //Minimal width = columnheader
             Text t = new Text(column.getText());
             double max = t.getLayoutBounds().getWidth();
-            for (int i = 0; i < tableView.getItems().size(); i++) {
-                //cell must not be empty
-                if (column.getCellData(i) != null) {
-                    t = new Text(column.getCellData(i).toString());
-                    double calcwidth = t.getLayoutBounds().getWidth();
-                    //remember new max-width
-                    if (calcwidth > max) {
-                        max = calcwidth;
-                    }
-                }
+            if (max >= MAX_TABLE_COLUMN_WIDTH) {
+                column.setPrefWidth(MAX_TABLE_COLUMN_WIDTH + TABLE_COLUMN_WIDTH_MARGIN);
+                return;
             }
+            String maxStr = IntStream.range(0, tableView.getItems().size())
+                    .mapToObj(i -> column.getCellData(i).toString())
+                    .max(Comparator.comparing(String::length)).orElse("");
+            max = new Text(maxStr).getLayoutBounds().getWidth();
+//            for (int i = 0; i < tableView.getItems().size(); i++) {
+//                //cell must not be empty
+//                if (column.getCellData(i) != null) {
+//                    t = new Text(column.getCellData(i).toString());
+//                    double calcwidth = t.getLayoutBounds().getWidth();
+//                    //remember new max-width
+//                    if (calcwidth > max) {
+//                        max = calcwidth;
+//                    }
+//                    if (max >= MAX_TABLE_COLUMN_WIDTH)
+//                        break;
+//                }
+//            }
             //set the new max-width with some extra space
-            column.setPrefWidth(Math.min(MAX_TABLE_COLUMN_WIDTH, max) + TABLE_COLUMN_WIDTH_MARGIN);
+            if (max + TABLE_COLUMN_WIDTH_MARGIN > column.getWidth() + 20 && max < MAX_TABLE_COLUMN_WIDTH) {
+                column.setPrefWidth(Math.min(MAX_TABLE_COLUMN_WIDTH, max) + TABLE_COLUMN_WIDTH_MARGIN);
+            }
         });
     }
 
