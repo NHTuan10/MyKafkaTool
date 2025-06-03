@@ -25,10 +25,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 @Slf4j
-public class SchemaEditableTableControl extends EditableTableControl<SchemaTableItem> {
+public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
     private KafkaCluster selectedClusterName;
     private BooleanProperty isBlockingUINeeded;
     private Map<String, SchemaTableItemsAndFilter> clusterNameToSchemaTableItemsCache;
@@ -90,16 +89,16 @@ public class SchemaEditableTableControl extends EditableTableControl<SchemaTable
         });
     }
 
-    @Override
-    protected Predicate<SchemaTableItem> filterPredicate(Filter filter) {
-        return Filter.buildFilterPredicate(filter,
-                SchemaTableItem::getSubject,
-                SchemaTableItem::getSchema,
-                SchemaTableItem::getType,
-                SchemaTableItem::getCompatibility,
-                SchemaTableItem::getSchemaId,
-                SchemaTableItem::getLatestVersion);
-    }
+//    @Override
+//    protected Predicate<SchemaTableItem> filterPredicate(Filter filter) {
+//        return Filter.buildFilterPredicate(filter,
+//                SchemaTableItem::getSubject,
+//                SchemaTableItem::getSchema,
+//                SchemaTableItem::getType,
+//                SchemaTableItem::getCompatibility,
+//                SchemaTableItem::getSchemaId,
+//                SchemaTableItem::getLatestVersion);
+//    }
 
     //    @RequiredArgsConstructor
 //    private class FilterPredicated implements Predicate<SchemaTableItem> {

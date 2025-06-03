@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui;
 
-import io.github.nhtuan10.mykafkatool.annotation.TableColumn;
+import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -8,15 +8,15 @@ import lombok.Getter;
 import org.apache.kafka.common.header.Headers;
 
 public class KafkaMessageTableItem {
-    @TableColumn
+    @TableViewColumn
     private final SimpleIntegerProperty partition;
-    @TableColumn
+    @TableViewColumn
     private final SimpleLongProperty offset;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty key;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty value;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty timestamp;
     @Getter
     private final String valueContentType;

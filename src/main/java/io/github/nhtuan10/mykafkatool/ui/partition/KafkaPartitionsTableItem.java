@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.partition;
 
-import io.github.nhtuan10.mykafkatool.annotation.TableColumn;
+import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleLongProperty;
@@ -9,19 +9,19 @@ import javafx.collections.ObservableList;
 
 
 public class KafkaPartitionsTableItem {
-    @TableColumn
+    @TableViewColumn
     private final SimpleIntegerProperty partition;
-    @TableColumn
+    @TableViewColumn
     private final SimpleLongProperty startOffset;
-    @TableColumn
+    @TableViewColumn
     private final SimpleLongProperty endOffset;
-    @TableColumn
+    @TableViewColumn
     private final SimpleLongProperty numOfMessages;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty leader;
-    @TableColumn
+    @TableViewColumn
     private final SimpleListProperty<String> replicasInSync;
-    @TableColumn
+    @TableViewColumn
     private final SimpleListProperty<String> replicasNotInSync;
 
 

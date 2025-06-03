@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Button?>
-
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.ErrorController">
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<BorderPane prefHeight="504.0" prefWidth="539.0" xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.ErrorController">
     <center>
         <ScrollPane>
             <content>
                 <Label fx:id="errorMessage" wrapText="true" />
+                <!--                <TextArea fx:id="errorMessage" wrapText="true" />-->
             </content>
         </ScrollPane>
     </center>
     <bottom>
         <HBox alignment="CENTER">
-            <Button text="OK" onAction="#close"/>
+            <Button onAction="#close" text="OK"/>
         </HBox>
     </bottom>
 </BorderPane>

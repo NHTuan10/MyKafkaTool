@@ -9,6 +9,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupListTreeItem;
+import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
@@ -16,7 +17,10 @@ import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -26,6 +30,7 @@ import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -70,6 +75,19 @@ public class KafkaClusterTree {
 
 //        clusterTree.setEditable(true);
 //        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
+        clusterTree.setCellFactory(param -> new TreeCell<>() {
+            @Override
+            protected void updateItem(Object item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText(null);
+                    setTooltip(null);
+                } else {
+                    setText(item.toString());
+                    setTooltip(new Tooltip(item.toString()));
+                }
+            }
+        });
     }
 
     public static void addClusterToTreeView(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
@@ -142,13 +160,7 @@ public class KafkaClusterTree {
         MenuItem blankItem = new MenuItem("");
         blankItem.setVisible(false);
 
-        MenuItem deleteTopicItem = createDeleteActionMenuItem();
-
         MenuItem addNewTopicItem = createAddTopicActionMenuItem();
-
-        MenuItem purgeTopicItem = createPurgeTopicActionMenuItem();
-
-        MenuItem refreshTopicItem = createRefreshTopicActionMenuItem();
 
         MenuItem purgePartitionItem = createPurgePartitionActionMenuItem();
 
@@ -159,6 +171,14 @@ public class KafkaClusterTree {
 
         clusterTreeContextMenu.setOnShowing(ae -> {
             TreeItem treeItem = (TreeItem) clusterTree.getSelectionModel().getSelectedItem();
+
+            CopyTreeItemNameMenuItem copyTreeItemNameMenuItem = new CopyTreeItemNameMenuItem(MessageFormat.format("Copy \"{0}\"", treeItem.getValue().toString()));
+            copyTreeItemNameMenuItem.setOnAction(actionEvent -> {
+                final ClipboardContent clipboardContent = new ClipboardContent();
+                clipboardContent.putString(treeItem.getValue().toString());
+                Clipboard.getSystemClipboard().setContent(clipboardContent);
+            });
+
             if ((treeItem == null) || (treeItem.getParent() == null && AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue()))) {
                 clusterTreeContextMenu.getItems().setAll(addNewConnectionItem);
             } else if (treeItem.getValue() instanceof KafkaCluster) { // tree item for a connection
@@ -169,14 +189,17 @@ public class KafkaClusterTree {
                 refreshItem.setOnAction(actionEvent -> topicListTreeItem.reloadChildren());
                 clusterTreeContextMenu.getItems().setAll(addNewTopicItem, refreshItem);
             } else if (treeItem instanceof KafkaTopicTreeItem<?>) {
-                // TODO: add refresh, copy topic name, edit topic menu item
-                clusterTreeContextMenu.getItems().setAll(refreshTopicItem, deleteTopicItem, purgeTopicItem);
+                // TODO:  edit topic menu item
+                clusterTreeContextMenu.getItems().setAll(getTopicActionMenuItems());
+                clusterTreeContextMenu.getItems().add(copyTreeItemNameMenuItem);
             } else if (treeItem instanceof KafkaPartitionTreeItem<?>) {
                 clusterTreeContextMenu.getItems().setAll(purgePartitionItem);
             } else if (treeItem instanceof ConsumerGroupListTreeItem<?> consumerGroupListTreeItem) {
                 MenuItem refreshItem = new MenuItem("Refresh");
                 refreshItem.setOnAction(actionEvent -> consumerGroupListTreeItem.reloadChildren());
                 clusterTreeContextMenu.getItems().setAll(refreshItem);
+            } else if (treeItem instanceof ConsumerGroupTreeItem consumerGroupTreeItem) {
+                clusterTreeContextMenu.getItems().setAll(copyTreeItemNameMenuItem);
             } else if (AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue())) {
                 MenuItem refreshItem = new MenuItem("Refresh");
                 KafkaCluster kafkaCluster = (KafkaCluster) treeItem.getParent().getValue();
@@ -195,6 +218,13 @@ public class KafkaClusterTree {
             // TODO: Add refresh & copy CG name menu action item for consumer group too
         });
         clusterTree.setContextMenu(clusterTreeContextMenu);
+    }
+
+    private List<MenuItem> getTopicActionMenuItems() {
+        MenuItem deleteTopicItem = createDeleteActionMenuItem();
+        MenuItem purgeTopicItem = createPurgeTopicActionMenuItem();
+        MenuItem refreshTopicItem = createRefreshTopicActionMenuItem();
+        return List.of(deleteTopicItem, purgeTopicItem, refreshTopicItem);
     }
 
     private MenuItem createPurgePartitionActionMenuItem() {
@@ -381,6 +411,19 @@ public class KafkaClusterTree {
         } catch (IOException e) {
             log.error("Error when removing connection", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private static class CopyTreeItemNameMenuItem extends MenuItem {
+        public CopyTreeItemNameMenuItem() {
+        }
+
+        public CopyTreeItemNameMenuItem(String text) {
+            super(text);
+        }
+
+        public CopyTreeItemNameMenuItem(String text, Node graphic) {
+            super(text, graphic);
         }
     }
 }

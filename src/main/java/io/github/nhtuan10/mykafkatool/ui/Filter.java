@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -14,8 +16,7 @@ public class Filter {
     private String filterText;
     private boolean isRegexFilter;
 
-    @SafeVarargs
-    public static <T> Predicate<T> buildFilterPredicate(@NonNull Filter filter, Function<T, String>... fieldGetters) {
+    public static <T> Predicate<T> buildFilterPredicate(@NonNull Filter filter, List<Function<T, String>> fieldGetters) {
         assert (filter.getFilterText() != null);
         String filterText = filter.getFilterText().trim();
         if (filter.isRegexFilter()) {
@@ -38,4 +39,10 @@ public class Filter {
 
         }
     }
+
+    @SafeVarargs
+    public static <T> Predicate<T> buildFilterPredicate(@NonNull Filter filter, Function<T, String>... fieldGetters) {
+        return buildFilterPredicate(filter, Arrays.asList(fieldGetters));
+    }
+
 }

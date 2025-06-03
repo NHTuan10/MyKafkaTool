@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 @Slf4j
@@ -63,6 +64,8 @@ public class EditableTableControl<T> extends AnchorPane {
 
     protected StageHolder stageHolder;
 
+    private final List<Function<T, String>> tableItemFieldGetters;
+
     public void setStage(Stage stage) {
         stageHolder.setStage(stage);
     }
@@ -76,6 +79,19 @@ public class EditableTableControl<T> extends AnchorPane {
         this.stageHolder = new StageHolder();
         this.filterTextProperty = new SimpleStringProperty("");
         this.itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        List<String> itemClassFields = TableViewConfigurer.getPropertyFieldNamesFromTableItem(itemClass);
+        tableItemFieldGetters = itemClassFields.stream().map(fieldName -> {
+            String getterName = "get" + StringUtils.capitalize(fieldName);
+            return (Function<T, String>) t -> {
+                try {
+                    return String.valueOf(itemClass.getMethod(getterName).invoke(t));
+                } catch (Exception e) {
+                    log.error("Error when invoking getter method: {}", getterName, e);
+                    return "";
+                }
+            };
+        }).toList();
+
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "editable-table.fxml"));
         fxmlLoader.setRoot(this);
@@ -166,7 +182,7 @@ public class EditableTableControl<T> extends AnchorPane {
     }
 
     protected Predicate<T> filterPredicate(Filter filter) {
-        return (item) -> true;
+        return Filter.buildFilterPredicate(filter, this.tableItemFieldGetters);
     }
 
     protected void configureEditableControls() {

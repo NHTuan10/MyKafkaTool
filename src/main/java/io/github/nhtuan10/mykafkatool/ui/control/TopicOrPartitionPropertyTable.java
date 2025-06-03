@@ -3,7 +3,6 @@ package io.github.nhtuan10.mykafkatool.ui.control;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.BooleanProperty;
@@ -25,7 +24,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 @Slf4j
 public class TopicOrPartitionPropertyTable extends EditableTableControl<UIPropertyTableItem> {
@@ -57,10 +55,10 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
         this.isShownOnWindow = isShownOnWindow;
     }
 
-    @Override
-    protected Predicate<UIPropertyTableItem> filterPredicate(Filter filter) {
-        return Filter.buildFilterPredicate(filter, UIPropertyTableItem::getName, UIPropertyTableItem::getValue);
-    }
+//    @Override
+//    protected Predicate<UIPropertyTableItem> filterPredicate(Filter filter) {
+//        return Filter.buildFilterPredicate(filter, UIPropertyTableItem::getName, UIPropertyTableItem::getValue);
+//    }
 
     public void loadTopicConfig(KafkaTopic kafkaTopic) {
         this.kafkaTopic = kafkaTopic;

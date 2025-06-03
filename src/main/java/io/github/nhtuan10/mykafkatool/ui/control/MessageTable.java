@@ -36,14 +36,16 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
         numberOfRowsLabel.textProperty().bind(new SimpleStringProperty("Showing: ").concat(noRowsIntProp.asString().concat(" Messages")));
     }
 
-    @Override
-    public Predicate<KafkaMessageTableItem> filterPredicate(Filter filter) {
-        return Filter.buildFilterPredicate(filter
-                , KafkaMessageTableItem::getKey
-                , KafkaMessageTableItem::getValue
-                , KafkaMessageTableItem::getTimestamp
-        );
-    }
+//    @Override
+//    public Predicate<KafkaMessageTableItem> filterPredicate(Filter filter) {
+//        return Filter.buildFilterPredicate(filter
+//                , KafkaMessageTableItem::getKey
+//                , KafkaMessageTableItem::getValue
+//                , KafkaMessageTableItem::getTimestamp
+//                , (item) -> String.valueOf(item.getPartition())
+//                 ,(item) -> String.valueOf(item.getOffset())
+//        );
+//    }
 
     public void configureMessageTable(SerDesHelper serDesHelper) {
         //TODO: for message table, allow copy more details such as key, offset, partition, timestamp, headers, serialized size, etc.

@@ -1,12 +1,9 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
-import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
 import javafx.fxml.FXML;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.function.Predicate;
 
 @Slf4j
 public class MessageHeaderTable extends EditableTableControl<UIPropertyTableItem> {
@@ -24,9 +21,9 @@ public class MessageHeaderTable extends EditableTableControl<UIPropertyTableItem
         addItem(new UIPropertyTableItem("", ""));
     }
 
-    @Override
-    protected Predicate<UIPropertyTableItem> filterPredicate(Filter filter) {
-        return Filter.buildFilterPredicate(filter, UIPropertyTableItem::getName, UIPropertyTableItem::getValue);
-    }
+//    @Override
+//    protected Predicate<UIPropertyTableItem> filterPredicate(Filter filter) {
+//        return Filter.buildFilterPredicate(filter, UIPropertyTableItem::getName, UIPropertyTableItem::getValue);
+//    }
 
 }

@@ -40,7 +40,7 @@ public class SchemaRegistryControl extends SplitPane {
     private SplitPane messageSplitPane;
 
     @FXML
-    private SchemaEditableTableControl schemaEditableTableControl;
+    private SchemaEditableTable schemaEditableTable;
 
     @FXML
     private CodeArea schemaRegistryTextArea;
@@ -61,7 +61,7 @@ public class SchemaRegistryControl extends SplitPane {
     }
 
     public void setStage(Stage stage) {
-        this.schemaEditableTableControl.setStage(stage);
+        this.schemaEditableTable.setStage(stage);
     }
 
     @FXML
@@ -70,12 +70,12 @@ public class SchemaRegistryControl extends SplitPane {
         schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
             ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
         });
-        schemaEditableTableControl.addEventHandler(SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
+        schemaEditableTable.addEventHandler(SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
                 (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));
     }
 
     public void loadAllSchema(KafkaCluster cluster) throws ExecutionException, InterruptedException {
-        schemaEditableTableControl.loadAllSchemas(cluster,
+        schemaEditableTable.loadAllSchemas(cluster,
                 (e) -> isBlockingAppUINeeded.set(false),
                 (e) -> {
                     isBlockingAppUINeeded.set(false);
@@ -84,7 +84,7 @@ public class SchemaRegistryControl extends SplitPane {
     }
 
     public void refresh() throws RestClientException, IOException, ExecutionException, InterruptedException {
-        schemaEditableTableControl.refresh();
+        schemaEditableTable.refresh();
     }
 
     @Getter

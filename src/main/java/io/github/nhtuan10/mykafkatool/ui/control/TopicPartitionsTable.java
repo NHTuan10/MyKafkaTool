@@ -2,7 +2,6 @@ package io.github.nhtuan10.mykafkatool.ui.control;
 
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionsTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.beans.property.BooleanProperty;
@@ -21,7 +20,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 @Slf4j
 public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTableItem> {
@@ -47,10 +45,10 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
         numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Partitions"));
     }
 
-    @Override
-    protected Predicate<KafkaPartitionsTableItem> filterPredicate(Filter filter) {
-        return Filter.buildFilterPredicate(filter, KafkaPartitionsTableItem::getLeader);
-    }
+//    @Override
+//    protected Predicate<KafkaPartitionsTableItem> filterPredicate(Filter filter) {
+//        return Filter.buildFilterPredicate(filter, KafkaPartitionsTableItem::getLeader);
+//    }
 
     public void loadTopicPartitions(KafkaTopic kafkaTopic, StringProperty totalMessages) {
         this.kafkaTopic = kafkaTopic;

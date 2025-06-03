@@ -1,7 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
-import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupOffsetTableItem;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
@@ -14,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Predicate;
 
 //TODO: create a new CG view which includes this table. Then add info such as number of topic, members, partition, members, total lag, topics, etc.
 
@@ -29,10 +27,20 @@ public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffset
         clusterManager = ClusterManager.getInstance();
     }
 
-    @Override
-    protected Predicate<ConsumerGroupOffsetTableItem> filterPredicate(Filter filter) {
-        return Filter.buildFilterPredicate(filter, ConsumerGroupOffsetTableItem::getTopic);
-    }
+//    @Override
+//    protected Predicate<ConsumerGroupOffsetTableItem> filterPredicate(Filter filter) {
+//        return Filter.buildFilterPredicate(filter
+//                , ConsumerGroupOffsetTableItem::getTopic
+//                , ConsumerGroupOffsetTableItem::getClientID
+//                , ConsumerGroupOffsetTableItem::getHost
+//                , ConsumerGroupOffsetTableItem::getCommittedOffset
+//                , ConsumerGroupOffsetTableItem::getLag
+//                , ConsumerGroupOffsetTableItem::getLastCommit
+//                , item -> String.valueOf(item.getStart())
+//                , item -> String.valueOf(item.getEnd())
+//                , item -> String.valueOf(item.getPartition())
+//        );
+//    }
 
     public void loadCG(ConsumerGroupTreeItem consumerGroupTreeItem, BooleanProperty isBusy) {
         this.consumerGroupTreeItem = consumerGroupTreeItem;

@@ -1,19 +1,19 @@
 package io.github.nhtuan10.mykafkatool.ui;
 
-import io.github.nhtuan10.mykafkatool.annotation.TableColumn;
+import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.Getter;
 
 public class SchemaTableItem {
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty subject;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty schemaId;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty latestVersion;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty type;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty compatibility;
     private final SimpleStringProperty schema;
 

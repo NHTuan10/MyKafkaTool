@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui;
 
-import io.github.nhtuan10.mykafkatool.annotation.TableColumn;
+import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.Data;
 
@@ -12,9 +12,9 @@ public class UIPropertyTableItem {
     public static final String LEADER = "Leader";
     public static final String REPLICA_IN_SYNC = "Replica [In-Sync]";
     public static final String REPLICA_NOT_IN_SYNC = "Replica [Not-In-Sync]";
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty name;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty value;
 
     public UIPropertyTableItem(String name, String value) {

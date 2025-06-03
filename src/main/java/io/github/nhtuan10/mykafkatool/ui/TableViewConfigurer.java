@@ -2,6 +2,7 @@ package io.github.nhtuan10.mykafkatool.ui;
 
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import io.github.nhtuan10.mykafkatool.constant.CssClassConstant;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
@@ -298,7 +299,7 @@ public class TableViewConfigurer {
 
     public static List<Field> getPropertyFieldFromTableItem(Class<?> tableIemClass) {
         return Arrays.stream(tableIemClass.getDeclaredFields())
-                .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(io.github.nhtuan10.mykafkatool.annotation.TableColumn.class))
+                .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(TableViewColumn.class))
                 .toList();
     }
 }

@@ -1,29 +1,29 @@
 package io.github.nhtuan10.mykafkatool.ui.cg;
 
-import io.github.nhtuan10.mykafkatool.annotation.TableColumn;
+import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.ToString;
 
 public class ConsumerGroupOffsetTableItem {
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty clientID;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty topic;
-    @TableColumn
+    @TableViewColumn
     private final SimpleIntegerProperty partition;
-    @TableColumn
+    @TableViewColumn
     private final SimpleLongProperty start;
-    @TableColumn
+    @TableViewColumn
     private final SimpleLongProperty end;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty committedOffset;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty lag;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty lastCommit;
-    @TableColumn
+    @TableViewColumn
     private final SimpleStringProperty host;
 
     public static final String CLIENT_ID = "Client ID";
