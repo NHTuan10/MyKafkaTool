@@ -23,6 +23,8 @@ import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SubmissionPublisher;
 
@@ -69,6 +71,8 @@ public class MainController {
     @FXML
     private SchemaRegistryControl schemaRegistryControl;
 
+    private Set<Tab> allTabs;
+
     public void setStage(Stage stage) {
         this.kafkaClusterTree.setStage(stage);
         this.schemaRegistryControl.setStage(stage);
@@ -95,6 +99,9 @@ public class MainController {
 
         blockAppProgressInd.visibleProperty().bindBidirectional(isBlockingAppUINeeded);
         this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, SchemaRegistryManager.getInstance(), eventDispatcher);
+
+        allTabs = Set.of(dataTab, propertiesTab, cgOffsetsTab);
+
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
     }
@@ -109,35 +116,13 @@ public class MainController {
                 messageView.switchTopicOrPartition((TreeItem) newValue);
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 // Enable the data tab and show/hide titled panes in the tab
-                tabPane.getTabs().remove(cgOffsetsTab);
-                if (!tabPane.getTabs().contains(dataTab)) {
-                    tabPane.getTabs().add(dataTab);
-                }
-                if (!tabPane.getTabs().contains(propertiesTab)) {
-                    tabPane.getTabs().add(propertiesTab);
-                }
-                if (tabPane.getSelectionModel().getSelectedItem() != dataTab && tabPane.getSelectionModel().getSelectedItem() != propertiesTab) {
-                    tabPane.getSelectionModel().select(dataTab);
-                }
-                dataTab.setDisable(false);
-                propertiesTab.setDisable(false);
+                setVisibleTabs(dataTab, propertiesTab);
                 schemaRegistryControl.setVisible(false);
                 messageView.setVisible(true);
                 eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 messageView.switchTopicOrPartition((TreeItem) newValue);
-                tabPane.getTabs().remove(cgOffsetsTab);
-                if (!tabPane.getTabs().contains(dataTab)) {
-                    tabPane.getTabs().add(dataTab);
-                }
-                if (!tabPane.getTabs().contains(propertiesTab)) {
-                    tabPane.getTabs().add(propertiesTab);
-                }
-                if (tabPane.getSelectionModel().getSelectedItem() != dataTab && tabPane.getSelectionModel().getSelectedItem() != propertiesTab) {
-                    tabPane.getSelectionModel().select(dataTab);
-                }
-                dataTab.setDisable(false);
-                propertiesTab.setDisable(false);
+                setVisibleTabs(dataTab, propertiesTab);
                 schemaRegistryControl.setVisible(false);
                 messageView.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
@@ -179,6 +164,29 @@ public class MainController {
                 propertiesTab.setDisable(true);
             }
         });
+    }
+
+    private void setVisibleTabs(Tab... tabs) {
+        for (Tab tab : tabs) {
+            if (!tabPane.getTabs().contains(tab)) {
+                tabPane.getTabs().add(tab);
+            }
+            tab.setDisable(false);
+        }
+        if (Arrays.stream(tabs).noneMatch(t -> t == tabPane.getSelectionModel().getSelectedItem())) {
+            tabPane.getSelectionModel().select(tabs[0]);
+        }
+        allTabs.stream().filter(tab -> !Arrays.asList(tabs).contains(tab)).forEach(tab -> tabPane.getTabs().remove(tab));
+//        tabPane.getTabs().remove(cgOffsetsTab);
+//        if (!tabPane.getTabs().contains(dataTab)) {
+//            tabPane.getTabs().add(dataTab);
+//        }
+//        if (!tabPane.getTabs().contains(propertiesTab)) {
+//            tabPane.getTabs().add(propertiesTab);
+//        }
+
+//        dataTab.setDisable(false);
+//        propertiesTab.setDisable(false);
     }
 
     @FXML

@@ -184,7 +184,7 @@ public class KafkaClusterTree {
                 clusterTreeContextMenu.getItems().setAll(getTopicActionMenuItems());
                 clusterTreeContextMenu.getItems().add(copyTreeItemNameMenuItem);
             } else if (treeItem instanceof KafkaPartitionTreeItem<?> selectedPartitionTreeItem) {
-                MenuItem refreshItem = new MenuItem("Refresh");
+                MenuItem refreshItem = new MenuItem("Refresh Metadata");
                 KafkaPartition partition = (KafkaPartition) selectedPartitionTreeItem.getValue();
                 refreshItem.setOnAction(actionEvent -> eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition)));
                 clusterTreeContextMenu.getItems().setAll(refreshItem, createPurgingPartitionActionMenuItem(partition));
