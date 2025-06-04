@@ -118,7 +118,7 @@ public class TableViewConfigurer {
 //                }
 //            }
             //set the new max-width with some extra space
-            if (max + TABLE_COLUMN_WIDTH_MARGIN > column.getWidth() + 5 && max < MAX_TABLE_COLUMN_WIDTH) {
+            if (max + TABLE_COLUMN_WIDTH_MARGIN > column.getWidth() + 5) {
                 column.setPrefWidth(Math.min(MAX_TABLE_COLUMN_WIDTH, max) + TABLE_COLUMN_WIDTH_MARGIN);
             }
         });
