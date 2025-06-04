@@ -129,24 +129,10 @@ public class MainController {
 //                this.topicAndPartitionPropertyView.loadPartitionConfig(partition);
                 eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
-                if (!tabPane.getTabs().contains(cgOffsetsTab)) {
-                    tabPane.getTabs().add(cgOffsetsTab);
-                }
-                cgOffsetsTab.setDisable(false);
-                tabPane.getTabs().remove(dataTab);
-                tabPane.getTabs().remove(propertiesTab);
-                tabPane.getSelectionModel().select(cgOffsetsTab);
-                blockAppProgressInd.setVisible(true);
+                setVisibleTabs(cgOffsetsTab);
                 this.consumerGroupOffsetTable.loadCG(selected, this.isBlockingAppUINeeded);
             } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equals(selectedItem.getValue())) {
-//                blockAppProgressInd.setVisible(true);
-                if (!tabPane.getTabs().contains(dataTab)) {
-                    tabPane.getTabs().add(dataTab);
-                }
-                tabPane.getSelectionModel().select(dataTab);
-                tabPane.getTabs().remove(cgOffsetsTab);
-                tabPane.getTabs().remove(propertiesTab);
-                dataTab.setDisable(false);
+                setVisibleTabs(dataTab);
                 schemaRegistryControl.setVisible(true);
                 messageView.setVisible(false);
                 KafkaCluster cluster = (KafkaCluster) selectedItem.getParent().getValue();
@@ -159,9 +145,7 @@ public class MainController {
 //                }
 
             } else {
-                cgOffsetsTab.setDisable(true);
-                dataTab.setDisable(true);
-                propertiesTab.setDisable(true);
+                allTabs.forEach(tab -> tab.setDisable(true));
             }
         });
     }
