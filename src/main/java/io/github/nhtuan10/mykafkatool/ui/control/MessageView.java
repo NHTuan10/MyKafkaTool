@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -95,6 +96,9 @@ public class MessageView extends SplitPane {
 
     @FXML
     private DateTimePicker startTimestampPicker;
+
+    @FXML
+    private DateTimePicker endTimestampPicker;
 
     @FXML
     private ComboBox<String> keyContentType;
@@ -204,14 +208,14 @@ public class MessageView extends SplitPane {
 
     private void initPollingOptionsUI() {
         maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
-        startTimestampPicker.setDayCellFactory(param -> new DateCell() {
+        List.of(startTimestampPicker, endTimestampPicker).forEach(picker -> picker.setDayCellFactory(param -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
                 setDisable(empty || date.isAfter(LocalDate.now()));
             }
-        });
-        startTimestampPicker.valueProperty().addListener(event -> countMessages());
+        }));
+        List.of(startTimestampPicker, endTimestampPicker).forEach(picker -> picker.valueProperty().addListener(event -> countMessages()));
         keyContentType.setItems(FXCollections.observableArrayList(serDesHelper.getSupportedKeyDeserializer()));
         keyContentType.getSelectionModel().selectFirst();
         valueContentType.setItems(FXCollections.observableArrayList(serDesHelper.getSupportedValueDeserializer()));
@@ -235,6 +239,8 @@ public class MessageView extends SplitPane {
         isLiveUpdateCheckBox.disableProperty()
                 .bind(msgPollingPosition.valueProperty().map(
                         v -> v != KafkaConsumerService.MessagePollingPosition.LAST));
+
+        endTimestampPicker.disableProperty().bind(isLiveUpdateCheckBox.selectedProperty());
 //        endTimestampLabel.setVisible(false);
 //        endTimestampLabel.setManaged(false);
 //        endTimestampPicker.setVisible(false);
@@ -320,7 +326,8 @@ public class MessageView extends SplitPane {
                 KafkaConsumerService.PollingOptions.builder()
                         .pollTime(DEFAULT_POLL_TIME_MS)
                         .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
-                        .startTimestamp(getPollStartTimestamp())
+                        .startTimestamp(getTimestamp(this.startTimestampPicker))
+                        .endTimestamp(getTimestamp(this.endTimestampPicker))
                         .pollingPosition(messagePollingPosition)
                         .valueContentType(valueContentType.getValue())
                         .schema(schema)
@@ -369,10 +376,10 @@ public class MessageView extends SplitPane {
         ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
     }
 
-    private Long getPollStartTimestamp() {
-        return startTimestampPicker.getValue() != null ? ZonedDateTime.of(startTimestampPicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
-    }
+    private Long getTimestamp(DateTimePicker dateTimePicker) {
+        return dateTimePicker.getValue() != null ? ZonedDateTime.of(dateTimePicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
 
+    }
     @FXML
     protected void addMessage() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (selectedTreeItem instanceof KafkaPartitionTreeItem<?>) {
@@ -415,18 +422,23 @@ public class MessageView extends SplitPane {
         }
     }
 
+    // Count message with end offset
     @FXML
     public void countMessages() {
         Callable<Long> callable = () -> {
             try {
                 long count;
+                Long startTimestamp = getTimestamp(this.startTimestampPicker);
+                Long endTimestamp = getTimestamp(this.endTimestampPicker);
                 if (selectedTreeItem instanceof KafkaPartitionTreeItem<?>) {
                     KafkaPartition partition = (KafkaPartition) selectedTreeItem.getValue();
-                    Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(partition.topic().cluster().getName(), new TopicPartition(partition.topic().name(), partition.id()), getPollStartTimestamp());
+                    String clusterName = partition.topic().cluster().getName();
+                    Pair<Long, Long> partitionInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(partition.topic().name(), partition.id()), startTimestamp, endTimestamp);
                     count = partitionInfo.getLeft() >= 0 ? (partitionInfo.getRight() - partitionInfo.getLeft()) : 0;
                 } else if (selectedTreeItem instanceof KafkaTopicTreeItem<?>) {
                     KafkaTopic topic = (KafkaTopic) selectedTreeItem.getValue();
-                    count = clusterManager.getAllPartitionOffsetInfo(topic.cluster().getName(), topic.name(), getPollStartTimestamp()).values()
+                    String clusterName = topic.cluster().getName();
+                    count = clusterManager.getAllPartitionOffsetInfo(clusterName, topic.name(), startTimestamp, endTimestamp).values()
                             .stream().mapToLong(t -> t.getLeft() >= 0 ? t.getRight() - t.getLeft() : 0).sum();
                 } else {
                     count = 0;

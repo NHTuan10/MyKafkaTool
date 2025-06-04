@@ -99,7 +99,7 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
         String topicName = kafkaTopic.name();
         return topicPartitionInfos.stream().map((topicPartitionInfo) -> {
             try {
-                Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, topicPartitionInfo.partition()), null);
+                Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, topicPartitionInfo.partition()), null, null);
                 return ViewUtil.mapToUIPartitionTableItem(topicPartitionInfo, partitionOffsetsInfo);
             } catch (ExecutionException | InterruptedException e) {
                 log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);

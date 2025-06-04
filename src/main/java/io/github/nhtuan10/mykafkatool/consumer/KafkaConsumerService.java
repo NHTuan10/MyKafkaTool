@@ -97,6 +97,7 @@ public class KafkaConsumerService {
     private static Map<TopicPartition, Pair<Long, Long>> seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, PollingOptions pollingOptions) {
         int noMessages = pollingOptions.noMessages();
         Long startTimestamp = pollingOptions.startTimestamp();
+        Long endTimestamp = pollingOptions.endTimestamp();
 
         if (pollingOptions.pollingPosition() == MessagePollingPosition.FIRST) {
             if (startTimestamp != null) {
@@ -104,30 +105,46 @@ public class KafkaConsumerService {
             } else {
                 consumer.seekToBeginning(topicPartitions);
             }
-            return topicPartitions.stream().collect(Collectors.toMap(tp -> tp, partition -> Pair.of(consumer.position(partition), consumer.position(partition) + noMessages)));
+            Map<TopicPartition, OffsetAndTimestamp> endOffsetForTs = endTimestamp != null
+                    ? getPartitionOffsetForTimestamp(consumer, topicPartitions, endTimestamp)
+                    : new HashMap<>();
+            Map<TopicPartition, Long> endOffsets = consumer.endOffsets(topicPartitions);
+//            long startOffset = consumer.position(partition);
+            return topicPartitions.stream().collect(Collectors.toMap(tp -> tp, partition -> {
+                long endOffset = endOffsetForTs.get(partition) != null ? endOffsetForTs.get(partition).offset() : endOffsets.get(partition);
+                return Pair.of(consumer.position(partition), Math.min(consumer.position(partition) + noMessages, endOffset));
+            }));
         } else {
 
             Map<TopicPartition, Pair<Long, Long>> partitionOffsetMap = new HashMap<>(topicPartitions.size());
-            Map<TopicPartition, OffsetAndTimestamp> offsetsForTs = new HashMap<>(topicPartitions.size());
+            Map<TopicPartition, OffsetAndTimestamp> startOffsetsForTs = new HashMap<>(topicPartitions.size());
+            Map<TopicPartition, OffsetAndTimestamp> endOffsetForTs = new HashMap<>(topicPartitions.size());
             if (startTimestamp != null) {
-                offsetsForTs = getPartitionOffsetForTimestamp(consumer, topicPartitions, startTimestamp);
+                startOffsetsForTs = getPartitionOffsetForTimestamp(consumer, topicPartitions, startTimestamp);
             }
-            consumer.seekToEnd(topicPartitions);
+            if (endTimestamp != null) {
+                endOffsetForTs = getPartitionOffsetForTimestamp(consumer, topicPartitions, endTimestamp);
+            }
             for (TopicPartition topicPartition : topicPartitions) {
-                long endOffset = consumer.position(topicPartition);
-                Long startTsOffset = Optional.ofNullable(offsetsForTs.get(topicPartition)).map(OffsetAndTimestamp::offset).orElseGet(() -> {
+//                long endOffset = consumer.position(topicPartition);
+                long startTsOffset = Optional.ofNullable(startOffsetsForTs.get(topicPartition)).map(OffsetAndTimestamp::offset).orElseGet(() -> {
                     consumer.seekToBeginning(List.of(topicPartition));
                     return consumer.position(topicPartition);
                 });
-                if (endOffset < noMessages) {
+                Long endTsOffset = Optional.ofNullable(endOffsetForTs.get(topicPartition)).map(OffsetAndTimestamp::offset).orElseGet(() -> {
+//                    consumer.seekToEnd(List.of(topicPartition));
+                    return consumer.endOffsets(List.of(topicPartition)).get(topicPartition);
+                });
+
+                if (endTsOffset < noMessages) {
                     consumer.seek(topicPartition, startTsOffset);
                 } else {
-                    consumer.seek(topicPartition, Math.max(startTsOffset, endOffset - noMessages));
+                    consumer.seek(topicPartition, Math.max(startTsOffset, endTsOffset - noMessages));
                 }
                 if (pollingOptions.isLiveUpdate()) {
                     partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), Long.MAX_VALUE));
                 } else {
-                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endOffset));
+                    partitionOffsetMap.put(topicPartition, Pair.of(consumer.position(topicPartition), endTsOffset));
                 }
             }
             return partitionOffsetMap;
@@ -279,7 +296,7 @@ public class KafkaConsumerService {
     }
 
     @Builder
-    public record PollingOptions(Integer pollTime, Integer noMessages, Long startTimestamp,
+    public record PollingOptions(Integer pollTime, Integer noMessages, Long startTimestamp, Long endTimestamp,
                                  MessagePollingPosition pollingPosition, String valueContentType,
                                  String schema,
                                  java.util.function.Supplier<PollCallback> pollCallback, boolean isLiveUpdate) {

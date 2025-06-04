@@ -90,7 +90,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
         final String topic = kafkaPartition.topic().name();
         Callable<Void> getPartitionInfo = () -> {
             try {
-                Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, kafkaPartition.id()), null);
+                Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, kafkaPartition.id()), null, null);
                 ObservableList<UIPropertyTableItem> list = FXCollections.observableArrayList(
                         new UIPropertyTableItem(UIPropertyTableItem.START_OFFSET, partitionOffsetsInfo.getLeft().toString())
                         , new UIPropertyTableItem(UIPropertyTableItem.END_OFFSET, partitionOffsetsInfo.getRight().toString())
@@ -163,6 +163,6 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
     }
 
     public enum ConsumerType {
-        PARTITION, TOPIC;
+        PARTITION, TOPIC
     }
 }
