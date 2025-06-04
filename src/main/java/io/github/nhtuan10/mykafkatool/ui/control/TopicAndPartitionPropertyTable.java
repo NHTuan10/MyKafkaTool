@@ -103,6 +103,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
                 return null;
             } catch (ExecutionException | InterruptedException e) {
                 log.error("Error when get partition info", e);
+                setItems(FXCollections.observableArrayList());
                 throw new RuntimeException(e);
             }
         };
@@ -131,6 +132,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
                 setItems(config);
             } catch (ExecutionException | InterruptedException | TimeoutException e) {
                 log.error("Error when get topic config properties", e);
+                setItems(FXCollections.observableArrayList());
                 throw new RuntimeException(e);
             }
             return null;

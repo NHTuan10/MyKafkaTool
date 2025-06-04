@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
+import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionsTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
@@ -24,6 +25,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTableItem> {
     private KafkaTopic kafkaTopic;
+    private KafkaPartition kafkaPartition;
     private final ClusterManager clusterManager;
     private BooleanProperty isBlockingUINeeded;
     private ReadOnlyBooleanProperty isShownOnWindow;
@@ -50,8 +52,9 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
 //        return Filter.buildFilterPredicate(filter, KafkaPartitionsTableItem::getLeader);
 //    }
 
-    public void loadTopicPartitions(KafkaTopic kafkaTopic, StringProperty totalMessages) {
+    public void loadTopicPartitions(KafkaTopic kafkaTopic, KafkaPartition kafkaPartition, StringProperty totalMessages) {
         this.kafkaTopic = kafkaTopic;
+        this.kafkaPartition = kafkaPartition;
         this.totalMessages = totalMessages;
         refresh();
     }
@@ -66,21 +69,16 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
         Callable<Long> task = () -> {
             List<TopicPartitionInfo> topicPartitionInfos;
             try {
-                topicPartitionInfos = clusterManager.getTopicPartitions(clusterName, topicName);
+                if (kafkaPartition != null) {
+                    topicPartitionInfos = List.of(clusterManager.getTopicPartitionInfo(clusterName, topicName, kafkaPartition.id()));
+                } else {
+                    topicPartitionInfos = clusterManager.getTopicPartitions(clusterName, topicName);
+                }
             } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                log.error("Error when get partition info for cluster {} and topic {}", clusterName, topicName, e);
+                log.error("Error when get partition info for cluster {}, topic {} and partition {}", clusterName, topicName, kafkaPartition, e);
                 throw new RuntimeException(e);
             }
-            topicPartitionInfos.forEach(partitionInfo -> {
-                try {
-                    Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, partitionInfo.partition()), null);
-                    KafkaPartitionsTableItem partitionsTableItem = ViewUtil.mapToUIPartitionTableItem(partitionInfo, partitionOffsetsInfo);
-                    partitionsTableItems.add(partitionsTableItem);
-                } catch (ExecutionException | InterruptedException e) {
-                    log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);
-                    throw new RuntimeException(e);
-                }
-            });
+            partitionsTableItems.addAll(getPartitionInfoForUI(topicPartitionInfos));
             return partitionsTableItems.stream().mapToLong(KafkaPartitionsTableItem::getNumOfMessages).sum();
         };
         Consumer<Long> onSuccess = (val) -> {
@@ -96,4 +94,17 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
         ViewUtil.runBackgroundTask(task, onSuccess, onFailure);
     }
 
+    private List<KafkaPartitionsTableItem> getPartitionInfoForUI(List<TopicPartitionInfo> topicPartitionInfos) {
+        String clusterName = kafkaTopic.cluster().getName();
+        String topicName = kafkaTopic.name();
+        return topicPartitionInfos.stream().map((topicPartitionInfo) -> {
+            try {
+                Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, topicPartitionInfo.partition()), null);
+                return ViewUtil.mapToUIPartitionTableItem(topicPartitionInfo, partitionOffsetsInfo);
+            } catch (ExecutionException | InterruptedException e) {
+                log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);
+                throw new RuntimeException(e);
+            }
+        }).toList();
+    }
 }

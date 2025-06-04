@@ -71,22 +71,21 @@ public class TopicAndPartitionPropertyView extends AnchorPane {
     private void initialize() {
         //TODO: Don't use Accordion, so it can show both properties & partitions panel
         totalMessagesInTheTopicLabel.textProperty().bind(totalMessagesInTheTopicStringProperty);
-        partitionsTitledPane.setVisible(false);
 //        this.setProperties(this.isBlockingAppUINeeded, this.isShownOnWindow);
     }
 
     public void loadTopicConfig(KafkaTopic topic) {
-        partitionsTitledPane.setVisible(true);
         this.topicAndPartitionPropertyTable.loadTopicConfig(topic);
     }
 
     public void loadTopicPartitions(KafkaTopic topic) {
-        this.kafkaPartitionsTable.loadTopicPartitions(topic, this.totalMessagesInTheTopicStringProperty);
+        this.kafkaPartitionsTable.loadTopicPartitions(topic, null, this.totalMessagesInTheTopicStringProperty);
     }
 
     public void loadPartitionConfig(KafkaPartition kafkaPartition) {
-        partitionsTitledPane.setVisible(false);
         this.topicAndPartitionPropertyTable.loadPartitionConfig(kafkaPartition);
+        this.kafkaPartitionsTable.loadTopicPartitions(kafkaPartition.topic(), kafkaPartition, this.totalMessagesInTheTopicStringProperty);
+
     }
 
     public void setProperties(BooleanProperty isBlockingAppUINeeded, ReadOnlyBooleanProperty isShownOnWindow) {
