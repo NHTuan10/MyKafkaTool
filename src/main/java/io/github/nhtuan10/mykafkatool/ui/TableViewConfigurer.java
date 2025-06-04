@@ -95,15 +95,15 @@ public class TableViewConfigurer {
             }
             //Minimal width = columnheader
             Text t = new Text(column.getText());
-            double max = t.getLayoutBounds().getWidth();
-            if (max >= MAX_TABLE_COLUMN_WIDTH) {
+            double headerWidth = t.getLayoutBounds().getWidth();
+            if (headerWidth >= MAX_TABLE_COLUMN_WIDTH) {
                 column.setPrefWidth(MAX_TABLE_COLUMN_WIDTH + TABLE_COLUMN_WIDTH_MARGIN);
                 return;
             }
             String maxStr = IntStream.range(0, tableView.getItems().size())
                     .mapToObj(i -> String.valueOf(column.getCellData(i)))
                     .max(Comparator.comparing(String::length)).orElse("");
-            max = new Text(maxStr).getLayoutBounds().getWidth();
+            double max = Math.max(headerWidth, new Text(maxStr).getLayoutBounds().getWidth());
 //            for (int i = 0; i < tableView.getItems().size(); i++) {
 //                //cell must not be empty
 //                if (column.getCellData(i) != null) {
@@ -118,7 +118,7 @@ public class TableViewConfigurer {
 //                }
 //            }
             //set the new max-width with some extra space
-            if (max + TABLE_COLUMN_WIDTH_MARGIN > column.getWidth() + 20 && max < MAX_TABLE_COLUMN_WIDTH) {
+            if (max + TABLE_COLUMN_WIDTH_MARGIN > column.getWidth() + 5 && max < MAX_TABLE_COLUMN_WIDTH) {
                 column.setPrefWidth(Math.min(MAX_TABLE_COLUMN_WIDTH, max) + TABLE_COLUMN_WIDTH_MARGIN);
             }
         });
