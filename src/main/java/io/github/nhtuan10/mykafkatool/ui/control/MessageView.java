@@ -23,6 +23,10 @@ import io.github.nhtuan10.mykafkatool.ui.KafkaMessageTableItem;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
+import io.github.nhtuan10.mykafkatool.ui.event.PartitionEventSubscriber;
+import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
+import io.github.nhtuan10.mykafkatool.ui.event.TopicEventSubscriber;
+import io.github.nhtuan10.mykafkatool.ui.event.TopicUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
@@ -35,10 +39,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -79,6 +80,16 @@ public class MessageView extends SplitPane {
 
     private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
 
+    TreeItem selectedTreeItem;
+
+    @Getter
+    private final TopicEventSubscriber topicEventSubscriber;
+
+    @Getter
+    private final PartitionEventSubscriber partitionEventSubscriber;
+
+    private final Map<TreeItem, MessageTableState> treeMsgTableItemCache = new ConcurrentHashMap<>();
+
     @FXML
     private TextField maxMessagesTextField;
 
@@ -116,10 +127,6 @@ public class MessageView extends SplitPane {
     @FXML
     private MessageTable messageTable;
 
-    TreeItem selectedTreeItem;
-
-    private final Map<TreeItem, MessageTableState> treeMsgTableItemCache = new ConcurrentHashMap<>();
-
     public MessageView() {
         clusterManager = ClusterManager.getInstance();
         serDesHelper = initSerDeserializer();
@@ -127,7 +134,23 @@ public class MessageView extends SplitPane {
         this.kafkaConsumerService = new KafkaConsumerService(this.serDesHelper);
         this.jsonHighlighter = new JsonHighlighter();
         this.stageHolder = new StageHolder();
+        this.topicEventSubscriber = new TopicEventSubscriber() {
+            @Override
+            public void handleOnNext(TopicUIEvent item) {
+                if (TopicUIEvent.isRefreshTopicEvent(item)) {
+                    countMessages();
+                }
+            }
+        };
 
+        this.partitionEventSubscriber = new PartitionEventSubscriber() {
+            @Override
+            public void handleOnNext(PartitionUIEvent item) {
+                if (PartitionUIEvent.isRefreshPartitionEvent(item)) {
+                    countMessages();
+                }
+            }
+        };
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "message-view.fxml"));
         fxmlLoader.setRoot(this);
@@ -375,10 +398,20 @@ public class MessageView extends SplitPane {
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {
             producerUtil.sendMessage(kafkaTopic, partition, newMsg);
-            if (!isPolling.get())
-                pollMessages();
-            ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Pulling the messages", "Added message successfully!",
-                    ButtonType.OK);
+            topicEventSubscriber.getEventDispatcher().publishEvent(TopicUIEvent.newRefreshTopicEven(kafkaTopic));
+            if (partition != null) {
+                partitionEventSubscriber.getEventDispatcher().publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
+            }
+            if (isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
+                ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Live-update is on, polling the messages", "Added message successfully!",
+                        ButtonType.OK);
+            } else {
+                if (ViewUtil.confirmAlert("Added message successfully!", "Added message successfully! Do you want to poll the messages?", "Yes", "No")) {
+                    if (!isPolling.get()) pollMessages();
+
+                }
+            }
+
         }
     }
 

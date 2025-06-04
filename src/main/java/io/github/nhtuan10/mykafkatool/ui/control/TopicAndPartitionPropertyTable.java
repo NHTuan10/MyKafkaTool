@@ -26,7 +26,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 @Slf4j
-public class TopicOrPartitionPropertyTable extends EditableTableControl<UIPropertyTableItem> {
+public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPropertyTableItem> {
     private KafkaTopic kafkaTopic;
     private KafkaPartition kafkaPartition;
     private ConsumerType type;
@@ -34,7 +34,7 @@ public class TopicOrPartitionPropertyTable extends EditableTableControl<UIProper
     private BooleanProperty isBlockingUINeeded;
     private ReadOnlyBooleanProperty isShownOnWindow;
 
-    public TopicOrPartitionPropertyTable() {
+    public TopicAndPartitionPropertyTable() {
         super(false);
         clusterManager = ClusterManager.getInstance();
     }

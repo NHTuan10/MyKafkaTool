@@ -3,7 +3,10 @@ package io.github.nhtuan10.mykafkatool.ui.control;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
+import io.github.nhtuan10.mykafkatool.ui.event.PartitionEventSubscriber;
+import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
+import io.github.nhtuan10.mykafkatool.ui.event.TopicEventSubscriber;
+import io.github.nhtuan10.mykafkatool.ui.event.TopicUIEvent;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -19,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 
-public class TopicOrPartitionPropertyView extends AnchorPane {
+public class TopicAndPartitionPropertyView extends AnchorPane {
 //    BooleanProperty isBlockingAppUINeeded;
 
 //    ReadOnlyBooleanProperty isShownOnWindow;
@@ -27,8 +30,11 @@ public class TopicOrPartitionPropertyView extends AnchorPane {
     @Getter
     private final TopicEventSubscriber topicEventSubscriber;
 
+    @Getter
+    private final PartitionEventSubscriber partitionEventSubscriber;
+
     @FXML
-    private TopicOrPartitionPropertyTable topicOrPartitionPropertyTable;
+    private TopicAndPartitionPropertyTable topicAndPartitionPropertyTable;
 
     @FXML
     private TopicPartitionsTable kafkaPartitionsTable;
@@ -41,8 +47,9 @@ public class TopicOrPartitionPropertyView extends AnchorPane {
     @FXML
     private Label totalMessagesInTheTopicLabel;
 
-    public TopicOrPartitionPropertyView() {
-        topicEventSubscriber = new TopicEventSubscriber(this);
+    public TopicAndPartitionPropertyView() {
+        topicEventSubscriber = new PropertyViewTopicEventSubscriber(this);
+        partitionEventSubscriber = new PropertyViewPartitionEventSubscriber(this);
         totalMessagesInTheTopicStringProperty = new SimpleStringProperty("0 Messages");
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "topic-or-partition-property-view.fxml"));
@@ -56,7 +63,7 @@ public class TopicOrPartitionPropertyView extends AnchorPane {
     }
 
     public void setStage(Stage stage) {
-        topicOrPartitionPropertyTable.setStage(stage);
+        topicAndPartitionPropertyTable.setStage(stage);
         kafkaPartitionsTable.setStage(stage);
     }
 
@@ -70,7 +77,7 @@ public class TopicOrPartitionPropertyView extends AnchorPane {
 
     public void loadTopicConfig(KafkaTopic topic) {
         partitionsTitledPane.setVisible(true);
-        this.topicOrPartitionPropertyTable.loadTopicConfig(topic);
+        this.topicAndPartitionPropertyTable.loadTopicConfig(topic);
     }
 
     public void loadTopicPartitions(KafkaTopic topic) {
@@ -79,26 +86,38 @@ public class TopicOrPartitionPropertyView extends AnchorPane {
 
     public void loadPartitionConfig(KafkaPartition kafkaPartition) {
         partitionsTitledPane.setVisible(false);
-        this.topicOrPartitionPropertyTable.loadPartitionConfig(kafkaPartition);
+        this.topicAndPartitionPropertyTable.loadPartitionConfig(kafkaPartition);
     }
 
     public void setProperties(BooleanProperty isBlockingAppUINeeded, ReadOnlyBooleanProperty isShownOnWindow) {
 //        this.isBlockingAppUINeeded = isBlockingAppUINeeded;
 //        this.isShownOnWindow = isShownOnWindow;
-        this.topicOrPartitionPropertyTable.setProperties(isBlockingAppUINeeded, isShownOnWindow);
+        this.topicAndPartitionPropertyTable.setProperties(isBlockingAppUINeeded, isShownOnWindow);
         this.kafkaPartitionsTable.setProperties(isBlockingAppUINeeded, isShownOnWindow);
     }
 
     @RequiredArgsConstructor
-    public static class TopicEventSubscriber extends io.github.nhtuan10.mykafkatool.ui.event.TopicEventSubscriber {
-        private final TopicOrPartitionPropertyView topicOrPartitionPropertyView;
-
+    private static class PropertyViewTopicEventSubscriber extends TopicEventSubscriber {
+        private final TopicAndPartitionPropertyView topicAndPartitionPropertyView;
 
         @Override
-        public void onNext(UIEvent.TopicEvent item) {
-            topicOrPartitionPropertyView.loadTopicConfig(item.topic());
-            topicOrPartitionPropertyView.loadTopicPartitions(item.topic());
-            subscription.request(1);
+        protected void handleOnNext(TopicUIEvent item) {
+            if (TopicUIEvent.isRefreshTopicEvent(item)) {
+                topicAndPartitionPropertyView.loadTopicConfig(item.topic());
+                topicAndPartitionPropertyView.loadTopicPartitions(item.topic());
+            }
+        }
+    }
+
+    @RequiredArgsConstructor
+    private static class PropertyViewPartitionEventSubscriber extends PartitionEventSubscriber {
+        private final TopicAndPartitionPropertyView topicAndPartitionPropertyView;
+
+        @Override
+        protected void handleOnNext(PartitionUIEvent item) {
+            if (PartitionUIEvent.isRefreshPartitionEvent(item)) {
+                topicAndPartitionPropertyView.loadPartitionConfig(item.partition());
+            }
         }
     }
 }

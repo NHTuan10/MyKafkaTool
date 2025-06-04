@@ -11,8 +11,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.CopyTextMenuItem;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
-import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
+import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
@@ -185,8 +184,10 @@ public class KafkaClusterTree {
                 clusterTreeContextMenu.getItems().setAll(getTopicActionMenuItems());
                 clusterTreeContextMenu.getItems().add(copyTreeItemNameMenuItem);
             } else if (treeItem instanceof KafkaPartitionTreeItem<?> selectedPartitionTreeItem) {
+                MenuItem refreshItem = new MenuItem("Refresh");
                 KafkaPartition partition = (KafkaPartition) selectedPartitionTreeItem.getValue();
-                clusterTreeContextMenu.getItems().setAll(createPurgingPartitionActionMenuItem(partition));
+                refreshItem.setOnAction(actionEvent -> eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition)));
+                clusterTreeContextMenu.getItems().setAll(refreshItem, createPurgingPartitionActionMenuItem(partition));
             } else if (treeItem instanceof ConsumerGroupListTreeItem<?> consumerGroupListTreeItem) {
                 MenuItem refreshItem = new MenuItem("Refresh");
                 refreshItem.setOnAction(actionEvent -> consumerGroupListTreeItem.reloadChildren());
@@ -202,7 +203,7 @@ public class KafkaClusterTree {
 //                    } catch (RestClientException | IOException | ExecutionException | InterruptedException e) {
 //                        throw new RuntimeException(e);
 //                    }
-                    this.eventDispatcher.publishEvent(new UIEvent.SchemaRegistryEvent(kafkaCluster, UIEvent.Action.REFRESH_SCHEMA_REGISTRY));
+                    this.eventDispatcher.publishEvent(new SchemaRegistryUIEvent(kafkaCluster, UIEvent.Action.REFRESH_SCHEMA_REGISTRY));
                 });
                 clusterTreeContextMenu.getItems().setAll(refreshItem);
             } else {
@@ -217,7 +218,7 @@ public class KafkaClusterTree {
         MenuItem deleteTopicItem = createDeleteTopicActionMenuItem();
         MenuItem purgeTopicItem = createPurgeTopicActionMenuItem();
         MenuItem refreshTopicItem = createRefreshTopicActionMenuItem();
-        return List.of(deleteTopicItem, purgeTopicItem, refreshTopicItem);
+        return List.of(refreshTopicItem, purgeTopicItem, deleteTopicItem);
     }
 
     private MenuItem createPurgingPartitionActionMenuItem(KafkaPartition partition) {
@@ -228,6 +229,7 @@ public class KafkaClusterTree {
             if (ViewUtil.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.id() + " ?", "Yes", "Cancel")) {
                 try {
                     clusterManager.purgePartition(partition);
+                    this.eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
                 } catch (ExecutionException | InterruptedException e) {
                     log.error("Error when purge partition", e);
                     throw new RuntimeException(e);
@@ -246,6 +248,7 @@ public class KafkaClusterTree {
                 if (ViewUtil.confirmAlert("Purge Topic", "Are you sure to delete all data in the topic " + topic.name() + " ?", "Yes", "Cancel")) {
                     try {
                         clusterManager.purgeTopic(topic);
+                        eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
                     } catch (ExecutionException | InterruptedException | TimeoutException e) {
                         log.error("Error when purge topic", e);
                         throw new RuntimeException(e);
@@ -262,7 +265,7 @@ public class KafkaClusterTree {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
                 selectedTopicTreeItem.reloadChildren();
-                eventDispatcher.publishEvent(new UIEvent.TopicEvent(topic, UIEvent.Action.REFRESH_TOPIC));
+                eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
             }
         });
         return refreshTopicItem;
@@ -288,7 +291,11 @@ public class KafkaClusterTree {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
                 if (ViewUtil.confirmAlert("Delete Topic", "Are you sure to delete " + topic.name() + " ?", "Yes", "Cancel")) {
-                    clusterManager.deleteTopic(topic.cluster().getName(), topic.name());
+                    try {
+                        clusterManager.deleteTopic(topic.cluster().getName(), topic.name()).all().get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     selectedTopicTreeItem.getParent().getChildren().remove(selectedTopicTreeItem);
                 }
             }

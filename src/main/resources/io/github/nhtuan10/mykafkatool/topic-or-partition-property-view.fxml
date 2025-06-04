@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.TopicAndPartitionPropertyTable?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
@@ -23,15 +23,15 @@
 <!--                                                                           </columns> -->
 <!--                                                                       </TableView> -->
 
-                                                                      <TopicOrPartitionPropertyTable
-                                                                              fx:id="topicOrPartitionPropertyTable"
+                                                                      <TopicAndPartitionPropertyTable
+                                                                              fx:id="topicAndPartitionPropertyTable"
                                                                               prefHeight="535.0" prefWidth="934.0"
                                                                               AnchorPane.bottomAnchor="0.0"
                                                                               AnchorPane.leftAnchor="0.0"
                                                                               AnchorPane.rightAnchor="0.0"
                                                                               AnchorPane.topAnchor="0.0">
 <!--                                                                         <editable> <Boolean fx:value="false"/> </editable> -->
-                                                                    </TopicOrPartitionPropertyTable>
+                                                                      </TopicAndPartitionPropertyTable>
                                                                   </children>
                                                               </AnchorPane>
                                                           </content>

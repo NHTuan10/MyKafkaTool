@@ -3,7 +3,7 @@
 <?import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.MessageView?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl?>
-<?import io.github.nhtuan10.mykafkatool.ui.control.TopicOrPartitionPropertyView?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.TopicAndPartitionPropertyView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane prefHeight="661.0" prefWidth="1418.0" xmlns="http://javafx.com/javafx/17.0.12"
@@ -289,7 +289,7 @@
                                 </Tab>
                                 <Tab fx:id="propertiesTab" text="Properties">
                                     <content>
-                                        <TopicOrPartitionPropertyView fx:id="topicOrPartitionPropertyView"/>
+                                        <TopicAndPartitionPropertyView fx:id="topicAndPartitionPropertyView"/>
                                         <!--                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"> -->
                                         <!--                                           <children> -->
                                         <!--                                               <Accordion prefHeight="614.0" prefWidth="936.0"> -->
