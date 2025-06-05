@@ -9,405 +9,404 @@
 <AnchorPane prefHeight="661.0" prefWidth="1418.0" xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.MainController">
-    <children>
-        <SplitPane dividerPositions="0.29069767441860467" prefHeight="614.0" prefWidth="1271.0"
-                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="8.0"
-                   AnchorPane.topAnchor="0.0">
-            <items>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="659.0" prefWidth="288.0">
-                    <children>
-                        <GridPane layoutX="14.0" layoutY="14.0" prefHeight="659.0" prefWidth="400.0"
-                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                  AnchorPane.topAnchor="0.0">
-                            <!--              <columnConstraints>-->
-                            <!--                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
-                            <!--                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
-                            <!--              </columnConstraints>-->
-                            <!--              <rowConstraints>-->
-                            <!--                <RowConstraints maxHeight="236.0" minHeight="10.0" prefHeight="36.0" vgrow="SOMETIMES" />-->
-                            <!--                <RowConstraints maxHeight="446.0" minHeight="10.0" prefHeight="446.0" vgrow="SOMETIMES" />-->
-                            <!--              </rowConstraints>-->
-                            <children>
-                                <!--                  <TreeView fx:id="clusterTree" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2"GridPane.rowIndex="1" />-->
-                                <TreeView fx:id="clusterTree" prefHeight="600.0" prefWidth="345.0"
-                                          GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS"/>
-                                <!--                  <ComboBox fx:id="clusterComboBox"   prefWidth="150.0" GridPane.halignment="LEFT" GridPane.valignment="TOP" />-->
-                                <!--                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">-->
-                                <!--                     <children>-->
-                                <!--                        <Button fx:id="connectBtn" mnemonicParsing="false" text="Connect" />-->
-                                <!--                        <Button fx:id="disconnectBtn" mnemonicParsing="false" text="Disconnect" />-->
-                                <!--                     </children>-->
-                                <!--                  </HBox>-->
-                            </children>
-                            <columnConstraints>
-                                <ColumnConstraints/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints/>
-                            </rowConstraints>
-                        </GridPane>
-                    </children>
-                </AnchorPane>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="601.0" prefWidth="857.0">
-                    <children>
-                        <TabPane fx:id="tabPane" prefHeight="659.0" prefWidth="980.0" tabClosingPolicy="UNAVAILABLE"
-                                 AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                 AnchorPane.topAnchor="0.0">
-                            <tabs>
-                                <Tab fx:id="dataTab" text="Data">
-                                    <content>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0">
-                                            <children>
-                                                <MessageView fx:id="messageView"/>
-                                                <!--                                                <SplitPane fx:id="messageSplitPane"-->
-                                                <!--                                                           dividerPositions="0.1662971175166297, 0.5"-->
-                                                <!--                                                           orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0"-->
-                                                <!--                                                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"-->
-                                                <!--                                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
-                                                <!--                                                    <items>-->
-                                                <!--                                                        <AnchorPane maxHeight="50.0" minHeight="39.0" minWidth="0.0"-->
-                                                <!--                                                                    prefHeight="50.0" prefWidth="993.0">-->
-                                                <!--                                                            <children>-->
-                                                <!--                                                                <FlowPane minHeight="40.0" prefHeight="50.0"-->
-                                                <!--                                                                          prefWidth="993.0"-->
-                                                <!--                                                                          AnchorPane.bottomAnchor="61.0"-->
-                                                <!--                                                                          AnchorPane.leftAnchor="0.0"-->
-                                                <!--                                                                          AnchorPane.rightAnchor="0.0"-->
-                                                <!--                                                                          AnchorPane.topAnchor="0.0">-->
-                                                <!--                                                                    <children>-->
-                                                <!--                                                                        <ProgressIndicator-->
-                                                <!--                                                                                fx:id="isPollingMsgProgressIndicator"-->
-                                                <!--                                                                                prefHeight="31.0" prefWidth="26.0"-->
-                                                <!--                                                                                visible="false">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="10.0" top="5.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </ProgressIndicator>-->
-                                                <!--                                                                        <Button fx:id="pollMessagesBtn"-->
-                                                <!--                                                                                mnemonicParsing="false"-->
-                                                <!--                                                                                onAction="#pollMessages"-->
-                                                <!--                                                                                text="Poll Msgs">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="10.0" top="5.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </Button>-->
-                                                <!--                                                                        <CheckBox fx:id="isLiveUpdateCheckBox"-->
-                                                <!--                                                                                  mnemonicParsing="false"-->
-                                                <!--                                                                                  text="Live Update">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="10.0" top="5.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </CheckBox>-->
-                                                <!--                                                                        <Button mnemonicParsing="false"-->
-                                                <!--                                                                                onAction="#addMessage" text="Add Msg">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="10.0" top="5.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </Button>-->
-                                                <!--                                                                        &lt;!&ndash;                                                                        <Label text="Poll Time">&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                            <FlowPane.margin>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                                <Insets left="10.0" top="5.0"/>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                            </FlowPane.margin>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                        </Label>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                        <TextField fx:id="pollTimeTextField"&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                                   prefHeight="26.0" prefWidth="60.0"&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                                   text="5000">&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                            <FlowPane.margin>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                                <Insets top="5.0"/>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                            </FlowPane.margin>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                        </TextField>&ndash;&gt;-->
-                                                <!--                                                                        <Label text="After">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="10.0" top="5.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </Label>-->
-                                                <!--                                                                        <DateTimePicker fx:id="startTimestampPicker"-->
-                                                <!--                                                                                        prefWidth="180.0">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="10.0" right="10.0"-->
-                                                <!--                                                                                        top="5.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </DateTimePicker>-->
-                                                <!--                                                                        &lt;!&ndash;                                                                        <Label fx:id="endTimestampLabel" text="Before" visible="false" />&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                        <DateTimePicker fx:id="endTimestampPicker" disable="true" prefWidth="180.0" visible="false" />&ndash;&gt;-->
-                                                <!--                                                                        <Button fx:id="countMessagesBtn"-->
-                                                <!--                                                                                mnemonicParsing="false"-->
-                                                <!--                                                                                onAction="#countMessages"-->
-                                                <!--                                                                                text="Count: 0">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="10.0" top="5.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </Button>-->
-                                                <!--                                                                        <Label text="No Msgs/Partition To Poll">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="10.0" top="5.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </Label>-->
-                                                <!--                                                                        <ComboBox fx:id="msgPollingPosition"-->
-                                                <!--                                                                                  promptText="LAST">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="5.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </ComboBox>-->
-                                                <!--                                                                        <TextField fx:id="maxMessagesTextField"-->
-                                                <!--                                                                                   prefHeight="26.0" prefWidth="72.0"-->
-                                                <!--                                                                                   text="1000">-->
-                                                <!--                                                                            <FlowPane.margin>-->
-                                                <!--                                                                                <Insets left="10.0"/>-->
-                                                <!--                                                                            </FlowPane.margin>-->
-                                                <!--                                                                        </TextField>-->
-                                                <!--                                                                        &lt;!&ndash;                                                      <Label text="Filter">&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                         <FlowPane.margin>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                            <Insets left="10.0" top="5.0" />&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                         </FlowPane.margin>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                      </Label>&ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                       <TextField fx:id="filterMsgTextField" promptText="Enter a filter"> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                          <FlowPane.margin> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                             <Insets left="10.0" top="5.0" /> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                          </FlowPane.margin> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                       </TextField> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                       <ToggleButton fx:id="regexFilterToggleBtn" mnemonicParsing="false" text=".*"> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                          <tooltip> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                             <Tooltip text="Regex" /> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                          </tooltip> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                          <FlowPane.margin> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                             <Insets left="10.0" top="5.0" /> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                          </FlowPane.margin> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                       </ToggleButton> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                       <Label fx:id="noMessagesLabel" text="0 Messages"> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                          <FlowPane.margin> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                             <Insets left="10.0" top="5.0" /> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                          </FlowPane.margin> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                       </Label> &ndash;&gt;-->
-                                                <!--                                                                    </children>-->
-                                                <!--                                                                </FlowPane>-->
-                                                <!--                                                            </children>-->
-                                                <!--                                                        </AnchorPane>-->
-                                                <!--                                                        <AnchorPane maxHeight="200.0" minHeight="50.0" minWidth="0.0"-->
-                                                <!--                                                                    prefHeight="100.0" prefWidth="993.0">-->
-                                                <!--                                                            <children>-->
-                                                <!--                                                                <HBox prefHeight="100.0" prefWidth="993.0"-->
-                                                <!--                                                                      AnchorPane.bottomAnchor="0.0"-->
-                                                <!--                                                                      AnchorPane.leftAnchor="0.0"-->
-                                                <!--                                                                      AnchorPane.rightAnchor="0.0"-->
-                                                <!--                                                                      AnchorPane.topAnchor="0.0">-->
-                                                <!--                                                                    <children>-->
-                                                <!--                                                                        <Label prefHeight="17.0" prefWidth="73.0"-->
-                                                <!--                                                                               text="Key Type">-->
-                                                <!--                                                                            <HBox.margin>-->
-                                                <!--                                                                                <Insets right="10.0"/>-->
-                                                <!--                                                                            </HBox.margin>-->
-                                                <!--                                                                            <padding>-->
-                                                <!--                                                                                <Insets left="5.0"/>-->
-                                                <!--                                                                            </padding>-->
-                                                <!--                                                                        </Label>-->
-                                                <!--                                                                        <ComboBox fx:id="keyContentType"-->
-                                                <!--                                                                                  prefHeight="26.0" prefWidth="130.0"/>-->
-                                                <!--                                                                        <Label prefHeight="17.0" prefWidth="72.0"-->
-                                                <!--                                                                               text="Value Type">-->
-                                                <!--                                                                            <HBox.margin>-->
-                                                <!--                                                                                <Insets left="10.0" right="10.0"/>-->
-                                                <!--                                                                            </HBox.margin>-->
-                                                <!--                                                                        </Label>-->
-                                                <!--                                                                        <ComboBox fx:id="valueContentType"-->
-                                                <!--                                                                                  prefHeight="26.0" prefWidth="130.0"/>-->
-                                                <!--                                                                        <Label prefHeight="17.0" prefWidth="87.0"-->
-                                                <!--                                                                               text="Value Schema">-->
-                                                <!--                                                                            <HBox.margin>-->
-                                                <!--                                                                                <Insets left="10.0" right="10.0"/>-->
-                                                <!--                                                                            </HBox.margin>-->
-                                                <!--                                                                        </Label>-->
-                                                <!--                                                                        <VirtualizedScrollPane>-->
-                                                <!--                                                                            <HBox.margin>-->
-                                                <!--                                                                                <Insets right="5.0"/>-->
-                                                <!--                                                                            </HBox.margin>-->
-                                                <!--                                                                            <content>-->
-                                                <!--                                                                                <CodeArea fx:id="schemaTextArea"-->
-                                                <!--                                                                                          disable="true"-->
-                                                <!--                                                                                          prefHeight="93.0"-->
-                                                <!--                                                                                          prefWidth="388.0"-->
-                                                <!--                                                                                          style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"-->
-                                                <!--                                                                                          wrapText="true">-->
-                                                <!--                                                                                </CodeArea>-->
-                                                <!--                                                                            </content>-->
-                                                <!--                                                                        </VirtualizedScrollPane>-->
-                                                <!--                                                                    </children>-->
-                                                <!--                                                                </HBox>-->
-                                                <!--                                                            </children>-->
-                                                <!--                                                        </AnchorPane>-->
-                                                <!--                                                        <AnchorPane maxHeight="1.7976931348623157E308" minHeight="50.0"-->
-                                                <!--                                                                    minWidth="0.0" prefHeight="461.0" prefWidth="993.0">-->
-                                                <!--                                                            <children>-->
-                                                <!--                                                                <StackPane AnchorPane.bottomAnchor="4.0"-->
-                                                <!--                                                                           AnchorPane.leftAnchor="0.0"-->
-                                                <!--                                                                           AnchorPane.rightAnchor="6.0"-->
-                                                <!--                                                                           AnchorPane.topAnchor="0.0">-->
-                                                <!--                                                                    <children>-->
-                                                <!--                                                                        <MessageTable fx:id="messageTable"/>-->
-                                                <!--                                                                        &lt;!&ndash;                                                                     <TableView fx:id="messageTable"> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                         <columns> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="75.0" text="Partition" /> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="75.0" text="Offset" /> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="141.0" text="Key" /> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="443.0" text="Value" /> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="242.0" text="Timestamp" /> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                         </columns> &ndash;&gt;-->
-                                                <!--                                                                        &lt;!&ndash;                                                                     </TableView> &ndash;&gt;-->
-                                                <!--                                                                    </children>-->
-                                                <!--                                                                </StackPane>-->
-                                                <!--                                                            </children>-->
-                                                <!--                                                        </AnchorPane>-->
-                                                <!--                                                    </items>-->
-                                                <!--                                                </SplitPane>-->
-                                                <SchemaRegistryControl fx:id="schemaRegistryControl" visible="false"
-                                                                       AnchorPane.bottomAnchor="0.0"
-                                                                       AnchorPane.leftAnchor="0.0"
-                                                                       AnchorPane.rightAnchor="0.0"
-                                                                       AnchorPane.topAnchor="0.0">
-                                                </SchemaRegistryControl>
-                                                <!--                                     <SplitPane fx:id="schemaSplitPane" dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
-                                                <!--                                       <items> -->
-                                                <!--                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
-                                                <!--                                             <children> -->
-                                                <!--                                                <SchemaEditableTableControl fx:id="schemaEditableTableControl" layoutY="7.0" minHeight="200.0" prefHeight="295.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" /> -->
-                                                <!--                                             </children> -->
-                                                <!--                                         </AnchorPane> -->
-                                                <!--                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
-                                                <!--                                          <children> -->
-                                                <!--                                              <VirtualizedScrollPane prefHeight="318.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
-                                                <!--                                                 <content> -->
-                                                <!--                                                     <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" /> -->
-                                                <!--                                                 </content> -->
-                                                <!--                                              </VirtualizedScrollPane> -->
-                                                <!--                                          </children> -->
-                                                <!--                                          </AnchorPane> -->
-                                                <!--                                       </items> -->
-                                                <!--                                     </SplitPane> -->
-                                            </children>
-                                        </AnchorPane>
-                                    </content>
-                                </Tab>
-                                <Tab fx:id="propertiesTab" text="Properties">
-                                    <content>
-                                        <TopicAndPartitionPropertyView fx:id="topicAndPartitionPropertyView"/>
-                                        <!--                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"> -->
-                                        <!--                                           <children> -->
-                                        <!--                                               <Accordion prefHeight="614.0" prefWidth="936.0"> -->
-                                        <!--                                                   <panes> -->
-                                        <!--                                                       <TitledPane animated="false" text="Properties"> -->
-                                        <!--                                                           <content> -->
-                                        <!--                                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"> -->
-                                        <!--                                                                   <children> -->
-                                        <!--                                                                       <TableView fx:id="topicConfigTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
-                                        <!--                                                                           <columns> -->
-                                        <!--                                                                               <TableColumn prefWidth="428.0" text="Name" /> -->
-                                        <!--                                                                                <TableColumn prefWidth="300.0" text="Value" /> -->
-                                        <!--                                                                           </columns> -->
-                                        <!--                                                                       </TableView> -->
 
-                                        <!--                                                                     <TopicOrPartitionPropertyTable fx:id="topicConfigTable" prefHeight="535.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
-                                        <!--                                                                         <editable> <Boolean fx:value="false"/> </editable> -->
-                                        <!--                                                                     </TopicOrPartitionPropertyTable> -->
-                                        <!--                                                                   </children> -->
-                                        <!--                                                               </AnchorPane> -->
-                                        <!--                                                           </content> -->
-                                        <!--                                                       </TitledPane> -->
-                                        <!--                                           <TitledPane fx:id="partitionsTitledPane" animated="false" text="Partitions"> -->
-                                        <!--                                             <content> -->
-                                        <!--                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"> -->
-                                        <!--                                                    <children> -->
-                                        <!--                                                       <SplitPane dividerPositions="0.05898876404494382" orientation="VERTICAL" prefHeight="0.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
-                                        <!--                                                         <items> -->
-                                        <!--                                                             <HBox prefHeight="17.0" prefWidth="911.0"> -->
-                                        <!--                                                                <children> -->
-                                        <!--                                                                   <Button mnemonicParsing="false" onAction="#refreshPartitionsTblAction" prefHeight="26.0" prefWidth="72.0" text="Refresh" /> -->
-                                        <!--                                                                   <Label fx:id="totalMessagesInTheTopicLabel" prefHeight="28.0" prefWidth="106.0" text="0 Messages"> -->
-                                        <!--                                                                      <HBox.margin> -->
-                                        <!--                                                                         <Insets left="10.0" /> -->
-                                        <!--                                                                      </HBox.margin> -->
-                                        <!--                                                                   </Label> -->
-                                        <!--                                                                </children> -->
-                                        <!--                                                             </HBox> -->
-                                        <!--                                                             <TopicPartitionsTable fx:id="kafkaPartitionsTable" minHeight="-Infinity" minWidth="-Infinity" prefHeight="210.0" prefWidth="795.0"> -->
-                                        <!--                                                               <columns> -->
-                                        <!--                                                                   <TableColumn prefWidth="75.0" text="Parttion" /> -->
-                                        <!--                                                                 <TableColumn prefWidth="98.0" text="Start Offset" /> -->
-                                        <!--                                                                   <TableColumn prefWidth="83.0" text="End Offset" /> -->
-                                        <!--                                                                   <TableColumn prefWidth="108.0" text="No Messages" /> -->
-                                        <!--                                                                   <TableColumn prefWidth="190.0" text="Leader" /> -->
-                                        <!--                                                                   <TableColumn prefWidth="204.0" text="Replica [In-Sync]" /> -->
-                                        <!--                                                                   <TableColumn prefWidth="217.0" text="Replica [Not-In-Sync]" /> -->
-                                        <!--                                                               </columns> -->
-                                        <!--                                                             </TopicPartitionsTable> -->
-                                        <!--                                                         </items> -->
-                                        <!--                                                       </SplitPane> -->
-                                        <!--                                                    </children> -->
-                                        <!--                                                 </AnchorPane> -->
-                                        <!--                                             </content> -->
-                                        <!--                                           </TitledPane> -->
-                                        <!--                                                                                        <TitledPane animated="false" text="Properties"> -->
-                                        <!--                                                                                          <content> -->
-                                        <!--                                                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" > -->
-                                        <!--                                                                                                  <children> -->
-                                        <!--                                                                                                      <TableView fx:id="propertiesTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
-                                        <!--                                                                                                          <columns> -->
-                                        <!--                                                                                                              <TableColumn prefWidth="138.0" text="Name" /> -->
-                                        <!--                                                                                                              <TableColumn prefWidth="290.0" text="Value" /> -->
-                                        <!--                                                                                                          </columns> -->
-                                        <!--                                                                                                      </TableView> -->
-                                        <!--                                                                                                  </children> -->
-                                        <!--                                                                                              </AnchorPane> -->
-                                        <!--                                                                                          </content> -->
-                                        <!--                                                                                        </TitledPane> -->
-                                        <!--                                                   </panes> -->
-                                        <!--                                               </Accordion> -->
-                                        <!--                                           </children> -->
-                                        <!--                                       </AnchorPane> -->
-                                    </content>
-                                </Tab>
-                                <Tab fx:id="cgOffsetsTab" text="CG Offsets">
-                                    <content>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                            <children>
-                                                <SplitPane orientation="VERTICAL" prefHeight="453.0" prefWidth="564.0"
-                                                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                    <items>
-                                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0"
-                                                                    prefWidth="727.0">
-                                                            <children>
-                                                                <ConsumerGroupTable fx:id="consumerGroupOffsetTable"
-                                                                                    layoutX="-2.0" layoutY="-58.0"
-                                                                                    prefHeight="484.0" prefWidth="729.0"
-                                                                                    AnchorPane.bottomAnchor="0.0"
-                                                                                    AnchorPane.leftAnchor="-2.0"
-                                                                                    AnchorPane.rightAnchor="0.0"
-                                                                                    AnchorPane.topAnchor="2.0">
-                                                                    <!--                                                                   <columns> -->
-                                                                    <!--                                                                       <TableColumn prefWidth="75.0" text="Topic" /> -->
-                                                                    <!--                                                                       <TableColumn prefWidth="75.0" text="Partition" /> -->
-                                                                    <!--                                                                       <TableColumn prefWidth="75.0" text="Start" /> -->
-                                                                    <!--                                                                       <TableColumn prefWidth="75.0" text="End" /> -->
-                                                                    <!--                                                                       <TableColumn prefWidth="75.0" text="Offset" /> -->
-                                                                    <!--                                                                       <TableColumn prefWidth="75.0" text="Lag" /> -->
-                                                                    <!--                                                                       <TableColumn prefWidth="75.0" text="Last Commit" /> -->
-                                                                    <!--                                                                   </columns> -->
-                                                                </ConsumerGroupTable>
-                                                            </children>
-                                                        </AnchorPane>
-                                                    </items>
-                                                </SplitPane>
-                                            </children>
-                                        </AnchorPane>
-                                    </content>
-                                </Tab>
-                            </tabs>
-                        </TabPane>
-                    </children>
-                </AnchorPane>
-            </items>
-        </SplitPane>
-        <ProgressIndicator fx:id="blockAppProgressInd" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0"
-                           prefWidth="1279.0" visible="false"/>
-    </children>
+    <SplitPane dividerPositions="0.29069767441860467" prefHeight="614.0" prefWidth="1271.0"
+               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="8.0"
+               AnchorPane.topAnchor="0.0">
+        <items>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="659.0" prefWidth="288.0">
+                <children>
+                    <GridPane layoutX="14.0" layoutY="14.0" prefHeight="659.0" prefWidth="400.0"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                              AnchorPane.topAnchor="0.0">
+                        <!--              <columnConstraints>-->
+                        <!--                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
+                        <!--                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
+                        <!--              </columnConstraints>-->
+                        <!--              <rowConstraints>-->
+                        <!--                <RowConstraints maxHeight="236.0" minHeight="10.0" prefHeight="36.0" vgrow="SOMETIMES" />-->
+                        <!--                <RowConstraints maxHeight="446.0" minHeight="10.0" prefHeight="446.0" vgrow="SOMETIMES" />-->
+                        <!--              </rowConstraints>-->
+                        <children>
+                            <!--                  <TreeView fx:id="clusterTree" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2"GridPane.rowIndex="1" />-->
+                            <TreeView fx:id="clusterTree" prefHeight="600.0" prefWidth="345.0"
+                                      GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS"/>
+                            <!--                  <ComboBox fx:id="clusterComboBox"   prefWidth="150.0" GridPane.halignment="LEFT" GridPane.valignment="TOP" />-->
+                            <!--                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">-->
+                            <!--                     <children>-->
+                            <!--                        <Button fx:id="connectBtn" mnemonicParsing="false" text="Connect" />-->
+                            <!--                        <Button fx:id="disconnectBtn" mnemonicParsing="false" text="Disconnect" />-->
+                            <!--                     </children>-->
+                            <!--                  </HBox>-->
+                        </children>
+                        <columnConstraints>
+                            <ColumnConstraints/>
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints/>
+                        </rowConstraints>
+                    </GridPane>
+                </children>
+            </AnchorPane>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="601.0" prefWidth="857.0">
+                <children>
+                    <TabPane fx:id="tabPane" prefHeight="659.0" prefWidth="980.0" tabClosingPolicy="UNAVAILABLE"
+                             AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                             AnchorPane.topAnchor="0.0">
+                        <tabs>
+                            <Tab fx:id="dataTab" text="Data">
+                                <content>
+                                    <AnchorPane minHeight="0.0" minWidth="0.0">
+                                        <children>
+                                            <MessageView fx:id="messageView"/>
+                                            <!--                                                <SplitPane fx:id="messageSplitPane"-->
+                                            <!--                                                           dividerPositions="0.1662971175166297, 0.5"-->
+                                            <!--                                                           orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0"-->
+                                            <!--                                                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"-->
+                                            <!--                                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
+                                            <!--                                                    <items>-->
+                                            <!--                                                        <AnchorPane maxHeight="50.0" minHeight="39.0" minWidth="0.0"-->
+                                            <!--                                                                    prefHeight="50.0" prefWidth="993.0">-->
+                                            <!--                                                            <children>-->
+                                            <!--                                                                <FlowPane minHeight="40.0" prefHeight="50.0"-->
+                                            <!--                                                                          prefWidth="993.0"-->
+                                            <!--                                                                          AnchorPane.bottomAnchor="61.0"-->
+                                            <!--                                                                          AnchorPane.leftAnchor="0.0"-->
+                                            <!--                                                                          AnchorPane.rightAnchor="0.0"-->
+                                            <!--                                                                          AnchorPane.topAnchor="0.0">-->
+                                            <!--                                                                    <children>-->
+                                            <!--                                                                        <ProgressIndicator-->
+                                            <!--                                                                                fx:id="isPollingMsgProgressIndicator"-->
+                                            <!--                                                                                prefHeight="31.0" prefWidth="26.0"-->
+                                            <!--                                                                                visible="false">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="10.0" top="5.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </ProgressIndicator>-->
+                                            <!--                                                                        <Button fx:id="pollMessagesBtn"-->
+                                            <!--                                                                                mnemonicParsing="false"-->
+                                            <!--                                                                                onAction="#pollMessages"-->
+                                            <!--                                                                                text="Poll Msgs">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="10.0" top="5.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </Button>-->
+                                            <!--                                                                        <CheckBox fx:id="isLiveUpdateCheckBox"-->
+                                            <!--                                                                                  mnemonicParsing="false"-->
+                                            <!--                                                                                  text="Live Update">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="10.0" top="5.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </CheckBox>-->
+                                            <!--                                                                        <Button mnemonicParsing="false"-->
+                                            <!--                                                                                onAction="#addMessage" text="Add Msg">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="10.0" top="5.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </Button>-->
+                                            <!--                                                                        &lt;!&ndash;                                                                        <Label text="Poll Time">&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                            <FlowPane.margin>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                                <Insets left="10.0" top="5.0"/>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                            </FlowPane.margin>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                        </Label>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                        <TextField fx:id="pollTimeTextField"&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                                   prefHeight="26.0" prefWidth="60.0"&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                                   text="5000">&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                            <FlowPane.margin>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                                <Insets top="5.0"/>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                            </FlowPane.margin>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                        </TextField>&ndash;&gt;-->
+                                            <!--                                                                        <Label text="After">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="10.0" top="5.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </Label>-->
+                                            <!--                                                                        <DateTimePicker fx:id="startTimestampPicker"-->
+                                            <!--                                                                                        prefWidth="180.0">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="10.0" right="10.0"-->
+                                            <!--                                                                                        top="5.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </DateTimePicker>-->
+                                            <!--                                                                        &lt;!&ndash;                                                                        <Label fx:id="endTimestampLabel" text="Before" visible="false" />&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                        <DateTimePicker fx:id="endTimestampPicker" disable="true" prefWidth="180.0" visible="false" />&ndash;&gt;-->
+                                            <!--                                                                        <Button fx:id="countMessagesBtn"-->
+                                            <!--                                                                                mnemonicParsing="false"-->
+                                            <!--                                                                                onAction="#countMessages"-->
+                                            <!--                                                                                text="Count: 0">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="10.0" top="5.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </Button>-->
+                                            <!--                                                                        <Label text="No Msgs/Partition To Poll">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="10.0" top="5.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </Label>-->
+                                            <!--                                                                        <ComboBox fx:id="msgPollingPosition"-->
+                                            <!--                                                                                  promptText="LAST">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="5.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </ComboBox>-->
+                                            <!--                                                                        <TextField fx:id="maxMessagesTextField"-->
+                                            <!--                                                                                   prefHeight="26.0" prefWidth="72.0"-->
+                                            <!--                                                                                   text="1000">-->
+                                            <!--                                                                            <FlowPane.margin>-->
+                                            <!--                                                                                <Insets left="10.0"/>-->
+                                            <!--                                                                            </FlowPane.margin>-->
+                                            <!--                                                                        </TextField>-->
+                                            <!--                                                                        &lt;!&ndash;                                                      <Label text="Filter">&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                         <FlowPane.margin>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                            <Insets left="10.0" top="5.0" />&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                         </FlowPane.margin>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                      </Label>&ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                       <TextField fx:id="filterMsgTextField" promptText="Enter a filter"> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                          <FlowPane.margin> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                             <Insets left="10.0" top="5.0" /> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                          </FlowPane.margin> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                       </TextField> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                       <ToggleButton fx:id="regexFilterToggleBtn" mnemonicParsing="false" text=".*"> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                          <tooltip> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                             <Tooltip text="Regex" /> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                          </tooltip> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                          <FlowPane.margin> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                             <Insets left="10.0" top="5.0" /> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                          </FlowPane.margin> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                       </ToggleButton> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                       <Label fx:id="noMessagesLabel" text="0 Messages"> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                          <FlowPane.margin> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                             <Insets left="10.0" top="5.0" /> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                          </FlowPane.margin> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                       </Label> &ndash;&gt;-->
+                                            <!--                                                                    </children>-->
+                                            <!--                                                                </FlowPane>-->
+                                            <!--                                                            </children>-->
+                                            <!--                                                        </AnchorPane>-->
+                                            <!--                                                        <AnchorPane maxHeight="200.0" minHeight="50.0" minWidth="0.0"-->
+                                            <!--                                                                    prefHeight="100.0" prefWidth="993.0">-->
+                                            <!--                                                            <children>-->
+                                            <!--                                                                <HBox prefHeight="100.0" prefWidth="993.0"-->
+                                            <!--                                                                      AnchorPane.bottomAnchor="0.0"-->
+                                            <!--                                                                      AnchorPane.leftAnchor="0.0"-->
+                                            <!--                                                                      AnchorPane.rightAnchor="0.0"-->
+                                            <!--                                                                      AnchorPane.topAnchor="0.0">-->
+                                            <!--                                                                    <children>-->
+                                            <!--                                                                        <Label prefHeight="17.0" prefWidth="73.0"-->
+                                            <!--                                                                               text="Key Type">-->
+                                            <!--                                                                            <HBox.margin>-->
+                                            <!--                                                                                <Insets right="10.0"/>-->
+                                            <!--                                                                            </HBox.margin>-->
+                                            <!--                                                                            <padding>-->
+                                            <!--                                                                                <Insets left="5.0"/>-->
+                                            <!--                                                                            </padding>-->
+                                            <!--                                                                        </Label>-->
+                                            <!--                                                                        <ComboBox fx:id="keyContentType"-->
+                                            <!--                                                                                  prefHeight="26.0" prefWidth="130.0"/>-->
+                                            <!--                                                                        <Label prefHeight="17.0" prefWidth="72.0"-->
+                                            <!--                                                                               text="Value Type">-->
+                                            <!--                                                                            <HBox.margin>-->
+                                            <!--                                                                                <Insets left="10.0" right="10.0"/>-->
+                                            <!--                                                                            </HBox.margin>-->
+                                            <!--                                                                        </Label>-->
+                                            <!--                                                                        <ComboBox fx:id="valueContentType"-->
+                                            <!--                                                                                  prefHeight="26.0" prefWidth="130.0"/>-->
+                                            <!--                                                                        <Label prefHeight="17.0" prefWidth="87.0"-->
+                                            <!--                                                                               text="Value Schema">-->
+                                            <!--                                                                            <HBox.margin>-->
+                                            <!--                                                                                <Insets left="10.0" right="10.0"/>-->
+                                            <!--                                                                            </HBox.margin>-->
+                                            <!--                                                                        </Label>-->
+                                            <!--                                                                        <VirtualizedScrollPane>-->
+                                            <!--                                                                            <HBox.margin>-->
+                                            <!--                                                                                <Insets right="5.0"/>-->
+                                            <!--                                                                            </HBox.margin>-->
+                                            <!--                                                                            <content>-->
+                                            <!--                                                                                <CodeArea fx:id="schemaTextArea"-->
+                                            <!--                                                                                          disable="true"-->
+                                            <!--                                                                                          prefHeight="93.0"-->
+                                            <!--                                                                                          prefWidth="388.0"-->
+                                            <!--                                                                                          style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"-->
+                                            <!--                                                                                          wrapText="true">-->
+                                            <!--                                                                                </CodeArea>-->
+                                            <!--                                                                            </content>-->
+                                            <!--                                                                        </VirtualizedScrollPane>-->
+                                            <!--                                                                    </children>-->
+                                            <!--                                                                </HBox>-->
+                                            <!--                                                            </children>-->
+                                            <!--                                                        </AnchorPane>-->
+                                            <!--                                                        <AnchorPane maxHeight="1.7976931348623157E308" minHeight="50.0"-->
+                                            <!--                                                                    minWidth="0.0" prefHeight="461.0" prefWidth="993.0">-->
+                                            <!--                                                            <children>-->
+                                            <!--                                                                <StackPane AnchorPane.bottomAnchor="4.0"-->
+                                            <!--                                                                           AnchorPane.leftAnchor="0.0"-->
+                                            <!--                                                                           AnchorPane.rightAnchor="6.0"-->
+                                            <!--                                                                           AnchorPane.topAnchor="0.0">-->
+                                            <!--                                                                    <children>-->
+                                            <!--                                                                        <MessageTable fx:id="messageTable"/>-->
+                                            <!--                                                                        &lt;!&ndash;                                                                     <TableView fx:id="messageTable"> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                         <columns> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="75.0" text="Partition" /> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="75.0" text="Offset" /> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="141.0" text="Key" /> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="443.0" text="Value" /> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                             <TableColumn prefWidth="242.0" text="Timestamp" /> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                         </columns> &ndash;&gt;-->
+                                            <!--                                                                        &lt;!&ndash;                                                                     </TableView> &ndash;&gt;-->
+                                            <!--                                                                    </children>-->
+                                            <!--                                                                </StackPane>-->
+                                            <!--                                                            </children>-->
+                                            <!--                                                        </AnchorPane>-->
+                                            <!--                                                    </items>-->
+                                            <!--                                                </SplitPane>-->
+                                            <SchemaRegistryControl fx:id="schemaRegistryControl" visible="false"
+                                                                   AnchorPane.bottomAnchor="0.0"
+                                                                   AnchorPane.leftAnchor="0.0"
+                                                                   AnchorPane.rightAnchor="0.0"
+                                                                   AnchorPane.topAnchor="0.0">
+                                            </SchemaRegistryControl>
+                                            <!--                                     <SplitPane fx:id="schemaSplitPane" dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+                                            <!--                                       <items> -->
+                                            <!--                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
+                                            <!--                                             <children> -->
+                                            <!--                                                <SchemaEditableTableControl fx:id="schemaEditableTableControl" layoutY="7.0" minHeight="200.0" prefHeight="295.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" /> -->
+                                            <!--                                             </children> -->
+                                            <!--                                         </AnchorPane> -->
+                                            <!--                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
+                                            <!--                                          <children> -->
+                                            <!--                                              <VirtualizedScrollPane prefHeight="318.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+                                            <!--                                                 <content> -->
+                                            <!--                                                     <CodeArea fx:id="schemaRegistryTextArea" editable="false" prefHeight="318.0" prefWidth="934.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" /> -->
+                                            <!--                                                 </content> -->
+                                            <!--                                              </VirtualizedScrollPane> -->
+                                            <!--                                          </children> -->
+                                            <!--                                          </AnchorPane> -->
+                                            <!--                                       </items> -->
+                                            <!--                                     </SplitPane> -->
+                                        </children>
+                                    </AnchorPane>
+                                </content>
+                            </Tab>
+                            <Tab fx:id="propertiesTab" text="Properties">
+                                <content>
+                                    <TopicAndPartitionPropertyView fx:id="topicAndPartitionPropertyView"/>
+                                    <!--                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"> -->
+                                    <!--                                           <children> -->
+                                    <!--                                               <Accordion prefHeight="614.0" prefWidth="936.0"> -->
+                                    <!--                                                   <panes> -->
+                                    <!--                                                       <TitledPane animated="false" text="Properties"> -->
+                                    <!--                                                           <content> -->
+                                    <!--                                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"> -->
+                                    <!--                                                                   <children> -->
+                                    <!--                                                                       <TableView fx:id="topicConfigTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+                                    <!--                                                                           <columns> -->
+                                    <!--                                                                               <TableColumn prefWidth="428.0" text="Name" /> -->
+                                    <!--                                                                                <TableColumn prefWidth="300.0" text="Value" /> -->
+                                    <!--                                                                           </columns> -->
+                                    <!--                                                                       </TableView> -->
+
+                                    <!--                                                                     <TopicOrPartitionPropertyTable fx:id="topicConfigTable" prefHeight="535.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+                                    <!--                                                                         <editable> <Boolean fx:value="false"/> </editable> -->
+                                    <!--                                                                     </TopicOrPartitionPropertyTable> -->
+                                    <!--                                                                   </children> -->
+                                    <!--                                                               </AnchorPane> -->
+                                    <!--                                                           </content> -->
+                                    <!--                                                       </TitledPane> -->
+                                    <!--                                           <TitledPane fx:id="partitionsTitledPane" animated="false" text="Partitions"> -->
+                                    <!--                                             <content> -->
+                                    <!--                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"> -->
+                                    <!--                                                    <children> -->
+                                    <!--                                                       <SplitPane dividerPositions="0.05898876404494382" orientation="VERTICAL" prefHeight="0.0" prefWidth="934.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+                                    <!--                                                         <items> -->
+                                    <!--                                                             <HBox prefHeight="17.0" prefWidth="911.0"> -->
+                                    <!--                                                                <children> -->
+                                    <!--                                                                   <Button mnemonicParsing="false" onAction="#refreshPartitionsTblAction" prefHeight="26.0" prefWidth="72.0" text="Refresh" /> -->
+                                    <!--                                                                   <Label fx:id="totalMessagesInTheTopicLabel" prefHeight="28.0" prefWidth="106.0" text="0 Messages"> -->
+                                    <!--                                                                      <HBox.margin> -->
+                                    <!--                                                                         <Insets left="10.0" /> -->
+                                    <!--                                                                      </HBox.margin> -->
+                                    <!--                                                                   </Label> -->
+                                    <!--                                                                </children> -->
+                                    <!--                                                             </HBox> -->
+                                    <!--                                                             <TopicPartitionsTable fx:id="kafkaPartitionsTable" minHeight="-Infinity" minWidth="-Infinity" prefHeight="210.0" prefWidth="795.0"> -->
+                                    <!--                                                               <columns> -->
+                                    <!--                                                                   <TableColumn prefWidth="75.0" text="Parttion" /> -->
+                                    <!--                                                                 <TableColumn prefWidth="98.0" text="Start Offset" /> -->
+                                    <!--                                                                   <TableColumn prefWidth="83.0" text="End Offset" /> -->
+                                    <!--                                                                   <TableColumn prefWidth="108.0" text="No Messages" /> -->
+                                    <!--                                                                   <TableColumn prefWidth="190.0" text="Leader" /> -->
+                                    <!--                                                                   <TableColumn prefWidth="204.0" text="Replica [In-Sync]" /> -->
+                                    <!--                                                                   <TableColumn prefWidth="217.0" text="Replica [Not-In-Sync]" /> -->
+                                    <!--                                                               </columns> -->
+                                    <!--                                                             </TopicPartitionsTable> -->
+                                    <!--                                                         </items> -->
+                                    <!--                                                       </SplitPane> -->
+                                    <!--                                                    </children> -->
+                                    <!--                                                 </AnchorPane> -->
+                                    <!--                                             </content> -->
+                                    <!--                                           </TitledPane> -->
+                                    <!--                                                                                        <TitledPane animated="false" text="Properties"> -->
+                                    <!--                                                                                          <content> -->
+                                    <!--                                                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" > -->
+                                    <!--                                                                                                  <children> -->
+                                    <!--                                                                                                      <TableView fx:id="propertiesTable" prefHeight="374.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+                                    <!--                                                                                                          <columns> -->
+                                    <!--                                                                                                              <TableColumn prefWidth="138.0" text="Name" /> -->
+                                    <!--                                                                                                              <TableColumn prefWidth="290.0" text="Value" /> -->
+                                    <!--                                                                                                          </columns> -->
+                                    <!--                                                                                                      </TableView> -->
+                                    <!--                                                                                                  </children> -->
+                                    <!--                                                                                              </AnchorPane> -->
+                                    <!--                                                                                          </content> -->
+                                    <!--                                                                                        </TitledPane> -->
+                                    <!--                                                   </panes> -->
+                                    <!--                                               </Accordion> -->
+                                    <!--                                           </children> -->
+                                    <!--                                       </AnchorPane> -->
+                                </content>
+                            </Tab>
+                            <Tab fx:id="cgOffsetsTab" text="CG Offsets">
+                                <content>
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                        <children>
+                                            <SplitPane orientation="VERTICAL" prefHeight="453.0" prefWidth="564.0"
+                                                       AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                <items>
+                                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="480.0"
+                                                                prefWidth="727.0">
+                                                        <children>
+                                                            <ConsumerGroupTable fx:id="consumerGroupOffsetTable"
+                                                                                layoutX="-2.0" layoutY="-58.0"
+                                                                                prefHeight="484.0" prefWidth="729.0"
+                                                                                AnchorPane.bottomAnchor="0.0"
+                                                                                AnchorPane.leftAnchor="-2.0"
+                                                                                AnchorPane.rightAnchor="0.0"
+                                                                                AnchorPane.topAnchor="2.0">
+                                                                <!--                                                                   <columns> -->
+                                                                <!--                                                                       <TableColumn prefWidth="75.0" text="Topic" /> -->
+                                                                <!--                                                                       <TableColumn prefWidth="75.0" text="Partition" /> -->
+                                                                <!--                                                                       <TableColumn prefWidth="75.0" text="Start" /> -->
+                                                                <!--                                                                       <TableColumn prefWidth="75.0" text="End" /> -->
+                                                                <!--                                                                       <TableColumn prefWidth="75.0" text="Offset" /> -->
+                                                                <!--                                                                       <TableColumn prefWidth="75.0" text="Lag" /> -->
+                                                                <!--                                                                       <TableColumn prefWidth="75.0" text="Last Commit" /> -->
+                                                                <!--                                                                   </columns> -->
+                                                            </ConsumerGroupTable>
+                                                        </children>
+                                                    </AnchorPane>
+                                                </items>
+                                            </SplitPane>
+                                        </children>
+                                    </AnchorPane>
+                                </content>
+                            </Tab>
+                        </tabs>
+                    </TabPane>
+                </children>
+            </AnchorPane>
+        </items>
+    </SplitPane>
+    <ProgressIndicator fx:id="blockAppProgressInd" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0"
+                       prefWidth="1279.0" visible="false"/>
 </AnchorPane>

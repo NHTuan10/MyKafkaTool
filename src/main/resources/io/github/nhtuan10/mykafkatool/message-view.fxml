@@ -9,7 +9,7 @@
 <?import org.fxmisc.richtext.CodeArea?>
 <fx:root dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0"
          type="SplitPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-         AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+         AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <items>
         <AnchorPane maxHeight="83.0" minHeight="40.0" minWidth="0.0" prefHeight="83.0" prefWidth="993.0">
             <children>
@@ -55,7 +55,7 @@
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </Label>
-                        <DateTimePicker fx:id="startTimestampPicker" prefWidth="180.0">
+                        <DateTimePicker fx:id="startTimestampPicker" prefWidth="200.0">
                             <FlowPane.margin>
                                 <Insets left="10.0" right="10.0" top="5.0"/>
                             </FlowPane.margin>
@@ -65,7 +65,7 @@
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </Label>
-                        <DateTimePicker fx:id="endTimestampPicker" prefWidth="180.0">
+                        <DateTimePicker fx:id="endTimestampPicker" prefWidth="200.0">
                             <FlowPane.margin>
                                 <Insets left="10.0" right="10.0" top="5.0"/>
                             </FlowPane.margin>
