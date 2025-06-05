@@ -23,10 +23,7 @@ import io.github.nhtuan10.mykafkatool.ui.KafkaMessageTableItem;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
-import io.github.nhtuan10.mykafkatool.ui.event.PartitionEventSubscriber;
-import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
-import io.github.nhtuan10.mykafkatool.ui.event.TopicEventSubscriber;
-import io.github.nhtuan10.mykafkatool.ui.event.TopicUIEvent;
+import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
@@ -241,6 +238,9 @@ public class MessageView extends SplitPane {
                         v -> v != KafkaConsumerService.MessagePollingPosition.LAST));
 
         endTimestampPicker.disableProperty().bind(isLiveUpdateCheckBox.selectedProperty());
+        endTimestampPicker.disableProperty().addListener((obs, oldValue, newValue) -> {
+            countMessages();
+        });
 //        endTimestampLabel.setVisible(false);
 //        endTimestampLabel.setManaged(false);
 //        endTimestampPicker.setVisible(false);
@@ -327,7 +327,7 @@ public class MessageView extends SplitPane {
                         .pollTime(DEFAULT_POLL_TIME_MS)
                         .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
                         .startTimestamp(getTimestamp(this.startTimestampPicker))
-                        .endTimestamp(getTimestamp(this.endTimestampPicker))
+                        .endTimestamp(this.endTimestampPicker.isDisabled() ? null : getTimestamp(this.endTimestampPicker))
                         .pollingPosition(messagePollingPosition)
                         .valueContentType(valueContentType.getValue())
                         .schema(schema)
@@ -366,6 +366,7 @@ public class MessageView extends SplitPane {
             isBlockingAppUINeeded.set(false);
             isPolling.set(false);
             messageTable.handleNumOfMsgChanged(messageTable.getShownItems().size());
+            getTopicEventDispatcher().publishEvent(TopicUIEvent.newRefreshTopicEven(getTopic()));
         };
         Consumer<Throwable> onFailure = (exception) -> {
             isBlockingAppUINeeded.set(false);
@@ -376,10 +377,19 @@ public class MessageView extends SplitPane {
         ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
     }
 
+    public KafkaTopic getTopic() {
+        if (selectedTreeItem instanceof KafkaPartitionTreeItem<?> selectedItem) {
+            return ((KafkaPartition) selectedItem.getValue()).topic();
+        } else {
+            return (KafkaTopic) ((KafkaTopicTreeItem<?>) selectedTreeItem).getValue();
+        }
+    }
+
     private Long getTimestamp(DateTimePicker dateTimePicker) {
         return dateTimePicker.getValue() != null ? ZonedDateTime.of(dateTimePicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
 
     }
+
     @FXML
     protected void addMessage() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (selectedTreeItem instanceof KafkaPartitionTreeItem<?>) {
@@ -405,9 +415,9 @@ public class MessageView extends SplitPane {
         KafkaMessage newMsg = (KafkaMessage) ref.get();
         if (newMsg != null) {
             producerUtil.sendMessage(kafkaTopic, partition, newMsg);
-            topicEventSubscriber.getEventDispatcher().publishEvent(TopicUIEvent.newRefreshTopicEven(kafkaTopic));
+            getTopicEventDispatcher().publishEvent(TopicUIEvent.newRefreshTopicEven(kafkaTopic));
             if (partition != null) {
-                partitionEventSubscriber.getEventDispatcher().publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
+                getTopicEventDispatcher().publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
             }
             if (isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
                 ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Live-update is on, polling the messages", "Added message successfully!",
@@ -422,14 +432,22 @@ public class MessageView extends SplitPane {
         }
     }
 
+    public EventDispatcher getTopicEventDispatcher() {
+        return topicEventSubscriber.getEventDispatcher();
+    }
+
     // Count message with end offset
     @FXML
     public void countMessages() {
         Callable<Long> callable = () -> {
             try {
-                long count;
                 Long startTimestamp = getTimestamp(this.startTimestampPicker);
-                Long endTimestamp = getTimestamp(this.endTimestampPicker);
+                Long endTimestamp = this.endTimestampPicker.isDisabled() ? null : getTimestamp(this.endTimestampPicker);
+                if (startTimestamp != null && endTimestamp != null && endTimestamp >= startTimestamp) {
+                    return 0L;
+                }
+
+                long count;
                 if (selectedTreeItem instanceof KafkaPartitionTreeItem<?>) {
                     KafkaPartition partition = (KafkaPartition) selectedTreeItem.getValue();
                     String clusterName = partition.topic().cluster().getName();
