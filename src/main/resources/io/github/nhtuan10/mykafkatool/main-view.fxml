@@ -27,10 +27,12 @@
                             <MenuItem mnemonicParsing="false" text="Exit" onAction="#exit"/>
                         </items>
                         <items>
-                            <MenuItem mnemonicParsing="false" text="Show Config Files In File Browser"/>
+                            <MenuItem mnemonicParsing="false" text="Show Config Files In File Browser"
+                                      onAction="#showConfigFileInFileBrowser"/>
                         </items>
                         <items>
-                            <MenuItem mnemonicParsing="false" text="Show Logs In File Browser"/>
+                            <MenuItem mnemonicParsing="false" text="Show Logs In File Browser"
+                                      onAction="#showLogsInFileBrowser"/>
                         </items>
                     </Menu>
 

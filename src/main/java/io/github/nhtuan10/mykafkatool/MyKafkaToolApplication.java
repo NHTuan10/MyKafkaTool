@@ -15,6 +15,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.MessageFormat;
+
+import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
 
 public class MyKafkaToolApplication extends javafx.application.Application {
 
@@ -75,5 +78,10 @@ public class MyKafkaToolApplication extends javafx.application.Application {
 
     public static void main(String[] args) {
         launch();
+    }
+
+    public static String getLogsPath() {
+        String userHome = System.getProperty("user.home");
+        return MessageFormat.format("{0}/{1}/log/{2}.log", userHome, APP_NAME, APP_NAME);
     }
 }

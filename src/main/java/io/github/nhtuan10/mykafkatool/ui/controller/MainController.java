@@ -5,6 +5,7 @@ import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.Theme;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
+import io.github.nhtuan10.mykafkatool.manager.UserPreferenceManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
@@ -21,9 +22,12 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.MenuBar;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
@@ -201,6 +205,16 @@ public class MainController {
     @FXML
     protected void switchToLightMode() {
         MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.LIGHT);
+    }
+
+    @FXML
+    protected void showConfigFileInFileBrowser() {
+        Desktop.getDesktop().browseFileDirectory(new File(UserPreferenceManager.getUserPrefFilePath()));
+    }
+
+    @FXML
+    protected void showLogsInFileBrowser() {
+        Desktop.getDesktop().browseFileDirectory(new File(MyKafkaToolApplication.getLogsPath()));
     }
 
 }
