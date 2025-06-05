@@ -1,7 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
-import io.github.nhtuan10.mykafkatool.constant.CssClassConstant;
+import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
@@ -70,14 +70,14 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
                 @Override
                 protected void updateItem(KafkaMessageTableItem item, boolean empty) {
                     super.updateItem(item, empty);
-                    getStyleClass().removeAll(CssClassConstant.ERROR_ROW);
+                    getStyleClass().removeAll(UIStyleConstant.ERROR_ROW_CLASS);
                     if (!empty && item != null) {
                         if (item.isErrorItem()) {
-                            getStyleClass().add(CssClassConstant.ERROR_ROW);
+                            getStyleClass().add(UIStyleConstant.ERROR_ROW_CLASS);
                         }
-                        getStyleClass().add(CssClassConstant.TABLE_ROW_BORDER);
+                        getStyleClass().add(UIStyleConstant.TABLE_ROW_BORDER_CLASS);
                     } else {
-                        getStyleClass().removeAll(CssClassConstant.ERROR_ROW, CssClassConstant.TABLE_ROW_BORDER);
+                        getStyleClass().removeAll(UIStyleConstant.ERROR_ROW_CLASS, UIStyleConstant.TABLE_ROW_BORDER_CLASS);
                     }
                 }
             };

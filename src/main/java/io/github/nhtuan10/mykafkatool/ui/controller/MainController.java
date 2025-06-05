@@ -1,6 +1,8 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.constant.Theme;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
@@ -70,6 +72,9 @@ public class MainController {
 
     @FXML
     private SchemaRegistryControl schemaRegistryControl;
+
+    @FXML
+    private MenuBar menuBar;
 
     private Set<Tab> allTabs;
 
@@ -176,6 +181,26 @@ public class MainController {
     @FXML
     protected void addTopic() throws IOException, ExecutionException, InterruptedException {
         kafkaClusterTree.addTopic();
+    }
+
+    @FXML
+    protected void addNewConnection() {
+        kafkaClusterTree.addNewConnection();
+    }
+
+    @FXML
+    protected void exit() {
+        MyKafkaToolApplication.exit();
+    }
+
+    @FXML
+    protected void switchToDarkMode() {
+        MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.DARK);
+    }
+
+    @FXML
+    protected void switchToLightMode() {
+        MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.LIGHT);
     }
 
 }

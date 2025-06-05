@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.manager;
 
+import io.github.nhtuan10.mykafkatool.constant.Theme;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;
 import io.github.nhtuan10.mykafkatool.repo.UserPreferenceRepoImpl;
@@ -31,6 +32,12 @@ public class UserPreferenceManager {
             userPreference = getDefaultUserPreference();
         }
         return userPreference;
+    }
+
+    public static void changeUserPreferenceTheme(Theme newTheme) throws IOException {
+        UserPreference userPreference = loadUserPreference();
+        saveUserPreference(new UserPreference(userPreference.connections(), newTheme));
+
     }
 
     public static String getDefaultUserPreferenceFilePath() {

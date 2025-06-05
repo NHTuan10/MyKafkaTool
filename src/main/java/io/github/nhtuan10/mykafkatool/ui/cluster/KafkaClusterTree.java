@@ -306,32 +306,36 @@ public class KafkaClusterTree {
     private MenuItem createAddingConnectionActionMenuItem() {
         MenuItem addNewConnectionItem = new MenuItem("Add New Connection");
         addNewConnectionItem.setOnAction(ae -> {
-            try {
-                KafkaCluster newConnection;
-                while (true) {
-                    AtomicReference<Object> modelRef = new AtomicReference<>();
-                    ViewUtil.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of(), stage);
-                    newConnection = (KafkaCluster) modelRef.get();
-
-                    if (newConnection != null && (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInTree(clusterTree, newConnection.getName()))) {
-                        String clusterName = newConnection.getName();
-                        log.warn("User enter an invalid cluster name {} or bootstrap server", clusterName);
-                        ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
-                    } else {
-                        break;
-                    }
-                }
-                if (newConnection != null) {
-                    connectToClusterAndSchemaRegistry(clusterTree, newConnection);
-                    UserPreferenceManager.addClusterToUserPreference(newConnection);
-                }
-
-            } catch (IOException | ClusterNameExistedException e) {
-                log.error("Error when add new connection", e);
-                throw new RuntimeException(e);
-            }
+            addNewConnection();
         });
         return addNewConnectionItem;
+    }
+
+    public void addNewConnection() {
+        try {
+            KafkaCluster newConnection;
+            while (true) {
+                AtomicReference<Object> modelRef = new AtomicReference<>();
+                ViewUtil.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of(), stage);
+                newConnection = (KafkaCluster) modelRef.get();
+
+                if (newConnection != null && (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInTree(clusterTree, newConnection.getName()))) {
+                    String clusterName = newConnection.getName();
+                    log.warn("User enter an invalid cluster name {} or bootstrap server", clusterName);
+                    ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
+                } else {
+                    break;
+                }
+            }
+            if (newConnection != null) {
+                connectToClusterAndSchemaRegistry(clusterTree, newConnection);
+                UserPreferenceManager.addClusterToUserPreference(newConnection);
+            }
+
+        } catch (IOException | ClusterNameExistedException e) {
+            log.error("Error when add new connection", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private MenuItem createEditingConnectionActionMenuItem(TreeItem<KafkaCluster> selectedItem) {

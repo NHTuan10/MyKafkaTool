@@ -1,0 +1,57 @@
+.red-text {
+    -fx-fill: red;
+}
+
+.json-property {
+    -fx-fill: pink;
+    /*    blue*/
+}
+
+.json-number {
+    -fx-fill: cyan;
+}
+
+.json-string {
+    -fx-fill: green;
+}
+
+.json-start-or-end-array {
+    -fx-fill: cyan;
+}
+
+.json-start-or-end-object {
+    -fx-fill: green;
+}
+
+.normal-text {
+    -fx-fill: white;
+}
+
+.error-row {
+    -fx-background-color: lightcoral;
+}
+
+.error-row:selected {
+    -fx-background-color: #C06666;
+}
+
+.table-row-border {
+    -fx-border-color: transparent transparent lightgray transparent;
+}
+
+.index-col-cell {
+    -fx-text-fill: darkgray;
+}
+
+.error-row .index-col-cell {
+    -fx-text-fill: #505050;
+}
+
+.table-view .scroll-bar:vertical > .increment-button,
+.table-view .scroll-bar:vertical > .decrement-button {
+    -fx-padding: 0.5em 0.5em;
+}
+
+.styled-text-area .caret {
+    -fx-stroke: white;
+}

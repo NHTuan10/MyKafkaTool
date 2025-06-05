@@ -28,7 +28,6 @@ import org.fxmisc.richtext.CodeArea;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
@@ -72,6 +71,7 @@ public final class ViewUtil {
         FXMLLoader modalLoader = new FXMLLoader(
                 MyKafkaToolApplication.class.getResource(modalFxml));
         Scene scene = new Scene(modalLoader.load());
+        MyKafkaToolApplication.applyThemeFromCurrentUserPreference(scene);
 
         ModalController modalController = modalLoader.getController();
         modalController.setModelRef(modelRef);
@@ -84,8 +84,9 @@ public final class ViewUtil {
         }
         stage.setResizable(resizable);
         stage.setScene(scene);
-        URL cssResource = MyKafkaToolApplication.class.getResource("style.css");
-        scene.getStylesheets().add(cssResource.toExternalForm());
+//        URL cssResource = MyKafkaToolApplication.class.getResource(UIStyleConstant.LIGHT_STYLE_CSS_FILE);
+//        scene.getStylesheets().add(cssResource.toExternalForm());
+
         stage.showAndWait();
     }
 

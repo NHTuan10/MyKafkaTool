@@ -1,7 +1,9 @@
 package io.github.nhtuan10.mykafkatool;
 
-import atlantafx.base.theme.PrimerLight;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.constant.Theme;
+import io.github.nhtuan10.mykafkatool.manager.UserPreferenceManager;
+import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.controller.MainController;
@@ -24,18 +26,51 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         MainController mainController = fxmlLoader.getController();
         mainController.setStage(stage);
         Scene scene = new Scene(parent);
-        javafx.application.Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
-//        Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet()); //PrimerDark
-        URL cssResource = MyKafkaToolApplication.class.getResource("style.css");
-        scene.getStylesheets().add(cssResource.toExternalForm());
+        applyThemeFromCurrentUserPreference(scene);
         stage.setTitle(AppConstant.APP_NAME);
         stage.setScene(scene);
         stage.show();
         KafkaClusterTree.initClusterPanel(stage);
         stage.setOnCloseRequest(event -> {
-            Platform.exit();
-            System.exit(0);
+            exit();
         });
+    }
+
+    public static void applyTheme(Scene scene, Theme theme) {
+        javafx.application.Application.setUserAgentStylesheet(theme.getUserAgentStyleSheet());
+        theme.getStyleSheets().forEach(styleSheet -> {
+            URL cssResource = MyKafkaToolApplication.class.getResource(styleSheet);
+            scene.getStylesheets().add(cssResource.toExternalForm());
+        });
+        try {
+            UserPreferenceManager.changeUserPreferenceTheme(theme);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void applyThemeFromCurrentUserPreference(Scene scene) {
+        UserPreference userPreference = UserPreferenceManager.loadUserPreference();
+        Theme theme = userPreference.theme() != null ? userPreference.theme() : Theme.LIGHT;
+        applyTheme(scene, theme);
+    }
+
+
+    public static void changeTheme(Scene scene, Theme newTheme) {
+        Theme currentTheme = UserPreferenceManager.loadUserPreference().theme();
+        if (currentTheme == null) currentTheme = Theme.LIGHT;
+        if (newTheme != currentTheme) {
+            currentTheme.getStyleSheets().forEach(styleSheet -> {
+                URL cssResource = MyKafkaToolApplication.class.getResource(styleSheet);
+                scene.getStylesheets().remove(cssResource.toExternalForm());
+            });
+            applyTheme(scene, newTheme);
+        }
+    }
+
+    public static void exit() {
+        Platform.exit();
+        System.exit(0);
     }
 
     public static void main(String[] args) {

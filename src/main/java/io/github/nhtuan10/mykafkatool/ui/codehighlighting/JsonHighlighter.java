@@ -14,6 +14,7 @@ import java.util.List;
 
 public class JsonHighlighter {
 
+    public static final String NORMAL_TEXT = "normal-text";
     private final JsonFactory jsonFactory;
 
     public JsonHighlighter() {
@@ -50,7 +51,7 @@ public class JsonHighlighter {
             // Fill the gaps, since Style Spans need to be contiguous.
             if (match.start > lastPos) {
                 int length = match.start - lastPos;
-                spansBuilder.add(Collections.emptyList(), length);
+                spansBuilder.add(List.of(NORMAL_TEXT), length);
             }
 
             int length = match.end - match.start;
@@ -58,8 +59,8 @@ public class JsonHighlighter {
             lastPos = match.end;
         }
 
-        if (lastPos == 0) {
-            spansBuilder.add(Collections.emptyList(), code.length());
+        if (lastPos < code.length()) {
+            spansBuilder.add(List.of(NORMAL_TEXT), code.length() - lastPos);
         }
 
         return spansBuilder.create();
@@ -84,7 +85,7 @@ public class JsonHighlighter {
             case VALUE_NUMBER_INT:
                 return "json-number";
             default:
-                return "";
+                return NORMAL_TEXT;
         }
     }
 

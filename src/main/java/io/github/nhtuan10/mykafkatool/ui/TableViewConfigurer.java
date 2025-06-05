@@ -3,7 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
-import io.github.nhtuan10.mykafkatool.constant.CssClassConstant;
+import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
@@ -132,13 +132,13 @@ public class TableViewConfigurer {
             @Override
             protected void updateItem(S item, boolean empty) {
                 super.updateItem(item, empty);
-                getStyleClass().removeAll(CssClassConstant.INDEX_COL_CELL);
+                getStyleClass().removeAll(UIStyleConstant.INDEX_COL_CELL_CLASS);
                 if (this.getTableRow() != null && item != null) {
                     setText(String.valueOf(this.getTableRow().getIndex() + 1));
-                    getStyleClass().add(CssClassConstant.INDEX_COL_CELL);
+                    getStyleClass().add(UIStyleConstant.INDEX_COL_CELL_CLASS);
                 } else {
                     setText("");
-                    getStyleClass().remove(CssClassConstant.INDEX_COL_CELL);
+                    getStyleClass().remove(UIStyleConstant.INDEX_COL_CELL_CLASS);
                 }
             }
         });

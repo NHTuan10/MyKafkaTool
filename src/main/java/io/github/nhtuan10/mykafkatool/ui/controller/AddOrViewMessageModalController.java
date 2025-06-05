@@ -19,9 +19,12 @@ import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -163,7 +166,11 @@ public class AddOrViewMessageModalController extends ModalController {
                 if (prettyPrint) {
                     codeArea.replaceText(inValue);
                 }
-                codeArea.clearStyle(0, codeArea.getText().length() - 1);
+                String code = codeArea.getText();
+                codeArea.clearStyle(0, code.length());
+                StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<Collection<String>>()
+                        .add(List.of(JsonHighlighter.NORMAL_TEXT), code.length());
+                codeArea.setStyleSpans(0, spansBuilder.create());
             }
 
         }
