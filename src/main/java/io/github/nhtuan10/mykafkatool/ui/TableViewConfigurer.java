@@ -33,7 +33,7 @@ public class TableViewConfigurer {
     public static final String COLUMN_SEPERATOR = "\t";
     public static final String LINE_SEPARATOR = System.lineSeparator();
     private final static CsvMapper CSV_MAPPER = new CsvMapper();
-    public static final int MAX_TABLE_COLUMN_WIDTH = 500;
+    public static final int MAX_TABLE_COLUMN_WIDTH = 400;
     public static final double TABLE_COLUMN_WIDTH_MARGIN = 40.0d;
 
     public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage, StageHolder stageHolder) {
