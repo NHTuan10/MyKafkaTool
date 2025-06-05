@@ -24,7 +24,7 @@
                 <menus>
                     <Menu mnemonicParsing="false" text="File">
                         <items>
-                            <MenuItem mnemonicParsing="false" text="Exit" fx:id="exit"/>
+                            <MenuItem mnemonicParsing="false" text="Exit" onAction="#exit"/>
                         </items>
                         <items>
                             <MenuItem mnemonicParsing="false" text="Show Config Files In File Browser"/>
