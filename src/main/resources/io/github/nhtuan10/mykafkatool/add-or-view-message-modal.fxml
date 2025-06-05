@@ -6,156 +6,186 @@
 <?import javafx.scene.layout.*?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
-<AnchorPane prefHeight="522.0" prefWidth="738.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController">
+<AnchorPane prefHeight="522.0" prefWidth="738.0" xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController">
     <children>
-      <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="522.0" prefWidth="738.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <items>
-              <TabPane prefHeight="385.0" prefWidth="634.0" tabClosingPolicy="UNAVAILABLE">
-                  <tabs>
-                      <Tab text="Contents">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                  <children>
-                                      <GridPane layoutY="12.0" prefHeight="429.0" prefWidth="736.0" vgap="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="12.0">
-                                          <columnConstraints>
-                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="280.0" minWidth="10.0" prefWidth="86.0" />
-                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="556.0" minWidth="10.0" percentWidth="80.0" prefWidth="556.0" />
-                                          </columnConstraints>
-                                          <rowConstraints>
-                                              <RowConstraints maxHeight="104.0" minHeight="0.0" percentHeight="10.0" prefHeight="54.0" vgrow="SOMETIMES" />
-                                              <RowConstraints maxHeight="216.0" minHeight="10.0" percentHeight="60.0" prefHeight="118.0" vgrow="SOMETIMES" />
-                                    <RowConstraints maxHeight="178.0" minHeight="10.0" percentHeight="25.0" prefHeight="129.0" vgrow="SOMETIMES" />
-                                              <RowConstraints maxHeight="129.0" minHeight="9.0" percentHeight="5.0" prefHeight="34.0" vgrow="SOMETIMES" />
-                                          </rowConstraints>
-                                          <children>
-                                              <Label text="Key">
-                                       <GridPane.margin>
-                                          <Insets left="10.0" />
-                                       </GridPane.margin></Label>
-                                              <TextArea fx:id="keyTextArea" prefHeight="200.0" prefWidth="200.0" wrapText="true" GridPane.columnIndex="1">
-                                       <GridPane.margin>
-                                          <Insets right="5.0" />
-                                       </GridPane.margin></TextArea>
-<!--                                     <AnchorPane GridPane.columnIndex="1" GridPane.rowIndex="1"> -->
-                                        <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                           <GridPane.margin>
-                                              <Insets right="5.0" />
-                                           </GridPane.margin>
-                                          <content>
-                                                    <CodeArea fx:id="valueTextArea" prefHeight="118.0" prefWidth="552.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true" />
-                                        </content>
+        <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="522.0" prefWidth="738.0"
+                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="0.0">
+            <items>
+                <TabPane prefHeight="385.0" prefWidth="634.0" tabClosingPolicy="UNAVAILABLE">
+                    <tabs>
+                        <Tab text="Contents">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <children>
+                                        <GridPane layoutY="12.0" prefHeight="429.0" prefWidth="736.0" vgap="10.0"
+                                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="12.0">
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="280.0" minWidth="10.0"
+                                                                   prefWidth="86.0"/>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="556.0" minWidth="10.0"
+                                                                   percentWidth="80.0" prefWidth="556.0"/>
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints maxHeight="104.0" minHeight="0.0" percentHeight="10.0"
+                                                                prefHeight="54.0" vgrow="SOMETIMES"/>
+                                                <RowConstraints maxHeight="216.0" minHeight="10.0" percentHeight="60.0"
+                                                                prefHeight="118.0" vgrow="SOMETIMES"/>
+                                                <RowConstraints maxHeight="178.0" minHeight="10.0" percentHeight="25.0"
+                                                                prefHeight="129.0" vgrow="SOMETIMES"/>
+                                                <RowConstraints maxHeight="129.0" minHeight="9.0" percentHeight="5.0"
+                                                                prefHeight="34.0" vgrow="SOMETIMES"/>
+                                            </rowConstraints>
+                                            <children>
+                                                <Label text="Key">
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0"/>
+                                                    </GridPane.margin>
+                                                </Label>
+                                                <TextArea fx:id="keyTextArea" prefHeight="200.0" prefWidth="200.0"
+                                                          wrapText="true" GridPane.columnIndex="1">
+                                                    <GridPane.margin>
+                                                        <Insets right="5.0"/>
+                                                    </GridPane.margin>
+                                                </TextArea>
+                                                <!--                                     <AnchorPane GridPane.columnIndex="1" GridPane.rowIndex="1"> -->
+                                                <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                    <GridPane.margin>
+                                                        <Insets right="5.0"/>
+                                                    </GridPane.margin>
+                                                    <content>
+                                                        <CodeArea fx:id="valueTextArea" prefHeight="118.0"
+                                                                  prefWidth="552.0"
+                                                                  style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"
+                                                                  wrapText="true"/>
+                                                    </content>
 
-                                        </VirtualizedScrollPane>
-<!--                                     </AnchorPane> -->
-<!--                                     <TextArea fx:id="schemaTextArea" layoutX="59.0" layoutY="69.0" prefHeight="108.0" prefWidth="520.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" /> -->
-                                    <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="2">
-                                    <GridPane.margin>
-                                                                              <Insets right="5.0" />
-                                                                           </GridPane.margin>
-                                                                           <content>
-<!--                                                                            layoutX="59.0" layoutY="69.0" -->
-                                    <CodeArea fx:id="schemaTextArea" prefHeight="130.0" prefWidth="551.0" style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;" wrapText="true">
-<!--                                    styleClass="text-input"    -->
+                                                </VirtualizedScrollPane>
+                                                <!--                                     </AnchorPane> -->
+                                                <!--                                     <TextArea fx:id="schemaTextArea" layoutX="59.0" layoutY="69.0" prefHeight="108.0" prefWidth="520.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" /> -->
+                                                <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                    <GridPane.margin>
+                                                        <Insets right="5.0"/>
+                                                    </GridPane.margin>
+                                                    <content>
+                                                        <!--                                                                            layoutX="59.0" layoutY="69.0" -->
+                                                        <CodeArea fx:id="schemaTextArea" prefHeight="130.0"
+                                                                  prefWidth="551.0"
+                                                                  style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"
+                                                                  wrapText="true">
+                                                            <!--                                    styleClass="text-input"    -->
 
-                                       </CodeArea>
-                                        </content>
+                                                        </CodeArea>
+                                                    </content>
 
-                                                                               </VirtualizedScrollPane>
-                                    <Label layoutX="10.0" layoutY="114.0" text="Value Schema" GridPane.rowIndex="2">
-                                       <GridPane.margin>
-                                          <Insets left="10.0" />
-                                       </GridPane.margin></Label>
-                                    <Label text="Value Type" GridPane.rowIndex="3">
-                                       <GridPane.margin>
-                                          <Insets left="10.0" />
-                                       </GridPane.margin></Label>
-                                    <ComboBox fx:id="valueContentTypeComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                    <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
-                                       <children>
-                                                    <Label text="Value">
-                                             <padding>
-                                                <Insets left="10.0" />
-                                             </padding>
-                                          </Label>
-                                          <ComboBox fx:id="valueDisplayTypeComboBox" prefHeight="26.0" prefWidth="92.0">
-                                             <VBox.margin>
-                                                <Insets left="10.0" top="10.0" />
-                                             </VBox.margin>
-                                          </ComboBox>
-                                       </children>
-                                    </VBox>
-                                          </children>
-                                      </GridPane>
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
-                      <Tab fx:id="headerTab" text="Headers">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                               <KafkaMessageHeaderTable fx:id="headerTable" layoutY="7.0" minHeight="200.0"
-                                                        prefHeight="297.0" prefWidth="924.0"
-                                                        AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="5.0"
-                                                        AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0"/>
+                                                </VirtualizedScrollPane>
+                                                <Label layoutX="10.0" layoutY="114.0" text="Value Schema"
+                                                       GridPane.rowIndex="2">
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0"/>
+                                                    </GridPane.margin>
+                                                </Label>
+                                                <Label text="Value Type" GridPane.rowIndex="3">
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0"/>
+                                                    </GridPane.margin>
+                                                </Label>
+                                                <ComboBox fx:id="valueContentTypeComboBox" prefWidth="150.0"
+                                                          GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                                                <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
+                                                    <children>
+                                                        <Label text="Value">
+                                                            <padding>
+                                                                <Insets left="10.0"/>
+                                                            </padding>
+                                                        </Label>
+                                                        <ComboBox fx:id="valueDisplayTypeComboBox" prefHeight="26.0"
+                                                                  prefWidth="92.0">
+                                                            <VBox.margin>
+                                                                <Insets left="10.0" top="10.0"/>
+                                                            </VBox.margin>
+                                                        </ComboBox>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="10.0"/>
+                                            </padding>
+                                        </GridPane>
+                                    </children>
+                                </AnchorPane>
+                            </content>
+                        </Tab>
+                        <Tab fx:id="headerTab" text="Headers">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <children>
+                                        <KafkaMessageHeaderTable fx:id="headerTable" layoutY="7.0" minHeight="200.0"
+                                                                 prefHeight="297.0" prefWidth="924.0"
+                                                                 AnchorPane.bottomAnchor="-7.0"
+                                                                 AnchorPane.leftAnchor="5.0"
+                                                                 AnchorPane.rightAnchor="5.0"
+                                                                 AnchorPane.topAnchor="5.0"/>
 
-<!--                               <SplitPane dividerPositions="0.12440944881889764" orientation="VERTICAL" prefHeight="319.5" prefWidth="598.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
-<!--                                 <items> -->
-<!--                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
-<!--                                        <children> -->
-<!--                                           <HBox prefHeight="17.0" prefWidth="200.0"> -->
-<!--                                              <children> -->
-<!--                                                 <Button fx:id="addHeaderBtn" mnemonicParsing="false" onAction="#addHeader" text="+"> -->
-<!--                                                    <HBox.margin> -->
-<!--                                                       <Insets left="10.0" top="5.0" /> -->
-<!--                                                    </HBox.margin> -->
-<!--                                                 </Button> -->
-<!--                                                 <Button fx:id="removeHeaderBtn" mnemonicParsing="false" onAction="#removeHeader" text="-"> -->
-<!--                                                    <HBox.margin> -->
-<!--                                                       <Insets left="10.0" top="5.0" /> -->
-<!--                                                    </HBox.margin> -->
-<!--                                                 </Button> -->
-<!--                                              </children> -->
-<!--                                           </HBox> -->
-<!--                                        </children> -->
-<!--                                     </AnchorPane> -->
-<!--                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
-<!--                                        <children> -->
-<!--                                           <TableView fx:id="headerTable" prefHeight="298.0" prefWidth="598.0"> -->
-<!--                                             <columns> -->
-<!--                                               <TableColumn prefWidth="180.0" text="Name" /> -->
-<!--                                               <TableColumn prefWidth="413.0" text="Value" /> -->
-<!--                                             </columns> -->
-<!--                                           </TableView> -->
-<!--                                        </children> -->
-<!--                                     </AnchorPane> -->
-<!--                                 </items> -->
-<!--                               </SplitPane> -->
-                           </children>
-                        </AnchorPane>
-                          </content>
-                      </Tab>
-                  </tabs>
-              </TabPane>
-          <AnchorPane maxHeight="40.0" minHeight="40.0" minWidth="0.0" prefHeight="40.0" prefWidth="593.0">
-               <children>
-                            <HBox prefHeight="40.0" prefWidth="598.0" spacing="10.0">
-                                <children>
-                                    <Button fx:id="okBtn" mnemonicParsing="false" onAction="#ok" prefHeight="26.0" prefWidth="80.0" text="OK">
-                           <HBox.margin>
-                              <Insets left="5.0" top="5.0" />
-                           </HBox.margin>
+                                        <!--                               <SplitPane dividerPositions="0.12440944881889764" orientation="VERTICAL" prefHeight="319.5" prefWidth="598.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
+                                        <!--                                 <items> -->
+                                        <!--                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
+                                        <!--                                        <children> -->
+                                        <!--                                           <HBox prefHeight="17.0" prefWidth="200.0"> -->
+                                        <!--                                              <children> -->
+                                        <!--                                                 <Button fx:id="addHeaderBtn" mnemonicParsing="false" onAction="#addHeader" text="+"> -->
+                                        <!--                                                    <HBox.margin> -->
+                                        <!--                                                       <Insets left="10.0" top="5.0" /> -->
+                                        <!--                                                    </HBox.margin> -->
+                                        <!--                                                 </Button> -->
+                                        <!--                                                 <Button fx:id="removeHeaderBtn" mnemonicParsing="false" onAction="#removeHeader" text="-"> -->
+                                        <!--                                                    <HBox.margin> -->
+                                        <!--                                                       <Insets left="10.0" top="5.0" /> -->
+                                        <!--                                                    </HBox.margin> -->
+                                        <!--                                                 </Button> -->
+                                        <!--                                              </children> -->
+                                        <!--                                           </HBox> -->
+                                        <!--                                        </children> -->
+                                        <!--                                     </AnchorPane> -->
+                                        <!--                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->
+                                        <!--                                        <children> -->
+                                        <!--                                           <TableView fx:id="headerTable" prefHeight="298.0" prefWidth="598.0"> -->
+                                        <!--                                             <columns> -->
+                                        <!--                                               <TableColumn prefWidth="180.0" text="Name" /> -->
+                                        <!--                                               <TableColumn prefWidth="413.0" text="Value" /> -->
+                                        <!--                                             </columns> -->
+                                        <!--                                           </TableView> -->
+                                        <!--                                        </children> -->
+                                        <!--                                     </AnchorPane> -->
+                                        <!--                                 </items> -->
+                                        <!--                               </SplitPane> -->
+                                    </children>
+                                </AnchorPane>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </TabPane>
+                <AnchorPane fx:id="choiceButtonContainer" maxHeight="40.0" minHeight="40.0" minWidth="0.0"
+                            prefHeight="40.0" prefWidth="593.0">
+                    <HBox prefHeight="40.0" prefWidth="598.0" spacing="10.0">
+                        <Button fx:id="okBtn" mnemonicParsing="false" onAction="#ok" prefHeight="26.0" prefWidth="80.0"
+                                text="OK">
+                            <HBox.margin>
+                                <Insets left="5.0" top="5.0"/>
+                            </HBox.margin>
                         </Button>
-                                    <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#cancel" prefWidth="80.0" text="Cancel">
-                           <HBox.margin>
-                              <Insets left="5.0" top="5.0" />
-                           </HBox.margin>
+                        <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#cancel" prefWidth="80.0"
+                                text="Cancel">
+                            <HBox.margin>
+                                <Insets left="5.0" top="5.0"/>
+                            </HBox.margin>
                         </Button>
-                                </children>
-                            </HBox>
-               </children>
-            </AnchorPane>
-        </items>
-      </SplitPane>
+                    </HBox>
+                </AnchorPane>
+            </items>
+        </SplitPane>
     </children>
 </AnchorPane>

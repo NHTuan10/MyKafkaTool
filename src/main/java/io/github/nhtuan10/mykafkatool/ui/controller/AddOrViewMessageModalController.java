@@ -14,6 +14,7 @@ import javafx.collections.FXCollections;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +42,10 @@ public class AddOrViewMessageModalController extends ModalController {
     private Button okBtn;
     @FXML
     private Button cancelBtn;
-
+    @FXML
+    private Pane choiceButtonContainer;
+    @FXML
+    private SplitPane splitPane;
     @FXML
     private Tab headerTab;
 
@@ -124,6 +128,11 @@ public class AddOrViewMessageModalController extends ModalController {
                     .map(PluggableSerializer::getDisplayType).orElse(DisplayType.TEXT);
             enableDisableSchemaTextArea();
         } else { // For View Message Modal
+//            choiceButtonContainer.setVisible(false);
+//            choiceButtonContainer.setMinHeight(0);
+//            choiceButtonContainer.setPrefHeight(0);
+            splitPane.getItems().remove(choiceButtonContainer);
+//            ( (SplitPane) choiceButtonContainer.getParent()).getItems().remove(choiceButtonContainer);
             if (valueContentType != null && serDesHelper.getPluggableDeserialize(valueContentType) != null) {
                 valueContentTypeComboBox.getSelectionModel().select(valueContentType);
             }
