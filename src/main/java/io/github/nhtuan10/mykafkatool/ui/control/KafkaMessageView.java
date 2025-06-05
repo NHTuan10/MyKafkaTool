@@ -61,7 +61,7 @@ import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_MAX_PO
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
-public class MessageView extends SplitPane {
+public class KafkaMessageView extends SplitPane {
     private final ClusterManager clusterManager;
 
     private final KafkaConsumerService kafkaConsumerService;
@@ -126,9 +126,9 @@ public class MessageView extends SplitPane {
     private SplitPane messageSplitPane;
 
     @FXML
-    private MessageTable messageTable;
+    private KafkaMessageTable kafkaMessageTable;
 
-    public MessageView() {
+    public KafkaMessageView() {
         clusterManager = ClusterManager.getInstance();
         serDesHelper = initSerDeserializer();
         this.producerUtil = new ProducerUtil(this.serDesHelper);
@@ -186,13 +186,13 @@ public class MessageView extends SplitPane {
     private void initialize() {
         // TODO: need to think about pagination for message table, may implement it if it's a good option
         initPollingOptionsUI();
-        messageTable.configureMessageTable(serDesHelper);
+        kafkaMessageTable.configureMessageTable(serDesHelper);
         isPollingMsgProgressIndicator.visibleProperty().bindBidirectional(isPolling);
         isPollingMsgProgressIndicator.managedProperty().bindBidirectional(isPolling);
         isPolling.addListener((observable, oldValue, newValue) -> {
             pollMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
         });
-        messageTable.addFilterListener((filter) -> {
+        kafkaMessageTable.addFilterListener((filter) -> {
             if (selectedTreeItem instanceof KafkaTopicTreeItem<?>) {
                 treeMsgTableItemCache.forEach((treeItem, state) -> {
                     if (treeItem instanceof KafkaPartitionTreeItem<?> && treeItem.getParent() == selectedTreeItem) {
@@ -252,9 +252,9 @@ public class MessageView extends SplitPane {
     }
 
     public void cacheMessages(TreeItem oldValue) {
-        treeMsgTableItemCache.put(oldValue, MessageView.MessageTableState.builder()
-                .items(messageTable.getItems())
-                .filter(messageTable.getFilter())
+        treeMsgTableItemCache.put(oldValue, KafkaMessageView.MessageTableState.builder()
+                .items(kafkaMessageTable.getItems())
+                .filter(kafkaMessageTable.getFilter())
                 .build());
     }
 
@@ -268,13 +268,13 @@ public class MessageView extends SplitPane {
         if (newValue instanceof KafkaTopicTreeItem<?>) {
             // if some clear msg table
             if (treeMsgTableItemCache.containsKey(newValue)) {
-                MessageView.MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
+                KafkaMessageView.MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
                 ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList(messageTableState.getItems());
-                messageTable.setItems(msgItems, false);
-                messageTable.configureSortAndFilterForMessageTable(messageTableState.getFilter(), messagePollingPosition);
+                kafkaMessageTable.setItems(msgItems, false);
+                kafkaMessageTable.configureSortAndFilterForMessageTable(messageTableState.getFilter(), messagePollingPosition);
             } else {
-                messageTable.setItems(FXCollections.observableArrayList(), false);
-                messageTable.configureSortAndFilterForMessageTable(new Filter("", false), messagePollingPosition);
+                kafkaMessageTable.setItems(FXCollections.observableArrayList(), false);
+                kafkaMessageTable.configureSortAndFilterForMessageTable(new Filter("", false), messagePollingPosition);
             }
             countMessages();
         } else if (newValue instanceof KafkaPartitionTreeItem<?>) {
@@ -282,7 +282,7 @@ public class MessageView extends SplitPane {
             Predicate<KafkaMessageTableItem> partitionPredicate = item -> item.getPartition() == partition.id();
             TreeItem<?> topicTreeItem = newValue.getParent();
             ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList();
-            MessageView.MessageTableState messageTableState = null;
+            KafkaMessageView.MessageTableState messageTableState = null;
             if (treeMsgTableItemCache.containsKey(newValue)) {
                 messageTableState = treeMsgTableItemCache.get(newValue);
                 msgItems = FXCollections.observableArrayList(messageTableState.getItems());
@@ -291,11 +291,11 @@ public class MessageView extends SplitPane {
                 msgItems = FXCollections.observableArrayList(treeMsgTableItemCache.get(topicTreeItem).getItems());
             }
             Filter filter = new Filter("", false);
-            messageTable.setItems(msgItems, false);
+            kafkaMessageTable.setItems(msgItems, false);
             if (messageTableState != null) {
                 filter = messageTableState.getFilter();
             }
-            messageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition, partitionPredicate);
+            kafkaMessageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition, partitionPredicate);
             countMessages();
         }
     }
@@ -313,7 +313,7 @@ public class MessageView extends SplitPane {
         }
         String schema = schemaTextArea.getText();
         ObservableList<KafkaMessageTableItem> list = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
-        messageTable.setItems(list);
+        kafkaMessageTable.setItems(list);
         // clear message cache for partitions
         treeMsgTableItemCache.forEach((treeItem, state) -> {
             if (treeItem instanceof KafkaPartitionTreeItem<?> && treeItem.getParent() == selectedTreeItem) {
@@ -333,10 +333,10 @@ public class MessageView extends SplitPane {
                         .schema(schema)
                         .pollCallback(() -> {
                             if (firstPoll.get()) {
-                                messageTable.resizeColumn();
+                                Platform.runLater(() -> kafkaMessageTable.resizeColumn());
                             }
                             isBlockingAppUINeeded.set(false);
-                            Platform.runLater(() -> messageTable.handleNumOfMsgChanged(messageTable.getShownItems().size()));
+                            Platform.runLater(() -> kafkaMessageTable.handleNumOfMsgChanged(kafkaMessageTable.getShownItems().size()));
                             return new KafkaConsumerService.PollCallback(list, isPolling);
                         })
                         .isLiveUpdate(!isLiveUpdateCheckBox.isDisabled() && isLiveUpdateCheckBox.isSelected())
@@ -365,7 +365,7 @@ public class MessageView extends SplitPane {
         Consumer<Void> onSuccess = (val) -> {
             isBlockingAppUINeeded.set(false);
             isPolling.set(false);
-            messageTable.handleNumOfMsgChanged(messageTable.getShownItems().size());
+            kafkaMessageTable.handleNumOfMsgChanged(kafkaMessageTable.getShownItems().size());
             getTopicEventDispatcher().publishEvent(TopicUIEvent.newRefreshTopicEven(getTopic()));
         };
         Consumer<Throwable> onFailure = (exception) -> {

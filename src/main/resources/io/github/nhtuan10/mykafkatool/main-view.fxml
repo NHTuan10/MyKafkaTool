@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable?>
-<?import io.github.nhtuan10.mykafkatool.ui.control.MessageView?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.KafkaMessageView?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.TopicAndPartitionPropertyView?>
 <?import javafx.scene.control.*?>
@@ -58,7 +58,7 @@
                                 <content>
                                     <AnchorPane minHeight="0.0" minWidth="0.0">
                                         <children>
-                                            <MessageView fx:id="messageView"/>
+                                            <KafkaMessageView fx:id="kafkaMessageView"/>
                                             <!--                                                <SplitPane fx:id="messageSplitPane"-->
                                             <!--                                                           dividerPositions="0.1662971175166297, 0.5"-->
                                             <!--                                                           orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0"-->

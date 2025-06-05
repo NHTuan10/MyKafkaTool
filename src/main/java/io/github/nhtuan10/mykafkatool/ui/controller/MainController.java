@@ -9,7 +9,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable;
-import io.github.nhtuan10.mykafkatool.ui.control.MessageView;
+import io.github.nhtuan10.mykafkatool.ui.control.KafkaMessageView;
 import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl;
 import io.github.nhtuan10.mykafkatool.ui.control.TopicAndPartitionPropertyView;
 import io.github.nhtuan10.mykafkatool.ui.event.*;
@@ -50,7 +50,7 @@ public class MainController {
     private Tab dataTab;
 
     @FXML
-    private MessageView messageView;
+    private KafkaMessageView kafkaMessageView;
 
     // Consumer Groups
     @FXML
@@ -89,10 +89,10 @@ public class MainController {
     public void initialize() {
         topicAndPartitionPropertyView.setProperties(isBlockingAppUINeeded, this.propertiesTab.selectedProperty());
         this.eventDispatcher.addTopicEventSubscriber(topicAndPartitionPropertyView.getTopicEventSubscriber());
-        this.eventDispatcher.addTopicEventSubscriber(messageView.getTopicEventSubscriber());
+        this.eventDispatcher.addTopicEventSubscriber(kafkaMessageView.getTopicEventSubscriber());
 
         this.eventDispatcher.addPartitionEventSubscriber(topicAndPartitionPropertyView.getPartitionEventSubscriber());
-        this.eventDispatcher.addPartitionEventSubscriber(messageView.getPartitionEventSubscriber());
+        this.eventDispatcher.addPartitionEventSubscriber(kafkaMessageView.getPartitionEventSubscriber());
 
         schemaRegistryControl.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
         this.eventDispatcher.addSchemaRegistryEventSubscriber(schemaRegistryControl.getSchemaRegistryEventSubscriber());
@@ -109,22 +109,22 @@ public class MainController {
     private void configureClusterTreeSelectedItemChanged() {
         clusterTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue != null && oldValue != newValue && (oldValue instanceof KafkaTopicTreeItem<?> || oldValue instanceof KafkaPartitionTreeItem<?>)) {
-                messageView.cacheMessages((TreeItem) oldValue);
+                kafkaMessageView.cacheMessages((TreeItem) oldValue);
             }
             if (newValue instanceof KafkaTopicTreeItem<?> selectedItem) {
 
-                messageView.switchTopicOrPartition((TreeItem) newValue);
+                kafkaMessageView.switchTopicOrPartition((TreeItem) newValue);
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 // Enable the data tab and show/hide titled panes in the tab
                 setVisibleTabs(dataTab, propertiesTab);
                 schemaRegistryControl.setVisible(false);
-                messageView.setVisible(true);
+                kafkaMessageView.setVisible(true);
                 eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
-                messageView.switchTopicOrPartition((TreeItem) newValue);
+                kafkaMessageView.switchTopicOrPartition((TreeItem) newValue);
                 setVisibleTabs(dataTab, propertiesTab);
                 schemaRegistryControl.setVisible(false);
-                messageView.setVisible(true);
+                kafkaMessageView.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
 //                this.topicAndPartitionPropertyView.loadPartitionConfig(partition);
                 eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
@@ -134,7 +134,7 @@ public class MainController {
             } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equals(selectedItem.getValue())) {
                 setVisibleTabs(dataTab);
                 schemaRegistryControl.setVisible(true);
-                messageView.setVisible(false);
+                kafkaMessageView.setVisible(false);
                 KafkaCluster cluster = (KafkaCluster) selectedItem.getParent().getValue();
                 this.eventDispatcher.publishEvent(new SchemaRegistryUIEvent(cluster, UIEvent.Action.REFRESH_SCHEMA_REGISTRY));
 //                try {

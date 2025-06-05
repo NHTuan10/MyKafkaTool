@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class MessageHeaderTable extends EditableTableControl<UIPropertyTableItem> {
+public class KafkaMessageHeaderTable extends EditableTableControl<UIPropertyTableItem> {
     @FXML
     protected void initialize() {
         super.initialize();

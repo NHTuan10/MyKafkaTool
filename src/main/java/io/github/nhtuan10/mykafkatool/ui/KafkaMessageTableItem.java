@@ -27,11 +27,11 @@ public class KafkaMessageTableItem {
     @Getter
     private final boolean isErrorItem;
 
-    public static final String PARTITION = "Partition";
-    public static final String OFFSET = "Offset";
-    public static final String KEY = "Key";
-    public static final String VALUE = "Value";
-    public static final String TIMESTAMP = "Timestamp";
+    public static final String PARTITION = "partition";
+    public static final String OFFSET = "offset";
+    public static final String KEY = "key";
+    public static final String VALUE = "value";
+    public static final String TIMESTAMP = "timestamp";
 
     public KafkaMessageTableItem(int partition, long offset, String key, String value, String timestamp, String valueContentType, Headers headers, String schema, boolean isErrorItem) {
         this.partition = new SimpleIntegerProperty(partition);

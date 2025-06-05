@@ -25,11 +25,11 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Slf4j
-public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
+public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableItem> {
     SerDesHelper serDesHelper;
     KafkaConsumerService.MessagePollingPosition messagePollingPosition;
 
-    public MessageTable() {
+    public KafkaMessageTable() {
         super(false);
         this.refreshBtn.setVisible(false);
     }
@@ -39,6 +39,7 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
         super.initialize();
         messagePollingPosition = KafkaConsumerService.MessagePollingPosition.LAST;
         numberOfRowsLabel.textProperty().bind(new SimpleStringProperty("Showing: ").concat(noRowsIntProp.asString().concat(" Messages")));
+//        setDefaultColumnWidths();
     }
 
 //    @Override
@@ -50,6 +51,15 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
 //                , (item) -> String.valueOf(item.getPartition())
 //                 ,(item) -> String.valueOf(item.getOffset())
 //        );
+//    }
+//    private void setDefaultColumnWidths() {
+//        table.getColumns().forEach(column -> {
+//           switch (column.getId()){
+//               case KafkaMessageTableItem.KEY -> column.setPrefWidth(100d);
+//               case KafkaMessageTableItem.VALUE -> column.setPrefWidth(440d);
+//               case KafkaMessageTableItem.TIMESTAMP -> column.setPrefWidth(300d);
+//           }
+//        });
 //    }
 
     public void configureMessageTable(SerDesHelper serDesHelper) {
@@ -106,7 +116,7 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
         super.applyFilter(filter, extraPredicates);
         ObservableList<TableColumn<KafkaMessageTableItem, ?>> sortOrder = table.getSortOrder();
         if (sortOrder == null || sortOrder.isEmpty()) {
-            table.getColumns().stream().filter(c -> c.getText().equals(KafkaMessageTableItem.TIMESTAMP)).findFirst().ifPresent((timestampColumn) -> {
+            table.getColumns().stream().filter(c -> c.getId().equals(KafkaMessageTableItem.TIMESTAMP)).findFirst().ifPresent((timestampColumn) -> {
                 timestampColumn.setSortType(pollingPosition == KafkaConsumerService.MessagePollingPosition.FIRST
                         ? TableColumn.SortType.ASCENDING
                         : TableColumn.SortType.DESCENDING);
@@ -127,6 +137,7 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
     public void resizeColumn() {
         TableViewConfigurer.autoResizeColumns(table);
     }
+
     public void addFilterListener(Consumer<Filter> runnable) {
         this.filterTextProperty.addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {

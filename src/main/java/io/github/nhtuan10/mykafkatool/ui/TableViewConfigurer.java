@@ -49,7 +49,7 @@ public class TableViewConfigurer {
         List<String> fieldNames = getPropertyFieldNamesFromTableItem(clazz);
         IntStream.range(0, fieldNames.size()).forEach(i -> {
             TableColumn<S, ?> tableColumn = tableView.getColumns().get(i + 1);
-            tableColumn.setId(fieldNames.get(i) + "Col");
+            tableColumn.setId(fieldNames.get(i));
 //            tableColumn.setText(null);
 //            Label label = new Label();
 //            label.setTooltip(new Tooltip(columnHeader));

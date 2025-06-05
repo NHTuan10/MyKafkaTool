@@ -1,7 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
-import io.github.nhtuan10.mykafkatool.ui.control.MessageHeaderTable;
+import io.github.nhtuan10.mykafkatool.ui.control.KafkaMessageHeaderTable;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -35,7 +35,7 @@ public abstract class ModalController {
                     codeArea.replaceText(str);
                 } else if ((fieldClass.equals(TableView.class) || fieldClass.equals(ComboBox.class)) && value instanceof ObservableList) {
                     fieldClass.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
-                } else if (fieldClass.equals(MessageHeaderTable.class) && value instanceof ObservableList) {
+                } else if (fieldClass.equals(KafkaMessageHeaderTable.class) && value instanceof ObservableList) {
                     EditableTableControl.class.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
                 } else if (fieldObject instanceof ObjectProperty<?> property) {
                     fieldClass.getDeclaredMethod("setValue", Object.class).invoke(property, value);

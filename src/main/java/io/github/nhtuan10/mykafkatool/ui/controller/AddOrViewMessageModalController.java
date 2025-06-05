@@ -8,7 +8,7 @@ import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
-import io.github.nhtuan10.mykafkatool.ui.control.MessageHeaderTable;
+import io.github.nhtuan10.mykafkatool.ui.control.KafkaMessageHeaderTable;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
 import javafx.collections.FXCollections;
 import javafx.event.Event;
@@ -52,7 +52,7 @@ public class AddOrViewMessageModalController extends ModalController {
     private ComboBox<DisplayType> valueDisplayTypeComboBox;
 
     @FXML
-    private MessageHeaderTable headerTable;
+    private KafkaMessageHeaderTable headerTable;
 
     private final JsonHighlighter jsonHighlighter = new JsonHighlighter();
 

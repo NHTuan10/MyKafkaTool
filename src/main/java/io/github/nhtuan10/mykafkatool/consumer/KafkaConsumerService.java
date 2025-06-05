@@ -8,8 +8,8 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.KafkaMessageTableItem;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.io.IOException;
@@ -162,7 +161,7 @@ public class KafkaConsumerService {
 
     public List<KafkaMessageTableItem> pollMessages(Consumer<String, Object> consumer, Map<String, Object> consumerProps, PollingOptions pollingOptions, Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll) {
         int pollingTimeMs = Objects.requireNonNullElse(pollingOptions.pollTime(), DEFAULT_POLL_TIME_MS);
-        ObservableList<KafkaMessageTableItem> messageObservableList = FXCollections.observableArrayList();
+        ObservableList<KafkaMessageTableItem> messageObservableList;
         Map<TopicPartition, Boolean> isAllMsgPulled = partitionOffsetsToPoll.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> (entry.getValue().getRight() - entry.getValue().getLeft() <= 0)));
         try (consumer) {
 //            boolean firstPoll = true;
@@ -202,7 +201,8 @@ public class KafkaConsumerService {
                         }
                     }
                     if (!messages.isEmpty()) {
-                        messageObservableList.addAll(messages);
+                        Platform.runLater(() -> messageObservableList.addAll(messages));
+//                        messageObservableList.addAll(messages);
                     }
                     if (!pollCallbackSupplier.get().isPolling().get()) break;
                 }
@@ -210,8 +210,6 @@ public class KafkaConsumerService {
                     break;
                 consumerRecords = consumer.poll(Duration.ofMillis(pollingTimeMs));
             }
-        } catch (WakeupException e) {
-
         }
         return messageObservableList;
     }
