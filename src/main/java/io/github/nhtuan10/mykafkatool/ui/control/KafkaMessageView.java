@@ -26,7 +26,7 @@ import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -226,7 +226,7 @@ public class KafkaMessageView extends SplitPane {
         });
         schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
         schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtil.highlightJsonInCodeArea(newText, schemaTextArea, false, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+            ViewUtils.highlightJsonInCodeArea(newText, schemaTextArea, false, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
         });
         isLiveUpdateCheckBox.setOnAction(event -> {
             if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
@@ -308,7 +308,7 @@ public class KafkaMessageView extends SplitPane {
         }
         if (!(selectedTreeItem instanceof KafkaTopicTreeItem<?>)
                 && !(selectedTreeItem instanceof KafkaPartitionTreeItem<?>)) {
-            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
+            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
             return;
         }
         String schema = schemaTextArea.getText();
@@ -374,7 +374,7 @@ public class KafkaMessageView extends SplitPane {
             log.error("Error when polling messages", exception);
             UIErrorHandler.showError(Thread.currentThread(), exception);
         };
-        ViewUtil.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
+        ViewUtils.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
     }
 
     public KafkaTopic getTopic() {
@@ -409,7 +409,7 @@ public class KafkaMessageView extends SplitPane {
     public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException {
 
         AtomicReference<Object> ref = new AtomicReference<>();
-        ViewUtil.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
+        ViewUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
                 Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
                         "schemaTextArea", schemaTextArea.getText()), true, true, stageHolder.getStage());
         KafkaMessage newMsg = (KafkaMessage) ref.get();
@@ -420,10 +420,10 @@ public class KafkaMessageView extends SplitPane {
                 getTopicEventDispatcher().publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
             }
             if (isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
-                ViewUtil.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Live-update is on, polling the messages", "Added message successfully!",
+                ViewUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Live-update is on, polling the messages", "Added message successfully!",
                         ButtonType.OK);
             } else {
-                if (ViewUtil.confirmAlert("Added message successfully!", "Added message successfully! Do you want to poll the messages?", "Yes", "No")) {
+                if (ViewUtils.confirmAlert("Added message successfully!", "Added message successfully! Do you want to poll the messages?", "Yes", "No")) {
                     if (!isPolling.get()) pollMessages();
 
                 }
@@ -467,7 +467,7 @@ public class KafkaMessageView extends SplitPane {
                 throw new RuntimeException(e);
             }
         };
-        ViewUtil.runBackgroundTask(callable, (count) -> countMessagesBtn.setText("Count: " + count), (e) -> {
+        ViewUtils.runBackgroundTask(callable, (count) -> countMessagesBtn.setText("Count: " + count), (e) -> {
             throw ((RuntimeException) e);
         });
     }

@@ -1,8 +1,7 @@
 package io.github.nhtuan10.mykafkatool.serdes;
 
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.nhtuan10.mykafkatool.ui.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
@@ -20,16 +19,7 @@ public class AvroUtil {
         return new Schema.Parser().parse(schemaStr);
     }
 
-    public static final ObjectMapper OBJECT_MAPPER = constructObjectMapper();
-
-    public static ObjectMapper constructObjectMapper() {
-        DefaultPrettyPrinter p = new DefaultPrettyPrinter();
-        DefaultPrettyPrinter.Indenter i = new DefaultIndenter("  ", "\n");
-        p.indentArraysWith(i);
-        p.indentObjectsWith(i);
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.setDefaultPrettyPrinter(p);
-    }
+    public static final ObjectMapper OBJECT_MAPPER = Utils.constructPrettyPrintObjectMapper();
 
     public static Object convertJsonToAvro(String json, String schemaStr) throws IOException {
         Schema schema = null;

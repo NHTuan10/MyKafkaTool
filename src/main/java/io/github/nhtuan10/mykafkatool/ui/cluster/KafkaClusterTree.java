@@ -15,7 +15,7 @@ import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
@@ -143,7 +143,7 @@ public class KafkaClusterTree {
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
             String clusterName = ((KafkaTopicListTreeItem.KafkaTopicListTreeItemValue) topicListTreeItem.getValue()).getCluster().getName();
             AtomicReference<Object> modelRef = new AtomicReference<>();
-            ViewUtil.showPopUpModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of(), stage);
+            ViewUtils.showPopUpModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of(), stage);
             NewTopic newTopic = (NewTopic) modelRef.get();
             if (newTopic != null) {
                 CreateTopicsResult result = clusterManager.addTopic(clusterName, newTopic);
@@ -226,7 +226,7 @@ public class KafkaClusterTree {
         purgePartitionItem.setOnAction(ae -> {
 //            if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedPartitionTreeItem) {
 //            KafkaPartition partition = (KafkaPartition) selectedPartitionTreeItem.getValue();
-            if (ViewUtil.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.id() + " ?", "Yes", "Cancel")) {
+            if (ViewUtils.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.id() + " ?", "Yes", "Cancel")) {
                 try {
                     clusterManager.purgePartition(partition);
                     this.eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
@@ -245,7 +245,7 @@ public class KafkaClusterTree {
         purgeTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
-                if (ViewUtil.confirmAlert("Purge Topic", "Are you sure to delete all data in the topic " + topic.name() + " ?", "Yes", "Cancel")) {
+                if (ViewUtils.confirmAlert("Purge Topic", "Are you sure to delete all data in the topic " + topic.name() + " ?", "Yes", "Cancel")) {
                     try {
                         clusterManager.purgeTopic(topic);
                         eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
@@ -290,7 +290,7 @@ public class KafkaClusterTree {
         deleteTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
-                if (ViewUtil.confirmAlert("Delete Topic", "Are you sure to delete " + topic.name() + " ?", "Yes", "Cancel")) {
+                if (ViewUtils.confirmAlert("Delete Topic", "Are you sure to delete " + topic.name() + " ?", "Yes", "Cancel")) {
                     try {
                         clusterManager.deleteTopic(topic.cluster().getName(), topic.name()).all().get();
                     } catch (ExecutionException | InterruptedException e) {
@@ -316,13 +316,13 @@ public class KafkaClusterTree {
             KafkaCluster newConnection;
             while (true) {
                 AtomicReference<Object> modelRef = new AtomicReference<>();
-                ViewUtil.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of(), stage);
+                ViewUtils.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of(), stage);
                 newConnection = (KafkaCluster) modelRef.get();
 
                 if (newConnection != null && (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInTree(clusterTree, newConnection.getName()))) {
                     String clusterName = newConnection.getName();
                     log.warn("User enter an invalid cluster name {} or bootstrap server", clusterName);
-                    ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
+                    ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
                 } else {
                     break;
                 }
@@ -348,14 +348,14 @@ public class KafkaClusterTree {
                 try {
                     while (true) {
                         AtomicReference<Object> modelRef = new AtomicReference<>();
-                        ViewUtil.showPopUpModal("add-connection-modal.fxml", "Edit Connection", modelRef,
+                        ViewUtils.showPopUpModal("add-connection-modal.fxml", "Edit Connection", modelRef,
                                 Map.of("objectProperty", oldConnection), stage);
                         newConnection = (KafkaCluster) modelRef.get();
                         if (newConnection != null &&
                                 (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInParentTree(selectedItem, newConnection.getName()))) {
                             String clusterName = newConnection.getName();
                             log.warn("User enter an invalid cluster name {} or bootstrap server", clusterName);
-                            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
+                            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
                         } else {
                             //TODO: add dialog to confirm if user want to close connection and replace with new connection
                             break;

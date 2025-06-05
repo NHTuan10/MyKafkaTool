@@ -6,7 +6,7 @@ import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
@@ -191,7 +191,7 @@ public class TableViewConfigurer {
         exportTableItem.setOnAction(event -> {
             String data = getTableDataInCSV(tableView);
             try {
-                ViewUtil.saveDataToFile(data, stage);
+                ViewUtils.saveDataToFile(data, stage);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -201,7 +201,7 @@ public class TableViewConfigurer {
         exportSelectedItem.setOnAction(event -> {
             String selectedData = getSelectedRowsData(tableView, true);
             try {
-                ViewUtil.saveDataToFile(selectedData, stage);
+                ViewUtils.saveDataToFile(selectedData, stage);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -209,7 +209,7 @@ public class TableViewConfigurer {
 
         String truncatedText = cellText.length() > 21 ? cellText.substring(0, 21) + "..." : cellText;
         MenuItem copyHoverCell = new CopyTextMenuItem("Copy '%s'".formatted(truncatedText));
-        copyHoverCell.setOnAction(event -> ViewUtil.copyTextToClipboard(cellText));
+        copyHoverCell.setOnAction(event -> ViewUtils.copyTextToClipboard(cellText));
 
         return List.of(copyRowItem, exportTableItem, exportSelectedItem, copyHoverCell);
     }

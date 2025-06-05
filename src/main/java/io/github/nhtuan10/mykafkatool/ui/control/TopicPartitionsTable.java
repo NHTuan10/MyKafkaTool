@@ -4,7 +4,7 @@ import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionsTableItem;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.StringProperty;
@@ -91,7 +91,7 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
             isBlockingUINeeded.set(false);
             throw new RuntimeException(exception);
         };
-        ViewUtil.runBackgroundTask(task, onSuccess, onFailure);
+        ViewUtils.runBackgroundTask(task, onSuccess, onFailure);
     }
 
     private List<KafkaPartitionsTableItem> getPartitionInfoForUI(List<TopicPartitionInfo> topicPartitionInfos) {
@@ -100,7 +100,7 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
         return topicPartitionInfos.stream().map((topicPartitionInfo) -> {
             try {
                 Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, topicPartitionInfo.partition()), null, null);
-                return ViewUtil.mapToUIPartitionTableItem(topicPartitionInfo, partitionOffsetsInfo);
+                return ViewUtils.mapToUIPartitionTableItem(topicPartitionInfo, partitionOffsetsInfo);
             } catch (ExecutionException | InterruptedException e) {
                 log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);
                 throw new RuntimeException(e);

@@ -9,7 +9,7 @@ import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.control.KafkaMessageHeaderTable;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.collections.FXCollections;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -91,7 +91,7 @@ public class AddOrViewMessageModalController extends ModalController {
         SerDesHelper.ValidationResult valueValidationResult = serDesHelper.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
         if (!valueValidationResult.isValid()) {
             log.warn("The message is invalid against the schema", valueValidationResult.exception());
-            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
+            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
             return;
         }
 
@@ -161,7 +161,7 @@ public class AddOrViewMessageModalController extends ModalController {
         if (StringUtils.isNotBlank(inValue)) {
 
             if (displayType == DisplayType.JSON) {
-                ViewUtil.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+                ViewUtils.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
             } else if (displayType == DisplayType.TEXT) {
                 if (prettyPrint) {
                     codeArea.replaceText(inValue);
@@ -179,7 +179,7 @@ public class AddOrViewMessageModalController extends ModalController {
     private boolean validateSchema(String valueContentType, String schema) {
         boolean valid = SerDesHelper.isValidSchemaForSerialization(serDesHelper, valueContentType, schema);
         if (!valid) {
-            ViewUtil.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
+            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
                     ButtonType.OK);
         }
         return valid;

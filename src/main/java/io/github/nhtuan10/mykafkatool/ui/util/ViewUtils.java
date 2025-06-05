@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 @Slf4j
-public final class ViewUtil {
+public final class ViewUtils {
 
     public static boolean confirmAlert(String title, String text, String okDoneText, String cancelCloseText) {
         ButtonType yes = new ButtonType(okDoneText, ButtonBar.ButtonData.OK_DONE);

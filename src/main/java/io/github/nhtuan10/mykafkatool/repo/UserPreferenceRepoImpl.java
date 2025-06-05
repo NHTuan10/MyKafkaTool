@@ -2,6 +2,7 @@ package io.github.nhtuan10.mykafkatool.repo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;
+import io.github.nhtuan10.mykafkatool.ui.util.Utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +12,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class UserPreferenceRepoImpl implements UserPreferenceRepo {
     private final String filePath;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = Utils.contructObjectMapper();
+
     Lock lock = new ReentrantLock();
 
     public UserPreferenceRepoImpl(String filePath) {

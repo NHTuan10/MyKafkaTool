@@ -3,7 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui.control;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupOffsetTableItem;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -52,7 +52,7 @@ public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffset
     @FXML
     public void refresh() {
         isBusy.set(true);
-        ViewUtil.runBackgroundTask(() -> {
+        ViewUtils.runBackgroundTask(() -> {
             try {
                 return FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(consumerGroupTreeItem.getClusterName(), consumerGroupTreeItem.getConsumerGroupId()));
             } catch (ExecutionException | InterruptedException e) {

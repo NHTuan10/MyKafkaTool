@@ -9,7 +9,7 @@ import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.EventSubscriber;
 import io.github.nhtuan10.mykafkatool.ui.event.SchemaRegistryUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.Event;
@@ -72,7 +72,7 @@ public class SchemaRegistryControl extends SplitPane {
     public void initialize() {
         // TODO: Multiple version for an schema, make the schema table editable
         schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtil.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+            ViewUtils.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
         });
         schemaEditableTable.addEventHandler(SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
                 (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));

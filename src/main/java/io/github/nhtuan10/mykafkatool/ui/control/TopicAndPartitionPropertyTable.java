@@ -4,7 +4,7 @@ import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtil;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.FXCollections;
@@ -115,7 +115,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
             isBlockingUINeeded.set(false);
             log.error("Error when getting topic config & partitions properties for cluster {} and topic {} and partition {}", clusterName, topic, kafkaPartition.id(), exception);
         };
-        ViewUtil.runBackgroundTask(getPartitionInfo, onSuccess, onFailure);
+        ViewUtils.runBackgroundTask(getPartitionInfo, onSuccess, onFailure);
     }
 
     private void refreshTopicConfig() {
@@ -145,7 +145,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
             isBlockingUINeeded.set(false);
             log.error("Error when getting topic config & partitions properties for cluster {} and topic {}", clusterName, topicName, exception);
         };
-        ViewUtil.runBackgroundTask(getTopicAndPartitionProperties, onSuccess, onFailure);
+        ViewUtils.runBackgroundTask(getTopicAndPartitionProperties, onSuccess, onFailure);
     }
 
     public static List<UIPropertyTableItem> getPartitionInfoForUI(TopicPartitionInfo partitionInfo) {
