@@ -32,7 +32,10 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         stage.setScene(scene);
         stage.show();
         KafkaClusterTree.initClusterPanel(stage);
-        stage.setOnCloseRequest(event -> Platform.exit());
+        stage.setOnCloseRequest(event -> {
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     public static void main(String[] args) {
