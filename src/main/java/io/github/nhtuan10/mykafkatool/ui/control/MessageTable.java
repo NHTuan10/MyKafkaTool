@@ -29,6 +29,11 @@ public class MessageTable extends EditableTableControl<KafkaMessageTableItem> {
     SerDesHelper serDesHelper;
     KafkaConsumerService.MessagePollingPosition messagePollingPosition;
 
+    public MessageTable() {
+        super(false);
+        this.refreshBtn.setVisible(false);
+    }
+
     @FXML
     protected void initialize() {
         super.initialize();
