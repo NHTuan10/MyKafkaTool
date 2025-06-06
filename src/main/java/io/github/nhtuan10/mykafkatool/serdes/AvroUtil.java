@@ -19,7 +19,7 @@ public class AvroUtil {
         return new Schema.Parser().parse(schemaStr);
     }
 
-    public static final ObjectMapper OBJECT_MAPPER = Utils.constructPrettyPrintObjectMapper();
+    public static final ObjectMapper OBJECT_MAPPER = Utils.constructRichtexFxPrettyPrintObjectMapper();
 
     public static Object convertJsonToAvro(String json, String schemaStr) throws IOException {
         Schema schema = null;

@@ -12,12 +12,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class UserPreferenceRepoImpl implements UserPreferenceRepo {
     private final String filePath;
-    private static final ObjectMapper objectMapper = Utils.contructObjectMapper();
+    private final ObjectMapper objectMapper;
 
     Lock lock = new ReentrantLock();
 
     public UserPreferenceRepoImpl(String filePath) {
         this.filePath = filePath;
+        this.objectMapper = Utils.contructObjectMapper();
     }
 
     @Override

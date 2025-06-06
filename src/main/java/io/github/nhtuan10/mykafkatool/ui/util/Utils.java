@@ -3,10 +3,11 @@ package io.github.nhtuan10.mykafkatool.ui.util;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class Utils {
 
-    public static ObjectMapper constructPrettyPrintObjectMapper() {
+    public static ObjectMapper constructRichtexFxPrettyPrintObjectMapper() {
         DefaultPrettyPrinter p = new DefaultPrettyPrinter();
         DefaultPrettyPrinter.Indenter i = new DefaultIndenter("  ", "\n");
         p.indentArraysWith(i);
@@ -17,6 +18,6 @@ public class Utils {
     }
 
     public static ObjectMapper contructObjectMapper() {
-        return new ObjectMapper().findAndRegisterModules();
+        return new ObjectMapper().findAndRegisterModules().enable(SerializationFeature.INDENT_OUTPUT);
     }
 }
