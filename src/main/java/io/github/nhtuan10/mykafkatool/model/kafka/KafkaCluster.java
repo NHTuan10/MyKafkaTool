@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.model.kafka;
 
+import io.github.nhtuan10.mykafkatool.api.AuthConfig;
 import io.github.nhtuan10.mykafkatool.model.common.Connection;
 import lombok.*;
 
@@ -12,6 +13,7 @@ public class KafkaCluster extends Connection {
     private String name;
     private String bootstrapServer;
     private String schemaRegistryUrl;
+    private AuthConfig authConfig;
     @Builder.Default
     private boolean isOnlySubjectLoaded = false;
     @Override

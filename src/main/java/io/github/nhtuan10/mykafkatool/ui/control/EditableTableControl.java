@@ -121,7 +121,7 @@ public class EditableTableControl<T> extends AnchorPane {
         tableItems = FXCollections.observableArrayList();
         applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
         filterTextField.textProperty().bindBidirectional(filterTextProperty);
-        this.filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+        filterTextProperty.addListener((observable, oldValue, newValue) -> {
             applyFilter(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
         });
         regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
