@@ -7,6 +7,7 @@ import io.github.nhtuan10.mykafkatool.ui.event.PartitionEventSubscriber;
 import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.event.TopicEventSubscriber;
 import io.github.nhtuan10.mykafkatool.ui.event.TopicUIEvent;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -102,8 +103,10 @@ public class TopicAndPartitionPropertyView extends AnchorPane {
         @Override
         protected void handleOnNext(TopicUIEvent item) {
             if (TopicUIEvent.isRefreshTopicEvent(item)) {
-                topicAndPartitionPropertyView.loadTopicConfig(item.topic());
-                topicAndPartitionPropertyView.loadTopicPartitions(item.topic());
+                Platform.runLater(() -> {
+                    topicAndPartitionPropertyView.loadTopicConfig(item.topic());
+                    topicAndPartitionPropertyView.loadTopicPartitions(item.topic());
+                });
             }
         }
     }
@@ -115,7 +118,9 @@ public class TopicAndPartitionPropertyView extends AnchorPane {
         @Override
         protected void handleOnNext(PartitionUIEvent item) {
             if (PartitionUIEvent.isRefreshPartitionEvent(item)) {
-                topicAndPartitionPropertyView.loadPartitionConfig(item.partition());
+                Platform.runLater(() -> {
+                    topicAndPartitionPropertyView.loadPartitionConfig(item.partition());
+                });
             }
         }
     }

@@ -2,6 +2,7 @@ package io.github.nhtuan10.mykafkatool.ui;
 
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
@@ -30,9 +31,13 @@ import java.util.stream.IntStream;
 
 @Slf4j
 public class TableViewConfigurer {
-    public static final String COLUMN_SEPERATOR = "\t";
+    public static final char COLUMN_SEPERATOR = '\t';
     public static final String LINE_SEPARATOR = System.lineSeparator();
     private final static CsvMapper CSV_MAPPER = new CsvMapper();
+    private final static CsvSchema schema = CsvSchema.builder()
+            .setColumnSeparator(COLUMN_SEPERATOR)
+            .setLineSeparator(LINE_SEPARATOR).build();
+
     public static final int MAX_TABLE_COLUMN_WIDTH = 400;
     public static final double TABLE_COLUMN_WIDTH_MARGIN = 40.0d;
 
@@ -271,7 +276,7 @@ public class TableViewConfigurer {
 
     private static String getRowData(TableView<?> table, Set<Integer> rows, boolean isHeaderIncluded) {
         try (StringWriter strWriter = new StringWriter()) {
-            SequenceWriter seqWriter = CSV_MAPPER.writer()
+            SequenceWriter seqWriter = CSV_MAPPER.writer(schema)
                     .writeValues(strWriter);
             if (isHeaderIncluded) {
                 // get table header

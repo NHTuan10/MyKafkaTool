@@ -8,6 +8,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.SchemaTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -142,7 +143,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
         Callable<ObservableList<SchemaTableItem>> getSchemaTask = () -> {
             ObservableList<SchemaTableItem> items;
             try {
-                this.isBlockingUINeeded.set(true);
+                Platform.runLater(() -> this.isBlockingUINeeded.set(true));
                 List<SchemaMetadataFromRegistry> schemaMetadataList = schemaRegistryManager.getAllSubjectMetadata(this.selectedClusterName.getName(), this.selectedClusterName.isOnlySubjectLoaded());
                 items = FXCollections.observableArrayList(
                         schemaMetadataList
@@ -150,7 +151,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                                 .map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, this.selectedClusterName.getName()))
                                 .toList());
                 clusterNameToSchemaTableItemsCache.put(this.selectedClusterName.getName(), new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
-                this.isBlockingUINeeded.set(false);
+                Platform.runLater(() -> this.isBlockingUINeeded.set(false));
             } catch (RestClientException | IOException e) {
                 log.error("Error when get schema registry subject metadata", e);
                 throw new RuntimeException(e);

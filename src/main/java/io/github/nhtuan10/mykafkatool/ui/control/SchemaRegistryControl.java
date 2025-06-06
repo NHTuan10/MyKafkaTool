@@ -10,6 +10,7 @@ import io.github.nhtuan10.mykafkatool.ui.event.EventSubscriber;
 import io.github.nhtuan10.mykafkatool.ui.event.SchemaRegistryUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.Event;
@@ -127,11 +128,13 @@ public class SchemaRegistryControl extends SplitPane {
         @Override
         public void handleOnNext(SchemaRegistryUIEvent item) {
             if (item.action() == UIEvent.Action.REFRESH_SCHEMA_REGISTRY) {
-                try {
-                    schemaRegistryControl.loadAllSchema(item.cluster());
-                } catch (ExecutionException | InterruptedException ex) {
-                    onFailure.accept(ex);
-                }
+                Platform.runLater(() -> {
+                    try {
+                        schemaRegistryControl.loadAllSchema(item.cluster());
+                    } catch (ExecutionException | InterruptedException ex) {
+                        onFailure.accept(ex);
+                    }
+                });
             }
         }
 

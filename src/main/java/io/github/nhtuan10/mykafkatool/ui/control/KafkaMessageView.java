@@ -139,7 +139,7 @@ public class KafkaMessageView extends SplitPane {
             @Override
             public void handleOnNext(TopicUIEvent item) {
                 if (TopicUIEvent.isRefreshTopicEvent(item)) {
-                    countMessages();
+                    Platform.runLater(() -> countMessages());
                 }
             }
         };
@@ -148,7 +148,7 @@ public class KafkaMessageView extends SplitPane {
             @Override
             public void handleOnNext(PartitionUIEvent item) {
                 if (PartitionUIEvent.isRefreshPartitionEvent(item)) {
-                    countMessages();
+                    Platform.runLater(() -> countMessages());
                 }
             }
         };
@@ -335,8 +335,10 @@ public class KafkaMessageView extends SplitPane {
                             if (firstPoll.get()) {
                                 Platform.runLater(() -> kafkaMessageTable.resizeColumn());
                             }
-                            isBlockingAppUINeeded.set(false);
-                            Platform.runLater(() -> kafkaMessageTable.handleNumOfMsgChanged(kafkaMessageTable.getShownItems().size()));
+                            Platform.runLater(() -> {
+                                isBlockingAppUINeeded.set(false);
+                                kafkaMessageTable.handleNumOfMsgChanged(kafkaMessageTable.getShownItems().size());
+                            });
                             return new KafkaConsumerService.PollCallback(list, isPolling);
                         })
                         .isLiveUpdate(!isLiveUpdateCheckBox.isDisabled() && isLiveUpdateCheckBox.isSelected())
