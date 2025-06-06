@@ -7,7 +7,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 class ProducerCreatorPefTest {
     public static void main(String[] args) throws InterruptedException {
         ProducerCreator.ProducerCreatorConfig config = ProducerCreator.ProducerCreatorConfig.builder()
-                .cluster(new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false))
+                .cluster(new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false, null))
                 .build();
         Producer producer = ProducerCreator.createProducer(config);
         for (int i = 0; i < 10000; i++) {

@@ -13,9 +13,9 @@ public class KafkaCluster extends Connection {
     private String name;
     private String bootstrapServer;
     private String schemaRegistryUrl;
-    private AuthConfig authConfig;
     @Builder.Default
     private boolean isOnlySubjectLoaded = false;
+    private AuthConfig authConfig;
     @Override
     public String toString() {
         return name;

@@ -19,7 +19,7 @@ import static io.github.nhtuan10.mykafkatool.constant.AppConstant.OFFSET_RESET_L
 @Slf4j
 public class ConsumerTest {
     public static void main(String[] args) {
-        KafkaCluster cluster = new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false);
+        KafkaCluster cluster = new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false, null);
         ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(cluster)
                 .keyDeserializer(StringDeserializer.class)
                 .valueDeserializer(StringDeserializer.class)
