@@ -2,8 +2,8 @@ package io.github.nhtuan10.mykafkatool.ui.control;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
-import io.github.nhtuan10.mykafkatool.api.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;

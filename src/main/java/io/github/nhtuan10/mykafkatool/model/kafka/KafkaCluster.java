@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
-import io.github.nhtuan10.mykafkatool.api.AuthConfig;
-import io.github.nhtuan10.mykafkatool.api.AuthProvider;
+import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
 import lombok.*;
 
 import java.util.HashMap;

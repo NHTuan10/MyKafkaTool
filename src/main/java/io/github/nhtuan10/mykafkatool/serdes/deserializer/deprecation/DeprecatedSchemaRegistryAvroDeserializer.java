@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.serdes.deserializer.deprecation;
 
-import io.github.nhtuan10.mykafkatool.api.PluggableDeserializer;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 
 public class DeprecatedSchemaRegistryAvroDeserializer implements PluggableDeserializer {
     @Override

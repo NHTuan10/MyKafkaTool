@@ -1,9 +1,9 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
-import io.github.nhtuan10.mykafkatool.api.DisplayType;
-import io.github.nhtuan10.mykafkatool.api.PluggableDeserializer;
-import io.github.nhtuan10.mykafkatool.api.PluggableSerializer;
+import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;

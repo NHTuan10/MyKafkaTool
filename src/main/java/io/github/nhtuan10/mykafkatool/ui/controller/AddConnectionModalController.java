@@ -1,10 +1,10 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.nhtuan10.mykafkatool.api.AuthConfig;
-import io.github.nhtuan10.mykafkatool.api.AuthProvider;
-import io.github.nhtuan10.mykafkatool.api.NoAuthProvider;
-import io.github.nhtuan10.mykafkatool.api.SaslProvider;
+import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
+import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
+import io.github.nhtuan10.mykafkatool.api.auth.SaslProvider;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;

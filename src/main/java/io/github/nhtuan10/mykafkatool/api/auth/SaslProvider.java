@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.api;
+package io.github.nhtuan10.mykafkatool.api.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

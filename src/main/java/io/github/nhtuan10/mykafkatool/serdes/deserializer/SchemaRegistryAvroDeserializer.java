@@ -1,8 +1,8 @@
 package io.github.nhtuan10.mykafkatool.serdes.deserializer;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
-import io.github.nhtuan10.mykafkatool.api.DisplayType;
-import io.github.nhtuan10.mykafkatool.api.PluggableDeserializer;
+import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import org.apache.kafka.common.header.Header;

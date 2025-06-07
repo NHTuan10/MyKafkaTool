@@ -1,4 +1,6 @@
-package io.github.nhtuan10.mykafkatool.api;
+package io.github.nhtuan10.mykafkatool.api.serdes;
+
+import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 
 import java.util.Map;
 

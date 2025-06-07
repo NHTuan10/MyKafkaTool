@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.api;
+package io.github.nhtuan10.mykafkatool.api.auth;
 
 import java.util.HashMap;
 

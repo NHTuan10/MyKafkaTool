@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.api;
+package io.github.nhtuan10.mykafkatool.api.auth;
 
 public interface AuthProvider {
     String NO_AUTH = "No Auth";

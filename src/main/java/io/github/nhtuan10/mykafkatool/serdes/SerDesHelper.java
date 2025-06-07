@@ -1,8 +1,8 @@
 package io.github.nhtuan10.mykafkatool.serdes;
 
-import io.github.nhtuan10.mykafkatool.api.PluggableDeserializer;
-import io.github.nhtuan10.mykafkatool.api.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.exception.DeserializationException;
 import lombok.RequiredArgsConstructor;

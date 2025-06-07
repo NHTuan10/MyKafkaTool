@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.serdes.serializer;
 
-import io.github.nhtuan10.mykafkatool.api.PluggableSerializer;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
