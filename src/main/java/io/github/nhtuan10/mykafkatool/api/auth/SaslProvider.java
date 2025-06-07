@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SaslProvider implements AuthProvider {
-    ObjectMapper objectMapper = Utils.contructObjectMapper();
+    protected ObjectMapper objectMapper = Utils.contructObjectMapper();
 
     @Override
     public String getName() {
