@@ -2,6 +2,8 @@ package io.github.nhtuan10.mykafkatool.model.kafka;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import io.github.nhtuan10.mykafkatool.api.AuthConfig;
 import io.github.nhtuan10.mykafkatool.api.AuthProvider;
 import lombok.*;
@@ -21,6 +23,7 @@ public class KafkaCluster {
     @Builder.Default
     private boolean isOnlySubjectLoaded = false;
     @Builder.Default
+    @JsonSetter(nulls = Nulls.SKIP)
     private AuthConfig authConfig = new AuthConfig(AuthProvider.NO_AUTH, new HashMap<>(), new HashMap<>());
     @Override
     public String toString() {
