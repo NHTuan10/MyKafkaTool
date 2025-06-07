@@ -5,5 +5,5 @@ import java.util.Map;
 /**
  * @param properties will be added in consumer & producer properties
  */
-public record AuthConfig(String name, Map<String, Object> properties, Map<String, Object> extraProperties) {
+public record AuthConfig(String name, Map<String, Object> properties, Object extraConfig) {
 }
