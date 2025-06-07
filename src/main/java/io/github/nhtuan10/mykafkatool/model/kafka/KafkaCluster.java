@@ -24,7 +24,7 @@ public class KafkaCluster {
     private boolean isOnlySubjectLoaded = false;
     @Builder.Default
     @JsonSetter(nulls = Nulls.SKIP)
-    private AuthConfig authConfig = new AuthConfig(AuthProvider.NO_AUTH, new HashMap<>(), new HashMap<>());
+    private AuthConfig authConfig = new AuthConfig(AuthProvider.NO_AUTH, new HashMap<>(), null);
     @Override
     public String toString() {
         return name;

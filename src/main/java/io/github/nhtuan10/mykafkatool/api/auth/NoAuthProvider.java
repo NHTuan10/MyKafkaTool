@@ -11,7 +11,7 @@ public class NoAuthProvider implements AuthProvider {
 
     @Override
     public AuthConfig fromConfigText(String configText) {
-        return new AuthConfig(getName(), new HashMap<>(), new HashMap<>());
+        return new AuthConfig(getName(), new HashMap<>(), null);
     }
 
     @Override

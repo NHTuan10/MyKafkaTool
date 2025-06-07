@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.ui.util.Utils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class SaslProvider implements AuthProvider {
@@ -20,7 +19,7 @@ public class SaslProvider implements AuthProvider {
     public AuthConfig fromConfigText(String configText) throws JsonProcessingException {
         Map<String, Object> properties = objectMapper.readValue(configText, new TypeReference<>() {
         });
-        return new AuthConfig(getName(), properties, new HashMap<>());
+        return new AuthConfig(getName(), properties, null);
     }
 
     @Override
