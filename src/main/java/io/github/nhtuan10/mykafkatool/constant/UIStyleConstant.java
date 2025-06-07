@@ -6,6 +6,7 @@ public class UIStyleConstant {
     public static final String INDEX_COL_CELL_CLASS = "index-col-cell";
     public static final String LIGHT_STYLE_CSS_FILE = "light-style.css";
     public static final String DARK_STYLE_CSS_FILE = "dark-style.css";
+    public static final String APP_CSS_FILE = "app.css";
 
     public static String getCssThemeFile() {
         return LIGHT_STYLE_CSS_FILE;

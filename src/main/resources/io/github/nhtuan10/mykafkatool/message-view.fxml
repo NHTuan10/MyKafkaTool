@@ -151,7 +151,6 @@
                             </HBox.margin>
                             <content>
                                 <CodeArea fx:id="schemaTextArea" disable="true" prefHeight="93.0" prefWidth="388.0"
-                                          style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"
                                           wrapText="true">
                                 </CodeArea>
                             </content>

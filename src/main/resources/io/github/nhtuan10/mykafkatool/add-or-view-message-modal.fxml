@@ -59,7 +59,6 @@
                                                     <content>
                                                         <CodeArea fx:id="valueTextArea" prefHeight="118.0"
                                                                   prefWidth="552.0"
-                                                                  style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"
                                                                   wrapText="true"/>
                                                     </content>
 
@@ -74,11 +73,8 @@
                                                         <!--                                                                            layoutX="59.0" layoutY="69.0" -->
                                                         <CodeArea fx:id="schemaTextArea" prefHeight="130.0"
                                                                   prefWidth="551.0"
-                                                                  style="-fx-border-color: lightgray lightgray lightgray lightgray; -fx-background-color: -color-bg-default;"
-                                                                  wrapText="true">
+                                                                  wrapText="true"/>
                                                             <!--                                    styleClass="text-input"    -->
-
-                                                        </CodeArea>
                                                     </content>
 
                                                 </VirtualizedScrollPane>

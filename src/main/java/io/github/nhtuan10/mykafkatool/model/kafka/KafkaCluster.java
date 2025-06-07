@@ -3,18 +3,16 @@ package io.github.nhtuan10.mykafkatool.model.kafka;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.nhtuan10.mykafkatool.api.AuthConfig;
-import io.github.nhtuan10.mykafkatool.constant.AppConstant;
-import io.github.nhtuan10.mykafkatool.model.common.Connection;
+import io.github.nhtuan10.mykafkatool.api.AuthProvider;
 import lombok.*;
 
 import java.util.HashMap;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Builder
-public class KafkaCluster extends Connection {
+@Builder(builderMethodName = "")
+public class KafkaCluster {
     @NonNull
     private final String name;
     @NonNull
@@ -23,7 +21,7 @@ public class KafkaCluster extends Connection {
     @Builder.Default
     private boolean isOnlySubjectLoaded = false;
     @Builder.Default
-    private AuthConfig authConfig = new AuthConfig(AppConstant.NO_AUTH, new HashMap<>(), new HashMap<>());
+    private AuthConfig authConfig = new AuthConfig(AuthProvider.NO_AUTH, new HashMap<>(), new HashMap<>());
     @Override
     public String toString() {
         return name;
@@ -35,5 +33,9 @@ public class KafkaCluster extends Connection {
             @JsonProperty("bootstrapServer") String bootstrapServer) {
 
         return new KafkaCluster(name, bootstrapServer);
+    }
+
+    public static KafkaCluster.KafkaClusterBuilder builder(String name, String bootstrapServer) {
+        return new KafkaClusterBuilder().name(name).bootstrapServer(bootstrapServer);
     }
 }

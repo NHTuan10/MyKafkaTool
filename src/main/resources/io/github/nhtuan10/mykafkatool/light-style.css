@@ -47,3 +47,13 @@
 .table-view .scroll-bar:vertical > .decrement-button {
     -fx-padding: 0.5em 0.5em;
 }
+
+.styled-text-area {
+    -fx-border-color: -color-border-default -color-border-default -color-border-default -color-border-default;
+    -fx-background-color: -color-bg-default;
+}
+
+.bordered-container {
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1;
+}

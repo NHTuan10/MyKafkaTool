@@ -30,7 +30,7 @@
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </Button>
-                        <HBox prefHeight="40.0" prefWidth="320.0" style="-fx-border-color: lightgray; -fx-border-width: 1;">
+                         <HBox prefHeight="40.0" prefWidth="320.0" styleClass="bordered-container">
                            <children>
                               <Label fx:id="filterLabel" text="Filter">
                                  <HBox.margin>

@@ -59,3 +59,13 @@
 .styled-text-area .selection {
     -fx-fill: darkblue;
 }
+
+.styled-text-area {
+    -fx-border-color: -color-border-default -color-border-default -color-border-default -color-border-default;
+    -fx-background-color: -color-bg-default;
+}
+
+.bordered-container {
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1;
+}

@@ -29,6 +29,8 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         MainController mainController = fxmlLoader.getController();
         mainController.setStage(stage);
         Scene scene = new Scene(parent);
+//        URL cssResource = MyKafkaToolApplication.class.getResource(UIStyleConstant.APP_CSS_FILE);
+//        scene.getStylesheets().add(cssResource.toExternalForm());
         applyThemeFromCurrentUserPreference(scene);
         stage.setTitle(AppConstant.APP_NAME);
         stage.setScene(scene);
