@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
-@FilterableTableItemField
-public @interface TableViewColumn {
+@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
+public @interface FilterableTableItemField {
 }

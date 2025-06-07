@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import io.github.nhtuan10.mykafkatool.annotation.FilterableTableItemField;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,7 +53,7 @@ public class TableViewConfigurer {
         TableColumn<S, S> numberCol = buildIndexTableColumn();
         tableView.getColumns().addFirst(numberCol);
 
-        List<String> fieldNames = getPropertyFieldNamesFromTableItem(clazz);
+        List<String> fieldNames = getTableColumnNamesFromTableItem(clazz);
         IntStream.range(0, fieldNames.size()).forEach(i -> {
             TableColumn<S, ?> tableColumn = tableView.getColumns().get(i + 1);
             tableColumn.setId(fieldNames.get(i));
@@ -157,7 +159,7 @@ public class TableViewConfigurer {
         Callback<TableColumn<S, String>,
                 TableCell<S, String>> cellFactory
                 = (TableColumn<S, String> p) -> new EditingTableCell<>();
-        List<Field> fields = getPropertyFieldFromTableItem(tableItemClass);
+        List<Field> fields = getTableColumnFieldsFromTableItem(tableItemClass);
         IntStream.range(0, fields.size()).forEach(i -> {
             Field field = fields.get(i);
             TableColumn<S, String> tableColumn = (TableColumn<S, String>) tableView.getColumns().get(i + 1);
@@ -310,16 +312,30 @@ public class TableViewConfigurer {
         return table.getColumns().subList(1, table.getColumns().size()).stream().map(TableColumn::getText).toList();
     }
 
-    public static List<String> getPropertyFieldNamesFromTableItem(Class<?> tableIemClass) {
-        List<String> fieldNames = getPropertyFieldFromTableItem(tableIemClass).stream()
+    public static List<String> getTableColumnNamesFromTableItem(Class<?> tableIemClass) {
+        List<String> fieldNames = getTableColumnFieldsFromTableItem(tableIemClass).stream()
                 .map(Field::getName)
                 .toList();
         return fieldNames;
     }
 
-    public static List<Field> getPropertyFieldFromTableItem(Class<?> tableIemClass) {
+    public static List<Field> getTableColumnFieldsFromTableItem(Class<?> tableIemClass) {
         return Arrays.stream(tableIemClass.getDeclaredFields())
                 .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(TableViewColumn.class))
                 .toList();
+    }
+
+    public static List<String> getFilterableFieldsFromTableItem(Class<?> tableIemClass) {
+        return Arrays.stream(tableIemClass.getDeclaredFields())
+                .filter(TableViewConfigurer::isFilterableField)
+                .map(Field::getName)
+                .toList();
+    }
+
+    public static boolean isFilterableField(Field field) {
+        for (Annotation annotation : field.getAnnotations()) {
+            return (annotation instanceof FilterableTableItemField || annotation.annotationType().isAnnotationPresent(FilterableTableItemField.class));
+        }
+        return false;
     }
 }

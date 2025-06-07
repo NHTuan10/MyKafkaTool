@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui;
 
+import io.github.nhtuan10.mykafkatool.annotation.FilterableTableItemField;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.Getter;
@@ -15,6 +16,7 @@ public class SchemaTableItem {
     private final SimpleStringProperty type;
     @TableViewColumn
     private final SimpleStringProperty compatibility;
+    @FilterableTableItemField
     private final SimpleStringProperty schema;
 
     @Getter

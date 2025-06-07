@@ -79,19 +79,7 @@ public class EditableTableControl<T> extends AnchorPane {
         this.stageHolder = new StageHolder();
         this.filterTextProperty = new SimpleStringProperty("");
         this.itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        List<String> itemClassFields = TableViewConfigurer.getPropertyFieldNamesFromTableItem(itemClass);
-        tableItemFieldGetters = itemClassFields.stream().map(fieldName -> {
-            String getterName = "get" + StringUtils.capitalize(fieldName);
-            return (Function<T, String>) t -> {
-                try {
-                    return String.valueOf(itemClass.getMethod(getterName).invoke(t));
-                } catch (Exception e) {
-                    log.error("Error when invoking getter method: {}", getterName, e);
-                    return "";
-                }
-            };
-        }).toList();
-
+        tableItemFieldGetters = getTableItemFieldGetters();
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "editable-table.fxml"));
         fxmlLoader.setRoot(this);
@@ -104,10 +92,25 @@ public class EditableTableControl<T> extends AnchorPane {
         }
     }
 
+    private List<Function<T, String>> getTableItemFieldGetters() {
+        List<String> itemClassFields = TableViewConfigurer.getFilterableFieldsFromTableItem(itemClass);
+        return itemClassFields.stream().map(fieldName -> {
+            String getterName = "get" + StringUtils.capitalize(fieldName);
+            return (Function<T, String>) t -> {
+                try {
+                    return String.valueOf(itemClass.getMethod(getterName).invoke(t));
+                } catch (Exception e) {
+                    log.error("Error when invoking getter method: {}", getterName, e);
+                    return "";
+                }
+            };
+        }).toList();
+    }
+
     @FXML
     protected void initialize() {
         table.getColumns().clear();
-        List<String> itemClassFields = TableViewConfigurer.getPropertyFieldNamesFromTableItem(itemClass);
+        List<String> itemClassFields = TableViewConfigurer.getTableColumnNamesFromTableItem(itemClass);
         itemClassFields.forEach(fieldName -> {
             String columnName = StringUtils.capitalize(StringUtils.join(
                     StringUtils.splitByCharacterTypeCamelCase(fieldName),

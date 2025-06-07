@@ -5,6 +5,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;
 import io.github.nhtuan10.mykafkatool.repo.UserPreferenceRepoImpl;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -15,20 +16,23 @@ import java.util.concurrent.locks.ReentrantLock;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.USER_PREF_FILENAME;
 
+@Slf4j
 public class UserPreferenceManager {
     @Getter
     private static final String userPrefFilePath = getDefaultUserPreferenceFilePath();
-    private static final UserPreferenceRepoImpl USER_PREFERENCE_REPO = new UserPreferenceRepoImpl(userPrefFilePath);
+    private static final UserPreferenceRepoImpl userPreferenceRepo = new UserPreferenceRepoImpl(userPrefFilePath);
     private static final Lock lock = new ReentrantLock();
+
     public static void saveUserPreference(UserPreference userPreference) throws IOException {
-        USER_PREFERENCE_REPO.saveUserPreference(userPreference);
+        userPreferenceRepo.saveUserPreference(userPreference);
     }
 
     public static UserPreference loadUserPreference() {
         UserPreference userPreference;
         try {
-            userPreference = USER_PREFERENCE_REPO.loadUserPreference();
+            userPreference = userPreferenceRepo.loadUserPreference();
         } catch (IOException e) {
+            log.warn("Error when load user preference", e);
             userPreference = getDefaultUserPreference();
         }
         return userPreference;
