@@ -7,6 +7,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -16,6 +17,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import java.util.Properties;
 
 public class ProducerCreator {
+    @SneakyThrows
     public static KafkaProducer createProducer(ProducerCreatorConfig producerCreatorConfig) {
         Properties properties = new Properties();
         KafkaCluster cluster = producerCreatorConfig.getCluster();

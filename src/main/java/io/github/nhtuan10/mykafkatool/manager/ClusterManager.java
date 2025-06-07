@@ -9,6 +9,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.creator.ProducerCreator;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupOffsetTableItem;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.admin.*;
@@ -42,6 +43,7 @@ public class ClusterManager {
         this.producerMap = producerMap;
     }
 
+    @SneakyThrows
     public void connectToCluster(KafkaCluster cluster) throws ClusterNameExistedException {
         String clusterName = cluster.getName();
         if (adminMap.containsKey(clusterName)) {

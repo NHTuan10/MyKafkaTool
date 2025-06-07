@@ -34,7 +34,7 @@ public class AuthProviderManager {
         return getInstance().authProviderMap.get(name);
     }
 
-    public static Map<String, Object> getKafkaAuthProperties(AuthConfig authConfig) {
+    public static Map<String, Object> getKafkaAuthProperties(AuthConfig authConfig) throws Exception {
         return getInstance().authProviderMap.getOrDefault(authConfig.name(), noAuthProvider).getKafkaProperties(authConfig);
     }
 }

@@ -7,6 +7,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -29,6 +30,7 @@ public class ConsumerCreator {
         return new KafkaConsumer<>(properties);
     }
 
+    @SneakyThrows
     public static Map<String, Object> buildConsumerConfigs(ConsumerCreatorConfig consumerCreatorConfig) {
         Map<String, Object> properties = new HashMap<>();
         KafkaCluster cluster = consumerCreatorConfig.getCluster();

@@ -13,7 +13,7 @@ public interface AuthProvider {
 
     String toString();
 
-    default Map<String, Object> getKafkaProperties(AuthConfig authConfig) {
+    default Map<String, Object> getKafkaProperties(AuthConfig authConfig) throws Exception {
         return authConfig.properties();
     }
 }
