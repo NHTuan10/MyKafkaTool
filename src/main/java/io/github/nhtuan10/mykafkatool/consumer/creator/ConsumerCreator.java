@@ -4,6 +4,7 @@ import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -28,12 +29,12 @@ public class ConsumerCreator {
 
     public static Map<String, Object> buildConsumerConfigs(ConsumerCreatorConfig consumerCreatorConfig) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, consumerCreatorConfig.cluster.getBootstrapServer());
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, consumerCreatorConfig.getCluster().getBootstrapServer());
 //        properties.put(ConsumerConfig.GROUP_ID_CONFIG, consumerCreatorConfig.groupId + UUID.randomUUID());
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, consumerCreatorConfig.groupId);
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, consumerCreatorConfig.keyDeserializer);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, consumerCreatorConfig.getGroupId());
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, consumerCreatorConfig.getKeyDeserializer());
 //        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,  consumerCreatorConfig.valueDeserializer);
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, consumerCreatorConfig.getValueDeserializer());
         String schemaRegistryUrl = consumerCreatorConfig.cluster.getSchemaRegistryUrl();
         if (StringUtils.isNotBlank(schemaRegistryUrl)) {
             properties.put("schema.registry.url", schemaRegistryUrl);
@@ -41,11 +42,13 @@ public class ConsumerCreator {
         properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, consumerCreatorConfig.maxPollRecords != null ? consumerCreatorConfig.maxPollRecords : DEFAULT_MAX_POLL_RECORDS);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_RESET_EARLIER);
+        properties.putAll(consumerCreatorConfig.getCluster().getAuthConfig().properties());
         return properties;
     }
 
     @Builder(builderMethodName = "")
     @EqualsAndHashCode
+    @Getter
     public static final class ConsumerCreatorConfig {
 
         private final KafkaCluster cluster;

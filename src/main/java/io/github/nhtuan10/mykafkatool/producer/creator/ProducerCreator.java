@@ -16,20 +16,22 @@ import java.util.Properties;
 public class ProducerCreator {
     public static KafkaProducer createProducer(ProducerCreatorConfig producerCreatorConfig) {
         Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerCreatorConfig.cluster.getBootstrapServer());
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerCreatorConfig.getCluster().getBootstrapServer());
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, AppConstant.APP_NAME);
-        String schemaRegistryUrl = producerCreatorConfig.cluster.getSchemaRegistryUrl();
+        String schemaRegistryUrl = producerCreatorConfig.getCluster().getSchemaRegistryUrl();
         if (StringUtils.isNotBlank(schemaRegistryUrl)) {
             properties.put("schema.registry.url", schemaRegistryUrl);
         }
 
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, producerCreatorConfig.keySerializer);
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, producerCreatorConfig.valueSerializer);
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, producerCreatorConfig.getKeySerializer());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, producerCreatorConfig.getValueSerializer());
+        properties.putAll(producerCreatorConfig.getCluster().getAuthConfig().properties());
         return new KafkaProducer<>(properties);
     }
 
     @Builder
     @EqualsAndHashCode
+    @Getter
     public static final class ProducerCreatorConfig {
 
         private final KafkaCluster cluster;

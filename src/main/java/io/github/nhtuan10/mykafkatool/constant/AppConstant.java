@@ -18,6 +18,5 @@ public class AppConstant {
     public static final int DEFAULT_ADMIN_REQUEST_TIMEOUT = 5000;
     public static final String SCHEMA = "schema";
     public static final int MAX_SCHEMA_CACHED_SIZE = 1000;
-    public static final int EMPTY_PULL_STILL_STOP = 2;
     public static final String NO_AUTH = "NO_AUTH";
 }

@@ -7,7 +7,7 @@ import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.model.common.Connection;
 import lombok.*;
 
-import java.util.Properties;
+import java.util.HashMap;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -23,7 +23,7 @@ public class KafkaCluster extends Connection {
     @Builder.Default
     private boolean isOnlySubjectLoaded = false;
     @Builder.Default
-    private AuthConfig authConfig = new AuthConfig(AppConstant.NO_AUTH, new Properties(), new Properties());
+    private AuthConfig authConfig = new AuthConfig(AppConstant.NO_AUTH, new HashMap<>(), new HashMap<>());
     @Override
     public String toString() {
         return name;
