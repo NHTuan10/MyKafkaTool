@@ -55,3 +55,7 @@
 .styled-text-area .caret {
     -fx-stroke: white;
 }
+
+.styled-text-area .selection {
+    -fx-fill: darkblue;
+}
