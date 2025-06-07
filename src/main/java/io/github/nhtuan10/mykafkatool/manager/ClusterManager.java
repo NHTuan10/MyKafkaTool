@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.manager;
 
+import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
 import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
@@ -46,9 +47,11 @@ public class ClusterManager {
         if (adminMap.containsKey(clusterName)) {
             throw new ClusterNameExistedException(clusterName, "Cluster already exists");
         }
-        Properties properties = new Properties();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServer());
         properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, AppConstant.DEFAULT_ADMIN_REQUEST_TIMEOUT);
+        AuthConfig authConfig = cluster.getAuthConfig();
+        properties.putAll(AuthProviderManager.getKafkaAuthProperties(authConfig));
         Admin adminClient = Admin.create(properties);
         adminMap.put(clusterName, adminClient);
         ProducerCreator.ProducerCreatorConfig producerCreatorConfig = ProducerCreator.ProducerCreatorConfig.builder().cluster(cluster).build();

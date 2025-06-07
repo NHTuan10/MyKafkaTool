@@ -1,5 +1,7 @@
 package io.github.nhtuan10.mykafkatool.api.auth;
 
+import java.util.Map;
+
 public interface AuthProvider {
     String NO_AUTH = "No Auth";
 
@@ -10,4 +12,8 @@ public interface AuthProvider {
     String toConfigText(AuthConfig authConfig) throws Exception;
 
     String toString();
+
+    default Map<String, Object> getKafkaProperties(AuthConfig authConfig) {
+        return authConfig.properties();
+    }
 }

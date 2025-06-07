@@ -1,6 +1,8 @@
 package io.github.nhtuan10.mykafkatool.producer.creator;
 
+import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -16,16 +18,18 @@ import java.util.Properties;
 public class ProducerCreator {
     public static KafkaProducer createProducer(ProducerCreatorConfig producerCreatorConfig) {
         Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producerCreatorConfig.getCluster().getBootstrapServer());
+        KafkaCluster cluster = producerCreatorConfig.getCluster();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServer());
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, AppConstant.APP_NAME);
-        String schemaRegistryUrl = producerCreatorConfig.getCluster().getSchemaRegistryUrl();
+        String schemaRegistryUrl = cluster.getSchemaRegistryUrl();
         if (StringUtils.isNotBlank(schemaRegistryUrl)) {
             properties.put("schema.registry.url", schemaRegistryUrl);
         }
 
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, producerCreatorConfig.getKeySerializer());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, producerCreatorConfig.getValueSerializer());
-        properties.putAll(producerCreatorConfig.getCluster().getAuthConfig().properties());
+        AuthConfig authConfig = cluster.getAuthConfig();
+        properties.putAll(AuthProviderManager.getKafkaAuthProperties(authConfig));
         return new KafkaProducer<>(properties);
     }
 
