@@ -1,10 +1,8 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
-import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
-import io.github.nhtuan10.mykafkatool.api.auth.SaslProvider;
+import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
@@ -20,12 +18,9 @@ import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
-import java.util.Map;
 
 public class AddConnectionModalController extends ModalController {
     private final ObjectProperty<KafkaCluster> objectProperty;
-
-    private final Map<String, AuthProvider> authProviderMap;
 
     private final JsonHighlighter jsonHighlighter;
 
@@ -49,11 +44,6 @@ public class AddConnectionModalController extends ModalController {
     public AddConnectionModalController() {
         objectProperty = new SimpleObjectProperty<>();
         jsonHighlighter = new JsonHighlighter();
-        SaslProvider saslProvider = new SaslProvider();
-        NoAuthProvider noAuthProvider = new NoAuthProvider();
-        authProviderMap = ImmutableMap.of(noAuthProvider.getName(), noAuthProvider
-                , saslProvider.getName(), saslProvider
-        );
     }
 
     @FXML
@@ -64,7 +54,7 @@ public class AddConnectionModalController extends ModalController {
             schemaRegistryTextField.setText(newValue.getSchemaRegistryUrl());
             isOnlySubjectLoadedCheckBox.setSelected(newValue.isOnlySubjectLoaded());
             AuthConfig authConfig = newValue.getAuthConfig();
-            AuthProvider authProvider = authProviderMap.get(authConfig.name());
+            AuthProvider authProvider = AuthProviderManager.getAuthProvider(authConfig.name());
             securityTypeComboxBox.getSelectionModel().select(authProvider);
             try {
                 securityConfigTextArea.replaceText(authProvider.toConfigText(authConfig));
@@ -72,7 +62,7 @@ public class AddConnectionModalController extends ModalController {
                 throw new RuntimeException(e);
             }
         });
-        securityTypeComboxBox.getItems().addAll(authProviderMap.values());
+        securityTypeComboxBox.getItems().addAll(AuthProviderManager.getAllAuthProviders());
         securityConfigTextArea.textProperty().addListener((obs, oldText, newText) -> {
             ViewUtils.highlightJsonInCodeArea(newText, securityConfigTextArea, false, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
         });

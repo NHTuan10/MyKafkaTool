@@ -6,6 +6,7 @@ import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
 import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
 import io.github.nhtuan10.mykafkatool.api.auth.SaslProvider;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class AuthProviderManager {
@@ -32,6 +33,10 @@ public class AuthProviderManager {
 
     public static AuthProvider getAuthProvider(String name) {
         return getInstance().authProviderMap.get(name);
+    }
+
+    public static Collection<AuthProvider> getAllAuthProviders() {
+        return getInstance().authProviderMap.values();
     }
 
     public static Map<String, Object> getKafkaAuthProperties(AuthConfig authConfig) throws Exception {
