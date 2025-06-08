@@ -20,7 +20,7 @@
 }
 
 .json-start-or-end-object {
-    -fx-fill: green;
+    -fx-fill: gray;
 }
 
 .error-row {
