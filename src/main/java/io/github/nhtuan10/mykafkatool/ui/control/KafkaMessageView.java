@@ -393,7 +393,7 @@ public class KafkaMessageView extends SplitPane {
     }
 
     @FXML
-    protected void addMessage() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    protected void addMessage() throws Exception {
         if (selectedTreeItem instanceof KafkaPartitionTreeItem<?>) {
             KafkaPartition partition = (KafkaPartition) selectedTreeItem.getValue();
             KafkaTopic topic = partition.topic();
@@ -408,7 +408,7 @@ public class KafkaMessageView extends SplitPane {
     }
 
 
-    public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws IOException, ExecutionException, InterruptedException {
+    public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws Exception {
 
         AtomicReference<Object> ref = new AtomicReference<>();
         ViewUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,

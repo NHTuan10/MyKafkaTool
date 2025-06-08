@@ -18,10 +18,8 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,7 +28,7 @@ public class ProducerUtil {
     private final SerDesHelper serDesHelper;
 
     public void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, KafkaMessage kafkaMessage)
-            throws ExecutionException, InterruptedException, IOException {
+            throws Exception {
 
         KafkaCluster cluster = kafkaTopic.cluster();
 
@@ -54,7 +52,7 @@ public class ProducerUtil {
     }
 
     private ProducerRecord<String, Object> createProducerRecord(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition,
-                                                                       KafkaMessage kafkaMessage) throws IOException {
+                                                                KafkaMessage kafkaMessage) throws Exception {
         Integer partitionId = partition != null ? partition.id() : null;
         String key = StringUtils.isBlank(kafkaMessage.key()) ? null : kafkaMessage.key();
         Map<String, Object> others = Map.of(Config.IS_KEY_PROP, false, Config.AUTH_CONFIG_PROP, kafkaTopic.cluster().getAuthConfig());

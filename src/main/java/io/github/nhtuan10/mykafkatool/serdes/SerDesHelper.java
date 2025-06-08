@@ -15,7 +15,6 @@ import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
@@ -83,7 +82,7 @@ public class SerDesHelper {
         }
     }
 
-    public Object convertStringToObjectBeforeSerialize(String topic, Integer partition, KafkaMessage kafkaMessage, Map<String, Object> others) throws IOException {
+    public Object convertStringToObjectBeforeSerialize(String topic, Integer partition, KafkaMessage kafkaMessage, Map<String, Object> others) throws Exception {
         boolean isKey = (boolean) others.getOrDefault(Config.IS_KEY_PROP, false);
         PluggableSerializer serializer = getPluggableSerialize(isKey ? kafkaMessage.keyContentType() : kafkaMessage.valueContentType());
         if (serializer.isCustomSerializeMethodUsed()) {

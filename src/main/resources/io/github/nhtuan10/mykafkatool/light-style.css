@@ -32,7 +32,7 @@
 }
 
 .table-row-border {
-    -fx-border-color: transparent transparent lightgray transparent;
+    -fx-border-color: transparent transparent -color-border-default transparent;
 }
 
 .index-col-cell {

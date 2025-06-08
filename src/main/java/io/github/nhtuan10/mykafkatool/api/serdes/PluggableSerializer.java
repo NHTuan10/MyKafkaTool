@@ -30,7 +30,7 @@ public interface PluggableSerializer {
 //          return new ProducerRecord<>(topic, partition, kafkaMessage.key(), kafkaMessage.value(), headers);
 //     }
 
-    default byte[] serialize(String topic, Integer partition, KafkaMessage kafkaMessage, Map<String, byte[]> headerMap, Map<String, Object> others) {
+    default byte[] serialize(String topic, Integer partition, KafkaMessage kafkaMessage, Map<String, byte[]> headerMap, Map<String, Object> others) throws Exception {
         return kafkaMessage.value().getBytes(StandardCharsets.UTF_8);
     }
 

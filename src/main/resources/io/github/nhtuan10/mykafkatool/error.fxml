@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<BorderPane prefHeight="504.0" prefWidth="539.0" xmlns:fx="http://javafx.com/fxml/1"
-            xmlns="http://javafx.com/javafx/17.0.12"
+<?import javafx.scene.text.Font?>
+<BorderPane prefHeight="504.0" prefWidth="539.0" xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.ErrorController">
+    <top>
+        <Label fx:id="errorMessage">
+            <BorderPane.margin>
+                <Insets bottom="5.0"/>
+            </BorderPane.margin>
+            <font>
+                <Font size="14.0"/>
+            </font>
+        </Label>
+    </top>
     <center>
-        <ScrollPane>
+
+        <ScrollPane fitToWidth="true" styleClass="bordered-container">
             <content>
-                <Label fx:id="errorMessage" wrapText="true" />
+                <Label fx:id="errorStackTrace" wrapText="true"/>
                 <!--                <TextArea fx:id="errorMessage" wrapText="true" />-->
             </content>
         </ScrollPane>
