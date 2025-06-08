@@ -1,10 +1,10 @@
 package io.github.nhtuan10.mykafkatool.serdes.deserializer;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
-import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
@@ -33,9 +33,9 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
     @Override
     public String deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
         KafkaAvroDeserializer kafkaAvroDeserializer;
-        boolean isKey = Boolean.getBoolean(others.getOrDefault(SerDesHelper.IS_KEY_PROP, "false"));
+        boolean isKey = Boolean.getBoolean(others.getOrDefault(Config.IS_KEY_PROP, "false"));
         Map<String, Object> serializerMapKey = new HashMap<>();
-        serializerMapKey.putAll(Map.of(SerDesHelper.IS_KEY_PROP, isKey));
+        serializerMapKey.putAll(Map.of(Config.IS_KEY_PROP, isKey));
         if (!kafkaAvroDeserializerMap.containsKey(serializerMapKey)) {
             kafkaAvroDeserializer = new KafkaAvroDeserializer();
             kafkaAvroDeserializer.configure(consumerProps, isKey);

@@ -1,9 +1,9 @@
 package io.github.nhtuan10.mykafkatool.serdes.serializer;
 
+import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
-import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 
 import java.io.IOException;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class SchemaRegistryAvroSerializer implements PluggableSerializer {
 
     @Override
     public Object convertStringToObject(String str, Map<String, Object> optionalParams) throws IOException {
-        String schema = optionalParams.get(SerDesHelper.SCHEMA_PROP).toString();
+        String schema = optionalParams.get(Config.SCHEMA_PROP).toString();
         return AvroUtil.convertJsonToAvro(str, schema);
     }
 

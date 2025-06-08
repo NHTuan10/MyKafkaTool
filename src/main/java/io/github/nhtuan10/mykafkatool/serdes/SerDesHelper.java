@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.serdes;
 
+import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
@@ -26,9 +27,7 @@ import java.util.stream.Collectors;
 public class SerDesHelper {
 
     public static final String SERDE_STRING = "String";
-    public static final String IS_KEY_PROP = "isKey";
     public static final String SERDE_AVRO = "AVRO";
-    public static final String SCHEMA_PROP = "schema";
     private final Map<String, PluggableSerializer> serializerMap;
     private final Map<String, PluggableDeserializer> deserializerMap;
 
@@ -84,10 +83,11 @@ public class SerDesHelper {
         }
     }
 
-    public Object convertStringToObjectBeforeSerialize(String topic, Integer partition, KafkaMessage kafkaMessage, boolean isKey) throws IOException {
+    public Object convertStringToObjectBeforeSerialize(String topic, Integer partition, KafkaMessage kafkaMessage, Map<String, Object> others) throws IOException {
+        boolean isKey = (boolean) others.getOrDefault(Config.IS_KEY_PROP, false);
         PluggableSerializer serializer = getPluggableSerialize(isKey ? kafkaMessage.keyContentType() : kafkaMessage.valueContentType());
         if (serializer.isCustomSerializeMethodUsed()) {
-            return serializer.serialize(topic, partition, kafkaMessage, kafkaMessage.headers(), Map.of(SerDesHelper.IS_KEY_PROP, Boolean.toString(isKey)));
+            return serializer.serialize(topic, partition, kafkaMessage, kafkaMessage.headers(), others);
         } else {
             return serializer.convertStringToObject(isKey ? kafkaMessage.key() : kafkaMessage.value(),
                     Map.of(AppConstant.SCHEMA, kafkaMessage.schema()));

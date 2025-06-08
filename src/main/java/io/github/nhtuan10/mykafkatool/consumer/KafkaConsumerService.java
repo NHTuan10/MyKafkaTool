@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.consumer;
 
+import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
 import io.github.nhtuan10.mykafkatool.exception.DeserializationException;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
@@ -70,6 +71,7 @@ public class KafkaConsumerService {
         consumers.add(consumer);
         consumer.assign(topicPartitions);
         Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll = seekOffset(consumer, topicPartitions, pollingOptions);
+        consumerProps.put(Config.AUTH_CONFIG_PROP, kafkaTopic.cluster().getAuthConfig());
         List<KafkaMessageTableItem> list = pollMessages(consumer, consumerProps, pollingOptions, partitionOffsetsToPoll);
         consumer.close();
         consumers.remove(consumer);
@@ -237,7 +239,7 @@ public class KafkaConsumerService {
     private KafkaMessageTableItem createMessageItem
             (ConsumerRecord<String, Object> record, PollingOptions pollingOptions, Map<String, Object> consumerProps) throws DeserializationException {
         String key = record.key() != null ? record.key() : "";
-        Map<String, String> others = Map.of(SerDesHelper.IS_KEY_PROP, Boolean.toString(false), SerDesHelper.SCHEMA_PROP, pollingOptions.schema());
+        Map<String, String> others = Map.of(Config.IS_KEY_PROP, Boolean.toString(false), Config.SCHEMA_PROP, pollingOptions.schema());
         String value = serDesHelper.deserializeToJsonString(record,
                 pollingOptions.valueContentType,
                 record.headers(), consumerProps, others);

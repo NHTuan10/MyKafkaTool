@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.producer;
 
+import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
@@ -19,6 +20,7 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -55,7 +57,8 @@ public class ProducerUtil {
                                                                        KafkaMessage kafkaMessage) throws IOException {
         Integer partitionId = partition != null ? partition.id() : null;
         String key = StringUtils.isBlank(kafkaMessage.key()) ? null : kafkaMessage.key();
-        Object value = serDesHelper.convertStringToObjectBeforeSerialize(kafkaTopic.name(), partitionId, kafkaMessage, false);
+        Map<String, Object> others = Map.of(Config.IS_KEY_PROP, false, Config.AUTH_CONFIG_PROP, kafkaTopic.cluster().getAuthConfig());
+        Object value = serDesHelper.convertStringToObjectBeforeSerialize(kafkaTopic.name(), partitionId, kafkaMessage, others);
 
         List<Header> headers = kafkaMessage.headers().entrySet().stream().map(entry -> new RecordHeader(entry.getKey(), entry.getValue())).collect(Collectors.toList());
 
