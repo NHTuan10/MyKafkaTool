@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.producer.creator;
 
+import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -7,7 +8,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 class ProducerCreatorPefTest {
     public static void main(String[] args) throws InterruptedException {
         ProducerCreator.ProducerCreatorConfig config = ProducerCreator.ProducerCreatorConfig.builder()
-                .cluster(new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false, null))
+                .cluster(new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false,
+                        new NoAuthProvider().fromConfigText("")))
                 .build();
         Producer producer = ProducerCreator.createProducer(config);
         for (int i = 0; i < 10000; i++) {

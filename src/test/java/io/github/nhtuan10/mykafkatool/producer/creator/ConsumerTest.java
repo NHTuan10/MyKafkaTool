@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.producer.creator;
 
+import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
@@ -19,7 +20,9 @@ import static io.github.nhtuan10.mykafkatool.constant.AppConstant.OFFSET_RESET_L
 @Slf4j
 public class ConsumerTest {
     public static void main(String[] args) {
-        KafkaCluster cluster = new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false, null);
+        NoAuthProvider noAuthProvider = new NoAuthProvider();
+        KafkaCluster cluster = new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false,
+                noAuthProvider.fromConfigText(""));
         ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(cluster)
                 .keyDeserializer(StringDeserializer.class)
                 .valueDeserializer(StringDeserializer.class)

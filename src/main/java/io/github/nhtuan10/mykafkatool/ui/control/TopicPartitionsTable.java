@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
+import com.google.common.collect.Streams;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
@@ -12,11 +13,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -97,14 +99,27 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
     private List<KafkaPartitionsTableItem> getPartitionInfoForUI(List<TopicPartitionInfo> topicPartitionInfos) {
         String clusterName = kafkaTopic.cluster().getName();
         String topicName = kafkaTopic.name();
-        return topicPartitionInfos.stream().map((topicPartitionInfo) -> {
-            try {
-                Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, topicPartitionInfo.partition()), null, null);
-                return ViewUtils.mapToUIPartitionTableItem(topicPartitionInfo, partitionOffsetsInfo);
-            } catch (ExecutionException | InterruptedException e) {
-                log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);
-                throw new RuntimeException(e);
-            }
-        }).toList();
+        List<TopicPartition> topicPartitions = topicPartitionInfos.stream().map(tpi -> new TopicPartition(topicName, tpi.partition())).toList();
+
+        try {
+            return Streams.zip(
+                            topicPartitionInfos.stream().sorted(Comparator.comparingInt(TopicPartitionInfo::partition))
+                            , clusterManager.getPartitionOffsetInfo(clusterName, topicPartitions, null, null).entrySet()
+                                    .stream().sorted(Comparator.comparingInt(entry -> entry.getKey().partition())).map(Map.Entry::getValue)
+                            , ViewUtils::mapToUIPartitionTableItem)
+                    .toList();
+        } catch (ExecutionException | InterruptedException e) {
+            log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);
+            throw new RuntimeException(e);
+        }
+//        return topicPartitionInfos.stream().map((topicPartitionInfo) -> {
+//            try {
+//                Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, topicPartitionInfo.partition()), null, null);
+//                return ViewUtils.mapToUIPartitionTableItem(topicPartitionInfo, partitionOffsetsInfo);
+//            } catch (ExecutionException | InterruptedException e) {
+//                log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);
+//                throw new RuntimeException(e);
+//            }
+//        }).toList();
     }
 }

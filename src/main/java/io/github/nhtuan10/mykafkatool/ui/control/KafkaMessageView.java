@@ -445,7 +445,7 @@ public class KafkaMessageView extends SplitPane {
             try {
                 Long startTimestamp = getTimestamp(this.startTimestampPicker);
                 Long endTimestamp = this.endTimestampPicker.isDisabled() ? null : getTimestamp(this.endTimestampPicker);
-                if (startTimestamp != null && endTimestamp != null && endTimestamp >= startTimestamp) {
+                if (startTimestamp != null && endTimestamp != null && endTimestamp <= startTimestamp) {
                     return 0L;
                 }
 

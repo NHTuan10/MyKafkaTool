@@ -123,35 +123,69 @@ public class ClusterManager {
     }
 
     public Pair<Long, Long> getPartitionOffsetInfo(String clusterName, TopicPartition topicPartition, Long startTimestamp, Long endTimestamp) throws ExecutionException, InterruptedException {
-        Admin adminClient = adminMap.get(clusterName);
-        OffsetSpec startOffsetSpec = OffsetSpec.earliest();
-        if (startTimestamp != null) {
-            startOffsetSpec = OffsetSpec.forTimestamp(startTimestamp);
-        }
-        OffsetSpec endOffsetSpec = OffsetSpec.latest();
-        if (endTimestamp != null) {
-            endOffsetSpec = OffsetSpec.forTimestamp(endTimestamp);
-        }
-        ListOffsetsResult.ListOffsetsResultInfo earliestOffsetsResultInfo = adminClient.listOffsets(Map.of(topicPartition, startOffsetSpec))
-                .partitionResult(topicPartition).get();
-        ListOffsetsResult.ListOffsetsResultInfo latestOffsetsResultInfo = adminClient.listOffsets(Map.of(topicPartition, endOffsetSpec))
-                .partitionResult(topicPartition).get();
-        if (latestOffsetsResultInfo.offset() < 0) { // if it return -1 , mean endTimestamp > the last offset timestamp
-            latestOffsetsResultInfo = adminClient.listOffsets(Map.of(topicPartition, OffsetSpec.latest()))
-                    .partitionResult(topicPartition).get();
-        }
-        return Pair.of(earliestOffsetsResultInfo.offset(), latestOffsetsResultInfo.offset());
+        return getPartitionOffsetInfo(clusterName, List.of(topicPartition), startTimestamp, endTimestamp).get(topicPartition);
     }
 
+    public Map<TopicPartition, Pair<Long, Long>> getPartitionOffsetInfo(String clusterName, List<TopicPartition> topicPartitions, Long startTimestamp, Long endTimestamp) throws ExecutionException, InterruptedException {
+        Admin adminClient = adminMap.get(clusterName);
+        OffsetSpec startOffsetSpec = startTimestamp != null ? OffsetSpec.forTimestamp(startTimestamp) : OffsetSpec.earliest();
+        OffsetSpec endOffsetSpec = endTimestamp != null ? OffsetSpec.forTimestamp(endTimestamp) : OffsetSpec.latest();
+
+        Map<TopicPartition, Long> earliestOffsetsResultMap = getPartitionOffsetsBySpec(topicPartitions, adminClient, startOffsetSpec);
+
+        Map<TopicPartition, Long> latestOffsetsResultMap = getPartitionOffsetsBySpec(topicPartitions, adminClient, endOffsetSpec);
+
+        List<TopicPartition> negativeOffsetlist = latestOffsetsResultMap.entrySet().stream()
+                .filter(entry -> entry.getValue() < 0)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        if (!negativeOffsetlist.isEmpty()) { // if it return -1 , mean endTimestamp > the last offset timestamp
+            latestOffsetsResultMap.putAll(getPartitionOffsetsBySpec(negativeOffsetlist, adminClient, OffsetSpec.latest()));
+        }
+        return topicPartitions.stream().collect(Collectors.toMap(tp -> tp, tp -> Pair.of(earliestOffsetsResultMap.get(tp), latestOffsetsResultMap.get(tp))));
+//        return Pair.of(earliestOffsetsResultMap.offset(), latestOffsetsResultMap.offset());
+    }
+
+    private Map<TopicPartition, Long> getPartitionOffsetsBySpec(List<TopicPartition> topicPartitions, Admin adminClient, OffsetSpec startOffsetSpec) throws InterruptedException, ExecutionException {
+        Map<TopicPartition, Long> earliestOffsetsResultInfo = adminClient
+                .listOffsets(topicPartitions.stream().collect(Collectors.toMap(tp -> tp, tp -> startOffsetSpec)))
+                .all().get().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().offset()));
+        return earliestOffsetsResultInfo;
+    }
+
+//    public Pair<Long, Long> getPartitionOffsetInfo(String clusterName, TopicPartition topicPartition, Long startTimestamp, Long endTimestamp) throws ExecutionException, InterruptedException {
+//        Admin adminClient = adminMap.get(clusterName);
+//        OffsetSpec startOffsetSpec = OffsetSpec.earliest();
+//        if (startTimestamp != null) {
+//            startOffsetSpec = OffsetSpec.forTimestamp(startTimestamp);
+//        }
+//        OffsetSpec endOffsetSpec = OffsetSpec.latest();
+//        if (endTimestamp != null) {
+//            endOffsetSpec = OffsetSpec.forTimestamp(endTimestamp);
+//        }
+//        ListOffsetsResult.ListOffsetsResultInfo earliestOffsetsResultInfo = adminClient.listOffsets(Map.of(topicPartition, startOffsetSpec))
+//                .partitionResult(topicPartition).get();
+//        ListOffsetsResult.ListOffsetsResultInfo latestOffsetsResultInfo = adminClient.listOffsets(Map.of(topicPartition, endOffsetSpec))
+//                .partitionResult(topicPartition).get();
+//        if (latestOffsetsResultInfo.offset() < 0) { // if it return -1 , mean endTimestamp > the last offset timestamp
+//            latestOffsetsResultInfo = adminClient.listOffsets(Map.of(topicPartition, OffsetSpec.latest()))
+//                    .partitionResult(topicPartition).get();
+//        }
+//        return Pair.of(earliestOffsetsResultInfo.offset(), latestOffsetsResultInfo.offset());
+//    }
+
     public Map<TopicPartition, Pair<Long, Long>> getAllPartitionOffsetInfo(String clusterName, String topicName, Long startTimestamp, Long endTimestamp) throws ExecutionException, InterruptedException, TimeoutException {
-        List<TopicPartitionInfo> partitionInfoList = getTopicPartitions(clusterName, topicName);
-        return partitionInfoList.stream().collect(Collectors.toMap(p -> new TopicPartition(topicName, p.partition()), p -> {
-            try {
-                return getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, p.partition()), startTimestamp, endTimestamp);
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }));
+        List<TopicPartition> topicPartitions = getTopicPartitions(clusterName, topicName).stream().map(tpi -> new TopicPartition(topicName, tpi.partition())).toList();
+        return getPartitionOffsetInfo(clusterName, topicPartitions, startTimestamp, endTimestamp);
+//        return partitionInfoList.stream().collect(Collectors.toMap(p -> new TopicPartition(topicName, p.partition()), p -> {
+//            try {
+//                return getPartitionOffsetInfo(clusterName, new TopicPartition(topicName, p.partition()), startTimestamp, endTimestamp);
+//            } catch (ExecutionException | InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }));
     }
 
     public Collection<ConsumerGroupListing> getConsumerGroupList(String clusterName) throws ExecutionException, InterruptedException {
@@ -187,25 +221,29 @@ public class ClusterManager {
                 Map<String, ConsumerGroupDescription> cgDetails = cgDetailsFuture.get();
                 if (cgDetails != null && !cgDetails.isEmpty()) {
                     ConsumerGroupDescription consumerGroupDescription = cgDetails.get(consumerGroupId);
-                    return consumerGroupDescription.members().stream().flatMap(member -> member.assignment().topicPartitions().stream().map(tp -> {
-                        OffsetAndMetadata metadata = cgOffsets.get(tp);
-                        Pair<Long, Long> startAndEndOffset;
+                    return consumerGroupDescription.members().stream().flatMap(member -> {
                         try {
-                            startAndEndOffset = getPartitionOffsetInfo(clusterName, tp, null, null);
+                            List<TopicPartition> partitions = member.assignment().topicPartitions().stream().toList();
+                            Map<TopicPartition, Pair<Long, Long>> startAndEndOffsets = getPartitionOffsetInfo(clusterName, partitions, null, null);
+                            return partitions.stream().map((tp) -> {
+                                OffsetAndMetadata metadata = cgOffsets.get(tp);
+                                String offset = null;
+                                String lag = null;
+                                String leaderEpoch = null;
+                                Pair<Long, Long> startEndOffsetPair = startAndEndOffsets.get(tp);
+                                Long endOffset = startEndOffsetPair.getRight();
+                                if (metadata != null) {
+                                    offset = String.valueOf(metadata.offset());
+                                    lag = String.valueOf(endOffset - metadata.offset());
+                                    leaderEpoch = metadata.leaderEpoch().orElse(0).toString();
+                                }
+                                return new ConsumerGroupOffsetTableItem(member.consumerId(), tp.topic(), tp.partition(), startEndOffsetPair.getLeft(), endOffset, offset, lag, leaderEpoch, member.host());
+                            });
+
                         } catch (ExecutionException | InterruptedException e) {
                             throw new RuntimeException(e);
                         }
-                        String offset = null;
-                        String lag = null;
-                        String leaderEpoch = null;
-                        Long endOffset = startAndEndOffset.getRight();
-                        if (metadata != null) {
-                            offset = String.valueOf(metadata.offset());
-                            lag = String.valueOf(endOffset - metadata.offset());
-                            leaderEpoch = metadata.leaderEpoch().orElse(0).toString();
-                        }
-                        return new ConsumerGroupOffsetTableItem(member.consumerId(), tp.topic(), tp.partition(), startAndEndOffset.getLeft(), endOffset, offset, lag, leaderEpoch, member.host());
-                    })).toList();
+                    }).toList();
                 }
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);

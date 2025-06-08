@@ -10,6 +10,7 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.admin.ConfigEntry;
@@ -88,7 +89,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
 //        isBlockingUINeeded.set(isFocused);
         final String clusterName = kafkaPartition.topic().cluster().getName();
         final String topic = kafkaPartition.topic().name();
-        Callable<Void> getPartitionInfo = () -> {
+        Callable<ObservableList<UIPropertyTableItem>> getPartitionInfo = () -> {
             try {
                 Pair<Long, Long> partitionOffsetsInfo = clusterManager.getPartitionOffsetInfo(clusterName, new TopicPartition(topic, kafkaPartition.id()), null, null);
                 ObservableList<UIPropertyTableItem> list = FXCollections.observableArrayList(
@@ -99,19 +100,21 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
                 TopicPartitionInfo partitionInfo = clusterManager.getTopicPartitionInfo(clusterName, topic, kafkaPartition.id());
                 list.addAll(getPartitionInfoForUI(partitionInfo));
 
-                setItems(list);
-                return null;
+                return list;
             } catch (ExecutionException | InterruptedException e) {
                 log.error("Error when get partition info", e);
-                setItems(FXCollections.observableArrayList());
+//                setItems(FXCollections.observableArrayList());
                 throw new RuntimeException(e);
             }
         };
-        Consumer<Void> onSuccess = (val) -> {
+        Consumer<ObservableList<UIPropertyTableItem>> onSuccess = (list) -> {
+            setItems(list);
             isBlockingUINeeded.set(false);
             log.info("Successfully get topic config & partitions properties for cluster {}, topic {} and partition {}", clusterName, topic, kafkaPartition.id());
         };
         Consumer<Throwable> onFailure = (exception) -> {
+            setItems(FXCollections.emptyObservableList());
+            table.setPlaceholder(new Label("Error when get partition info: " + exception.getCause().getMessage()));
             isBlockingUINeeded.set(false);
             log.error("Error when getting topic config & partitions properties for cluster {} and topic {} and partition {}", clusterName, topic, kafkaPartition.id(), exception);
         };
@@ -123,25 +126,27 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
 //        isBlockingUINeeded.set(isFocused);
         String clusterName = kafkaTopic.cluster().getName();
         String topicName = kafkaTopic.name();
-        Callable<Void> getTopicAndPartitionProperties = () -> {
+        Callable<ObservableList<UIPropertyTableItem>> getTopicAndPartitionProperties = () -> {
             try {
                 // topic config table
-                ObservableList<UIPropertyTableItem> config = FXCollections.observableArrayList();
+                ObservableList<UIPropertyTableItem> configs = FXCollections.observableArrayList();
                 Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
-                configEntries.forEach(entry -> config.add(new UIPropertyTableItem(entry.name(), entry.value())));
-                setItems(config);
+                configEntries.forEach(entry -> configs.add(new UIPropertyTableItem(entry.name(), entry.value())));
+                return configs;
             } catch (ExecutionException | InterruptedException | TimeoutException e) {
                 log.error("Error when get topic config properties", e);
-                setItems(FXCollections.observableArrayList());
+//                setItems(FXCollections.observableArrayList());
                 throw new RuntimeException(e);
             }
-            return null;
         };
-        Consumer<Void> onSuccess = (val) -> {
+        Consumer<ObservableList<UIPropertyTableItem>> onSuccess = (list) -> {
+            setItems(list);
             isBlockingUINeeded.set(false);
             log.info("Successfully get topic config & partitions properties for cluster {} and topic {}", clusterName, topicName);
         };
         Consumer<Throwable> onFailure = (exception) -> {
+            setItems(FXCollections.emptyObservableList());
+            table.setPlaceholder(new Label("Error when get topic config properties: " + exception.getCause().getMessage()));
             isBlockingUINeeded.set(false);
             log.error("Error when getting topic config & partitions properties for cluster {} and topic {}", clusterName, topicName, exception);
         };
