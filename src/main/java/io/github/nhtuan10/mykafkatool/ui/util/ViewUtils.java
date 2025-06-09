@@ -6,7 +6,7 @@ import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.controller.ModalController;
-import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionsTableItem;
+import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionsTableItem;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;

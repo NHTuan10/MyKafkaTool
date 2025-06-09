@@ -1,7 +1,8 @@
-package io.github.nhtuan10.mykafkatool.ui.control;
+package io.github.nhtuan10.mykafkatool.ui.messageview;
 
-import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
-import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
+import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
+import io.github.nhtuan10.mykafkatool.ui.topic.UIPropertyTableItem;
+import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
 import javafx.fxml.FXML;
 import lombok.extern.slf4j.Slf4j;
 

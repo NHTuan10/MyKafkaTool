@@ -1,8 +1,7 @@
-package io.github.nhtuan10.mykafkatool.ui.control;
+package io.github.nhtuan10.mykafkatool.ui.cg;
 
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
-import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupOffsetTableItem;
-import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
+import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;

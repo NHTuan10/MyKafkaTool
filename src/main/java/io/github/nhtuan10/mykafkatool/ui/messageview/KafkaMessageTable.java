@@ -1,13 +1,13 @@
-package io.github.nhtuan10.mykafkatool.ui.control;
+package io.github.nhtuan10.mykafkatool.ui.messageview;
 
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
-import io.github.nhtuan10.mykafkatool.ui.KafkaMessageTableItem;
-import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
-import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
+import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
+import io.github.nhtuan10.mykafkatool.ui.topic.UIPropertyTableItem;
+import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;

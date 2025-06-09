@@ -2,11 +2,11 @@ package io.github.nhtuan10.mykafkatool;
 
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.Theme;
-import io.github.nhtuan10.mykafkatool.manager.UserPreferenceManager;
-import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.controller.MainController;
+import io.github.nhtuan10.mykafkatool.userpreference.UserPreference;
+import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

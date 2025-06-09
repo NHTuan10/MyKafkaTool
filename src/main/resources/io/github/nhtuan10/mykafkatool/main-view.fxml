@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import io.github.nhtuan10.mykafkatool.ui.control.ConsumerGroupTable?>
-<?import io.github.nhtuan10.mykafkatool.ui.control.KafkaMessageView?>
-<?import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl?>
-<?import io.github.nhtuan10.mykafkatool.ui.control.TopicAndPartitionPropertyView?>
+<?import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageView?>
+<?import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryControl?>
+<?import io.github.nhtuan10.mykafkatool.ui.topic.TopicAndPartitionPropertyView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane prefHeight="661.0" prefWidth="1418.0" xmlns="http://javafx.com/javafx/23.0.1"

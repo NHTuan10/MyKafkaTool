@@ -1,6 +1,4 @@
-package io.github.nhtuan10.mykafkatool.repo;
-
-import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;
+package io.github.nhtuan10.mykafkatool.userpreference;
 
 import java.io.IOException;
 

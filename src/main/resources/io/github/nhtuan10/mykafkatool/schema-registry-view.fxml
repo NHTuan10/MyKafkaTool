@@ -2,7 +2,7 @@
 
 <!-- fx:controller="control.ui.io.github.nhtuan10.mykafkatool.EditableTableControl" -->
 
-<?import io.github.nhtuan10.mykafkatool.ui.control.SchemaEditableTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaEditableTable?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.*?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>

@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui;
+package io.github.nhtuan10.mykafkatool.ui.util;
 
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -6,9 +6,10 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import io.github.nhtuan10.mykafkatool.annotation.FilterableTableItemField;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
+import io.github.nhtuan10.mykafkatool.ui.StageHolder;
+import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;

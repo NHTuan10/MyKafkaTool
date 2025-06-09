@@ -3,7 +3,6 @@ package io.github.nhtuan10.mykafkatool.ui.topic;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;

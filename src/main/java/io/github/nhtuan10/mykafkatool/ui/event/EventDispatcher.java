@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.event;
 
-import io.github.nhtuan10.mykafkatool.ui.control.SchemaRegistryControl;
+import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryControl;
 import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.Flow;

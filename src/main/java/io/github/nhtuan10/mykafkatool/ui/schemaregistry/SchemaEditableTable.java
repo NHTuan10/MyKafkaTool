@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui.control;
+package io.github.nhtuan10.mykafkatool.ui.schemaregistry;
 
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
@@ -6,7 +6,7 @@ import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
-import io.github.nhtuan10.mykafkatool.ui.SchemaTableItem;
+import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -88,6 +88,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
             Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName()))
                     .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setRegexFilter(newValue));
         });
+        // TODO: functionality to add a new schema
     }
 
 //    @Override

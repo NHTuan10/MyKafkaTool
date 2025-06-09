@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui.control;
+package io.github.nhtuan10.mykafkatool.ui.schemaregistry;
 
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;

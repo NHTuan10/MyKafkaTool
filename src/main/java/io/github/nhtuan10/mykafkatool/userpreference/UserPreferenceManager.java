@@ -1,9 +1,7 @@
-package io.github.nhtuan10.mykafkatool.manager;
+package io.github.nhtuan10.mykafkatool.userpreference;
 
 import io.github.nhtuan10.mykafkatool.constant.Theme;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
-import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;
-import io.github.nhtuan10.mykafkatool.repo.UserPreferenceRepoImpl;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import io.github.nhtuan10.mykafkatool.ui.control.KafkaMessageHeaderTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>

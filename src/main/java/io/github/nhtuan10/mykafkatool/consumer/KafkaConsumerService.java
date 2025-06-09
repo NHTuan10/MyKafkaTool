@@ -8,7 +8,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
-import io.github.nhtuan10.mykafkatool.ui.KafkaMessageTableItem;
+import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;

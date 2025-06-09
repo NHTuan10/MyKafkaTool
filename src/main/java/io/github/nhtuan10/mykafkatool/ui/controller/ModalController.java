@@ -1,7 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
-import io.github.nhtuan10.mykafkatool.ui.control.KafkaMessageHeaderTable;
+import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;

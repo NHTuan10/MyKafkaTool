@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui.partition;
+package io.github.nhtuan10.mykafkatool.ui.topic;
 
 import javafx.scene.control.TreeItem;
 

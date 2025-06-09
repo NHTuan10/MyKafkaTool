@@ -1,7 +1,6 @@
-package io.github.nhtuan10.mykafkatool.repo;
+package io.github.nhtuan10.mykafkatool.userpreference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.nhtuan10.mykafkatool.model.preference.UserPreference;
 import io.github.nhtuan10.mykafkatool.ui.util.Utils;
 
 import java.io.IOException;

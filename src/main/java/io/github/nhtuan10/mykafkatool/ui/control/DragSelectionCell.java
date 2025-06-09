@@ -1,7 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
-import io.github.nhtuan10.mykafkatool.ui.TableViewConfigurer;
+import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.Tooltip;

@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui;
+package io.github.nhtuan10.mykafkatool.ui.messageview;
 
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import javafx.beans.property.SimpleIntegerProperty;

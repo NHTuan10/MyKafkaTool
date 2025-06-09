@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui.control;
+package io.github.nhtuan10.mykafkatool.ui.topic;
 
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
@@ -38,7 +38,7 @@ public class TopicAndPartitionPropertyView extends AnchorPane {
     private TopicAndPartitionPropertyTable topicAndPartitionPropertyTable;
 
     @FXML
-    private TopicPartitionsTable kafkaPartitionsTable;
+    private PartitionsTable kafkaPartitionsTable;
 
     @FXML
     private TitledPane partitionsTitledPane;

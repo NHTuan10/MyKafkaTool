@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui.control;
+package io.github.nhtuan10.mykafkatool.ui.messageview;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
@@ -19,12 +19,12 @@ import io.github.nhtuan10.mykafkatool.serdes.serializer.ByteArraySerializer;
 import io.github.nhtuan10.mykafkatool.serdes.serializer.SchemaRegistryAvroSerializer;
 import io.github.nhtuan10.mykafkatool.serdes.serializer.StringSerializer;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
-import io.github.nhtuan10.mykafkatool.ui.KafkaMessageTableItem;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
+import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
 import io.github.nhtuan10.mykafkatool.ui.event.*;
-import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionTreeItem;
+import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.application.Platform;

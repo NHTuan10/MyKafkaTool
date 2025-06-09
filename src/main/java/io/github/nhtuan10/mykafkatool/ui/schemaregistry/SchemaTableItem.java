@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui;
+package io.github.nhtuan10.mykafkatool.ui.schemaregistry;
 
 import io.github.nhtuan10.mykafkatool.annotation.FilterableTableItemField;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;

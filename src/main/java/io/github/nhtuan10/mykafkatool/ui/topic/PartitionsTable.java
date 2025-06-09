@@ -1,10 +1,10 @@
-package io.github.nhtuan10.mykafkatool.ui.control;
+package io.github.nhtuan10.mykafkatool.ui.topic;
 
 import com.google.common.collect.Streams;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.ui.partition.KafkaPartitionsTableItem;
+import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 @Slf4j
-public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTableItem> {
+public class PartitionsTable extends EditableTableControl<KafkaPartitionsTableItem> {
     private KafkaTopic kafkaTopic;
     private KafkaPartition kafkaPartition;
     private final ClusterManager clusterManager;
@@ -33,7 +33,7 @@ public class TopicPartitionsTable extends EditableTableControl<KafkaPartitionsTa
     private ReadOnlyBooleanProperty isShownOnWindow;
     private StringProperty totalMessages;
 
-    public TopicPartitionsTable() {
+    public PartitionsTable() {
         super(false);
         clusterManager = ClusterManager.getInstance();
     }

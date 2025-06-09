@@ -1,9 +1,9 @@
-package io.github.nhtuan10.mykafkatool.ui.control;
+package io.github.nhtuan10.mykafkatool.ui.topic;
 
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.ui.UIPropertyTableItem;
+import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;

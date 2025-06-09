@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import io.github.nhtuan10.mykafkatool.ui.control.TopicAndPartitionPropertyTable?>
-<?import io.github.nhtuan10.mykafkatool.ui.control.TopicPartitionsTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.topic.PartitionsTable?>
+<?import io.github.nhtuan10.mykafkatool.ui.topic.TopicAndPartitionPropertyTable?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -53,7 +53,9 @@
                                                                   </Label>
                                                                </children>
                                                             </HBox>
-                                                            <TopicPartitionsTable fx:id="kafkaPartitionsTable" minHeight="-Infinity" minWidth="-Infinity" prefHeight="210.0" prefWidth="795.0">
+                                                            <PartitionsTable fx:id="kafkaPartitionsTable"
+                                                                             minHeight="-Infinity" minWidth="-Infinity"
+                                                                             prefHeight="210.0" prefWidth="795.0">
 <!--                                                               <columns> -->
 <!--                                                                   <TableColumn prefWidth="75.0" text="Parttion" /> -->
 <!--                                                                 <TableColumn prefWidth="98.0" text="Start Offset" /> -->
@@ -63,7 +65,7 @@
 <!--                                                                   <TableColumn prefWidth="204.0" text="Replica [In-Sync]" /> -->
 <!--                                                                   <TableColumn prefWidth="217.0" text="Replica [Not-In-Sync]" /> -->
 <!--                                                               </columns> -->
-                                                            </TopicPartitionsTable>
+                                                            </PartitionsTable>
                                                         </items>
                                                       </SplitPane>
                                                    </children>

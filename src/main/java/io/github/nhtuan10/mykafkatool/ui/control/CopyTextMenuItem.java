@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui;
+package io.github.nhtuan10.mykafkatool.ui.control;
 
 import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
