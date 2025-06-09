@@ -13,6 +13,7 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -38,7 +39,7 @@ import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_T
 @Slf4j
 public class KafkaConsumerService {
     private final SerDesHelper serDesHelper;
-
+    private final ClusterManager clusterManager = ClusterManager.getInstance();
     private List<Consumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
     public KafkaConsumerService(SerDesHelper serDesHelper) {
@@ -79,13 +80,13 @@ public class KafkaConsumerService {
     }
 
     private static void seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, Long timestamp) {
-        var offsetsForTime = getPartitionOffsetForTimestamp(consumer, topicPartitions, timestamp);
-        offsetsForTime.forEach((tp, offset) -> {
-            if (timestamp != null) {
-                consumer.seek(tp, offset);
-            } else
-                consumer.seekToEnd(List.of(tp));
-        });
+        if (timestamp != null) {
+            var offsetsForTime = getPartitionOffsetForTimestamp(consumer, topicPartitions, timestamp);
+            offsetsForTime.forEach((tp, offset) -> consumer.seek(tp, offset));
+        } else {
+            topicPartitions.forEach(tp -> consumer.seekToBeginning(List.of(tp)));
+        }
+
 //        if (timestamp == null) {
 //            consumer.seekToBeginning(topicPartitions);
 //        }
@@ -96,7 +97,7 @@ public class KafkaConsumerService {
 //        }
     }
 
-    private static Map<TopicPartition, Long> getPartitionOffsetForTimestamp(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, Long timestamp) {
+    private static Map<TopicPartition, Long> getPartitionOffsetForTimestamp(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, @NonNull long timestamp) {
         Map<TopicPartition, Long> endOffsets = consumer.endOffsets(topicPartitions);
         Map<TopicPartition, Long> partitionTimestampMap = topicPartitions.stream()
                 .collect(Collectors.toMap(p -> p, p -> timestamp));

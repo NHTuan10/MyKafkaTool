@@ -388,7 +388,7 @@ public class KafkaMessageView extends SplitPane {
     }
 
     private Long getTimestamp(DateTimePicker dateTimePicker) {
-        return dateTimePicker.getValue() != null ? ZonedDateTime.of(dateTimePicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
+        return dateTimePicker.getDateTimeValue() != null ? ZonedDateTime.of(dateTimePicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
 
     }
 

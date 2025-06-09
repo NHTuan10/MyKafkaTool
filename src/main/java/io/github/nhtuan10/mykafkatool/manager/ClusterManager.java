@@ -30,12 +30,12 @@ public class ClusterManager {
     private final Map<String, Admin> adminMap;
     private final Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap;
 
-    private static class InstanceHolder {
+    //    private static class InstanceHolder {
         private static final ClusterManager INSTANCE = new ClusterManager(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
-    }
+//    }
 
     public static ClusterManager getInstance() {
-        return InstanceHolder.INSTANCE;
+        return INSTANCE;
     }
 
     private ClusterManager(Map<String, Admin> adminMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
