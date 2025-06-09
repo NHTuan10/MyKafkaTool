@@ -12,7 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -56,7 +56,7 @@ public class KafkaTopicListTreeItem<T> extends TreeItem<T> {
         if (value instanceof KafkaTopicListTreeItemValue conn) {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             try {
-                Set<String> topics = ClusterManager.getInstance().getAllTopics(conn.getCluster().getName());
+                List<String> topics = ClusterManager.getInstance().getAllTopics(conn.getCluster().getName()).stream().sorted().toList();
                 topics.forEach(topicName -> {
                     KafkaTopicTreeItem<T> topic = new KafkaTopicTreeItem<>((T) new KafkaTopic(topicName, conn.getCluster()));
                     children.add(topic);

@@ -11,7 +11,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.ConsumerGroupListing;
 
-import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -55,7 +56,8 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             String clusterName = consumerGroupListTreeItemValue.getCluster().getName();
             try {
-                Collection<ConsumerGroupListing> consumerGroupListings = ClusterManager.getInstance().getConsumerGroupList(clusterName);
+                List<ConsumerGroupListing> consumerGroupListings = ClusterManager.getInstance().getConsumerGroupList(clusterName).stream()
+                        .sorted(Comparator.comparing(ConsumerGroupListing::groupId)).toList();
                 consumerGroupListings.forEach(consumerGroupListing -> {
                     String consumerGroupId = consumerGroupListing.groupId();
                     StringBuilder displayValSB = new StringBuilder(consumerGroupId);
