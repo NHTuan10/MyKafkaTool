@@ -37,7 +37,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
 
     public TopicAndPartitionPropertyTable() {
         super(false);
-        clusterManager = ClusterManager.getInstance();
+        clusterManager = ClusterManager.getInstance(); //TODO: use Dagger
     }
 
     @FXML

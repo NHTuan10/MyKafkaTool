@@ -55,6 +55,7 @@ public class KafkaTopicTreeItem<T> extends TreeItem<T> {
         if (treeItem.getValue() instanceof KafkaTopic topic) {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             try {
+                //TODO: use Dagger
                 List<TopicPartitionInfo> partitionInfoList = ClusterManager.getInstance().getTopicPartitions(topic.cluster().getName(), topic.name());
 
                 partitionInfoList.forEach(partitionInfo -> {

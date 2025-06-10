@@ -10,6 +10,7 @@ import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable;
 import io.github.nhtuan10.mykafkatool.ui.topic.UIPropertyTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -32,7 +33,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AddOrViewMessageModalController extends ModalController {
 
-    private SerDesHelper serDesHelper;
+    private final SerDesHelper serDesHelper;
+    private final JsonHighlighter jsonHighlighter;
     private String valueContentType;
 
     @FXML
@@ -61,7 +63,11 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private KafkaMessageHeaderTable headerTable;
 
-    private final JsonHighlighter jsonHighlighter = new JsonHighlighter();
+    @Inject
+    public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter) {
+        this.serDesHelper = serDesHelper;
+        this.jsonHighlighter = jsonHighlighter;
+    }
 
     @FXML
     void initialize() {

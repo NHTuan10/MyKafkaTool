@@ -2,14 +2,15 @@ package io.github.nhtuan10.mykafkatool.producer;
 
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
+import io.github.nhtuan10.mykafkatool.dagger.AppScoped;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.creator.ProducerCreator;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
+import jakarta.inject.Inject;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -23,9 +24,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
+@AppScoped
 public class ProducerUtil {
     private final SerDesHelper serDesHelper;
+
+    @Inject
+    public ProducerUtil(SerDesHelper serDesHelper) {
+        this.serDesHelper = serDesHelper;
+    }
 
     public void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, KafkaMessage kafkaMessage)
             throws Exception {
@@ -33,7 +39,7 @@ public class ProducerUtil {
         KafkaCluster cluster = kafkaTopic.cluster();
 
         ProducerCreator.ProducerCreatorConfig producerConfig = createProducerConfig(cluster, kafkaMessage);
-        KafkaProducer producer = ClusterManager.getInstance().getProducer(producerConfig);
+        KafkaProducer producer = ClusterManager.getInstance().getProducer(producerConfig); //TODO: use Dagger
         producer.flush();
 
         ProducerRecord<String, Object> producerRecord = createProducerRecord(kafkaTopic, partition, kafkaMessage);

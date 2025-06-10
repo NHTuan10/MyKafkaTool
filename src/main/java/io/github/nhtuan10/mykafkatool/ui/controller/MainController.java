@@ -18,6 +18,7 @@ import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.TopicAndPartitionPropertyView;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
+import jakarta.inject.Inject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -32,18 +33,17 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.SubmissionPublisher;
 
 // TODO: refactor this class
 
 @Slf4j
 public class MainController {
-    public static final int SUBSCRIBER_MAX_BUFFER_CAPACITY = 1000;
+    //    public static final int SUBSCRIBER_MAX_BUFFER_CAPACITY = 1000;
     private final ClusterManager clusterManager;
     private KafkaClusterTree kafkaClusterTree;
     private final EventDispatcher eventDispatcher;
-
     private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
+    private Set<Tab> allTabs;
 
     @FXML
     private TreeView clusterTree;
@@ -80,7 +80,6 @@ public class MainController {
     @FXML
     private MenuBar menuBar;
 
-    private Set<Tab> allTabs;
 
     public void setStage(Stage stage) {
         this.kafkaClusterTree.setStage(stage);
@@ -88,10 +87,13 @@ public class MainController {
         this.topicAndPartitionPropertyView.setStage(stage);
     }
 
-    public MainController() {
-        this.clusterManager = ClusterManager.getInstance();
-        this.eventDispatcher = new EventDispatcher(new SubmissionPublisher<>()
-                , new SubmissionPublisher<>(), new SubmissionPublisher<>());
+    @Inject
+    public MainController(ClusterManager clusterManager, EventDispatcher eventDispatcher) {
+//        this.clusterManager = ClusterManager.getInstance();
+        this.clusterManager = clusterManager;
+        this.eventDispatcher = eventDispatcher;
+//        this.eventDispatcher = new EventDispatcher(new SubmissionPublisher<>()
+//                , new SubmissionPublisher<>(), new SubmissionPublisher<>());
     }
 
     @FXML

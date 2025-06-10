@@ -35,7 +35,7 @@ public class PartitionsTable extends EditableTableControl<KafkaPartitionsTableIt
 
     public PartitionsTable() {
         super(false);
-        clusterManager = ClusterManager.getInstance();
+        clusterManager = ClusterManager.getInstance(); //TODO: use Dagger
     }
 
     public void setProperties(BooleanProperty isBlockingAppUINeeded, ReadOnlyBooleanProperty isShownOnWindow) {

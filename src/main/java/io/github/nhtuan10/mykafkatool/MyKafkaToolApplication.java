@@ -2,6 +2,8 @@ package io.github.nhtuan10.mykafkatool;
 
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.Theme;
+import io.github.nhtuan10.mykafkatool.dagger.AppComponent;
+import io.github.nhtuan10.mykafkatool.dagger.DaggerAppComponent;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.controller.MainController;
@@ -20,11 +22,18 @@ import java.text.MessageFormat;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
 
 public class MyKafkaToolApplication extends javafx.application.Application {
+//    private final DaggerContext context = new DaggerContext(this, () -> List.of(new DaggerModule()));
+//    @Inject
+//    FXMLLoader fxmlLoader;
 
     @Override
     public void start(Stage stage) throws IOException {
+//        context.init();
         Thread.setDefaultUncaughtExceptionHandler(UIErrorHandler::showError);
-        FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource("main-view.fxml"));
+        AppComponent appComponent = DaggerAppComponent.create();
+        FXMLLoader fxmlLoader = appComponent.loader(MyKafkaToolApplication.class.getResource("main-view.fxml"));
+//        FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource("main-view.fxml"));
+//        fxmlLoader.setLocation( MyKafkaToolApplication.class.getResource("main-view.fxml"));
         Parent parent = fxmlLoader.load();
         MainController mainController = fxmlLoader.getController();
         mainController.setStage(stage);

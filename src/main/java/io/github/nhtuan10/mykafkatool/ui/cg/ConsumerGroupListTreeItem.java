@@ -56,6 +56,7 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             String clusterName = consumerGroupListTreeItemValue.getCluster().getName();
             try {
+                //TODO: use Dagger
                 List<ConsumerGroupListing> consumerGroupListings = ClusterManager.getInstance().getConsumerGroupList(clusterName).stream()
                         .sorted(Comparator.comparing(ConsumerGroupListing::groupId)).toList();
                 consumerGroupListings.forEach(consumerGroupListing -> {

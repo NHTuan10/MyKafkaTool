@@ -109,7 +109,7 @@ public class KafkaClusterTree {
     }
 
     public static void connectToClusterAndLoadAllChildren(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
-        ClusterManager.getInstance().connectToCluster(cluster);
+        ClusterManager.getInstance().connectToCluster(cluster); //TODO: refactor duplicated code
         String clusterName = cluster.getName();
         if (isClusterNameExistedInTree(clusterTree, clusterName)) {
             throw new ClusterNameExistedException(clusterName, "Cluster already exists");

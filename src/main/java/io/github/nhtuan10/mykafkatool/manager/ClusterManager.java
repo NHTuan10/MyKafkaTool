@@ -3,12 +3,14 @@ package io.github.nhtuan10.mykafkatool.manager;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
+import io.github.nhtuan10.mykafkatool.dagger.AppScoped;
 import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.creator.ProducerCreator;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupOffsetTableItem;
+import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,17 +27,26 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Slf4j
+@AppScoped
 public class ClusterManager {
 
     private final Map<String, Admin> adminMap;
     private final Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap;
 
     //    private static class InstanceHolder {
-        private static final ClusterManager INSTANCE = new ClusterManager(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+//        private static  ClusterManager INSTANCE = new ClusterManager(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+    private static ClusterManager INSTANCE;
 //    }
 
     public static ClusterManager getInstance() {
+//        return DaggerAppComponent.create().clusterManager();
         return INSTANCE;
+    }
+
+    @Inject
+    public ClusterManager() {
+        this(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+        INSTANCE = this;
     }
 
     private ClusterManager(Map<String, Admin> adminMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {

@@ -7,6 +7,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import jakarta.inject.Inject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -41,9 +42,11 @@ public class AddConnectionModalController extends ModalController {
     @FXML
     private ComboBox<AuthProvider> securityTypeComboxBox;
 
-    public AddConnectionModalController() {
-        objectProperty = new SimpleObjectProperty<>();
-        jsonHighlighter = new JsonHighlighter();
+    @Inject
+    public AddConnectionModalController(JsonHighlighter jsonHighlighter) {
+//        this.jsonHighlighter = new JsonHighlighter();
+        this.objectProperty = new SimpleObjectProperty<>();
+        this.jsonHighlighter = jsonHighlighter;
     }
 
     @FXML

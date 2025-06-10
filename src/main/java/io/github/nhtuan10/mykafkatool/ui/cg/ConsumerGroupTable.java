@@ -18,12 +18,13 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffsetTableItem> {
     private ConsumerGroupTreeItem consumerGroupTreeItem;
-    private final ClusterManager clusterManager;
+    //    @Inject
+    ClusterManager clusterManager;
     private BooleanProperty isBusy;
 
     public ConsumerGroupTable() {
         super(false);
-        clusterManager = ClusterManager.getInstance();
+        clusterManager = ClusterManager.getInstance(); //TODO: use Dagger
     }
 
 //    @Override

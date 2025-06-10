@@ -56,6 +56,7 @@ public class KafkaTopicListTreeItem<T> extends TreeItem<T> {
         if (value instanceof KafkaTopicListTreeItemValue conn) {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             try {
+                //TODO: use Dagger
                 List<String> topics = ClusterManager.getInstance().getAllTopics(conn.getCluster().getName()).stream().sorted().toList();
                 topics.forEach(topicName -> {
                     KafkaTopicTreeItem<T> topic = new KafkaTopicTreeItem<>((T) new KafkaTopic(topicName, conn.getCluster()));
