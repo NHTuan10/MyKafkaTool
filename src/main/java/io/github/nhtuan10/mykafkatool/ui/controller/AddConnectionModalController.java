@@ -63,6 +63,7 @@ public class AddConnectionModalController extends ModalController {
             }
         });
         securityTypeComboxBox.getItems().addAll(AuthProviderManager.getAllAuthProviders());
+        securityTypeComboxBox.getSelectionModel().select(AuthProviderManager.getNoAuthProvider());
         securityConfigTextArea.textProperty().addListener((obs, oldText, newText) -> {
             ViewUtils.highlightJsonInCodeArea(newText, securityConfigTextArea, false, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
         });

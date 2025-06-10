@@ -156,10 +156,10 @@ public class TableViewConfigurer {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <S> void configureEditableTableCell(TableView<S> tableView, Class<S> tableItemClass) {
+    public static <S> void configureEditableTableCell(TableView<S> tableView, Class<S> tableItemClass, @NonNull StageHolder stageHolder) {
         Callback<TableColumn<S, String>,
                 TableCell<S, String>> cellFactory
-                = (TableColumn<S, String> p) -> new EditingTableCell<>();
+                = (TableColumn<S, String> p) -> new EditingTableCell<>(stageHolder);
         List<Field> fields = getTableColumnFieldsFromTableItem(tableItemClass);
         IntStream.range(0, fields.size()).forEach(i -> {
             Field field = fields.get(i);

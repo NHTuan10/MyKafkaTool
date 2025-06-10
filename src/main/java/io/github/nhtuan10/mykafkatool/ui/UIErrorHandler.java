@@ -35,7 +35,6 @@ public class UIErrorHandler {
             errorController.setErrorText(e);
             dialog.setScene(new Scene(root, 450, 600));
             dialog.show();
-            errorController.initUI();
         } catch (IOException exc) {
             log.error("Error loading error dialog", exc);
         }

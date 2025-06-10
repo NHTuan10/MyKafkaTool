@@ -79,7 +79,7 @@ public class MyKafkaToolApplication extends javafx.application.Application {
     }
 
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 
     public static String getLogsPath() {

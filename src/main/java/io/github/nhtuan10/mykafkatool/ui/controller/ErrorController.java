@@ -27,8 +27,4 @@ public class ErrorController {
     private void close() {
         errorStackTrace.getScene().getWindow().hide();
     }
-
-    public void initUI() {
-//        errorMessage.lookup(".scroll-bar:horizontal").setStyle("-fx-opacity: 0;");
-    }
 }

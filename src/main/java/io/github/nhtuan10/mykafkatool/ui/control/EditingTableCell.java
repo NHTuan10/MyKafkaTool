@@ -1,16 +1,17 @@
 package io.github.nhtuan10.mykafkatool.ui.control;
 
-import javafx.scene.control.TableCell;
+import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
-public class EditingTableCell<T> extends TableCell<T, String> {
+public class EditingTableCell<T> extends DragSelectionCell<T, String> {
 
     private TextField textField;
 
     private String oldValue;
 
-    public EditingTableCell() {
+    public EditingTableCell(StageHolder stageHolder) {
+        super(stageHolder);
     }
 
     @Override

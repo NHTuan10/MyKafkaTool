@@ -13,7 +13,7 @@ public class KafkaMessageHeaderTable extends EditableTableControl<UIPropertyTabl
         super.initialize();
         this.refreshBtn.setVisible(false);
 //        this.refreshBtn.setManaged(false);
-        TableViewConfigurer.configureEditableTableCell(table, UIPropertyTableItem.class);
+        TableViewConfigurer.configureEditableTableCell(table, UIPropertyTableItem.class, stageHolder);
         numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Headers"));
     }
 
