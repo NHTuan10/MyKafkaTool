@@ -5,6 +5,7 @@ public class Config {
     public static final String SCHEMA_PROP = "schema";
     public static final String AUTH_EXTRA_CONFIG_PROP = "authExtraConfig";
     public static final String AUTH_CONFIG_PROP = "authConfig";
+    public static final String SCHEMA_REGISTRY_URL_PROP = "schema.registry.url";
 
     private Config() {
     }

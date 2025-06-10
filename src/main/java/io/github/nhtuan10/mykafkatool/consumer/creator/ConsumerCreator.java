@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.consumer.creator;
 
+import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
@@ -42,7 +43,7 @@ public class ConsumerCreator {
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, consumerCreatorConfig.getValueDeserializer());
         String schemaRegistryUrl = cluster.getSchemaRegistryUrl();
         if (StringUtils.isNotBlank(schemaRegistryUrl)) {
-            properties.put("schema.registry.url", schemaRegistryUrl);
+            properties.put(Config.SCHEMA_REGISTRY_URL_PROP, schemaRegistryUrl);
         }
         properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, consumerCreatorConfig.maxPollRecords != null ? consumerCreatorConfig.maxPollRecords : DEFAULT_MAX_POLL_RECORDS);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
