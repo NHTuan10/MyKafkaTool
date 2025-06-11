@@ -325,7 +325,7 @@ public class KafkaClusterTree {
             KafkaCluster newConnection;
             while (true) {
                 AtomicReference<Object> modelRef = new AtomicReference<>();
-                ViewUtils.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of(), stage);
+                ViewUtils.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, Map.of(), true, true, stage);
                 newConnection = (KafkaCluster) modelRef.get();
 
                 if (newConnection != null && (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInTree(clusterTree, newConnection.getName()))) {
@@ -358,7 +358,7 @@ public class KafkaClusterTree {
                     while (true) {
                         AtomicReference<Object> modelRef = new AtomicReference<>();
                         ViewUtils.showPopUpModal("add-connection-modal.fxml", "Edit Connection", modelRef,
-                                Map.of("objectProperty", oldConnection), stage);
+                                Map.of("objectProperty", oldConnection), true, true, stage);
                         newConnection = (KafkaCluster) modelRef.get();
                         if (newConnection != null &&
                                 (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInParentTree(selectedItem, newConnection.getName()))) {

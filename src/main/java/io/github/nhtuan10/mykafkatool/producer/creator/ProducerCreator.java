@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.producer.creator;
 
+import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
@@ -28,7 +29,7 @@ public class ProducerCreator {
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, AppConstant.APP_NAME);
         String schemaRegistryUrl = cluster.getSchemaRegistryUrl();
         if (StringUtils.isNotBlank(schemaRegistryUrl)) {
-            properties.put("schema.registry.url", schemaRegistryUrl);
+            properties.put(Config.SCHEMA_REGISTRY_URL_PROP, schemaRegistryUrl);
         }
 
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, producerCreatorConfig.getKeySerializer());
