@@ -1,15 +1,17 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
-import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable;
 import io.github.nhtuan10.mykafkatool.ui.topic.UIPropertyTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -32,7 +34,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AddOrViewMessageModalController extends ModalController {
 
-    private SerDesHelper serDesHelper;
+    private final SerDesHelper serDesHelper;
+    private final JsonHighlighter jsonHighlighter;
+    private final ObjectMapper objectMapper;
+
     private String valueContentType;
 
     @FXML
@@ -61,7 +66,12 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private KafkaMessageHeaderTable headerTable;
 
-    private final JsonHighlighter jsonHighlighter = new JsonHighlighter();
+    @Inject
+    public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper) {
+        this.serDesHelper = serDesHelper;
+        this.jsonHighlighter = jsonHighlighter;
+        this.objectMapper = objectMapper;
+    }
 
     @FXML
     void initialize() {
@@ -161,7 +171,7 @@ public class AddOrViewMessageModalController extends ModalController {
         if (StringUtils.isNotBlank(inValue)) {
 
             if (displayType == DisplayType.JSON) {
-                ViewUtils.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+                ViewUtils.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, objectMapper, jsonHighlighter);
             } else if (displayType == DisplayType.TEXT) {
                 if (prettyPrint) {
                     codeArea.replaceText(inValue);

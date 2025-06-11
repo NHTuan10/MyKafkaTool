@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.manager;
 
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
 import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
@@ -9,6 +10,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.creator.ProducerCreator;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupOffsetTableItem;
+import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,23 +27,40 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Slf4j
+@AppScoped
 public class ClusterManager {
 
     private final Map<String, Admin> adminMap;
     private final Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap;
+    private final AuthProviderManager authProviderManager;
+    private final ProducerCreator producerCreator;
+    private final ConsumerCreator consumerCreator;
 
     //    private static class InstanceHolder {
-        private static final ClusterManager INSTANCE = new ClusterManager(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+//        private static  ClusterManager INSTANCE = new ClusterManager(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+    private static ClusterManager INSTANCE;
 //    }
 
     public static ClusterManager getInstance() {
+//        return DaggerAppComponent.create().clusterManager();
         return INSTANCE;
     }
 
-    private ClusterManager(Map<String, Admin> adminMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
-        this.adminMap = adminMap;
-        this.producerMap = producerMap;
+    @Inject
+    public ClusterManager(AuthProviderManager authProviderManager, ProducerCreator producerCreator, ConsumerCreator consumerCreator) {
+//        this(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+        this.adminMap = new ConcurrentHashMap<>();
+        this.producerMap = new ConcurrentHashMap<>();
+        this.authProviderManager = authProviderManager;
+        this.producerCreator = producerCreator;
+        this.consumerCreator = consumerCreator;
+        INSTANCE = this;
     }
+
+//    private ClusterManager(Map<String, Admin> adminMap, Map<ProducerCreator.ProducerCreatorConfig, KafkaProducer> producerMap) {
+//        this.adminMap = adminMap;
+//        this.producerMap = producerMap;
+//    }
 
     @SneakyThrows
     public void connectToCluster(KafkaCluster cluster) throws ClusterNameExistedException {
@@ -53,11 +72,11 @@ public class ClusterManager {
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServer());
         properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, AppConstant.DEFAULT_ADMIN_REQUEST_TIMEOUT);
         AuthConfig authConfig = cluster.getAuthConfig();
-        properties.putAll(AuthProviderManager.getKafkaAuthProperties(authConfig));
+        properties.putAll(authProviderManager.getKafkaAuthProperties(authConfig));
         Admin adminClient = Admin.create(properties);
         adminMap.put(clusterName, adminClient);
         ProducerCreator.ProducerCreatorConfig producerCreatorConfig = ProducerCreator.ProducerCreatorConfig.builder().cluster(cluster).build();
-        KafkaProducer producer = ProducerCreator.createProducer(producerCreatorConfig);
+        KafkaProducer producer = producerCreator.createProducer(producerCreatorConfig);
         producerMap.put(producerCreatorConfig, producer);
     }
 
@@ -101,14 +120,14 @@ public class ClusterManager {
     }
 
     public Consumer createConsumer(Map<String, Object> consumerProperties) {
-        return ConsumerCreator.createConsumer(consumerProperties);
+        return consumerCreator.createConsumer(consumerProperties);
     }
 
     public KafkaProducer getProducer(ProducerCreator.ProducerCreatorConfig producerCreatorConfig) {
         if (producerMap.containsKey(producerCreatorConfig)) {
             return producerMap.get(producerCreatorConfig);
         } else {
-            KafkaProducer producer = ProducerCreator.createProducer(producerCreatorConfig);
+            KafkaProducer producer = producerCreator.createProducer(producerCreatorConfig);
             producerMap.put(producerCreatorConfig, producer);
             return producer;
         }

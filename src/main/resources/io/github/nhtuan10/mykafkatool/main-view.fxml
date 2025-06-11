@@ -2,7 +2,7 @@
 
 <?import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTable?>
 <?import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageView?>
-<?import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryControl?>
+<?import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryView?>
 <?import io.github.nhtuan10.mykafkatool.ui.topic.TopicAndPartitionPropertyView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -305,11 +305,11 @@
                                                     <!--                                                        </AnchorPane>-->
                                                     <!--                                                    </items>-->
                                                     <!--                                                </SplitPane>-->
-                                                    <SchemaRegistryControl fx:id="schemaRegistryControl" visible="false"
-                                                                           AnchorPane.bottomAnchor="0.0"
-                                                                           AnchorPane.leftAnchor="0.0"
-                                                                           AnchorPane.rightAnchor="0.0"
-                                                                           AnchorPane.topAnchor="0.0"/>
+                                                    <SchemaRegistryView fx:id="schemaRegistryView" visible="false"
+                                                                        AnchorPane.bottomAnchor="0.0"
+                                                                        AnchorPane.leftAnchor="0.0"
+                                                                        AnchorPane.rightAnchor="0.0"
+                                                                        AnchorPane.topAnchor="0.0"/>
                                                     <!--                                     <SplitPane fx:id="schemaSplitPane" dividerPositions="0.4814516129032258" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
                                                     <!--                                       <items> -->
                                                     <!--                                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"> -->

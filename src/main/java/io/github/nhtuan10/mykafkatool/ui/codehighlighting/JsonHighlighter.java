@@ -3,6 +3,8 @@ package io.github.nhtuan10.mykafkatool.ui.codehighlighting;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
+import jakarta.inject.Inject;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
@@ -12,11 +14,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+@AppScoped
 public class JsonHighlighter {
 
     public static final String NORMAL_TEXT = "normal-text";
     private final JsonFactory jsonFactory;
 
+    @Inject
     public JsonHighlighter() {
         jsonFactory = new JsonFactory();
     }

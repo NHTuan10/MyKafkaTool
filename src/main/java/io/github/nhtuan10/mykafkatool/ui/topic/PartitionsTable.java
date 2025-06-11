@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.topic;
 
 import com.google.common.collect.Streams;
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
@@ -35,7 +36,7 @@ public class PartitionsTable extends EditableTableControl<KafkaPartitionsTableIt
 
     public PartitionsTable() {
         super(false);
-        clusterManager = ClusterManager.getInstance();
+        clusterManager = MyKafkaToolApplication.DAGGER_APP_COMPONENT.clusterManager();
     }
 
     public void setProperties(BooleanProperty isBlockingAppUINeeded, ReadOnlyBooleanProperty isShownOnWindow) {

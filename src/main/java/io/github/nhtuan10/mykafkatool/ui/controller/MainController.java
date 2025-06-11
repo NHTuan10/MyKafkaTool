@@ -13,17 +13,19 @@ import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageView;
-import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryControl;
+import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryView;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.TopicAndPartitionPropertyView;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
+import jakarta.inject.Inject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuBar;
 import javafx.stage.Stage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
@@ -32,18 +34,20 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.SubmissionPublisher;
 
 // TODO: refactor this class
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainController {
-    public static final int SUBSCRIBER_MAX_BUFFER_CAPACITY = 1000;
+    //    public static final int SUBSCRIBER_MAX_BUFFER_CAPACITY = 1000;
     private final ClusterManager clusterManager;
-    private KafkaClusterTree kafkaClusterTree;
     private final EventDispatcher eventDispatcher;
-
+    private final UserPreferenceManager userPreferenceManager;
+    private final SchemaRegistryManager schemaRegistryManager;
     private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
+    private KafkaClusterTree kafkaClusterTree;
+    private Set<Tab> allTabs;
 
     @FXML
     private TreeView clusterTree;
@@ -75,24 +79,27 @@ public class MainController {
     private TopicAndPartitionPropertyView topicAndPartitionPropertyView;
 
     @FXML
-    private SchemaRegistryControl schemaRegistryControl;
+    private SchemaRegistryView schemaRegistryView;
 
     @FXML
     private MenuBar menuBar;
 
-    private Set<Tab> allTabs;
 
     public void setStage(Stage stage) {
         this.kafkaClusterTree.setStage(stage);
-        this.schemaRegistryControl.setStage(stage);
+        this.schemaRegistryView.setStage(stage);
         this.topicAndPartitionPropertyView.setStage(stage);
     }
 
-    public MainController() {
-        this.clusterManager = ClusterManager.getInstance();
-        this.eventDispatcher = new EventDispatcher(new SubmissionPublisher<>()
-                , new SubmissionPublisher<>(), new SubmissionPublisher<>());
-    }
+//    @Inject
+//    public MainController(ClusterManager clusterManager, EventDispatcher eventDispatcher) {
+////        this.clusterManager = ClusterManager.getInstance();
+//        this.clusterManager = clusterManager;
+//        this.eventDispatcher = eventDispatcher;
+
+    /// /        this.eventDispatcher = new EventDispatcher(new SubmissionPublisher<>()
+    /// /                , new SubmissionPublisher<>(), new SubmissionPublisher<>());
+//    }
 
     @FXML
     public void initialize() {
@@ -103,11 +110,11 @@ public class MainController {
         this.eventDispatcher.addPartitionEventSubscriber(topicAndPartitionPropertyView.getPartitionEventSubscriber());
         this.eventDispatcher.addPartitionEventSubscriber(kafkaMessageView.getPartitionEventSubscriber());
 
-        schemaRegistryControl.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
-        this.eventDispatcher.addSchemaRegistryEventSubscriber(schemaRegistryControl.getSchemaRegistryEventSubscriber());
+        schemaRegistryView.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
+        this.eventDispatcher.addSchemaRegistryEventSubscriber(schemaRegistryView.getSchemaRegistryEventSubscriber());
 
         blockAppProgressInd.visibleProperty().bindBidirectional(isBlockingAppUINeeded);
-        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, SchemaRegistryManager.getInstance(), eventDispatcher);
+        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaRegistryManager, eventDispatcher, userPreferenceManager);
 
         allTabs = Set.of(dataTab, propertiesTab, cgOffsetsTab);
 
@@ -126,13 +133,13 @@ public class MainController {
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 // Enable the data tab and show/hide titled panes in the tab
                 setVisibleTabs(dataTab, propertiesTab);
-                schemaRegistryControl.setVisible(false);
+                schemaRegistryView.setVisible(false);
                 kafkaMessageView.setVisible(true);
                 eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 kafkaMessageView.switchTopicOrPartition((TreeItem) newValue);
                 setVisibleTabs(dataTab, propertiesTab);
-                schemaRegistryControl.setVisible(false);
+                schemaRegistryView.setVisible(false);
                 kafkaMessageView.setVisible(true);
                 KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
 //                this.topicAndPartitionPropertyView.loadPartitionConfig(partition);
@@ -142,7 +149,7 @@ public class MainController {
                 this.consumerGroupOffsetTable.loadCG(selected, this.isBlockingAppUINeeded);
             } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equals(selectedItem.getValue())) {
                 setVisibleTabs(dataTab);
-                schemaRegistryControl.setVisible(true);
+                schemaRegistryView.setVisible(true);
                 kafkaMessageView.setVisible(false);
                 KafkaCluster cluster = (KafkaCluster) selectedItem.getParent().getValue();
                 this.eventDispatcher.publishEvent(new SchemaRegistryUIEvent(cluster, UIEvent.Action.REFRESH_SCHEMA_REGISTRY));
@@ -209,7 +216,7 @@ public class MainController {
 
     @FXML
     protected void showConfigFileInFileBrowser() {
-        Desktop.getDesktop().browseFileDirectory(new File(UserPreferenceManager.getUserPrefFilePath()));
+        Desktop.getDesktop().browseFileDirectory(new File(userPreferenceManager.getUserPrefFilePath()));
     }
 
     @FXML

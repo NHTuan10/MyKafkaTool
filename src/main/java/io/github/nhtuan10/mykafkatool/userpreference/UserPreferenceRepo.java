@@ -6,4 +6,6 @@ public interface UserPreferenceRepo {
     UserPreference loadUserPreference() throws IOException;
 
     void saveUserPreference(UserPreference userPreference) throws IOException;
+
+    String getUserPrefFilePath();
 }

@@ -2,13 +2,12 @@ package io.github.nhtuan10.mykafkatool.producer.creator;
 
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.SneakyThrows;
+import jakarta.inject.Inject;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -17,9 +16,13 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
 
+@AppScoped
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ProducerCreator {
+    private final AuthProviderManager authProviderManager;
+
     @SneakyThrows
-    public static KafkaProducer createProducer(ProducerCreatorConfig producerCreatorConfig) {
+    public KafkaProducer createProducer(ProducerCreatorConfig producerCreatorConfig) {
         Properties properties = new Properties();
         KafkaCluster cluster = producerCreatorConfig.getCluster();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServer());
@@ -32,7 +35,7 @@ public class ProducerCreator {
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, producerCreatorConfig.getKeySerializer());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, producerCreatorConfig.getValueSerializer());
         AuthConfig authConfig = cluster.getAuthConfig();
-        properties.putAll(AuthProviderManager.getKafkaAuthProperties(authConfig));
+        properties.putAll(authProviderManager.getKafkaAuthProperties(authConfig));
         return new KafkaProducer<>(properties);
     }
 

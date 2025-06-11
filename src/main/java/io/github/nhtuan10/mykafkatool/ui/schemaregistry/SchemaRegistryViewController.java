@@ -1,15 +1,17 @@
 package io.github.nhtuan10.mykafkatool.ui.schemaregistry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
-import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.EventSubscriber;
 import io.github.nhtuan10.mykafkatool.ui.event.SchemaRegistryUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import jakarta.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -30,9 +32,11 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-public class SchemaRegistryControl extends SplitPane {
+public class SchemaRegistryViewController extends SplitPane {
 
     private final JsonHighlighter jsonHighlighter;
+
+    private final ObjectMapper objectMapper;
 
     @Setter
     private BooleanProperty isBlockingAppUINeeded;
@@ -49,8 +53,10 @@ public class SchemaRegistryControl extends SplitPane {
     @FXML
     private CodeArea schemaRegistryTextArea;
 
-    public SchemaRegistryControl() {
-        jsonHighlighter = new JsonHighlighter();
+    @Inject
+    public SchemaRegistryViewController(JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper) {
+        this.jsonHighlighter = jsonHighlighter;
+        this.objectMapper = objectMapper;
         schemaRegistryEventSubscriber = new SchemaRegistryEventSubscriber(this, (ex) -> UIErrorHandler.showError(Thread.currentThread(), ex)
         );
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
@@ -73,7 +79,7 @@ public class SchemaRegistryControl extends SplitPane {
     public void initialize() {
         // TODO: Multiple version for an schema, make the schema table editable
         schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtils.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+            ViewUtils.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, objectMapper, jsonHighlighter);
         });
         schemaEditableTable.addEventHandler(SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
                 (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));
@@ -122,7 +128,7 @@ public class SchemaRegistryControl extends SplitPane {
     @Slf4j
     @RequiredArgsConstructor
     public static class SchemaRegistryEventSubscriber extends EventSubscriber<SchemaRegistryUIEvent> {
-        private final SchemaRegistryControl schemaRegistryControl;
+        private final SchemaRegistryViewController schemaRegistryViewController;
         private final Consumer<Exception> onFailure;
 
         @Override
@@ -130,7 +136,7 @@ public class SchemaRegistryControl extends SplitPane {
             if (item.action() == UIEvent.Action.REFRESH_SCHEMA_REGISTRY) {
                 Platform.runLater(() -> {
                     try {
-                        schemaRegistryControl.loadAllSchema(item.cluster());
+                        schemaRegistryViewController.loadAllSchema(item.cluster());
                     } catch (ExecutionException | InterruptedException ex) {
                         onFailure.accept(ex);
                     }
@@ -149,5 +155,4 @@ public class SchemaRegistryControl extends SplitPane {
             log.info("Topic refresh subscription complete");
         }
     }
-
 }

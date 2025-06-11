@@ -9,6 +9,8 @@ import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
+import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 
@@ -20,17 +22,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class SchemaRegistryManager {
 
     public static final String DEFAULT_SCHEMA_COMPATIBILITY_LEVEL = CompatibilityLevel.BACKWARD.toString();
 
-    private static class InstanceHolder {
-        private static final SchemaRegistryManager INSTANCE = new SchemaRegistryManager();
-    }
-
-    public static SchemaRegistryManager getInstance() {
-        return SchemaRegistryManager.InstanceHolder.INSTANCE;
-    }
+//    private static class InstanceHolder {
+//        private static final SchemaRegistryManager INSTANCE = new SchemaRegistryManager();
+//    }
+//
+//    public static SchemaRegistryManager getInstance() {
+//        return SchemaRegistryManager.InstanceHolder.INSTANCE;
+//    }
 
     private final Map<String, SchemaRegistryClient> schemaRegistryClientMap = new ConcurrentHashMap<>();
 

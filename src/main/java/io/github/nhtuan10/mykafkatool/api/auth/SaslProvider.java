@@ -3,16 +3,25 @@ package io.github.nhtuan10.mykafkatool.api.auth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.nhtuan10.mykafkatool.ui.util.Utils;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
+import jakarta.inject.Inject;
 
 import java.util.Map;
 
+@AppScoped
 public class SaslProvider implements AuthProvider {
-    protected ObjectMapper objectMapper = Utils.contructObjectMapper();
+    public static final String SASL = "SASL";
+    protected final ObjectMapper objectMapper;
+
+    @Inject
+    public SaslProvider(@SharedObjectMapper ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public String getName() {
-        return "SASL";
+        return SASL;
     }
 
     @Override

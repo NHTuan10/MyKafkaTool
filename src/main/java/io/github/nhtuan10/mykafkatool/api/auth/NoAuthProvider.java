@@ -1,7 +1,11 @@
 package io.github.nhtuan10.mykafkatool.api.auth;
 
+import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
+
 import java.util.HashMap;
 
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class NoAuthProvider implements AuthProvider {
 
     @Override

@@ -1,5 +1,7 @@
 package io.github.nhtuan10.mykafkatool;
 
+import io.github.nhtuan10.mykafkatool.configuration.AppComponent;
+import io.github.nhtuan10.mykafkatool.configuration.DaggerAppComponent;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.Theme;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
@@ -20,17 +22,23 @@ import java.text.MessageFormat;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
 
 public class MyKafkaToolApplication extends javafx.application.Application {
+    public static final AppComponent DAGGER_APP_COMPONENT = DaggerAppComponent.create();
+    private static UserPreferenceManager userPreferenceManager;
 
     @Override
     public void start(Stage stage) throws IOException {
+//        context.init();
         Thread.setDefaultUncaughtExceptionHandler(UIErrorHandler::showError);
-        FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource("main-view.fxml"));
+        FXMLLoader fxmlLoader = DAGGER_APP_COMPONENT.loader(MyKafkaToolApplication.class.getResource("main-view.fxml"));
+//        FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource("main-view.fxml"));
+//        fxmlLoader.setLocation( MyKafkaToolApplication.class.getResource("main-view.fxml"));
         Parent parent = fxmlLoader.load();
         MainController mainController = fxmlLoader.getController();
         mainController.setStage(stage);
         Scene scene = new Scene(parent);
 //        URL cssResource = MyKafkaToolApplication.class.getResource(UIStyleConstant.APP_CSS_FILE);
 //        scene.getStylesheets().add(cssResource.toExternalForm());
+        userPreferenceManager = DAGGER_APP_COMPONENT.userPreferenceManager();
         applyThemeFromCurrentUserPreference(scene);
         stage.setTitle(AppConstant.APP_NAME);
         stage.setScene(scene);
@@ -48,21 +56,21 @@ public class MyKafkaToolApplication extends javafx.application.Application {
             scene.getStylesheets().add(cssResource.toExternalForm());
         });
         try {
-            UserPreferenceManager.changeUserPreferenceTheme(theme);
+            userPreferenceManager.changeUserPreferenceTheme(theme);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void applyThemeFromCurrentUserPreference(Scene scene) {
-        UserPreference userPreference = UserPreferenceManager.loadUserPreference();
+        UserPreference userPreference = userPreferenceManager.loadUserPreference();
         Theme theme = userPreference.theme() != null ? userPreference.theme() : Theme.LIGHT;
         applyTheme(scene, theme);
     }
 
 
     public static void changeTheme(Scene scene, Theme newTheme) {
-        Theme currentTheme = UserPreferenceManager.loadUserPreference().theme();
+        Theme currentTheme = userPreferenceManager.loadUserPreference().theme();
         if (currentTheme == null) currentTheme = Theme.LIGHT;
         if (newTheme != currentTheme) {
             currentTheme.getStyleSheets().forEach(styleSheet -> {

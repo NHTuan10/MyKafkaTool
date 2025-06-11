@@ -18,12 +18,16 @@ import java.util.concurrent.TimeoutException;
 
 @Slf4j
 public class KafkaTopicListTreeItem<T> extends TreeItem<T> {
-    public KafkaTopicListTreeItem(T value) {
+    private final ClusterManager clusterManager;
+
+    public KafkaTopicListTreeItem(T value, ClusterManager clusterManager) {
         super(value);
+        this.clusterManager = clusterManager;
     }
 
-    public KafkaTopicListTreeItem(T value, Node graphic) {
+    public KafkaTopicListTreeItem(T value, Node graphic, ClusterManager clusterManager) {
         super(value, graphic);
+        this.clusterManager = clusterManager;
     }
 
     private boolean loadChildren = true;
@@ -56,9 +60,10 @@ public class KafkaTopicListTreeItem<T> extends TreeItem<T> {
         if (value instanceof KafkaTopicListTreeItemValue conn) {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             try {
-                List<String> topics = ClusterManager.getInstance().getAllTopics(conn.getCluster().getName()).stream().sorted().toList();
+                //TODO: use Dagger
+                List<String> topics = clusterManager.getAllTopics(conn.getCluster().getName()).stream().sorted().toList();
                 topics.forEach(topicName -> {
-                    KafkaTopicTreeItem<T> topic = new KafkaTopicTreeItem<>((T) new KafkaTopic(topicName, conn.getCluster()));
+                    KafkaTopicTreeItem<T> topic = new KafkaTopicTreeItem<>((T) new KafkaTopic(topicName, conn.getCluster()), clusterManager);
                     children.add(topic);
                     topic.getChildren();
                 });

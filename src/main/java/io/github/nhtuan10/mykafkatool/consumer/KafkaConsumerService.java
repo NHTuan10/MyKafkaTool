@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.consumer;
 
 import io.github.nhtuan10.mykafkatool.api.Config;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
 import io.github.nhtuan10.mykafkatool.exception.DeserializationException;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
@@ -9,11 +10,11 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
+import jakarta.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import lombok.Builder;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,13 +38,19 @@ import java.util.stream.Collectors;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
+@AppScoped
 public class KafkaConsumerService {
     private final SerDesHelper serDesHelper;
-    private final ClusterManager clusterManager = ClusterManager.getInstance();
+    private final ClusterManager clusterManager;
+    private final ConsumerCreator consumerCreator;
+
     private List<Consumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
-    public KafkaConsumerService(SerDesHelper serDesHelper) {
+    @Inject
+    public KafkaConsumerService(SerDesHelper serDesHelper, ClusterManager clusterManager, ConsumerCreator consumerCreator) {
         this.serDesHelper = serDesHelper;
+        this.clusterManager = clusterManager;
+        this.consumerCreator = consumerCreator;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             consumers.forEach(Consumer::wakeup);
         }));
@@ -57,7 +64,7 @@ public class KafkaConsumerService {
 
     public List<KafkaMessageTableItem> consumeMessages(KafkaTopic kafkaTopic, PollingOptions pollingOptions) throws ExecutionException, InterruptedException, TimeoutException {
         String topicName = kafkaTopic.name();
-        Set<TopicPartition> topicPartitions = ClusterManager.getInstance().getTopicPartitions(kafkaTopic.cluster().getName(), topicName)
+        Set<TopicPartition> topicPartitions = clusterManager.getTopicPartitions(kafkaTopic.cluster().getName(), topicName)
                 .stream().map(p -> new TopicPartition(topicName, p.partition())).collect(Collectors.toSet());
         return consumeMessagesFromPartitions(kafkaTopic, topicPartitions, pollingOptions);
     }
@@ -67,8 +74,8 @@ public class KafkaConsumerService {
                 .keyDeserializer(StringDeserializer.class)
                 .valueDeserializer(serDesHelper.getDeserializeClass(pollingOptions.valueContentType()))
                 .build();
-        Map<String, Object> consumerProps = ConsumerCreator.buildConsumerConfigs(consumerCreatorConfig);
-        Consumer consumer = ClusterManager.getInstance().createConsumer(consumerProps);
+        Map<String, Object> consumerProps = consumerCreator.buildConsumerConfigs(consumerCreatorConfig);
+        Consumer consumer = clusterManager.createConsumer(consumerProps);
         consumers.add(consumer);
         consumer.assign(topicPartitions);
         Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll = seekOffset(consumer, topicPartitions, pollingOptions);
@@ -97,7 +104,7 @@ public class KafkaConsumerService {
 //        }
     }
 
-    private static Map<TopicPartition, Long> getPartitionOffsetForTimestamp(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, @NonNull long timestamp) {
+    private static Map<TopicPartition, Long> getPartitionOffsetForTimestamp(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, long timestamp) {
         Map<TopicPartition, Long> endOffsets = consumer.endOffsets(topicPartitions);
         Map<TopicPartition, Long> partitionTimestampMap = topicPartitions.stream()
                 .collect(Collectors.toMap(p -> p, p -> timestamp));
