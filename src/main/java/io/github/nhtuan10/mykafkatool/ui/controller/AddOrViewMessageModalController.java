@@ -1,10 +1,11 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
-import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable;
@@ -35,6 +36,8 @@ public class AddOrViewMessageModalController extends ModalController {
 
     private final SerDesHelper serDesHelper;
     private final JsonHighlighter jsonHighlighter;
+    private final ObjectMapper objectMapper;
+
     private String valueContentType;
 
     @FXML
@@ -64,9 +67,10 @@ public class AddOrViewMessageModalController extends ModalController {
     private KafkaMessageHeaderTable headerTable;
 
     @Inject
-    public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter) {
+    public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper) {
         this.serDesHelper = serDesHelper;
         this.jsonHighlighter = jsonHighlighter;
+        this.objectMapper = objectMapper;
     }
 
     @FXML
@@ -167,7 +171,7 @@ public class AddOrViewMessageModalController extends ModalController {
         if (StringUtils.isNotBlank(inValue)) {
 
             if (displayType == DisplayType.JSON) {
-                ViewUtils.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+                ViewUtils.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, objectMapper, jsonHighlighter);
             } else if (displayType == DisplayType.TEXT) {
                 if (prettyPrint) {
                     codeArea.replaceText(inValue);

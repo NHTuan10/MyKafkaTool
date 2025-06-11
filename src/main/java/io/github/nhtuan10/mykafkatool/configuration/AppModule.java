@@ -1,8 +1,22 @@
-package io.github.nhtuan10.mykafkatool.dagger;
+package io.github.nhtuan10.mykafkatool.configuration;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.IntoMap;
+import dagger.multibindings.StringKey;
+import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
+import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
+import io.github.nhtuan10.mykafkatool.api.auth.SaslProvider;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
@@ -14,15 +28,13 @@ import io.github.nhtuan10.mykafkatool.serdes.serializer.SchemaRegistryAvroSerial
 import io.github.nhtuan10.mykafkatool.serdes.serializer.StringSerializer;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
+import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepo;
+import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepoImpl;
 
 import java.util.concurrent.SubmissionPublisher;
 
 @Module
 public abstract class AppModule {
-//    @Provides
-//    ClusterManager clusterManager() {
-//        return ClusterManager.getInstance();
-//    }
 
     @AppScoped
     @Provides
@@ -30,17 +42,6 @@ public abstract class AppModule {
         return new EventDispatcher(new SubmissionPublisher<>()
                 , new SubmissionPublisher<>(), new SubmissionPublisher<>());
     }
-
-//    @Provides
-//    JsonHighlighter jsonHighlighter() {
-//        return new JsonHighlighter();
-//    }
-
-//    @Provides
-//    ObjectProperty<KafkaCluster> kafkaClusterObjectProperty() {
-//        return new SimpleObjectProperty<>();
-//    }
-
 
     @AppScoped
     @Provides
@@ -68,7 +69,45 @@ public abstract class AppModule {
 
     abstract KafkaConsumerService kafkaConsumerService(KafkaConsumerService kafkaConsumerService);
 
-//    abstract KafkaMessageView kafkaMessageView(KafkaMessageView kafkaMessageView);
+    @Binds
+    abstract UserPreferenceRepo userPreferenceRepo(UserPreferenceRepoImpl userPreferenceRepo);
+
+    @AppScoped
+    @Provides
+    @SharedObjectMapper
+    static ObjectMapper sharedObjectMapper() {
+        return new ObjectMapper()
+                .findAndRegisterModules()
+                .configure(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS, false)
+                .enable(SerializationFeature.INDENT_OUTPUT);
+    }
+
+    @AppScoped
+    @Provides
+    @RichTextFxObjectMapper
+    static ObjectMapper richTextFxObjectMapper() {
+        DefaultPrettyPrinter p = new DefaultPrettyPrinter();
+        DefaultPrettyPrinter.Indenter i = new DefaultIndenter("  ", "\n");
+        p.indentArraysWith(i);
+        p.indentObjectsWith(i);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        return objectMapper.setDefaultPrettyPrinter(p);
+    }
+
+    @Binds
+    @IntoMap
+    @StringKey(AuthProvider.NO_AUTH)
+    @AppScoped
+//    @Named("noAuthProvider")
+    abstract AuthProvider noAuthProvider(NoAuthProvider provider);
+
+    @Binds
+    @IntoMap
+    @StringKey(SaslProvider.SASL)
+    @AppScoped
+//    @Named("saslProvider")
+    abstract AuthProvider saslProvider(SaslProvider controller);
 
 //    @Provides
 //    Callback<Class<?>, Object>  provideControllerFactory(Map<Class<?>, Object> controllerFactory) {

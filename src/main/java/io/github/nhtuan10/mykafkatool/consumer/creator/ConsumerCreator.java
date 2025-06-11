@@ -1,13 +1,12 @@
 package io.github.nhtuan10.mykafkatool.consumer.creator;
 
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.SneakyThrows;
+import jakarta.inject.Inject;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -21,17 +20,21 @@ import java.util.Map;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.OFFSET_RESET_EARLIER;
 
+@RequiredArgsConstructor(onConstructor_ = @Inject)
+@AppScoped
 public class ConsumerCreator {
-    public static Consumer createConsumer(ConsumerCreatorConfig consumerCreatorConfig) {
+    private final AuthProviderManager authProviderManager;
+
+    public Consumer createConsumer(ConsumerCreatorConfig consumerCreatorConfig) {
         return createConsumer(buildConsumerConfigs(consumerCreatorConfig));
     }
 
-    public static Consumer createConsumer(Map<String, Object> properties) {
+    public Consumer createConsumer(Map<String, Object> properties) {
         return new KafkaConsumer<>(properties);
     }
 
     @SneakyThrows
-    public static Map<String, Object> buildConsumerConfigs(ConsumerCreatorConfig consumerCreatorConfig) {
+    public Map<String, Object> buildConsumerConfigs(ConsumerCreatorConfig consumerCreatorConfig) {
         Map<String, Object> properties = new HashMap<>();
         KafkaCluster cluster = consumerCreatorConfig.getCluster();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServer());
@@ -48,7 +51,7 @@ public class ConsumerCreator {
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_RESET_EARLIER);
         AuthConfig authConfig = cluster.getAuthConfig();
-        properties.putAll(AuthProviderManager.getKafkaAuthProperties(authConfig));
+        properties.putAll(authProviderManager.getKafkaAuthProperties(authConfig));
         return properties;
     }
 

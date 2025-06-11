@@ -1,14 +1,15 @@
 package io.github.nhtuan10.mykafkatool.ui.messageview;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
-import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
@@ -64,6 +65,8 @@ public class KafkaMessageViewController {
     private final SerDesHelper serDesHelper;
     //    @Inject
     private final JsonHighlighter jsonHighlighter;
+
+    private final ObjectMapper objectMapper;
 
     private final StageHolder stageHolder;
 
@@ -124,7 +127,8 @@ public class KafkaMessageViewController {
     //    @Inject
 
     @Inject
-    public KafkaMessageViewController(ClusterManager clusterManager, SerDesHelper serDesHelper, ProducerUtil producerUtil, KafkaConsumerService kafkaConsumerService, JsonHighlighter jsonHighlighter) {
+    public KafkaMessageViewController(ClusterManager clusterManager, SerDesHelper serDesHelper, ProducerUtil producerUtil,
+                                      KafkaConsumerService kafkaConsumerService, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper) {
 //        clusterManager = ClusterManager.getInstance();
 //        serDesHelper = initSerDeserializer();
         this.clusterManager = clusterManager;
@@ -132,6 +136,7 @@ public class KafkaMessageViewController {
         this.producerUtil = producerUtil;
         this.kafkaConsumerService = kafkaConsumerService;
         this.jsonHighlighter = jsonHighlighter;
+        this.objectMapper = objectMapper;
         this.stageHolder = new StageHolder();
         this.topicEventSubscriber = new TopicEventSubscriber() {
             @Override
@@ -214,7 +219,7 @@ public class KafkaMessageViewController {
         });
         schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
         schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtils.highlightJsonInCodeArea(newText, schemaTextArea, false, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+            ViewUtils.highlightJsonInCodeArea(newText, schemaTextArea, false, objectMapper, jsonHighlighter);
         });
         isLiveUpdateCheckBox.setOnAction(event -> {
             if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {

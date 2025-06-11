@@ -18,12 +18,16 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 @AllArgsConstructor
 public class KafkaTopicTreeItem<T> extends TreeItem<T> {
-    public KafkaTopicTreeItem(T value) {
+    private final ClusterManager clusterManager;
+
+    public KafkaTopicTreeItem(T value, ClusterManager clusterManager) {
         super(value);
+        this.clusterManager = clusterManager;
     }
 
-    public KafkaTopicTreeItem(T value, Node graphic) {
+    public KafkaTopicTreeItem(T value, Node graphic, ClusterManager clusterManager) {
         super(value, graphic);
+        this.clusterManager = clusterManager;
     }
 
     private boolean isFirstTimeChildren = true;
@@ -56,7 +60,7 @@ public class KafkaTopicTreeItem<T> extends TreeItem<T> {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             try {
                 //TODO: use Dagger
-                List<TopicPartitionInfo> partitionInfoList = ClusterManager.getInstance().getTopicPartitions(topic.cluster().getName(), topic.name());
+                List<TopicPartitionInfo> partitionInfoList = clusterManager.getTopicPartitions(topic.cluster().getName(), topic.name());
 
                 partitionInfoList.forEach(partitionInfo -> {
                     KafkaPartition partition = new KafkaPartition(partitionInfo.partition(), topic);

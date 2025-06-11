@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.event;
 
-import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryControl;
+import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryViewController;
 import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.Flow;
@@ -23,7 +23,7 @@ public class EventDispatcher {
         subscriber.setEventDispatcher(this);
     }
 
-    public void addSchemaRegistryEventSubscriber(SchemaRegistryControl.SchemaRegistryEventSubscriber subscriber) {
+    public void addSchemaRegistryEventSubscriber(SchemaRegistryViewController.SchemaRegistryEventSubscriber subscriber) {
         schemaRegistryEventSubmissionPublisher.subscribe(subscriber);
         subscriber.setEventDispatcher(this);
     }

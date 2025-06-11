@@ -1,10 +1,11 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
-import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import jakarta.inject.Inject;
@@ -25,6 +26,10 @@ public class AddConnectionModalController extends ModalController {
 
     private final JsonHighlighter jsonHighlighter;
 
+    private final AuthProviderManager authProviderManager;
+
+    private final ObjectMapper objectMapper;
+
     @FXML
     private TextField clusterNameTextField;
     @FXML
@@ -43,10 +48,12 @@ public class AddConnectionModalController extends ModalController {
     private ComboBox<AuthProvider> securityTypeComboxBox;
 
     @Inject
-    public AddConnectionModalController(JsonHighlighter jsonHighlighter) {
+    public AddConnectionModalController(JsonHighlighter jsonHighlighter, AuthProviderManager authProviderManager, @RichTextFxObjectMapper ObjectMapper objectMapper) {
 //        this.jsonHighlighter = new JsonHighlighter();
         this.objectProperty = new SimpleObjectProperty<>();
         this.jsonHighlighter = jsonHighlighter;
+        this.authProviderManager = authProviderManager;
+        this.objectMapper = objectMapper;
     }
 
     @FXML
@@ -57,7 +64,7 @@ public class AddConnectionModalController extends ModalController {
             schemaRegistryTextField.setText(newValue.getSchemaRegistryUrl());
             isOnlySubjectLoadedCheckBox.setSelected(newValue.isOnlySubjectLoaded());
             AuthConfig authConfig = newValue.getAuthConfig();
-            AuthProvider authProvider = AuthProviderManager.getAuthProvider(authConfig.name());
+            AuthProvider authProvider = authProviderManager.getAuthProvider(authConfig.name());
             securityTypeComboxBox.getSelectionModel().select(authProvider);
             try {
                 securityConfigTextArea.replaceText(authProvider.toConfigText(authConfig));
@@ -65,10 +72,10 @@ public class AddConnectionModalController extends ModalController {
                 throw new RuntimeException(e);
             }
         });
-        securityTypeComboxBox.getItems().addAll(AuthProviderManager.getAllAuthProviders());
-        securityTypeComboxBox.getSelectionModel().select(AuthProviderManager.getNoAuthProvider());
+        securityTypeComboxBox.getItems().addAll(authProviderManager.getAllAuthProviders());
+        securityTypeComboxBox.getSelectionModel().select(authProviderManager.getNoAuthProvider());
         securityConfigTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtils.highlightJsonInCodeArea(newText, securityConfigTextArea, false, AvroUtil.OBJECT_MAPPER, jsonHighlighter);
+            ViewUtils.highlightJsonInCodeArea(newText, securityConfigTextArea, false, objectMapper, jsonHighlighter);
         });
     }
 

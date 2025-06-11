@@ -2,6 +2,7 @@ package io.github.nhtuan10.mykafkatool.producer.creator;
 
 import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
+import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import static io.github.nhtuan10.mykafkatool.constant.AppConstant.OFFSET_RESET_L
 public class ConsumerTest {
     public static void main(String[] args) {
         NoAuthProvider noAuthProvider = new NoAuthProvider();
+        AuthProviderManager authProviderManager = new AuthProviderManager(Map.of(noAuthProvider.getName(), noAuthProvider));
         KafkaCluster cluster = new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false,
                 noAuthProvider.fromConfigText(""));
         ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(cluster)
@@ -28,10 +30,13 @@ public class ConsumerTest {
                 .valueDeserializer(StringDeserializer.class)
                 .groupId("MyKafkaTool-Test-CG")
                 .build();
-        Map<String, Object> consumerProps = ConsumerCreator.buildConsumerConfigs(consumerCreatorConfig);
+        ConsumerCreator consumerCreator = new ConsumerCreator(authProviderManager);
+        Map<String, Object> consumerProps = new ConsumerCreator(authProviderManager).buildConsumerConfigs(consumerCreatorConfig);
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_RESET_LATEST);
-        Consumer<String, Object> consumer = ClusterManager.getInstance().createConsumer(consumerProps);
-        Consumer<String, Object> consumer2 = ClusterManager.getInstance().createConsumer(consumerProps);
+        ClusterManager clusterManager = new ClusterManager(authProviderManager,
+                new ProducerCreator(authProviderManager), consumerCreator);
+        Consumer<String, Object> consumer = clusterManager.createConsumer(consumerProps);
+        Consumer<String, Object> consumer2 = clusterManager.createConsumer(consumerProps);
         consumer.subscribe(List.of("perf", "test2"));
         consumer2.subscribe(List.of("perf", "test2"));
         //            consumers.clear();

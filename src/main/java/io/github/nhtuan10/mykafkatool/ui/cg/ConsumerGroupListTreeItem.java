@@ -17,12 +17,16 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
-    public ConsumerGroupListTreeItem(T value) {
+    private final ClusterManager clusterManager;
+
+    public ConsumerGroupListTreeItem(T value, ClusterManager clusterManager) {
         super(value);
+        this.clusterManager = clusterManager;
     }
 
-    public ConsumerGroupListTreeItem(T value, Node graphic) {
+    public ConsumerGroupListTreeItem(T value, Node graphic, ClusterManager clusterManager) {
         super(value, graphic);
+        this.clusterManager = clusterManager;
     }
 
     private boolean loadChildren = true;
@@ -56,8 +60,7 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             String clusterName = consumerGroupListTreeItemValue.getCluster().getName();
             try {
-                //TODO: use Dagger
-                List<ConsumerGroupListing> consumerGroupListings = ClusterManager.getInstance().getConsumerGroupList(clusterName).stream()
+                List<ConsumerGroupListing> consumerGroupListings = clusterManager.getConsumerGroupList(clusterName).stream()
                         .sorted(Comparator.comparing(ConsumerGroupListing::groupId)).toList();
                 consumerGroupListings.forEach(consumerGroupListing -> {
                     String consumerGroupId = consumerGroupListing.groupId();
@@ -67,7 +70,7 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
                     TreeItem<T> consumerGroupItem = (TreeItem<T>) new ConsumerGroupTreeItem(displayValSB.toString(), clusterName, consumerGroupId);
                     children.add(consumerGroupItem);
                 });
-                // ClusterManager.getInstance().getConsumerGroup(clusterName, consumerGroupListings.stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList()));
+                // clusterManager.getConsumerGroup(clusterName, consumerGroupListings.stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList()));
 
                 return children;
             } catch (ExecutionException | InterruptedException e) {

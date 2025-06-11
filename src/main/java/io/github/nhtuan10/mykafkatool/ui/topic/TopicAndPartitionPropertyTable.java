@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.topic;
 
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
@@ -37,7 +38,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
 
     public TopicAndPartitionPropertyTable() {
         super(false);
-        clusterManager = ClusterManager.getInstance(); //TODO: use Dagger
+        clusterManager = MyKafkaToolApplication.DAGGER_APP_COMPONENT.clusterManager();
     }
 
     @FXML

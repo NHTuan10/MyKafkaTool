@@ -1,9 +1,8 @@
 package io.github.nhtuan10.mykafkatool.ui.messageview;
 
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
-import io.github.nhtuan10.mykafkatool.dagger.AppScoped;
-import io.github.nhtuan10.mykafkatool.dagger.DaggerAppComponent;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -79,7 +78,7 @@ public class KafkaMessageView extends SplitPane {
 
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "message-view.fxml"));
-        this.controller = DaggerAppComponent.create().kafkaMessageViewController();
+        this.controller = (KafkaMessageViewController) MyKafkaToolApplication.DAGGER_APP_COMPONENT.viewControllers().get(KafkaMessageViewController.class);
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this.controller);
         try {

@@ -1,8 +1,8 @@
 package io.github.nhtuan10.mykafkatool.consumer;
 
 import io.github.nhtuan10.mykafkatool.api.Config;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
-import io.github.nhtuan10.mykafkatool.dagger.AppScoped;
 import io.github.nhtuan10.mykafkatool.exception.DeserializationException;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
@@ -42,12 +42,15 @@ import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_T
 public class KafkaConsumerService {
     private final SerDesHelper serDesHelper;
     private final ClusterManager clusterManager;
+    private final ConsumerCreator consumerCreator;
+
     private List<Consumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
     @Inject
-    public KafkaConsumerService(SerDesHelper serDesHelper, ClusterManager clusterManager) {
+    public KafkaConsumerService(SerDesHelper serDesHelper, ClusterManager clusterManager, ConsumerCreator consumerCreator) {
         this.serDesHelper = serDesHelper;
         this.clusterManager = clusterManager;
+        this.consumerCreator = consumerCreator;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             consumers.forEach(Consumer::wakeup);
         }));
@@ -71,7 +74,7 @@ public class KafkaConsumerService {
                 .keyDeserializer(StringDeserializer.class)
                 .valueDeserializer(serDesHelper.getDeserializeClass(pollingOptions.valueContentType()))
                 .build();
-        Map<String, Object> consumerProps = ConsumerCreator.buildConsumerConfigs(consumerCreatorConfig);
+        Map<String, Object> consumerProps = consumerCreator.buildConsumerConfigs(consumerCreatorConfig);
         Consumer consumer = clusterManager.createConsumer(consumerProps);
         consumers.add(consumer);
         consumer.assign(topicPartitions);

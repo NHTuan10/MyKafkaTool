@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.cg;
 
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
@@ -19,12 +20,12 @@ import java.util.concurrent.ExecutionException;
 public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffsetTableItem> {
     private ConsumerGroupTreeItem consumerGroupTreeItem;
     //    @Inject
-    ClusterManager clusterManager;
+    private final ClusterManager clusterManager;
     private BooleanProperty isBusy;
 
     public ConsumerGroupTable() {
         super(false);
-        clusterManager = ClusterManager.getInstance(); //TODO: use Dagger
+        this.clusterManager = MyKafkaToolApplication.DAGGER_APP_COMPONENT.clusterManager();
     }
 
 //    @Override

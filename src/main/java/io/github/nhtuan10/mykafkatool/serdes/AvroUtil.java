@@ -1,7 +1,5 @@
 package io.github.nhtuan10.mykafkatool.serdes;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.nhtuan10.mykafkatool.ui.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
@@ -18,8 +16,6 @@ public class AvroUtil {
     public static Schema parseSchema(String schemaStr) {
         return new Schema.Parser().parse(schemaStr);
     }
-
-    public static final ObjectMapper OBJECT_MAPPER = Utils.constructRichtexFxPrettyPrintObjectMapper();
 
     public static Object convertJsonToAvro(String json, String schemaStr) throws IOException {
         Schema schema = null;
@@ -76,7 +72,7 @@ public class AvroUtil {
             default -> {
 //                objectMapper.writeValue(outputStream, deserializedObject);
 //                result = outputStream.toString();
-                result = deserializedObject.toString(); // TODO: find a better approach than toString
+                result = deserializedObject.toString(); // TODO:[Low Priority] find a better approach than toString
             }
         }
         outputStream.close();

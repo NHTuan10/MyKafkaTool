@@ -2,7 +2,7 @@ package io.github.nhtuan10.mykafkatool.producer;
 
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
-import io.github.nhtuan10.mykafkatool.dagger.AppScoped;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
@@ -27,10 +27,12 @@ import java.util.stream.Collectors;
 @AppScoped
 public class ProducerUtil {
     private final SerDesHelper serDesHelper;
+    private final ClusterManager clusterManager;
 
     @Inject
-    public ProducerUtil(SerDesHelper serDesHelper) {
+    public ProducerUtil(SerDesHelper serDesHelper, ClusterManager clusterManager) {
         this.serDesHelper = serDesHelper;
+        this.clusterManager = clusterManager;
     }
 
     public void sendMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, KafkaMessage kafkaMessage)
@@ -39,7 +41,7 @@ public class ProducerUtil {
         KafkaCluster cluster = kafkaTopic.cluster();
 
         ProducerCreator.ProducerCreatorConfig producerConfig = createProducerConfig(cluster, kafkaMessage);
-        KafkaProducer producer = ClusterManager.getInstance().getProducer(producerConfig); //TODO: use Dagger
+        KafkaProducer producer = clusterManager.getProducer(producerConfig);
         producer.flush();
 
         ProducerRecord<String, Object> producerRecord = createProducerRecord(kafkaTopic, partition, kafkaMessage);

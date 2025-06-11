@@ -2,6 +2,7 @@ package io.github.nhtuan10.mykafkatool.ui.schemaregistry;
 
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
@@ -32,7 +33,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
     private KafkaCluster selectedClusterName;
     private BooleanProperty isBlockingUINeeded;
     private Map<String, SchemaTableItemsAndFilter> clusterNameToSchemaTableItemsCache;
-    SchemaRegistryManager schemaRegistryManager = SchemaRegistryManager.getInstance();
+    private final SchemaRegistryManager schemaRegistryManager = MyKafkaToolApplication.DAGGER_APP_COMPONENT.schemaRegistryManager();
 
     static SchemaTableItem mapFromSchemaMetaData(SchemaMetadataFromRegistry schemaMetadataFromRegistry, String clusterName) {
         // schemaMetadata is null if only subject is loaded from registry
@@ -74,7 +75,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                         throw new RuntimeException("Error when loading subject {} from Schema Registry", e);
                     }
                 }
-                SchemaRegistryControl.SelectedSchemaEvent selectedSchemaEvent = new SchemaRegistryControl.SelectedSchemaEvent(new SimpleStringProperty(schema));
+                SchemaRegistryViewController.SelectedSchemaEvent selectedSchemaEvent = new SchemaRegistryViewController.SelectedSchemaEvent(new SimpleStringProperty(schema));
                 fireEvent(selectedSchemaEvent);
             }
         });

@@ -21,7 +21,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,27 +36,34 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
-@RequiredArgsConstructor
 public class KafkaClusterTree {
-    final private ClusterManager clusterManager;
+    private final ClusterManager clusterManager;
 
-    final private TreeView clusterTree;
+    private final TreeView clusterTree;
 
-    final private SchemaRegistryManager schemaRegistryManager;
+    private final SchemaRegistryManager schemaRegistryManager;
 
-    final private EventDispatcher eventDispatcher;
+    private final EventDispatcher eventDispatcher;
+
+    private final UserPreferenceManager userPreferenceManager;
 
     @Setter
     private Stage stage;
 
-    public static void initClusterPanel(Stage stage) {
-        TreeView clusterTree = (TreeView) stage.getScene().lookup("#clusterTree");
+    public KafkaClusterTree(ClusterManager clusterManager, TreeView clusterTree, SchemaRegistryManager schemaRegistryManager,
+                            EventDispatcher eventDispatcher, UserPreferenceManager userPreferenceManager) {
+        this.clusterManager = clusterManager;
+        this.clusterTree = clusterTree;
+        this.schemaRegistryManager = schemaRegistryManager;
+        this.eventDispatcher = eventDispatcher;
+        this.userPreferenceManager = userPreferenceManager;
+//        TreeView clusterTree = (TreeView) stage.getScene().lookup("#clusterTree");
 
         TreeItem<Object> clustersItem = new TreeItem<>(AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME);
         clustersItem.setExpanded(true);
         clusterTree.setRoot(clustersItem);
 
-        UserPreferenceManager.loadUserPreference().connections().forEach((cluster -> {
+        userPreferenceManager.loadUserPreference().connections().forEach((cluster -> {
             try {
                 if (!isClusterNameExistedInTree(clusterTree, cluster.getName())) {
                     addClusterToTreeView(clusterTree, cluster);
@@ -89,35 +95,38 @@ public class KafkaClusterTree {
         });
     }
 
-    public static void addClusterToTreeView(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
-        ClusterManager.getInstance().connectToCluster(cluster);
+    public static void initClusterPanel(Stage stage) {
+    }
+
+    public void addClusterToTreeView(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
+        clusterManager.connectToCluster(cluster);
         String clusterName = cluster.getName();
         if (isClusterNameExistedInTree(clusterTree, clusterName)) {
             throw new ClusterNameExistedException(clusterName, "Cluster already exists");
         }
         TreeItem<Object> brokerTreeItem = new TreeItem<>(cluster);
-        TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster));
-        ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster));
+        TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster), clusterManager);
+        ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster), clusterManager);
         brokerTreeItem.getChildren().add(topicListTreeItem);
         brokerTreeItem.getChildren().add(consumerGroupListTreeItem);
         if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
             TreeItem<Object> schemaRegistry = new TreeItem<>(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME);
             brokerTreeItem.getChildren().add(schemaRegistry);
-            SchemaRegistryManager.getInstance().connectToSchemaRegistry(cluster);
+            schemaRegistryManager.connectToSchemaRegistry(cluster);
         }
         clusterTree.getRoot().getChildren().add(brokerTreeItem);
     }
 
-    public static void connectToClusterAndLoadAllChildren(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
-        ClusterManager.getInstance().connectToCluster(cluster); //TODO: refactor duplicated code
+    public void connectToClusterAndLoadAllChildren(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
+        clusterManager.connectToCluster(cluster); //TODO: refactor duplicated code
         String clusterName = cluster.getName();
         if (isClusterNameExistedInTree(clusterTree, clusterName)) {
             throw new ClusterNameExistedException(clusterName, "Cluster already exists");
         }
 
         TreeItem<Object> brokerTreeItem = new TreeItem<>(cluster);
-        TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster));
-        ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster));
+        TreeItem<Object> topicListTreeItem = new KafkaTopicListTreeItem<>(new KafkaTopicListTreeItem.KafkaTopicListTreeItemValue(cluster), clusterManager);
+        ConsumerGroupListTreeItem<Object> consumerGroupListTreeItem = new ConsumerGroupListTreeItem<>(new ConsumerGroupListTreeItem.ConsumerGroupListTreeItemValue(cluster), clusterManager);
 
         topicListTreeItem.getChildren();
         brokerTreeItem.getChildren().add(topicListTreeItem);
@@ -128,7 +137,7 @@ public class KafkaClusterTree {
         if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
             TreeItem<Object> schemaRegistry = new TreeItem<>(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME);
             brokerTreeItem.getChildren().add(schemaRegistry);
-            SchemaRegistryManager.getInstance().connectToSchemaRegistry(cluster);
+            schemaRegistryManager.connectToSchemaRegistry(cluster);
         }
 
         clusterTree.getRoot().getChildren().add(brokerTreeItem);
@@ -329,7 +338,7 @@ public class KafkaClusterTree {
             }
             if (newConnection != null) {
                 connectToClusterAndSchemaRegistry(clusterTree, newConnection);
-                UserPreferenceManager.addClusterToUserPreference(newConnection);
+                userPreferenceManager.addClusterToUserPreference(newConnection);
             }
 
         } catch (IOException | ClusterNameExistedException e) {
@@ -364,7 +373,7 @@ public class KafkaClusterTree {
                     if (newConnection != null && !oldConnection.equals(newConnection)) {
                         deleteConnection(selectedItem);
                         connectToClusterAndSchemaRegistry(clusterTree, newConnection);
-                        UserPreferenceManager.addClusterToUserPreference(newConnection);
+                        userPreferenceManager.addClusterToUserPreference(newConnection);
                     }
                 } catch (IOException | ClusterNameExistedException e) {
                     log.error("Error when add new connection", e);
@@ -387,7 +396,7 @@ public class KafkaClusterTree {
                 .toList();
     }
 
-    private static void connectToClusterAndSchemaRegistry(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
+    private void connectToClusterAndSchemaRegistry(TreeView clusterTree, KafkaCluster cluster) throws ClusterNameExistedException {
         connectToClusterAndLoadAllChildren(clusterTree, cluster);
     }
 
@@ -406,7 +415,7 @@ public class KafkaClusterTree {
         schemaRegistryManager.disconnectFromSchemaRegistry(clusterName);
         selectedItem.getParent().getChildren().remove(selectedItem);
         try {
-            UserPreferenceManager.removeClusterFromUserPreference(clusterName);
+            userPreferenceManager.removeClusterFromUserPreference(clusterName);
         } catch (IOException e) {
             log.error("Error when removing connection", e);
             throw new RuntimeException(e);

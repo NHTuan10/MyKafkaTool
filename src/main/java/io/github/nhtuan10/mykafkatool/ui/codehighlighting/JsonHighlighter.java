@@ -3,7 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui.codehighlighting;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import io.github.nhtuan10.mykafkatool.dagger.AppScoped;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import jakarta.inject.Inject;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;

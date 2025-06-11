@@ -3,8 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
-import io.github.nhtuan10.mykafkatool.dagger.AppComponent;
-import io.github.nhtuan10.mykafkatool.dagger.DaggerAppComponent;
+import io.github.nhtuan10.mykafkatool.configuration.AppComponent;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.controller.ModalController;
@@ -69,7 +68,7 @@ public final class ViewUtils {
 
     public static void showPopUpModal(final String modalFxml, final String title, final AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable, final boolean resizable, Window parentWindow) throws IOException {
         Stage stage = new Stage();
-        AppComponent appComponent = DaggerAppComponent.create();
+        AppComponent appComponent = MyKafkaToolApplication.DAGGER_APP_COMPONENT;
         FXMLLoader modalLoader = appComponent.loader(MyKafkaToolApplication.class.getResource(modalFxml));
 //        FXMLLoader modalLoader = new FXMLLoader(
 //                MyKafkaToolApplication.class.getResource(modalFxml));
