@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui.controller;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.Theme;
+import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
@@ -24,6 +25,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +86,11 @@ public class MainController {
     @FXML
     private MenuBar menuBar;
 
+    @FXML
+    private MenuItem darkModeMenuItem;
+
+    @FXML
+    private MenuItem lightModeMenuItem;
 
     public void setStage(Stage stage) {
         this.kafkaClusterTree.setStage(stage);
@@ -120,6 +127,10 @@ public class MainController {
 
         kafkaClusterTree.configureClusterTreeActionMenu();
         configureClusterTreeSelectedItemChanged();
+
+        this.darkModeMenuItem.textProperty().bind(MyKafkaToolApplication.themeProperty.map(theme -> theme == Theme.DARK ? "✅ " + UIStyleConstant.DARK_MODE : UIStyleConstant.DARK_MODE));
+        this.lightModeMenuItem.textProperty().bind(MyKafkaToolApplication.themeProperty.map(theme -> theme == Theme.LIGHT ? "✅ " + UIStyleConstant.LIGHT_MODE : UIStyleConstant.LIGHT_MODE));
+
     }
 
     private void configureClusterTreeSelectedItemChanged() {
@@ -206,7 +217,9 @@ public class MainController {
 
     @FXML
     protected void switchToDarkMode() {
-        MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.DARK);
+        if (MyKafkaToolApplication.getCurrentTheme() != Theme.DARK) {
+            MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.DARK);
+        }
     }
 
     @FXML

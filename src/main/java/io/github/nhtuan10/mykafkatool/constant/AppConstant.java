@@ -3,7 +3,7 @@ package io.github.nhtuan10.mykafkatool.constant;
 public class AppConstant {
     public static final String APP_NAME = "MyKafkaTool";
     public static final String USER_PREF_FILENAME = "user_settings.json";
-    public static final String TREE_ITEM_CLUSTERS_DISPLAY_NAME = "Clusters";
+    public static final String TREE_ITEM_CLUSTERS_DISPLAY_NAME = "⚷ Clusters";
     public static final String TREE_ITEM_CONSUMER_GROUPS_DISPLAY_NAME = "Consumer Groups";
     public static final String TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME = "Schema Registry";
     public static final String TREE_ITEM_TOPIC_LIST_DISPLAY_NAME = "Topics";

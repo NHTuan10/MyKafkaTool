@@ -5,6 +5,7 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
@@ -23,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
+@AppScoped
 public class SchemaRegistryManager {
 
     public static final String DEFAULT_SCHEMA_COMPATIBILITY_LEVEL = CompatibilityLevel.BACKWARD.toString();

@@ -4,25 +4,25 @@ import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.Theme;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import jakarta.inject.Inject;
+import lombok.Locked;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 @AppScoped
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class UserPreferenceManager {
     private final UserPreferenceRepo userPreferenceRepo;
-    private final Lock lock = new ReentrantLock();
 
+    @Locked.Write
     public void saveUserPreference(UserPreference userPreference) throws IOException {
         userPreferenceRepo.saveUserPreference(userPreference);
     }
 
+    @Locked.Read
     public UserPreference loadUserPreference() {
         UserPreference userPreference;
         try {
@@ -44,26 +44,27 @@ public class UserPreferenceManager {
         return new UserPreference(new ArrayList<>());
     }
 
+    @Locked.Write
     public void addClusterToUserPreference(KafkaCluster cluster) throws IOException {
-        lock.lock();
-        try {
-            UserPreference userPreference = loadUserPreference();
-            userPreference.connections().add(cluster);
-            saveUserPreference(userPreference);
-        } finally {
-            lock.unlock();
-        }
+        UserPreference userPreference = loadUserPreference();
+        userPreference.connections().add(cluster);
+        saveUserPreference(userPreference);
     }
 
+    @Locked.Write
+    public void updateClusterToUserPreference(KafkaCluster oldCluster, KafkaCluster cluster) throws IOException {
+        UserPreference userPreference = loadUserPreference();
+        userPreference.connections().removeIf(c -> c.getName().equals(oldCluster.getName()));
+        userPreference.connections().add(cluster);
+        saveUserPreference(userPreference);
+    }
+
+    @Locked.Write
     public void removeClusterFromUserPreference(String clusterName) throws IOException {
-        lock.lock();
-        try {
-            UserPreference userPreference = loadUserPreference();
-            userPreference.connections().removeIf(cluster -> cluster.getName().equals(clusterName));
-            saveUserPreference(userPreference);
-        } finally {
-            lock.unlock();
-        }
+        UserPreference userPreference = loadUserPreference();
+        userPreference.connections().removeIf(cluster -> cluster.getName().equals(clusterName));
+        saveUserPreference(userPreference);
+
     }
 
     public String getUserPrefFilePath() {

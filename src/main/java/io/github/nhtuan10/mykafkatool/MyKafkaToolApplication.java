@@ -5,15 +5,17 @@ import io.github.nhtuan10.mykafkatool.configuration.DaggerAppComponent;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.Theme;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
-import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.controller.MainController;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreference;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URL;
@@ -21,9 +23,11 @@ import java.text.MessageFormat;
 
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
 
+@Slf4j
 public class MyKafkaToolApplication extends javafx.application.Application {
     public static final AppComponent DAGGER_APP_COMPONENT = DaggerAppComponent.create();
     private static UserPreferenceManager userPreferenceManager;
+    public static final ObjectProperty<Theme> themeProperty = new SimpleObjectProperty<>(Theme.LIGHT);
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -43,7 +47,6 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         stage.setTitle(AppConstant.APP_NAME);
         stage.setScene(scene);
         stage.show();
-        KafkaClusterTree.initClusterPanel(stage);
         stage.setOnCloseRequest(event -> {
             exit();
         });
@@ -60,6 +63,7 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        themeProperty.set(theme);
     }
 
     public static void applyThemeFromCurrentUserPreference(Scene scene) {
@@ -81,8 +85,16 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         }
     }
 
+    public static Theme getCurrentTheme() {
+        return userPreferenceManager.loadUserPreference().theme();
+    }
     public static void exit() {
         Platform.exit();
+    }
+
+    @Override
+    public void stop() {
+        log.info("App is closing");
         System.exit(0);
     }
 

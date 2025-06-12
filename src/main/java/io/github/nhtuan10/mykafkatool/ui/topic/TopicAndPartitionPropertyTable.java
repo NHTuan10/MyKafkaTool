@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -102,7 +100,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
                 list.addAll(getPartitionInfoForUI(partitionInfo));
 
                 return list;
-            } catch (ExecutionException | InterruptedException e) {
+            } catch (Exception e) {
                 log.error("Error when get partition info", e);
 //                setItems(FXCollections.observableArrayList());
                 throw new RuntimeException(e);
@@ -134,7 +132,7 @@ public class TopicAndPartitionPropertyTable extends EditableTableControl<UIPrope
                 Collection<ConfigEntry> configEntries = clusterManager.getTopicConfig(clusterName, topicName);
                 configEntries.forEach(entry -> configs.add(new UIPropertyTableItem(entry.name(), entry.value())));
                 return configs;
-            } catch (ExecutionException | InterruptedException | TimeoutException e) {
+            } catch (Exception e) {
                 log.error("Error when get topic config properties", e);
 //                setItems(FXCollections.observableArrayList());
                 throw new RuntimeException(e);

@@ -14,6 +14,7 @@ import org.apache.kafka.clients.admin.ConsumerGroupListing;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
@@ -73,8 +74,10 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
                 // clusterManager.getConsumerGroup(clusterName, consumerGroupListings.stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList()));
 
                 return children;
-            } catch (ExecutionException | InterruptedException e) {
+            } catch (ExecutionException | InterruptedException | TimeoutException e) {
                 log.error("Error loading consumer groups", e);
+                consumerGroupListTreeItemValue.getCluster().setStatus(KafkaCluster.ClusterStatus.DISCONNECTED);
+                throw new RuntimeException(e);
             }
         }
         return FXCollections.emptyObservableList();

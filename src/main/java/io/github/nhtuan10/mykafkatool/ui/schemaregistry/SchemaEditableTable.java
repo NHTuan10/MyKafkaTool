@@ -15,6 +15,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -154,8 +155,12 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                                 .toList());
                 clusterNameToSchemaTableItemsCache.put(this.selectedClusterName.getName(), new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
                 Platform.runLater(() -> this.isBlockingUINeeded.set(false));
-            } catch (RestClientException | IOException e) {
+            } catch (Exception e) {
                 log.error("Error when get schema registry subject metadata", e);
+                Platform.runLater(() -> {
+                    setItems(FXCollections.emptyObservableList());
+                    table.setPlaceholder(new Label("Error when get topic config properties: " + e.getMessage()));
+                });
                 throw new RuntimeException(e);
             }
             return items;

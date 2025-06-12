@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -77,7 +76,7 @@ public class PartitionsTable extends EditableTableControl<KafkaPartitionsTableIt
                 } else {
                     topicPartitionInfos = clusterManager.getTopicPartitions(clusterName, topicName);
                 }
-            } catch (ExecutionException | InterruptedException | TimeoutException e) {
+            } catch (Exception e) {
                 log.error("Error when get partition info for cluster {}, topic {} and partition {}", clusterName, topicName, kafkaPartition, e);
                 throw new RuntimeException(e);
             }

@@ -5,13 +5,12 @@ import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
 import jakarta.inject.Inject;
 import lombok.Getter;
+import lombok.Locked;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.USER_PREF_FILENAME;
@@ -23,7 +22,7 @@ public class UserPreferenceRepoImpl implements UserPreferenceRepo {
     //    private final String filePath;
     private final ObjectMapper objectMapper;
 
-    Lock lock = new ReentrantLock();
+//    Lock lock = new ReentrantLock();
 
     @Inject
     public UserPreferenceRepoImpl(@SharedObjectMapper ObjectMapper objectMapper) {
@@ -33,6 +32,7 @@ public class UserPreferenceRepoImpl implements UserPreferenceRepo {
     }
 
     @Override
+    @Locked.Read
     public UserPreference loadUserPreference() throws IOException {
 //        String data = Files.asCharSource(new File(filePath), StandardCharsets.UTF_8).read();
         String data = Files.readString(Paths.get(userPrefFilePath));
@@ -40,17 +40,18 @@ public class UserPreferenceRepoImpl implements UserPreferenceRepo {
     }
 
     @Override
+    @Locked.Write
     public void saveUserPreference(UserPreference userPreference) throws IOException {
-        lock.lock();
-        try {
+//        lock.lock();
+//        try {
 //        Files.createParentDirs(new File(filePath));
             Files.createDirectories(Paths.get(userPrefFilePath).getParent());
             String data = objectMapper.writeValueAsString(userPreference);
 //        Files.write(data.getBytes(StandardCharsets.UTF_8), new File(filePath));
             Files.writeString(Paths.get(userPrefFilePath), data);
-        } finally {
-            lock.unlock();
-        }
+//        } finally {
+//            lock.unlock();
+//        }
     }
 
     public static String getDefaultUserPreferenceFilePath() {

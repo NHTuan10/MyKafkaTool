@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class AddConnectionModalController extends ModalController {
     private final ObjectProperty<KafkaCluster> objectProperty;
@@ -58,25 +59,45 @@ public class AddConnectionModalController extends ModalController {
 
     @FXML
     public void initialize() {
-        objectProperty.addListener((observable, oldValue, newValue) -> {
-            clusterNameTextField.setText(newValue.getName());
-            bootstrapServerTextField.setText(newValue.getBootstrapServer());
-            schemaRegistryTextField.setText(newValue.getSchemaRegistryUrl());
-            isOnlySubjectLoadedCheckBox.setSelected(newValue.isOnlySubjectLoaded());
-            AuthConfig authConfig = newValue.getAuthConfig();
-            AuthProvider authProvider = authProviderManager.getAuthProvider(authConfig.name());
-            securityTypeComboxBox.getSelectionModel().select(authProvider);
-            try {
-                securityConfigTextArea.replaceText(authProvider.toConfigText(authConfig));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+//        if (objectProperty.get() != null) {
+//            setValuesForFields(objectProperty.get());
+//        }
+//        objectProperty.addListener((observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                setValuesForFields(newValue);
+//            }
+//
+//        });
         securityTypeComboxBox.getItems().addAll(authProviderManager.getAllAuthProviders());
         securityTypeComboxBox.getSelectionModel().select(authProviderManager.getNoAuthProvider());
         securityConfigTextArea.textProperty().addListener((obs, oldText, newText) -> {
             ViewUtils.highlightJsonInCodeArea(newText, securityConfigTextArea, false, objectMapper, jsonHighlighter);
         });
+    }
+
+    @Override
+    public void setFields(ModalController modalController, Stage stage, Map<String, Object> text) {
+        this.stage = stage;
+        KafkaCluster kafkaCluster = (KafkaCluster) text.get("objectProperty");
+        this.objectProperty.set(kafkaCluster);
+        if (kafkaCluster != null) {
+            setValuesForFields(kafkaCluster);
+        }
+    }
+
+    private void setValuesForFields(KafkaCluster newValue) {
+        clusterNameTextField.setText(newValue.getName());
+        bootstrapServerTextField.setText(newValue.getBootstrapServer());
+        schemaRegistryTextField.setText(newValue.getSchemaRegistryUrl());
+        isOnlySubjectLoadedCheckBox.setSelected(newValue.isOnlySubjectLoaded());
+        AuthConfig authConfig = newValue.getAuthConfig();
+        AuthProvider authProvider = authProviderManager.getAuthProvider(authConfig.name());
+        securityTypeComboxBox.getSelectionModel().select(authProvider);
+        try {
+            securityConfigTextArea.replaceText(authProvider.toConfigText(authConfig));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @FXML

@@ -43,10 +43,12 @@
                     </Menu>
                     <Menu mnemonicParsing="false" text="Appearance">
                         <items>
-                            <MenuItem mnemonicParsing="false" text="Dark Mode" onAction="#switchToDarkMode"/>
+                            <MenuItem fx:id="darkModeMenuItem" mnemonicParsing="false" text="Dark Mode"
+                                      onAction="#switchToDarkMode"/>
                         </items>
                         <items>
-                            <MenuItem mnemonicParsing="false" text="Light Mode" onAction="#switchToLightMode"/>
+                            <MenuItem fx:id="lightModeMenuItem" mnemonicParsing="false" text="Light Mode"
+                                      onAction="#switchToLightMode"/>
                         </items>
 
                     </Menu>

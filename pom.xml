@@ -14,6 +14,8 @@
         <maven.compiler.target>21</maven.compiler.target>
         <javafx.version>21.0.2</javafx.version>
         <junit.version>5.8.1</junit.version>
+        <lombok.version>1.18.38</lombok.version>
+        <native.maven.plugin.version>0.10.6</native.maven.plugin.version>
     </properties>
 
     <repositories>
@@ -57,7 +59,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.36</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -147,7 +149,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.36</version>
+                            <version>${lombok.version}</version>
                         </path>
                         <path>
                             <groupId>com.google.dagger</groupId>
@@ -240,6 +242,34 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.3</version>
             </plugin>
+
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>${native.maven.plugin.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>build-native</id>
+                        <goals>
+                            <goal>compile-no-fork</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolApplication</mainClass>
+                </configuration>
+            </plugin>
+            <!--            Gluon not working-->
+            <!--            <plugin>-->
+            <!--                <groupId>com.gluonhq</groupId>-->
+            <!--                <artifactId>gluonfx-maven-plugin</artifactId>-->
+            <!--                <version>1.0.26</version>-->
+            <!--                <configuration>-->
+            <!--                    <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolApplication</mainClass>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
         </plugins>
     </build>
 </project>

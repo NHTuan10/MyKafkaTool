@@ -65,12 +65,15 @@ public class ClusterManager {
     @SneakyThrows
     public void connectToCluster(KafkaCluster cluster) throws ClusterNameExistedException {
         String clusterName = cluster.getName();
-        if (adminMap.containsKey(clusterName)) {
-            throw new ClusterNameExistedException(clusterName, "Cluster already exists");
-        }
+//        if (adminMap.containsKey(clusterName)) {
+//            throw new ClusterNameExistedException(clusterName, "Cluster already exists");
+//        }
         Map<String, Object> properties = new HashMap<>();
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServer());
         properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, AppConstant.DEFAULT_ADMIN_REQUEST_TIMEOUT);
+        properties.put(AdminClientConfig.SOCKET_CONNECTION_SETUP_TIMEOUT_MS_CONFIG, AppConstant.DEFAULT_ADMIN_REQUEST_TIMEOUT);
+        properties.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, AppConstant.DEFAULT_ADMIN_REQUEST_TIMEOUT);
+        properties.put(AdminClientConfig.RETRIES_CONFIG, 2);
         AuthConfig authConfig = cluster.getAuthConfig();
         properties.putAll(authProviderManager.getKafkaAuthProperties(authConfig));
         Admin adminClient = Admin.create(properties);
@@ -96,7 +99,7 @@ public class ClusterManager {
     public Set<String> getAllTopics(String clusterName) throws ExecutionException, InterruptedException, TimeoutException {
         Admin adminClient = adminMap.get(clusterName);
         ListTopicsResult result = adminClient.listTopics();
-        return result.names().get(60, TimeUnit.SECONDS);
+        return result.names().get(10, TimeUnit.SECONDS);
     }
 
     public TopicDescription getTopicDesc(String clusterName, String topic) throws ExecutionException, InterruptedException {
@@ -207,8 +210,8 @@ public class ClusterManager {
 //        }));
     }
 
-    public Collection<ConsumerGroupListing> getConsumerGroupList(String clusterName) throws ExecutionException, InterruptedException {
-        return adminMap.get(clusterName).listConsumerGroups().all().get();
+    public Collection<ConsumerGroupListing> getConsumerGroupList(String clusterName) throws ExecutionException, InterruptedException, TimeoutException {
+        return adminMap.get(clusterName).listConsumerGroups().all().get(10, TimeUnit.SECONDS);
     }
 
 

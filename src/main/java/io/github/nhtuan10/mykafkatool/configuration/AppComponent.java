@@ -32,6 +32,7 @@ public interface AppComponent {
     UserPreferenceManager userPreferenceManager();
 
     SchemaRegistryManager schemaRegistryManager();
+
     default FXMLLoader loader(URL fxmlUrl) {
         return fxmlLoaderFactory().apply(Objects.requireNonNull(fxmlUrl));
     }
