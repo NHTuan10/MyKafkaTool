@@ -7,10 +7,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -20,6 +17,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Builder(builderMethodName = "")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@EqualsAndHashCode(exclude = "status")
 public class KafkaCluster {
     @NonNull
     private final StringProperty name;

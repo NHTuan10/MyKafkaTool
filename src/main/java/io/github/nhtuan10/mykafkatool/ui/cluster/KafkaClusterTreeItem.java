@@ -1,6 +1,8 @@
 package io.github.nhtuan10.mykafkatool.ui.cluster;
 
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
+import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
@@ -10,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @AllArgsConstructor
@@ -59,16 +62,18 @@ public class KafkaClusterTreeItem<T> extends TreeItem<T> {
         return this.getChildren().removeIf(ConsumerGroupListTreeItem.class::isInstance);
     }
 
-    public void addSchemaRegistryItemIfAbsent() {
-        if (this.getChildren().stream().noneMatch(item -> item.getValue().equals(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME))) {
-            TreeItem<Object> schemaRegistry = new TreeItem<>(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME);
+    public void addOrUpdateSchemaRegistryItem(SchemaRegistryManager schemaRegistryManager, KafkaCluster cluster) throws ClusterNameExistedException {
+        removeSchemaRegistryItem();
+        if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
+            schemaRegistryManager.connectToSchemaRegistry(cluster);
+            TreeItem<Object> schemaRegistry = new TreeItem<>(AppConstant.SCHEMA_REGISTRY_TREE_ITEM_DISPLAY_NAME);
             this.getChildren().add((TreeItem<T>) schemaRegistry);
         }
 
     }
 
     public boolean removeSchemaRegistryItem() {
-        return this.getChildren().removeIf(item -> item.getValue().equals(AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME));
+        return this.getChildren().removeIf(item -> item.getValue().equals(AppConstant.SCHEMA_REGISTRY_TREE_ITEM_DISPLAY_NAME));
     }
 
 }

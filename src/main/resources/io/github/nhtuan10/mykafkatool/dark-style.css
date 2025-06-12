@@ -69,3 +69,7 @@
     -fx-border-color: -color-border-default;
     -fx-border-width: 1;
 }
+
+.cluster-tree-root, .cluster-tree-item {
+    -fx-font-size: 15;
+}

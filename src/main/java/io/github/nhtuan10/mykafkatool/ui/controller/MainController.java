@@ -158,7 +158,7 @@ public class MainController {
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 setVisibleTabs(cgOffsetsTab);
                 this.consumerGroupOffsetTable.loadCG(selected, this.isBlockingAppUINeeded);
-            } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equals(selectedItem.getValue())) {
+            } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.SCHEMA_REGISTRY_TREE_ITEM_DISPLAY_NAME.equals(selectedItem.getValue())) {
                 setVisibleTabs(dataTab);
                 schemaRegistryView.setVisible(true);
                 kafkaMessageView.setVisible(false);

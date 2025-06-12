@@ -63,10 +63,9 @@ public class AddConnectionModalController extends ModalController {
 //            setValuesForFields(objectProperty.get());
 //        }
 //        objectProperty.addListener((observable, oldValue, newValue) -> {
-//            if (newValue != null) {
+//            if (newValue != null && !Objects.equals(newValue, oldValue)) {
 //                setValuesForFields(newValue);
 //            }
-//
 //        });
         securityTypeComboxBox.getItems().addAll(authProviderManager.getAllAuthProviders());
         securityTypeComboxBox.getSelectionModel().select(authProviderManager.getNoAuthProvider());

@@ -33,7 +33,8 @@ import java.util.function.Consumer;
 public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
     private KafkaCluster selectedClusterName;
     private BooleanProperty isBlockingUINeeded;
-    private Map<String, SchemaTableItemsAndFilter> clusterNameToSchemaTableItemsCache;
+    // add event handler to clean cache
+    private Map<KafkaCluster, SchemaTableItemsAndFilter> clusterNameToSchemaTableItemsCache;
     private final SchemaRegistryManager schemaRegistryManager = MyKafkaToolApplication.DAGGER_APP_COMPONENT.schemaRegistryManager();
 
     static SchemaTableItem mapFromSchemaMetaData(SchemaMetadataFromRegistry schemaMetadataFromRegistry, String clusterName) {
@@ -82,12 +83,12 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
         });
         this.filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             applyFilter(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
-            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName()))
+            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
                     .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setFilterText(newValue));
         });
         this.regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
             applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
-            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName()))
+            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
                     .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setRegexFilter(newValue));
         });
         // TODO: functionality to add a new schema
@@ -128,10 +129,10 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
     public void loadAllSchemas(KafkaCluster kafkaCluster, Consumer<ObservableList<SchemaTableItem>> onSuccess, Consumer<Throwable> onError, BooleanProperty isBusy) throws ExecutionException, InterruptedException {
         this.selectedClusterName = kafkaCluster;
         this.isBlockingUINeeded = isBusy;
-        if (!clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName.getName())) {
+        if (!clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName)) {
             setTableItemsAndFilter(refresh(onSuccess, onError), new Filter("", this.regexFilterToggleBtn.isSelected()));
         } else {
-            SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName.getName());
+            SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName);
             setTableItemsAndFilter(schemaTableItemsAndFilter.getItems(), schemaTableItemsAndFilter.getFilter());
         }
     }
@@ -153,12 +154,14 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                                 .stream()
                                 .map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, this.selectedClusterName.getName()))
                                 .toList());
-                clusterNameToSchemaTableItemsCache.put(this.selectedClusterName.getName(), new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
+                clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
                 Platform.runLater(() -> this.isBlockingUINeeded.set(false));
             } catch (Exception e) {
                 log.error("Error when get schema registry subject metadata", e);
                 Platform.runLater(() -> {
-                    setItems(FXCollections.emptyObservableList());
+                    var emptyItems = FXCollections.<SchemaTableItem>emptyObservableList();
+                    setItems(emptyItems);
+                    clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(emptyItems, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
                     table.setPlaceholder(new Label("Error when get topic config properties: " + e.getMessage()));
                 });
                 throw new RuntimeException(e);

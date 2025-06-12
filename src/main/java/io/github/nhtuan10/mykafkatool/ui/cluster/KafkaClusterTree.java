@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.cluster;
 
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
@@ -59,7 +60,7 @@ public class KafkaClusterTree {
         this.userPreferenceManager = userPreferenceManager;
 //        TreeView clusterTree = (TreeView) stage.getScene().lookup("#clusterTree");
 
-        TreeItem<Object> clustersItem = new TreeItem<>(AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME);
+        TreeItem<Object> clustersItem = new TreeItem<>(AppConstant.CLUSTERS_TREE_ITEM_DISPLAY_NAME);
         clustersItem.setExpanded(true);
         clusterTree.setRoot(clustersItem);
 
@@ -84,6 +85,7 @@ public class KafkaClusterTree {
             @Override
             protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
+                addStyle(item);
                 if (empty) {
                     setText(null);
                     setTooltip(null);
@@ -95,6 +97,21 @@ public class KafkaClusterTree {
                         setTooltip(new Tooltip(item.toString()));
                     }
                 }
+            }
+
+            private void addStyle(Object item) {
+                if (getStyleClass() != null) {
+                    List<String> treeItemClasses = List.of(UIStyleConstant.CLUSTER_TREE_ROOT_CLASS, UIStyleConstant.CLUSTER_TREE_ITEM_CLASS);
+                    this.getStyleClass().removeAll(treeItemClasses);
+                    if (item instanceof String rootItemVal && AppConstant.CLUSTERS_TREE_ITEM_DISPLAY_NAME.equalsIgnoreCase(rootItemVal)) {
+
+                        this.getStyleClass().add(UIStyleConstant.CLUSTER_TREE_ROOT_CLASS);
+                    } else if (item instanceof KafkaCluster) {
+                        this.getStyleClass().add(UIStyleConstant.CLUSTER_TREE_ITEM_CLASS);
+                    }
+
+                }
+
             }
         });
     }
@@ -135,7 +152,7 @@ public class KafkaClusterTree {
                 Clipboard.getSystemClipboard().setContent(clipboardContent);
             });
 
-            if ((treeItem == null) || (treeItem.getParent() == null && AppConstant.TREE_ITEM_CLUSTERS_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue()))) {
+            if ((treeItem == null) || (treeItem.getParent() == null && AppConstant.CLUSTERS_TREE_ITEM_DISPLAY_NAME.equalsIgnoreCase((String) treeItem.getValue()))) {
                 clusterTreeContextMenu.getItems().setAll(createAddingConnectionActionMenuItem());
             } else if (treeItem instanceof KafkaClusterTreeItem<?> kafkaClusterTreeItem) { // tree item for a connection
                 clusterTreeContextMenu.getItems().setAll(
@@ -165,7 +182,7 @@ public class KafkaClusterTree {
                 clusterTreeContextMenu.getItems().setAll(refreshItem);
             } else if (treeItem instanceof ConsumerGroupTreeItem) {
                 clusterTreeContextMenu.getItems().setAll(copyTreeItemNameMenuItem);
-            } else if (treeItem.getValue() instanceof String value && AppConstant.TREE_ITEM_SCHEMA_REGISTRY_DISPLAY_NAME.equalsIgnoreCase(value)) {
+            } else if (treeItem.getValue() instanceof String value && AppConstant.SCHEMA_REGISTRY_TREE_ITEM_DISPLAY_NAME.equalsIgnoreCase(value)) {
                 MenuItem refreshItem = new MenuItem("Refresh");
                 KafkaCluster kafkaCluster = (KafkaCluster) treeItem.getParent().getValue();
                 refreshItem.setOnAction(actionEvent -> {
@@ -407,13 +424,11 @@ public class KafkaClusterTree {
 //            if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
 //
 //            }
+        clusterTreeItem.addOrUpdateSchemaRegistryItem(schemaRegistryManager, cluster);
 
-        if (StringUtils.isNotBlank(cluster.getSchemaRegistryUrl())) {
-            clusterTreeItem.addSchemaRegistryItemIfAbsent();
-            schemaRegistryManager.connectToSchemaRegistry(cluster);
-        } else {
-            clusterTreeItem.removeSchemaRegistryItem();
-        }
+//        else {
+//            clusterTreeItem.removeSchemaRegistryItem();
+//        }
     }
 
     private MenuItem createDeletingConnectionActionMenuItem(KafkaClusterTreeItem<?> selectedItem) {
@@ -467,19 +482,19 @@ public class KafkaClusterTree {
     }
 
     private void disconnectKafkaClusterAndSchemaRegistry(KafkaCluster cluster) {
-        if (cluster.getStatus() == KafkaCluster.ClusterStatus.CONNECTED) {
-            try {
-                clusterManager.closeClusterConnection(cluster.getName());
-                schemaRegistryManager.disconnectFromSchemaRegistry(cluster.getName());
-            } catch (Exception e) {
-                log.error("Error when disconnecting cluster", e);
-                ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Error when disconnecting cluster: " + e.getMessage(), "Error when disconnecting cluster", ButtonType.OK);
-            }
-            cluster.setStatus(KafkaCluster.ClusterStatus.DISCONNECTED);
-        } else {
-//            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Cluster is not connected", "Cluster is not connected", ButtonType.OK);
-            log.info("Disconnect an cluster which is already not connected");
+//        if (cluster.getStatus() == KafkaCluster.ClusterStatus.CONNECTED) {
+        try {
+            clusterManager.closeClusterConnection(cluster.getName());
+            schemaRegistryManager.disconnectFromSchemaRegistry(cluster.getName());
+        } catch (Exception e) {
+            log.error("Error when disconnecting cluster", e);
+            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Error when disconnecting cluster: " + e.getMessage(), "Error when disconnecting cluster", ButtonType.OK);
         }
+        cluster.setStatus(KafkaCluster.ClusterStatus.DISCONNECTED);
+//        } else {
+//            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Cluster is not connected", "Cluster is not connected", ButtonType.OK);
+
+//        }
     }
 
 

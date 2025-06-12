@@ -86,7 +86,11 @@ public class ClusterManager {
     public void closeClusterConnection(String clusterName) {
 
         Admin adminClient = adminMap.get(clusterName);
-        adminClient.close();
+        try {
+            adminClient.close();
+        } catch (Exception e) {
+            log.warn("Error when disconnected an cluster");
+        }
         new HashMap<>(producerMap).forEach((producerCreatorConfig, producer) -> {
             if (producerCreatorConfig.getClusterName().equals(clusterName)) {
                 producer.close();

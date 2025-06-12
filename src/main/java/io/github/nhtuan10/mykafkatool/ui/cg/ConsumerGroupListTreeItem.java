@@ -95,7 +95,7 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
 
         public ConsumerGroupListTreeItemValue(KafkaCluster cluster) {
             this.cluster = cluster;
-            this.display = AppConstant.TREE_ITEM_CONSUMER_GROUPS_DISPLAY_NAME;
+            this.display = AppConstant.CONSUMER_GROUPS_TREE_ITEM_DISPLAY_NAME;
         }
     }
 }
