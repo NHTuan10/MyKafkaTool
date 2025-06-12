@@ -5,6 +5,7 @@ import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
 import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
+import javafx.beans.property.SimpleStringProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -23,8 +24,8 @@ public class ConsumerTest {
     public static void main(String[] args) {
         NoAuthProvider noAuthProvider = new NoAuthProvider();
         AuthProviderManager authProviderManager = new AuthProviderManager(Map.of(noAuthProvider.getName(), noAuthProvider));
-        KafkaCluster cluster = new KafkaCluster("local", "localhost:9092", "http://localhost:8081", false,
-                noAuthProvider.fromConfigText(""));
+        KafkaCluster cluster = new KafkaCluster(new SimpleStringProperty("local"), "localhost:9092", "http://localhost:8081", false,
+                noAuthProvider.fromConfigText(""), null);
         ConsumerCreator.ConsumerCreatorConfig consumerCreatorConfig = ConsumerCreator.ConsumerCreatorConfig.builder(cluster)
                 .keyDeserializer(StringDeserializer.class)
                 .valueDeserializer(StringDeserializer.class)
