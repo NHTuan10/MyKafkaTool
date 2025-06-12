@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12"
+<AnchorPane prefHeight="453.0" prefWidth="658.0" xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddConnectionModalController">
     <children>
@@ -88,8 +88,11 @@
                                                         <RowConstraints maxHeight="110.0" minHeight="0.0"
                                                                         percentHeight="10.0" prefHeight="27.0"
                                                                         vgrow="SOMETIMES"/>
+                                                        <RowConstraints maxHeight="301.0" minHeight="10.0"
+                                                                        percentHeight="80.0" prefHeight="301.0"
+                                                                        vgrow="SOMETIMES"/>
                                                         <RowConstraints maxHeight="272.0" minHeight="10.0"
-                                                                        percentHeight="90.0" prefHeight="267.0"
+                                                                        percentHeight="10.0" prefHeight="51.0"
                                                                         vgrow="SOMETIMES"/>
                                                     </rowConstraints>
                                                     <children>
@@ -108,6 +111,14 @@
                                                                           wrapText="true"/>
                                                             </content>
                                                         </VirtualizedScrollPane>
+                                                        <Label text="Sample" GridPane.rowIndex="2"/>
+                                                        <HBox fx:id="sampleSecurityConfigContainer" prefHeight="100.0"
+                                                              prefWidth="200.0" GridPane.columnIndex="1"
+                                                              GridPane.rowIndex="2">
+                                                            <padding>
+                                                                <Insets top="5.0"/>
+                                                            </padding>
+                                                        </HBox>
                                                     </children>
                                                 </GridPane>
                                             </children>

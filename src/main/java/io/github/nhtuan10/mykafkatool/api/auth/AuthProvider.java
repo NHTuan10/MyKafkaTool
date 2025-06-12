@@ -1,5 +1,9 @@
 package io.github.nhtuan10.mykafkatool.api.auth;
 
+import javafx.util.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public interface AuthProvider {
@@ -15,5 +19,9 @@ public interface AuthProvider {
 
     default Map<String, Object> getKafkaProperties(AuthConfig authConfig) throws Exception {
         return authConfig.properties();
+    }
+
+    default List<Pair<String, String>> getSampleConfig() {
+        return new ArrayList<>();
     }
 }

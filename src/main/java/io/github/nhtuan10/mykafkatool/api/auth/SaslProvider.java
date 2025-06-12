@@ -6,10 +6,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
 import jakarta.inject.Inject;
+import javafx.util.Pair;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @AppScoped
+@Slf4j
 public class SaslProvider implements AuthProvider {
     public static final String SASL = "SASL";
     protected final ObjectMapper objectMapper;
@@ -39,5 +47,15 @@ public class SaslProvider implements AuthProvider {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public List<Pair<String, String>> getSampleConfig() {
+        try {
+            return List.of(new Pair<>("PLAIN", IOUtils.toString(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("sasl-plain.json")), StandardCharsets.UTF_8)));
+        } catch (IOException e) {
+            log.error("Failed to load sasl-plain.json", e);
+            return List.of(new Pair<>("", ""));
+        }
     }
 }

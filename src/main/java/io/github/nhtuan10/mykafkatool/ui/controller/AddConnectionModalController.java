@@ -12,15 +12,15 @@ import jakarta.inject.Inject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AddConnectionModalController extends ModalController {
     private final ObjectProperty<KafkaCluster> objectProperty;
@@ -30,6 +30,8 @@ public class AddConnectionModalController extends ModalController {
     private final AuthProviderManager authProviderManager;
 
     private final ObjectMapper objectMapper;
+
+    private final Map<AuthProvider, List<Hyperlink>> hyperlinks;
 
     @FXML
     private TextField clusterNameTextField;
@@ -48,13 +50,24 @@ public class AddConnectionModalController extends ModalController {
     @FXML
     private ComboBox<AuthProvider> securityTypeComboxBox;
 
+    @FXML
+    private HBox sampleSecurityConfigContainer;
+
     @Inject
     public AddConnectionModalController(JsonHighlighter jsonHighlighter, AuthProviderManager authProviderManager, @RichTextFxObjectMapper ObjectMapper objectMapper) {
-//        this.jsonHighlighter = new JsonHighlighter();
         this.objectProperty = new SimpleObjectProperty<>();
         this.jsonHighlighter = jsonHighlighter;
         this.authProviderManager = authProviderManager;
         this.objectMapper = objectMapper;
+        this.hyperlinks = authProviderManager.getAllAuthProviders().stream().collect(Collectors.toMap(
+                auth -> auth
+                , authProvider -> authProvider.getSampleConfig().stream().map(sample -> {
+                    Hyperlink hyperlink = new Hyperlink(sample.getKey());
+                    hyperlink.setOnAction(event -> {
+                        this.securityConfigTextArea.replaceText(sample.getValue());
+                    });
+                    return hyperlink;
+                }).toList()));
     }
 
     @FXML
@@ -72,6 +85,10 @@ public class AddConnectionModalController extends ModalController {
         securityConfigTextArea.textProperty().addListener((obs, oldText, newText) -> {
             ViewUtils.highlightJsonInCodeArea(newText, securityConfigTextArea, false, objectMapper, jsonHighlighter);
         });
+        securityTypeComboxBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+            sampleSecurityConfigContainer.getChildren().setAll(hyperlinks.get(newValue));
+        });
+        
     }
 
     @Override

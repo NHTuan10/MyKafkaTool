@@ -22,6 +22,7 @@
             <pattern>${ENCODER_PATTERN}</pattern>
         </encoder>
     </appender>
+    <!--    <logger name="com.sun.javafx" level="debug" />-->
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

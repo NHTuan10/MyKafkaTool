@@ -1,0 +1,6 @@
+{
+  "sasl.mechanism": "PLAIN",
+  "sasl.login.callback.handler.class": "org.apache.kafka.common.security.authenticator.SaslClientCallbackHandler",
+  "sasl.client.callback.handler.class": "org.apache.kafka.common.security.authenticator.SaslClientCallbackHandler",
+  "sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"user\" password=\"password\";"
+}
