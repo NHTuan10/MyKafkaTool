@@ -82,7 +82,7 @@ public class SchemaRegistryViewController extends SplitPane {
             ViewUtils.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, objectMapper, jsonHighlighter);
         });
         schemaEditableTable.addEventHandler(SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
-                (event) -> schemaRegistryTextArea.replaceText(event.getData().getValue()));
+                (event) -> ViewUtils.highlightJsonInCodeArea(event.getData().getValue(), schemaRegistryTextArea, true, objectMapper, jsonHighlighter));
     }
 
     public void loadAllSchema(KafkaCluster cluster) throws ExecutionException, InterruptedException {
