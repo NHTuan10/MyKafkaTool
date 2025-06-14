@@ -109,11 +109,10 @@ public class KafkaConsumerService {
         Map<TopicPartition, Long> partitionTimestampMap = topicPartitions.stream()
                 .collect(Collectors.toMap(p -> p, p -> timestamp));
 
-        var offsetsForTime = consumer.offsetsForTimes(partitionTimestampMap).entrySet().stream()
+        return consumer.offsetsForTimes(partitionTimestampMap).entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> Optional.ofNullable(entry.getValue()).map(OffsetAndTimestamp::offset).orElse(endOffsets.get(entry.getKey()))));
-        return offsetsForTime;
     }
 
     private static Map<TopicPartition, Pair<Long, Long>> seekOffset(Consumer<String, String> consumer, Set<TopicPartition> topicPartitions, PollingOptions pollingOptions) {
@@ -251,10 +250,9 @@ public class KafkaConsumerService {
         String value = serDesHelper.deserializeToJsonString(record,
                 pollingOptions.valueContentType,
                 record.headers(), consumerProps, others);
-
         String timestamp = formatRecordTimestamp(record);
 
-        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, pollingOptions.valueContentType(), record.headers(), pollingOptions.schema(), false);
+        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, record.serializedValueSize(), pollingOptions.valueContentType(), record.headers(), pollingOptions.schema(), false);
     }
 
     private KafkaMessageTableItem createErrorMessageItem
@@ -272,10 +270,11 @@ public class KafkaConsumerService {
                 record.key() != null ? record.key() : "",
                 displayValue,
                 timestamp,
-                pollingOptions.valueContentType(),
+                record.serializedValueSize(), pollingOptions.valueContentType(),
                 record.headers(),
                 "",
-                true);
+                true
+        );
     }
 
     private String formatRecordTimestamp(ConsumerRecord<String, Object> record) {

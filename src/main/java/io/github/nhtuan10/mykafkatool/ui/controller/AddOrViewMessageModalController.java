@@ -128,7 +128,7 @@ public class AddOrViewMessageModalController extends ModalController {
         valueDisplayTypeComboBox.setOnAction(event -> {
             valueDisplayTypeToggleEventAction(editable, initValue);
         });
-        //TODO: Set value on below combox box based on the valueContentTypeComboBox
+        //TODO:[Low Priority] Set value on below combox box based on the valueContentTypeComboBox
         valueContentTypeComboBox.getSelectionModel().selectFirst();
         headerTable.setEditable(editable);
 

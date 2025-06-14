@@ -1,7 +1,9 @@
 package io.github.nhtuan10.mykafkatool.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Component;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.ViewControllerMap;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.WindowControllerMap;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
@@ -36,4 +38,7 @@ public interface AppComponent {
     default FXMLLoader loader(URL fxmlUrl) {
         return fxmlLoaderFactory().apply(Objects.requireNonNull(fxmlUrl));
     }
+
+    @SharedObjectMapper
+    ObjectMapper sharedObjectMapper();
 }

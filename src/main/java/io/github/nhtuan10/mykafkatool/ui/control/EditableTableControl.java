@@ -110,17 +110,7 @@ public class EditableTableControl<T> extends AnchorPane {
     @FXML
     protected void initialize() {
         table.getColumns().clear();
-        List<String> itemClassFields = TableViewConfigurer.getTableColumnNamesFromTableItem(itemClass);
-        itemClassFields.forEach(fieldName -> {
-            String columnName = StringUtils.capitalize(StringUtils.join(
-                    StringUtils.splitByCharacterTypeCamelCase(fieldName),
-                    ' '
-            ));
-            TableColumn<T, ?> tableColumn = new TableColumn<>(columnName);
-            table.getColumns().add(tableColumn);
-        });
-        TableViewConfigurer.configureTableView(itemClass, table, stageHolder);
-        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        configureTableView();
         tableItems = FXCollections.observableArrayList();
         applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
         filterTextField.textProperty().bindBidirectional(filterTextProperty);
@@ -144,6 +134,23 @@ public class EditableTableControl<T> extends AnchorPane {
         });
 
         configureEditableControls();
+    }
+
+    protected void configureTableView() {
+        configureTableView((TableViewConfigurer.TableViewConfiguration<T>) TableViewConfigurer.TableViewConfiguration.DEFAULT);
+    }
+
+    protected void configureTableView(TableViewConfigurer.TableViewConfiguration<T> tableViewConfiguration) {
+        List<String> itemClassFields = TableViewConfigurer.getTableColumnNamesFromTableItem(itemClass);
+        itemClassFields.forEach(fieldName -> {
+            String columnName = StringUtils.capitalize(StringUtils.join(
+                    StringUtils.splitByCharacterTypeCamelCase(fieldName),
+                    ' '
+            ));
+            TableColumn<T, ?> tableColumn = new TableColumn<>(columnName);
+            table.getColumns().add(tableColumn);
+        });
+        TableViewConfigurer.configureTableView(itemClass, table, stageHolder, tableViewConfiguration);
     }
 
     public void applyFilter(Filter filter, Predicate<T>... extraPredicates) {

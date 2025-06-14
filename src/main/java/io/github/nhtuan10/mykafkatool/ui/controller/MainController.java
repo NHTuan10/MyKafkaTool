@@ -37,8 +37,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-// TODO: refactor this class
-
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class MainController {

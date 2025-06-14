@@ -17,6 +17,7 @@ import io.github.nhtuan10.mykafkatool.api.auth.SaslProvider;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedPrettyPrintObjectMapper;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
@@ -72,10 +73,19 @@ public abstract class AppModule {
     @Binds
     abstract UserPreferenceRepo userPreferenceRepo(UserPreferenceRepoImpl userPreferenceRepo);
 
+
     @AppScoped
     @Provides
     @SharedObjectMapper
     static ObjectMapper sharedObjectMapper() {
+        return new ObjectMapper()
+                .findAndRegisterModules();
+    }
+
+    @AppScoped
+    @Provides
+    @SharedPrettyPrintObjectMapper
+    static ObjectMapper sharedPrettyPrintObjectMapper() {
         return new ObjectMapper()
                 .findAndRegisterModules()
                 .configure(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS, false)

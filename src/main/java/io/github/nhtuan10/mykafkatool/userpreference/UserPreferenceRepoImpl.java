@@ -2,7 +2,7 @@ package io.github.nhtuan10.mykafkatool.userpreference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
-import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedPrettyPrintObjectMapper;
 import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.Locked;
@@ -25,7 +25,7 @@ public class UserPreferenceRepoImpl implements UserPreferenceRepo {
 //    Lock lock = new ReentrantLock();
 
     @Inject
-    public UserPreferenceRepoImpl(@SharedObjectMapper ObjectMapper objectMapper) {
+    public UserPreferenceRepoImpl(@SharedPrettyPrintObjectMapper ObjectMapper objectMapper) {
 //        this.filePath = filePath;
         this.objectMapper = objectMapper;
 //        this.objectMapper = Utils.contructObjectMapper();

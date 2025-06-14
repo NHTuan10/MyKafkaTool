@@ -18,6 +18,9 @@ public class KafkaMessageTableItem {
     private final SimpleStringProperty value;
     @TableViewColumn
     private final SimpleStringProperty timestamp;
+    @TableViewColumn
+    private final SimpleIntegerProperty serializedValueSize;
+
     @Getter
     private final String valueContentType;
     @Getter
@@ -27,13 +30,15 @@ public class KafkaMessageTableItem {
     @Getter
     private final boolean isErrorItem;
 
+
     public static final String PARTITION = "partition";
     public static final String OFFSET = "offset";
     public static final String KEY = "key";
     public static final String VALUE = "value";
     public static final String TIMESTAMP = "timestamp";
+    public static final String SERIALIZED_VALUE_SIZE = "serializedValueSize";
 
-    public KafkaMessageTableItem(int partition, long offset, String key, String value, String timestamp, String valueContentType, Headers headers, String schema, boolean isErrorItem) {
+    public KafkaMessageTableItem(int partition, long offset, String key, String value, String timestamp, int serializedValueSize, String valueContentType, Headers headers, String schema, boolean isErrorItem) {
         this.partition = new SimpleIntegerProperty(partition);
         this.offset = new SimpleLongProperty(offset);
         this.key = new SimpleStringProperty(key);
@@ -43,6 +48,7 @@ public class KafkaMessageTableItem {
         this.headers = headers;
         this.schema = schema;
         this.isErrorItem = isErrorItem;
+        this.serializedValueSize = new SimpleIntegerProperty(serializedValueSize);
     }
 
     public int getPartition() {
@@ -83,6 +89,14 @@ public class KafkaMessageTableItem {
 
     public void setTimestamp(String timestamp) {
         this.timestamp.set(timestamp);
+    }
+
+    public int getSerializedValueSize() {
+        return serializedValueSize.get();
+    }
+
+    public void setSerializedValueSize(int serializedValueSize) {
+        this.serializedValueSize.set(serializedValueSize);
     }
 
 }

@@ -10,9 +10,11 @@ import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
+import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.skin.TableColumnHeader;
@@ -29,8 +31,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Slf4j
 public class TableViewConfigurer {
@@ -44,13 +48,15 @@ public class TableViewConfigurer {
     public static final int MAX_TABLE_COLUMN_WIDTH = 400;
     public static final double TABLE_COLUMN_WIDTH_MARGIN = 40.0d;
 
-    public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage, StageHolder stageHolder) {
+    public static <S> TableView<S> configureTableView(Class<S> clazz, String fxId, Stage stage, StageHolder stageHolder, TableViewConfiguration<S> tableViewConfiguration) {
         TableView<S> tableView = (TableView<S>) stage.getScene().lookup("#" + fxId);
-        return configureTableView(clazz, tableView, stageHolder);
+        return configureTableView(clazz, tableView, stageHolder, tableViewConfiguration);
     }
 
-    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView, @NonNull StageHolder stageHolder) {
+    public static <S> TableView<S> configureTableView(Class<S> clazz, TableView<S> tableView, @NonNull StageHolder stageHolder, TableViewConfiguration<S> tableViewConfiguration) {
         tableView.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        tableView.getSelectionModel().setSelectionMode(tableViewConfiguration.selectionMode());
+        tableView.getSelectionModel().setCellSelectionEnabled(tableViewConfiguration.isCellSelectionEnabled());
         TableColumn<S, S> numberCol = buildIndexTableColumn();
         tableView.getColumns().addFirst(numberCol);
 
@@ -63,11 +69,10 @@ public class TableViewConfigurer {
 //            label.setTooltip(new Tooltip(columnHeader));
 //            tableColumn.setGraphic(label);
             tableColumn.setCellValueFactory(new PropertyValueFactory<>(fieldNames.get(i)));
-            tableColumn.setCellFactory((column) -> new DragSelectionCell<>(stageHolder));
+            tableColumn.setCellFactory((column) -> new DragSelectionCell<>(stageHolder, tableViewConfiguration));
         });
         // Enable copy by Ctrl + C or by right click -> Copy
-        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        enableCopyDataFromTableByShortcutKeys(tableView);
+        enableCopyDataFromTableByShortcutKeys(tableView, tableViewConfiguration.isHeadersIncludedInRowCopy(), tableViewConfiguration);
         AtomicReference<Boolean> tooltipConfigured = new AtomicReference<>(false);
         //Set the auto-resize policy
         tableView.itemsProperty().addListener((observable, oldValue, newValue) -> {
@@ -156,10 +161,10 @@ public class TableViewConfigurer {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <S> void configureEditableTableCell(TableView<S> tableView, Class<S> tableItemClass, @NonNull StageHolder stageHolder) {
+    public static <S> void configureEditableTableCell(TableView<S> tableView, Class<S> tableItemClass, @NonNull StageHolder stageHolder, TableViewConfigurer.TableViewConfiguration<S> tableViewConfiguration) {
         Callback<TableColumn<S, String>,
                 TableCell<S, String>> cellFactory
-                = (TableColumn<S, String> p) -> new EditingTableCell<>(stageHolder);
+                = (TableColumn<S, String> p) -> new EditingTableCell<>(stageHolder, tableViewConfiguration);
         List<Field> fields = getTableColumnFieldsFromTableItem(tableItemClass);
         IntStream.range(0, fields.size()).forEach(i -> {
             Field field = fields.get(i);
@@ -182,22 +187,23 @@ public class TableViewConfigurer {
         });
     }
 
-    private static void enableCopyDataFromTableByShortcutKeys(TableView<?> tableView) {
+    private static <S> void enableCopyDataFromTableByShortcutKeys(TableView<S> tableView, boolean isHeadersIncludedInRowCopy, TableViewConfigurer.TableViewConfiguration<S> tableViewConfiguration) {
         final KeyCodeCombination keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN);
         tableView.setOnKeyPressed(event -> {
             if (keyCodeCopy.match(event)) {
-                copySelectedInTableViewToClipboard(tableView, false);
+                copySelectedInTableViewToClipboard(tableView, false, isHeadersIncludedInRowCopy, tableViewConfiguration.extraFieldsToCopyAndExport());
             }
         });
     }
 
-    public static List<MenuItem> getTableContextMenuItems(TableView<?> tableView, String cellText, StageHolder stage) {
+    public static <S> List<MenuItem> getTableContextMenuItems(TableView<S> tableView, String cellText, StageHolder stage, TableViewConfigurer.TableViewConfiguration<S> tableViewConfiguration) {
         MenuItem copyRowItem = new MenuItem("Copy Row");
-        copyRowItem.setOnAction(event -> copySelectedInTableViewToClipboard(tableView, false));
+        copyRowItem.setOnAction(event -> copySelectedInTableViewToClipboard(tableView, tableViewConfiguration.isCellSelectionEnabled(), tableViewConfiguration.isHeadersIncludedInRowCopy(), tableViewConfiguration.extraFieldsToCopyAndExport()));
 
         MenuItem exportTableItem = new MenuItem("Export Table");
+        boolean isHeadersIncludedInRowExport = tableViewConfiguration.isHeadersIncludedInRowExport();
         exportTableItem.setOnAction(event -> {
-            String data = getTableDataInCSV(tableView);
+            String data = getTableDataInCSV(tableView, isHeadersIncludedInRowExport, tableViewConfiguration.extraFieldsToCopyAndExport());
             try {
                 ViewUtils.saveDataToFile(data, stage);
             } catch (IOException e) {
@@ -207,7 +213,7 @@ public class TableViewConfigurer {
 
         MenuItem exportSelectedItem = new MenuItem("Export Selected");
         exportSelectedItem.setOnAction(event -> {
-            String selectedData = getSelectedRowsData(tableView, true);
+            String selectedData = getSelectedRowsData(tableView, isHeadersIncludedInRowExport, tableViewConfiguration.extraFieldsToCopyAndExport());
             try {
                 ViewUtils.saveDataToFile(selectedData, stage);
             } catch (IOException e) {
@@ -222,68 +228,71 @@ public class TableViewConfigurer {
         return List.of(copyRowItem, exportTableItem, exportSelectedItem, copyHoverCell);
     }
 
-    private static void copySelectedInTableViewToClipboard(TableView<?> tableView, boolean isCellSelectionEnabled) {
+    private static <S> void copySelectedInTableViewToClipboard(TableView<S> tableView, boolean isCellSelectionEnabled, boolean isHeaderIncluded, TableViewConfiguration.ExtraFieldsToCopyAndExport<S> extraFieldsToCopyAndExport) {
         if (isCellSelectionEnabled) {
-//            copySelectedCellsToClipboard(tableView);
+            copySelectedCellsToClipboard(tableView);
         } else {
-            copySelectedRowsToClipboard(tableView);
+            copySelectedRowsToClipboard(tableView, isHeaderIncluded, extraFieldsToCopyAndExport);
         }
     }
 
-    private static String getTableDataInCSV(TableView<?> tableView) {
+    private static <S> String getTableDataInCSV(TableView<S> tableView, boolean isHeaderIncluded, TableViewConfiguration.ExtraFieldsToCopyAndExport<S> extraFieldsToCopyAndExport) {
         Set<Integer> rows = IntStream.range(0, tableView.getItems().size()).boxed().collect(Collectors.toSet());
-        return getRowData(tableView, rows, true);
+        return getRowData(tableView, rows, true, extraFieldsToCopyAndExport);
     }
 
-//    public static void copySelectedCellsToClipboard(TableView<?> tableView) {
-//        String selectedData = getSelectedCellsData(tableView);
-//        final ClipboardContent content = new ClipboardContent();
-//        content.putString(selectedData);
-//        Clipboard.getSystemClipboard().setContent(content);
-//    }
+    // Doesn't have any use case for cell select or copy data from the table by cells.
+    // Below code are legacy,
 
-//    private static String getSelectedCellsData(TableView<?> tableView) {
-//        ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
-//        int old_r = -1;
-//        StringBuilder selectedString = new StringBuilder();
-//        for (TablePosition<?, ?> p : posList) {
-//            int r = p.getRow();
-//            int c = p.getColumn();
-//            Object cell = tableView.getColumns().get(c).getCellData(r);
-//            if (cell == null)
-//                cell = "";
-//            if (old_r == r)
-//                selectedString.append('\t');
-//            else if (old_r != -1)
-//                selectedString.append(System.lineSeparator());
-//            selectedString.append(cell);
-//            old_r = r;
-//        }
-//        return selectedString.toString();
-//    }
-
-    public static void copySelectedRowsToClipboard(final TableView<?> table) {
-        final String data = getSelectedRowsData(table, true);
-        final ClipboardContent clipboardContent = new ClipboardContent();
-        clipboardContent.putString(data);
-        Clipboard.getSystemClipboard().setContent(clipboardContent);
+    public static void copySelectedCellsToClipboard(TableView<?> tableView) {
+        String selectedData = getSelectedCellsData(tableView);
+        final ClipboardContent content = new ClipboardContent();
+        content.putString(selectedData);
+        Clipboard.getSystemClipboard().setContent(content);
     }
 
-    private static String getSelectedRowsData(TableView<?> table, boolean isHeaderIncluded) {
+    private static String getSelectedCellsData(TableView<?> tableView) {
+        ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
+        int old_r = -1;
+        StringBuilder selectedString = new StringBuilder();
+        for (TablePosition<?, ?> p : posList) {
+            int r = p.getRow();
+            int c = p.getColumn();
+            Object cell = tableView.getColumns().get(c).getCellData(r);
+            if (cell == null)
+                cell = "";
+            if (old_r == r)
+                selectedString.append('\t');
+            else if (old_r != -1)
+                selectedString.append(System.lineSeparator());
+            selectedString.append(cell);
+            old_r = r;
+        }
+        return selectedString.toString();
+    }
+
+    public static <S> void copySelectedRowsToClipboard(final TableView<S> table, boolean isHeaderIncluded, TableViewConfiguration.ExtraFieldsToCopyAndExport<S> extraFieldsToCopyAndExport) {
+        final String data = getSelectedRowsData(table, isHeaderIncluded, extraFieldsToCopyAndExport);
+        ViewUtils.copyTextToClipboard(data);
+    }
+
+    private static <S> String getSelectedRowsData(TableView<S> table, boolean isHeaderIncluded, TableViewConfiguration.ExtraFieldsToCopyAndExport<S> extraFieldsToCopyAndExport) {
         final Set<Integer> rows = new TreeSet<>();
         for (final TablePosition tablePosition : table.getSelectionModel().getSelectedCells()) {
             rows.add(tablePosition.getRow());
         }
-        return getRowData(table, rows, isHeaderIncluded);
+        return getRowData(table, rows, isHeaderIncluded, extraFieldsToCopyAndExport);
     }
 
-    private static String getRowData(TableView<?> table, Set<Integer> rows, boolean isHeaderIncluded) {
+    private static <S> String getRowData(TableView<S> table, Set<Integer> rows, boolean isHeaderIncluded, TableViewConfiguration.ExtraFieldsToCopyAndExport<S> extraFieldsToCopyAndExport) {
         try (StringWriter strWriter = new StringWriter()) {
             SequenceWriter seqWriter = CSV_MAPPER.writer(schema)
                     .writeValues(strWriter);
             if (isHeaderIncluded) {
                 // get table header
-                seqWriter.write(getHeaders(table));
+                List<String> headers = Stream.concat(getHeaders(table).stream(), extraFieldsToCopyAndExport.extraFieldsHeadersToCopyAndExport().stream())
+                        .toList();
+                seqWriter.write(headers);
             }
 
             for (final Integer row : rows) {
@@ -294,6 +303,7 @@ public class TableViewConfigurer {
                     final Object cellData = column.getCellData(row);
                     csvRow.add(cellData == null ? "" : cellData.toString());
                 }
+                csvRow.addAll(extraFieldsToCopyAndExport.extraFieldsToCopyAndExportFunc().apply(table.getItems().get(row)));
                 seqWriter.write(csvRow);
             }
             seqWriter.flush();
@@ -314,10 +324,9 @@ public class TableViewConfigurer {
     }
 
     public static List<String> getTableColumnNamesFromTableItem(Class<?> tableIemClass) {
-        List<String> fieldNames = getTableColumnFieldsFromTableItem(tableIemClass).stream()
+        return getTableColumnFieldsFromTableItem(tableIemClass).stream()
                 .map(Field::getName)
                 .toList();
-        return fieldNames;
     }
 
     public static List<Field> getTableColumnFieldsFromTableItem(Class<?> tableIemClass) {
@@ -338,5 +347,23 @@ public class TableViewConfigurer {
             return (annotation instanceof FilterableTableItemField || annotation.annotationType().isAnnotationPresent(FilterableTableItemField.class));
         }
         return false;
+    }
+
+    public static Optional<TableColumn<KafkaMessageTableItem, ?>> getTableColumnById(TableView<KafkaMessageTableItem> tableView, String tableColumnId) {
+        return tableView.getColumns().stream().filter(c -> c.getId().equals(tableColumnId)).findFirst();
+    }
+
+    public static record TableViewConfiguration<T>(
+            SelectionMode selectionMode
+            , boolean isCellSelectionEnabled
+            , boolean isHeadersIncludedInRowCopy
+            , boolean isHeadersIncludedInRowExport
+            , ExtraFieldsToCopyAndExport<T> extraFieldsToCopyAndExport
+    ) {
+        public static final TableViewConfiguration<?> DEFAULT = new TableViewConfiguration<>(SelectionMode.MULTIPLE, false, true, true, new ExtraFieldsToCopyAndExport(List.of(), (item) -> List.of()));
+
+        public record ExtraFieldsToCopyAndExport<T>(List<String> extraFieldsHeadersToCopyAndExport,
+                                                    Function<T, List<String>> extraFieldsToCopyAndExportFunc) {
+        }
     }
 }

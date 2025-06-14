@@ -1,5 +1,8 @@
 package io.github.nhtuan10.mykafkatool.ui.messageview;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
@@ -13,21 +16,26 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.header.Header;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableItem> {
-    SerDesHelper serDesHelper;
-    KafkaConsumerService.MessagePollingPosition messagePollingPosition;
+    private SerDesHelper serDesHelper;
+    private KafkaConsumerService.MessagePollingPosition messagePollingPosition;
+    private ObjectMapper objectMapper = MyKafkaToolApplication.DAGGER_APP_COMPONENT.sharedObjectMapper();
 
     public KafkaMessageTable() {
         super(false);
@@ -42,6 +50,29 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
 //        setDefaultColumnWidths();
     }
 
+    @Override
+    protected void configureTableView() {
+        TableViewConfigurer.TableViewConfiguration<KafkaMessageTableItem> configuration = new TableViewConfigurer.TableViewConfiguration<>(
+                SelectionMode.MULTIPLE
+                , false
+                , true
+                , true
+                , new TableViewConfigurer.TableViewConfiguration.ExtraFieldsToCopyAndExport<>(List.of("Headers")
+                , item -> {
+            String headers;
+            try {
+                headers = objectMapper.writeValueAsString(Arrays.stream(item.getHeaders().toArray()).collect(Collectors.toMap(Header::key, Header::value)));
+            } catch (JsonProcessingException e) {
+                log.error("Error when serializing headers", e);
+                headers = "Error when serializing headers";
+            }
+            return List.of(headers);
+        }
+        ));
+        configureTableView(configuration);
+        TableViewConfigurer.getTableColumnById(table, KafkaMessageTableItem.SERIALIZED_VALUE_SIZE).ifPresent(column ->
+                column.setText("Serialized Value Size (Bytes)"));
+    }
 //    @Override
 //    public Predicate<KafkaMessageTableItem> filterPredicate(Filter filter) {
 //        return Filter.buildFilterPredicate(filter
@@ -116,7 +147,7 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
         super.applyFilter(filter, extraPredicates);
         ObservableList<TableColumn<KafkaMessageTableItem, ?>> sortOrder = table.getSortOrder();
         if (sortOrder == null || sortOrder.isEmpty()) {
-            table.getColumns().stream().filter(c -> c.getId().equals(KafkaMessageTableItem.TIMESTAMP)).findFirst().ifPresent((timestampColumn) -> {
+            TableViewConfigurer.getTableColumnById(table, KafkaMessageTableItem.TIMESTAMP).ifPresent((timestampColumn) -> {
                 timestampColumn.setSortType(pollingPosition == KafkaConsumerService.MessagePollingPosition.FIRST
                         ? TableColumn.SortType.ASCENDING
                         : TableColumn.SortType.DESCENDING);

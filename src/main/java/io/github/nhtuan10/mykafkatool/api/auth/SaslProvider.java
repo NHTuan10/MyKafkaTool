@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
-import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedPrettyPrintObjectMapper;
 import jakarta.inject.Inject;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class SaslProvider implements AuthProvider {
     protected final ObjectMapper objectMapper;
 
     @Inject
-    public SaslProvider(@SharedObjectMapper ObjectMapper objectMapper) {
+    public SaslProvider(@SharedPrettyPrintObjectMapper ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
