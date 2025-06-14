@@ -15,7 +15,7 @@ import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -85,6 +85,7 @@ public class KafkaClusterTree {
             @Override
             protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
+                TreeItem treeItem = getTreeItem();
                 addStyle(item);
                 if (empty) {
                     setText(null);
@@ -92,7 +93,9 @@ public class KafkaClusterTree {
                 } else {
                     setText(item.toString());
                     if (item instanceof KafkaCluster cluster) {
-                        setTooltip(new Tooltip("%s [ %s ]".formatted(cluster.getName(), cluster.getStatus())));
+                        setTooltip(new Tooltip("%s [%s]".formatted(cluster.getName(), cluster.getStatus())));
+                    } else if (item instanceof KafkaTopic topic && treeItem instanceof KafkaTopicTreeItem<?> topicTreeItem) {
+                        setTooltip(new Tooltip("%s [%s Partitions]".formatted(topic.name(), topicTreeItem.getNumOfPartitions())));
                     } else {
                         setTooltip(new Tooltip(item.toString()));
                     }
@@ -125,7 +128,7 @@ public class KafkaClusterTree {
         if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
             String clusterName = ((KafkaTopicListTreeItem.KafkaTopicListTreeItemValue) topicListTreeItem.getValue()).getCluster().getName();
             AtomicReference<Object> modelRef = new AtomicReference<>();
-            ViewUtils.showPopUpModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of(), stage);
+            ModalUtils.showPopUpModal("add-topic-modal.fxml", "Add New Topic", modelRef, Map.of(), stage);
             NewTopic newTopic = (NewTopic) modelRef.get();
             if (newTopic != null) {
                 CreateTopicsResult result = clusterManager.addTopic(clusterName, newTopic);
@@ -214,7 +217,7 @@ public class KafkaClusterTree {
         purgePartitionItem.setOnAction(ae -> {
 //            if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaPartitionTreeItem<?> selectedPartitionTreeItem) {
 //            KafkaPartition partition = (KafkaPartition) selectedPartitionTreeItem.getValue();
-            if (ViewUtils.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.id() + " ?", "Yes", "Cancel")) {
+            if (ModalUtils.confirmAlert("Purge Partition", "Are you sure to delete all data in the partition " + partition.id() + " ?", "Yes", "Cancel")) {
                 try {
                     clusterManager.purgePartition(partition);
                     this.eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
@@ -233,7 +236,7 @@ public class KafkaClusterTree {
         purgeTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
-                if (ViewUtils.confirmAlert("Purge Topic", "Are you sure to delete all data in the topic " + topic.name() + " ?", "Yes", "Cancel")) {
+                if (ModalUtils.confirmAlert("Purge Topic", "Are you sure to delete all data in the topic " + topic.name() + " ?", "Yes", "Cancel")) {
                     try {
                         clusterManager.purgeTopic(topic);
                         eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
@@ -278,7 +281,7 @@ public class KafkaClusterTree {
         deleteTopicItem.setOnAction(ae -> {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
-                if (ViewUtils.confirmAlert("Delete Topic", "Are you sure to delete " + topic.name() + " ?", "Yes", "Cancel")) {
+                if (ModalUtils.confirmAlert("Delete Topic", "Are you sure to delete " + topic.name() + " ?", "Yes", "Cancel")) {
                     try {
                         clusterManager.deleteTopic(topic.cluster().getName(), topic.name()).all().get();
                     } catch (ExecutionException | InterruptedException e) {
@@ -309,13 +312,13 @@ public class KafkaClusterTree {
             while (true) {
                 AtomicReference<Object> modelRef = new AtomicReference<>();
                 final Map<String, Object> initValues = clonedFrom != null ? Map.of("objectProperty", clonedFrom) : Map.of();
-                ViewUtils.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, initValues, true, true, stage);
+                ModalUtils.showPopUpModal("add-connection-modal.fxml", "Add New Connection", modelRef, initValues, true, true, stage);
                 newConnection = (KafkaCluster) modelRef.get();
 
                 if (newConnection != null && (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameExistedInTree(clusterTree, newConnection.getName()))) {
                     String clusterName = newConnection.getName();
                     log.warn("User enter an invalid cluster name {} or bootstrap server", clusterName);
-                    ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
+                    ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
                 } else {
                     break;
                 }
@@ -341,14 +344,14 @@ public class KafkaClusterTree {
                 try {
                     while (true) {
                         AtomicReference<Object> modelRef = new AtomicReference<>();
-                        ViewUtils.showPopUpModal("add-connection-modal.fxml", "Edit Connection", modelRef,
+                        ModalUtils.showPopUpModal("add-connection-modal.fxml", "Edit Connection", modelRef,
                                 Map.of("objectProperty", oldConnection), true, true, stage);
                         newConnection = (KafkaCluster) modelRef.get();
                         if (newConnection != null &&
                                 (StringUtils.isBlank(newConnection.getName()) || StringUtils.isBlank(newConnection.getBootstrapServer()) || isClusterNameDuplicatedWithOthers(selectedItem, newConnection.getName()))) {
                             String clusterName = newConnection.getName();
                             log.warn("User enter an invalid cluster name {} or bootstrap server", clusterName);
-                            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
+                            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Cluster name " + clusterName + " or bootstrap server is invalid, please try again. Please note that cluster name need to be unique", "Invalid Or Duplicated Connection", ButtonType.OK);
                         } else {
                             //TODO: add dialog to confirm if user want to close connection and replace with new connection
                             break;
@@ -435,7 +438,7 @@ public class KafkaClusterTree {
         MenuItem deleteConnectionItem = new MenuItem("Delete Connection");
         deleteConnectionItem.setOnAction(ae -> {
             // Remove the selected item from its parent's children
-            if (ViewUtils.confirmAlert("Delete Connection", "Are you sure to delete connection " + selectedItem.getValue().toString() + " ?", "Yes", "Cancel")) {
+            if (ModalUtils.confirmAlert("Delete Connection", "Are you sure to delete connection " + selectedItem.getValue().toString() + " ?", "Yes", "Cancel")) {
                 deleteConnection(selectedItem);
             }
         });
@@ -488,7 +491,7 @@ public class KafkaClusterTree {
             schemaRegistryManager.disconnectFromSchemaRegistry(cluster.getName());
         } catch (Exception e) {
             log.error("Error when disconnecting cluster", e);
-            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Error when disconnecting cluster: " + e.getMessage(), "Error when disconnecting cluster", ButtonType.OK);
+            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Error when disconnecting cluster: " + e.getMessage(), "Error when disconnecting cluster", ButtonType.OK);
         }
         cluster.setStatus(KafkaCluster.ClusterStatus.DISCONNECTED);
 //        } else {

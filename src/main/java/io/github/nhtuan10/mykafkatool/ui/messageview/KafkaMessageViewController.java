@@ -19,6 +19,7 @@ import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
 import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
+import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
@@ -301,7 +302,7 @@ public class KafkaMessageViewController {
         }
         if (!(selectedTreeItem instanceof KafkaTopicTreeItem<?>)
                 && !(selectedTreeItem instanceof KafkaPartitionTreeItem<?>)) {
-            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
+            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
             return;
         }
         String schema = schemaTextArea.getText();
@@ -404,7 +405,7 @@ public class KafkaMessageViewController {
     public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws Exception {
 
         AtomicReference<Object> ref = new AtomicReference<>();
-        ViewUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
+        ModalUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
                 Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
                         "schemaTextArea", schemaTextArea.getText()), true, true, stageHolder.getStage());
         KafkaMessage newMsg = (KafkaMessage) ref.get();
@@ -415,10 +416,10 @@ public class KafkaMessageViewController {
                 getTopicEventDispatcher().publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
             }
             if (isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
-                ViewUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Live-update is on, polling the messages", "Added message successfully!",
+                ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Live-update is on, polling the messages", "Added message successfully!",
                         ButtonType.OK);
             } else {
-                if (ViewUtils.confirmAlert("Added message successfully!", "Added message successfully! Do you want to poll the messages?", "Yes", "No")) {
+                if (ModalUtils.confirmAlert("Added message successfully!", "Added message successfully! Do you want to poll the messages?", "Yes", "No")) {
                     if (!isPolling.get()) pollMessages();
 
                 }

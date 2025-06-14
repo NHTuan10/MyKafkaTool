@@ -14,6 +14,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
 
@@ -106,7 +108,7 @@ public class PartitionsTable extends EditableTableControl<KafkaPartitionsTableIt
                             topicPartitionInfos.stream().sorted(Comparator.comparingInt(TopicPartitionInfo::partition))
                             , clusterManager.getPartitionOffsetInfo(clusterName, topicPartitions, null, null).entrySet()
                                     .stream().sorted(Comparator.comparingInt(entry -> entry.getKey().partition())).map(Map.Entry::getValue)
-                            , ViewUtils::mapToUIPartitionTableItem)
+                            , PartitionsTable::mapToUIPartitionTableItem)
                     .toList();
         } catch (ExecutionException | InterruptedException e) {
             log.error("Error when get partitions  offset info for Partitions table of cluster {} and topic {}", clusterName, topicName, e);
@@ -121,5 +123,17 @@ public class PartitionsTable extends EditableTableControl<KafkaPartitionsTableIt
 //                throw new RuntimeException(e);
 //            }
 //        }).toList();
+    }
+
+    public static KafkaPartitionsTableItem mapToUIPartitionTableItem(TopicPartitionInfo partitionInfo, Pair<Long, Long> partitionOffsetsInfo) {
+        Node leader = partitionInfo.leader();
+        return new KafkaPartitionsTableItem(
+                partitionInfo.partition(),
+                partitionOffsetsInfo.getLeft(),
+                partitionOffsetsInfo.getRight(),
+                partitionOffsetsInfo.getRight() - partitionOffsetsInfo.getLeft(),
+                leader.host() + ":" + leader.port(),
+                FXCollections.observableArrayList(partitionInfo.isr().stream().filter(r -> r != leader).map(replica -> replica.host() + ":" + replica.port()).toList()),
+                FXCollections.observableArrayList(partitionInfo.replicas().stream().filter(r -> r != leader && !partitionInfo.isr().contains(r)).map(replica -> replica.host() + ":" + replica.port()).toList()));
     }
 }

@@ -7,8 +7,8 @@ import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.topic.UIPropertyTableItem;
+import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -95,7 +95,7 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
                             FXCollections.observableArrayList(
                                     Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
                     try {
-                        ViewUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false, true, stageHolder.getStage());
+                        ModalUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false, true, stageHolder.getStage());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

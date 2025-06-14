@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartitionInfo;
 
@@ -19,6 +20,8 @@ import java.util.concurrent.TimeoutException;
 @AllArgsConstructor
 public class KafkaTopicTreeItem<T> extends TreeItem<T> {
     private final ClusterManager clusterManager;
+    @Getter
+    private int numOfPartitions;
 
     public KafkaTopicTreeItem(T value, ClusterManager clusterManager) {
         super(value);
@@ -59,9 +62,8 @@ public class KafkaTopicTreeItem<T> extends TreeItem<T> {
         if (treeItem.getValue() instanceof KafkaTopic topic) {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             try {
-                //TODO: use Dagger
                 List<TopicPartitionInfo> partitionInfoList = clusterManager.getTopicPartitions(topic.cluster().getName(), topic.name());
-
+                numOfPartitions = partitionInfoList.size();
                 partitionInfoList.forEach(partitionInfo -> {
                     KafkaPartition partition = new KafkaPartition(partitionInfo.partition(), topic);
                     children.add(new KafkaPartitionTreeItem<>((T) partition));

@@ -10,6 +10,7 @@ import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable;
 import io.github.nhtuan10.mykafkatool.ui.topic.UIPropertyTableItem;
+import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
@@ -101,7 +102,7 @@ public class AddOrViewMessageModalController extends ModalController {
         SerDesHelper.ValidationResult valueValidationResult = serDesHelper.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
         if (!valueValidationResult.isValid()) {
             log.warn("The message is invalid against the schema", valueValidationResult.exception());
-            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
+            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
             return;
         }
 
@@ -189,7 +190,7 @@ public class AddOrViewMessageModalController extends ModalController {
     private boolean validateSchema(String valueContentType, String schema) {
         boolean valid = SerDesHelper.isValidSchemaForSerialization(serDesHelper, valueContentType, schema);
         if (!valid) {
-            ViewUtils.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
+            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Schema is invalid", null,
                     ButtonType.OK);
         }
         return valid;

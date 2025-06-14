@@ -8,6 +8,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
+import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -180,7 +181,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
 
     @Override
     protected boolean doRemoveItem(int index, SchemaTableItem item) {
-        if (ViewUtils.confirmAlert("Delete Subject", "Are you sure to delete " + item.getSubject() + " ?", "Yes", "Cancel")) {
+        if (ModalUtils.confirmAlert("Delete Subject", "Are you sure to delete " + item.getSubject() + " ?", "Yes", "Cancel")) {
             try {
                 schemaRegistryManager.deleteSubject(item.getClusterName(), item.getSubject());
             } catch (RestClientException | IOException e) {
