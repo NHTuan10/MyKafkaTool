@@ -31,6 +31,8 @@ import java.util.function.Consumer;
 
 @Slf4j
 public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
+    public static final String DEFAULT_SCHEMA_TABLE_PLACEHOLDER = "No schema found";
+    public static final String ERROR_MESSAGE_TABLE_PLACEHOLDER = "Error when get schema registry subject metadata";
     private KafkaCluster selectedClusterName;
     private BooleanProperty isBlockingUINeeded;
     // add event handler to clean cache
@@ -154,14 +156,18 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                                 .stream()
                                 .map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, this.selectedClusterName.getName()))
                                 .toList());
-                clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
-                Platform.runLater(() -> this.isBlockingUINeeded.set(false));
+                clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected()), DEFAULT_SCHEMA_TABLE_PLACEHOLDER));
+                Platform.runLater(() -> {
+                    this.isBlockingUINeeded.set(false);
+                    table.setPlaceholder(new Label(DEFAULT_SCHEMA_TABLE_PLACEHOLDER));
+                });
+
             } catch (Exception e) {
-                log.error("Error when get schema registry subject metadata", e);
+                log.error(ERROR_MESSAGE_TABLE_PLACEHOLDER, e);
                 Platform.runLater(() -> {
                     var emptyItems = FXCollections.<SchemaTableItem>emptyObservableList();
                     setItems(emptyItems);
-                    clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(emptyItems, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected())));
+                    clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(emptyItems, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected()), ERROR_MESSAGE_TABLE_PLACEHOLDER));
                     table.setPlaceholder(new Label("Error when get topic config properties: " + e.getMessage()));
                 });
                 throw new RuntimeException(e);
@@ -191,6 +197,6 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
     private static class SchemaTableItemsAndFilter {
         private ObservableList<SchemaTableItem> items;
         private Filter filter;
-
+        private String placeHolderText;
     }
 }
