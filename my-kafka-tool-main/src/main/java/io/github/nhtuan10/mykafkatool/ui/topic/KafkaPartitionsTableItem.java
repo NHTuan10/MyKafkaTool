@@ -43,6 +43,10 @@ public class KafkaPartitionsTableItem {
         return partition;
     }
 
+    public void setPartition(int partition) {
+        this.partition.set(partition);
+    }
+
     public long getStartOffset() {
         return startOffset.get();
     }
@@ -89,11 +93,6 @@ public class KafkaPartitionsTableItem {
 
     public SimpleListProperty<String> replicasNotInSyncProperty() {
         return replicasNotInSync;
-    }
-
-
-    public void setPartition(int partition) {
-        this.partition.set(partition);
     }
 
     public void setStartOffset(long startOffset) {

@@ -1,0 +1,22 @@
+package {{packageName}};
+
+{{#each imports}}
+    import {{this}};
+{{/each}}
+public sealed interface {{className}}FXModel permits {{className}} {
+
+{{#each fields}}
+    public default  {{simpleTypeName}} {{name}}Property() {
+    return (({{className}})this).{{name}};
+    }
+    public default  {{underlyingType}} get{{capitalizeFirst name}}() {
+    return this.{{name}}Property().get();
+    }
+    public default void set{{capitalizeFirst name}}(final {{underlyingType}} {{name}}) {
+    this.{{name}}Property().set({{name}});
+    }
+{{/each}}
+
+}
+
+

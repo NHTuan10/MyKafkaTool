@@ -1,30 +1,32 @@
 package io.github.nhtuan10.mykafkatool.ui.consumergroup;
 
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
+import io.github.nhtuan10.mykafkatool.annotationprocessor.FXModel;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.ToString;
 
-public class ConsumerGroupIDOffsetTableItem {
+@FXModel
+public non-sealed class ConsumerGroupIDOffsetTableItem implements ConsumerGroupIDOffsetTableItemFXModel {
     @TableViewColumn
-    private final SimpleStringProperty consumerID;
+    final SimpleStringProperty consumerID;
     @TableViewColumn
-    private final SimpleStringProperty topic;
+    final SimpleStringProperty topic;
     @TableViewColumn
-    private final SimpleIntegerProperty partition;
+    final SimpleIntegerProperty partition;
     @TableViewColumn
-    private final SimpleLongProperty start;
+    final SimpleLongProperty start;
     @TableViewColumn
-    private final SimpleLongProperty end;
+    final SimpleLongProperty end;
     @TableViewColumn
-    private final SimpleStringProperty committedOffset;
+    final SimpleStringProperty committedOffset;
     @TableViewColumn
-    private final SimpleStringProperty lag;
+    final SimpleStringProperty lag;
     @TableViewColumn
-    private final SimpleStringProperty lastCommit;
+    final SimpleStringProperty lastCommit;
     @TableViewColumn
-    private final SimpleStringProperty host;
+    final SimpleStringProperty host;
 
     public static final String CONSUMER_ID = "consumerID";
     public static final String TOPIC = "topic";
@@ -52,77 +54,77 @@ public class ConsumerGroupIDOffsetTableItem {
         return new ConsumerGroupOffsetTableItemBuilder();
     }
 
-    public int getPartition() {
-        return partition.get();
-    }
-
-    public void setPartition(int partition) {
-        this.partition.set(partition);
-    }
-
-    public String getTopic() {
-        return topic.get();
-    }
-
-    public void setTopic(String topic) {
-        this.topic.set(topic);
-    }
-
-    public long getStart() {
-        return start.get();
-    }
-
-    public void setStart(long start) {
-        this.start.set(start);
-    }
-
-    public long getEnd() {
-        return end.get();
-    }
-
-    public void setEnd(long start) {
-        this.end.set(start);
-    }
-
-    public String getCommittedOffset() {
-        return committedOffset.get();
-    }
-
-    public void setCommittedOffset(String committedOffset) {
-        this.committedOffset.set(committedOffset);
-    }
-
-    public String getLag() {
-        return lag.get();
-    }
-
-    public void setLag(String lag) {
-        this.lag.set(lag);
-    }
-
-    public String getLastCommit() {
-        return lastCommit.get();
-    }
-
-    public void setLastCommit(String lastCommit) {
-        this.lastCommit.set(lastCommit);
-    }
-
-    public String getHost() {
-        return host.get();
-    }
-
-    public void setHost(String host) {
-        this.host.set(host);
-    }
-
-    public String getConsumerID() {
-        return consumerID.get();
-    }
-
-    public void setConsumerID(String consumerID) {
-        this.consumerID.set(consumerID);
-    }
+//    public int getPartition() {
+//        return partition.get();
+//    }
+//
+//    public void setPartition(int partition) {
+//        this.partition.set(partition);
+//    }
+//
+//    public String getTopic() {
+//        return topic.get();
+//    }
+//
+//    public void setTopic(String topic) {
+//        this.topic.set(topic);
+//    }
+//
+//    public long getStart() {
+//        return start.get();
+//    }
+//
+//    public void setStart(long start) {
+//        this.start.set(start);
+//    }
+//
+//    public long getEnd() {
+//        return end.get();
+//    }
+//
+//    public void setEnd(long start) {
+//        this.end.set(start);
+//    }
+//
+//    public String getCommittedOffset() {
+//        return committedOffset.get();
+//    }
+//
+//    public void setCommittedOffset(String committedOffset) {
+//        this.committedOffset.set(committedOffset);
+//    }
+//
+//    public String getLag() {
+//        return lag.get();
+//    }
+//
+//    public void setLag(String lag) {
+//        this.lag.set(lag);
+//    }
+//
+//    public String getLastCommit() {
+//        return lastCommit.get();
+//    }
+//
+//    public void setLastCommit(String lastCommit) {
+//        this.lastCommit.set(lastCommit);
+//    }
+//
+//    public String getHost() {
+//        return host.get();
+//    }
+//
+//    public void setHost(String host) {
+//        this.host.set(host);
+//    }
+//
+//    public String getConsumerID() {
+//        return consumerID.get();
+//    }
+//
+//    public void setConsumerID(String consumerID) {
+//        this.consumerID.set(consumerID);
+//    }
 
     @ToString
     public static class ConsumerGroupOffsetTableItemBuilder {
