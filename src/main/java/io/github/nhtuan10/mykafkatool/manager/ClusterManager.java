@@ -9,7 +9,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.creator.ProducerCreator;
-import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupOffsetTableItem;
+import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupIDOffsetTableItem;
 import jakarta.inject.Inject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -174,11 +174,10 @@ public class ClusterManager {
     }
 
     private Map<TopicPartition, Long> getPartitionOffsetsBySpec(List<TopicPartition> topicPartitions, Admin adminClient, OffsetSpec startOffsetSpec) throws InterruptedException, ExecutionException {
-        Map<TopicPartition, Long> earliestOffsetsResultInfo = adminClient
+        return adminClient
                 .listOffsets(topicPartitions.stream().collect(Collectors.toMap(tp -> tp, tp -> startOffsetSpec)))
                 .all().get().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().offset()));
-        return earliestOffsetsResultInfo;
     }
 
 //    public Pair<Long, Long> getPartitionOffsetInfo(String clusterName, TopicPartition topicPartition, Long startTimestamp, Long endTimestamp) throws ExecutionException, InterruptedException {
@@ -223,7 +222,7 @@ public class ClusterManager {
         return adminMap.get(clusterName).describeConsumerGroups(consumerGroupIds).all().get();
     }
 
-    public List<ConsumerGroupOffsetTableItem> listConsumerGroupOffsets(String clusterName, String consumerGroupId) throws ExecutionException, InterruptedException {
+    public List<ConsumerGroupIDOffsetTableItem> listConsumerGroupOffsets(String clusterName, String consumerGroupId) throws ExecutionException, InterruptedException {
         CompletableFuture<Map<TopicPartition, OffsetAndMetadata>> cgOffsetFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 return adminMap.get(clusterName).listConsumerGroupOffsets(consumerGroupId).partitionsToOffsetAndMetadata().get();
@@ -263,7 +262,7 @@ public class ClusterManager {
                                     lag = String.valueOf(endOffset - metadata.offset());
                                     leaderEpoch = metadata.leaderEpoch().orElse(0).toString();
                                 }
-                                return new ConsumerGroupOffsetTableItem(member.consumerId(), tp.topic(), tp.partition(), startEndOffsetPair.getLeft(), endOffset, offset, lag, leaderEpoch, member.host());
+                                return new ConsumerGroupIDOffsetTableItem(member.consumerId(), tp.topic(), tp.partition(), startEndOffsetPair.getLeft(), endOffset, offset, lag, leaderEpoch, member.host());
                             });
 
                         } catch (ExecutionException | InterruptedException e) {
@@ -274,7 +273,7 @@ public class ClusterManager {
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
-            return List.<ConsumerGroupOffsetTableItem>of();
+            return List.<ConsumerGroupIDOffsetTableItem>of();
         }).get();
     }
 

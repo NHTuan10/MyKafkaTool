@@ -4,7 +4,7 @@ import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
 import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
-import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupListTreeItem;
+import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import javafx.beans.value.ChangeListener;
 import javafx.event.Event;

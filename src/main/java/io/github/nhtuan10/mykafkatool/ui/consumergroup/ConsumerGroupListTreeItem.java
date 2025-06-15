@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui.cg;
+package io.github.nhtuan10.mykafkatool.ui.consumergroup;
 
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;

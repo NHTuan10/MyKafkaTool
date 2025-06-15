@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui.cg;
+package io.github.nhtuan10.mykafkatool.ui.consumergroup;
 
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.ToString;
 
-public class ConsumerGroupOffsetTableItem {
+public class ConsumerGroupIDOffsetTableItem {
     @TableViewColumn
     private final SimpleStringProperty consumerID;
     @TableViewColumn
@@ -36,7 +36,7 @@ public class ConsumerGroupOffsetTableItem {
     public static final String LAST_COMMIT = "lastCommit";
     public static final String HOST = "host";
 
-    public ConsumerGroupOffsetTableItem(String consumerID, String topic, int partition, long start, long end, String committedOffset, String lag, String lastCommit, String host) {
+    public ConsumerGroupIDOffsetTableItem(String consumerID, String topic, int partition, long start, long end, String committedOffset, String lag, String lastCommit, String host) {
         this.consumerID = new SimpleStringProperty(consumerID);
         this.topic = new SimpleStringProperty(topic);
         this.partition = new SimpleIntegerProperty(partition);
@@ -185,8 +185,8 @@ public class ConsumerGroupOffsetTableItem {
             return this;
         }
 
-        public ConsumerGroupOffsetTableItem build() {
-            return new ConsumerGroupOffsetTableItem(this.consumerID, this.topic, this.partition, this.start, this.end, this.committedOffset, this.lag, this.lastCommit, this.host);
+        public ConsumerGroupIDOffsetTableItem build() {
+            return new ConsumerGroupIDOffsetTableItem(this.consumerID, this.topic, this.partition, this.start, this.end, this.committedOffset, this.lag, this.lastCommit, this.host);
         }
 
     }

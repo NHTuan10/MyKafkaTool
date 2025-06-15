@@ -9,9 +9,9 @@ import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTable;
-import io.github.nhtuan10.mykafkatool.ui.cg.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
+import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupTreeItem;
+import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupView;
 import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageView;
 import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryView;
@@ -63,8 +63,11 @@ public class MainController {
     private KafkaMessageView kafkaMessageView;
 
     // Consumer Groups
+//    @FXML
+//    private ConsumerGroupIDTable consumerGroupOffsetTable;
+
     @FXML
-    private ConsumerGroupTable consumerGroupOffsetTable;
+    private ConsumerGroupView consumerGroupView;
 
     @FXML
     private Tab cgOffsetsTab;
@@ -155,7 +158,7 @@ public class MainController {
                 eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 setVisibleTabs(cgOffsetsTab);
-                this.consumerGroupOffsetTable.loadCG(selected, this.isBlockingAppUINeeded);
+                this.consumerGroupView.loadCG(selected, this.isBlockingAppUINeeded);
             } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.SCHEMA_REGISTRY_TREE_ITEM_DISPLAY_NAME.equals(selectedItem.getValue())) {
                 setVisibleTabs(dataTab);
                 schemaRegistryView.setVisible(true);

@@ -26,7 +26,7 @@ module com.example.mykafkatool {
     exports io.github.nhtuan10.mykafkatool.model.preference to com.fasterxml.jackson.databind;
     exports io.github.nhtuan10.mykafkatool.model.kafka to com.fasterxml.jackson.databind;
     opens io.github.nhtuan10.mykafkatool.ui to javafx.base;
-    opens io.github.nhtuan10.mykafkatool.ui.cg to javafx.base;
+    opens io.github.nhtuan10.mykafkatool.ui.consumergroup to javafx.base;
     opens io.github.nhtuan10.mykafkatool.ui.cluster to javafx.base;
     opens io.github.nhtuan10.mykafkatool.ui.partition to javafx.base;
     opens io.github.nhtuan10.mykafkatool.ui.topic to javafx.base;

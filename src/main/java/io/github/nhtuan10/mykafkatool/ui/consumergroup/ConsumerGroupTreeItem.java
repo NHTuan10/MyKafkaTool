@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui.cg;
+package io.github.nhtuan10.mykafkatool.ui.consumergroup;
 
 import javafx.scene.control.TreeItem;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class ConsumerGroupTreeItem extends TreeItem<String> {
 
-    private List<ConsumerGroupOffsetTableItem> consumerGroupOffsetTableItemList;
+    private List<ConsumerGroupIDOffsetTableItem> consumerGroupIDOffsetTableItemList;
     private String clusterName;
     private String consumerGroupId;
 

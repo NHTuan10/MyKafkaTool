@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.ui.cg;
+package io.github.nhtuan10.mykafkatool.ui.consumergroup;
 
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
@@ -17,13 +17,13 @@ import java.util.concurrent.ExecutionException;
 //TODO: create a new CG view which includes this table. Then add info such as number of topic, members, partition, members, total lag, topics, etc.
 
 @Slf4j
-public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffsetTableItem> {
+public class ConsumerGroupIDTable extends EditableTableControl<ConsumerGroupIDOffsetTableItem> {
     private ConsumerGroupTreeItem consumerGroupTreeItem;
     //    @Inject
     private final ClusterManager clusterManager;
     private BooleanProperty isBusy;
 
-    public ConsumerGroupTable() {
+    public ConsumerGroupIDTable() {
         super(false);
         this.clusterManager = MyKafkaToolApplication.DAGGER_APP_COMPONENT.clusterManager();
     }
@@ -64,10 +64,10 @@ public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupOffset
         }, (items) -> {
             isBusy.set(false);
             setItems(items);
-            ObservableList<TableColumn<ConsumerGroupOffsetTableItem, ?>> sortOrder = table.getSortOrder();
-            final List<String> sortedColumnNames = List.of(ConsumerGroupOffsetTableItem.CONSUMER_ID, ConsumerGroupOffsetTableItem.TOPIC, ConsumerGroupOffsetTableItem.PARTITION);
+            ObservableList<TableColumn<ConsumerGroupIDOffsetTableItem, ?>> sortOrder = table.getSortOrder();
+            final List<String> sortedColumnNames = List.of(ConsumerGroupIDOffsetTableItem.CONSUMER_ID, ConsumerGroupIDOffsetTableItem.TOPIC, ConsumerGroupIDOffsetTableItem.PARTITION);
             if (sortOrder.isEmpty()) {
-                List<TableColumn<ConsumerGroupOffsetTableItem, ?>> sortedColumns = table.getColumns().stream()
+                List<TableColumn<ConsumerGroupIDOffsetTableItem, ?>> sortedColumns = table.getColumns().stream()
                         .filter(c -> sortedColumnNames.contains(c.getId()))
                         .peek(c -> c.setSortType(TableColumn.SortType.ASCENDING))
                         .toList();
