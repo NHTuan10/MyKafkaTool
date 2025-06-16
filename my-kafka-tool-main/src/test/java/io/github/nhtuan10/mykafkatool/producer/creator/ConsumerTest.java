@@ -34,6 +34,7 @@ public class ConsumerTest {
         ConsumerCreator consumerCreator = new ConsumerCreator(authProviderManager);
         Map<String, Object> consumerProps = new ConsumerCreator(authProviderManager).buildConsumerConfigs(consumerCreatorConfig);
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OFFSET_RESET_LATEST);
+        consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         ClusterManager clusterManager = new ClusterManager(authProviderManager,
                 new ProducerCreator(authProviderManager), consumerCreator);
         Consumer<String, Object> consumer = clusterManager.createConsumer(consumerProps);

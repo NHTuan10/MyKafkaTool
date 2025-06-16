@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class ConsumerGroupTreeItem extends TreeItem<String> {
 
-    private List<ConsumerGroupIDOffsetTableItem> consumerGroupIDOffsetTableItemList;
+    private List<ConsumerTableItem> consumerTableItemList;
     private String clusterName;
     private String consumerGroupId;
 
