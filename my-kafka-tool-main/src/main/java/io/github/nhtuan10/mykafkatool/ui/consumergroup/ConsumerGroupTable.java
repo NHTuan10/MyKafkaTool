@@ -108,24 +108,33 @@ public class ConsumerGroupTable extends EditableTableControl<ConsumerGroupTableI
     }
 
     public void resetCG(CGResetOption resetOption, Long startTimestamp) {
-        table.getSelectionModel().getSelectedItems().stream().forEach(item -> {
-            try {
-                switch (resetOption) {
-                    case EARLIEST ->
-                            clusterManager.resetConsumerGroupOffset(clusterName, item.getTopic(), item.getGroupId(), OffsetSpec.earliest());
-                    case LATEST ->
-                            clusterManager.resetConsumerGroupOffset(clusterName, item.getTopic(), item.getGroupId(), OffsetSpec.latest());
-                    case START_TIMESTAMP -> {
-                        if (startTimestamp == null) {
-                            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Please select start time to reset", "Please select start time to reset", ButtonType.OK);
+        var selectedItems = table.getSelectionModel().getSelectedItems();
+        if (selectedItems.isEmpty()) {
+            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Please choose a consumer group and topic to reset offsets", "Please choose a consumer group and topic to reset offsets", ButtonType.OK);
+            return;
+        }
+
+        selectedItems.stream().forEach(item -> {
+            if (ModalUtils.confirmAlert("Reset Consumer Group Offset", "Do you want to reset CG %s for topic %s to the %s".formatted(item.getGroupId(), item.getTopic(), resetOption), "YES", "NO")) {
+                try {
+                    switch (resetOption) {
+                        case EARLIEST ->
+                                clusterManager.resetConsumerGroupOffset(clusterName, item.getTopic(), item.getGroupId(), OffsetSpec.earliest());
+                        case LATEST ->
+                                clusterManager.resetConsumerGroupOffset(clusterName, item.getTopic(), item.getGroupId(), OffsetSpec.latest());
+                        case START_TIMESTAMP -> {
+                            if (startTimestamp == null) {
+                                ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Please select start time to reset", "Please select start time to reset", ButtonType.OK);
+                            }
                         }
                     }
+                    ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Reset offset successfully", "Reset offset successfully", ButtonType.OK);
+                } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                    throw new RuntimeException(e);
                 }
-                ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Reset offset successfully", "Reset offset successfully", ButtonType.OK);
-            } catch (ExecutionException | InterruptedException | TimeoutException e) {
-                throw new RuntimeException(e);
             }
         });
+
     }
 
     public ReadOnlyObjectProperty<ConsumerGroupTableItem> selectedItemProperty() {

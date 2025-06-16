@@ -22,30 +22,33 @@
                     <Insets left="5.0" top="5.0"/>
                 </HBox.margin>
             </Label>
-            <HBox styleClass="bordered-container" fx:id="resetCGHBox">
+            <HBox fx:id="resetCGHBox" styleClass="bordered-container">
                 <HBox.margin>
                     <Insets left="20.0"/>
                 </HBox.margin>
                 <Label text="Reset Consumer Group">
                     <HBox.margin>
-                        <Insets left="10.0" top="5.0"/>
+                        <Insets left="5.0"/>
                     </HBox.margin>
                 </Label>
-                <ComboBox prefWidth="150.0" fx:id="resetCGComboBox">
+                <ComboBox fx:id="resetCGComboBox" prefWidth="150.0">
                     <HBox.margin>
-                        <Insets left="5.0" top="5.0"/>
+                        <Insets left="5.0"/>
                     </HBox.margin>
                 </ComboBox>
-                <DateTimePicker prefWidth="150.0" fx:id="resetCGStartDateTimePicker">
+                <DateTimePicker fx:id="resetCGStartDateTimePicker" prefWidth="150.0">
                     <HBox.margin>
-                        <Insets left="5.0" top="5.0"/>
+                        <Insets left="5.0"/>
                     </HBox.margin>
                 </DateTimePicker>
-                <Button mnemonicParsing="false" text="Reset" onAction="#resetCG">
+                <Button mnemonicParsing="false" onAction="#resetCG" text="Reset">
                     <HBox.margin>
-                        <Insets left="5.0" top="5.0"/>
+                        <Insets left="5.0"/>
                     </HBox.margin>
                 </Button>
+                <padding>
+                    <Insets left="5.0" right="5.0" top="5.0" bottom="5.0"/>
+                </padding>
             </HBox>
             <!--                   text="${consumerGroupId}"-->
         </HBox>
