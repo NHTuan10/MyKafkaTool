@@ -34,6 +34,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -121,6 +122,8 @@ public class MainController {
         schemaRegistryView.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
         this.eventDispatcher.addSchemaRegistryEventSubscriber(schemaRegistryView.getSchemaRegistryEventSubscriber());
 
+        consumerGroupView.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
+        this.eventDispatcher.addConsumerGroupEventSubscriber(consumerGroupView.getConsumerGroupEventSubscriber());
         blockAppProgressInd.visibleProperty().bindBidirectional(isBlockingAppUINeeded);
         this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaRegistryManager, eventDispatcher, userPreferenceManager);
 
@@ -144,10 +147,12 @@ public class MainController {
                 kafkaMessageView.switchTopicOrPartition((TreeItem) newValue);
                 KafkaTopic topic = (KafkaTopic) selectedItem.getValue();
                 // Enable the data tab and show/hide titled panes in the tab
-                setVisibleTabs(dataTab, propertiesTab);
+                setVisibleTabs(dataTab, propertiesTab, cgOffsetsTab);
                 schemaRegistryView.setVisible(false);
                 kafkaMessageView.setVisible(true);
                 eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
+                this.consumerGroupView.loadCG(topic);
+                this.eventDispatcher.publishEvent(ConsumerGroupUIEvent.newRefreshConsumerGroupEven(topic.cluster().getName(), null, topic));
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 kafkaMessageView.switchTopicOrPartition((TreeItem) newValue);
                 setVisibleTabs(dataTab, propertiesTab);
@@ -158,7 +163,8 @@ public class MainController {
                 eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
             } else if (newValue instanceof ConsumerGroupTreeItem selected) {
                 setVisibleTabs(cgOffsetsTab);
-                this.consumerGroupView.loadCG(selected, this.isBlockingAppUINeeded);
+//                this.consumerGroupView.loadCG(selected.getClusterName(), List.of(selected.getConsumerGroupId()));
+                this.eventDispatcher.publishEvent(ConsumerGroupUIEvent.newRefreshConsumerGroupEven(selected.getClusterName(), List.of(selected.getConsumerGroupId()), null));
             } else if (newValue instanceof TreeItem<?> selectedItem && AppConstant.SCHEMA_REGISTRY_TREE_ITEM_DISPLAY_NAME.equals(selectedItem.getValue())) {
                 setVisibleTabs(dataTab);
                 schemaRegistryView.setVisible(true);

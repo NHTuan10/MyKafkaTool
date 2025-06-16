@@ -10,6 +10,7 @@ import javafx.scene.control.TreeItem;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.ConsumerGroupListing;
+import org.apache.kafka.common.ConsumerGroupState;
 
 import java.util.Comparator;
 import java.util.List;
@@ -66,9 +67,10 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
                 consumerGroupListings.forEach(consumerGroupListing -> {
                     String consumerGroupId = consumerGroupListing.groupId();
                     StringBuilder displayValSB = new StringBuilder(consumerGroupId);
-                    consumerGroupListing.state().ifPresent(state -> displayValSB.append(" [").append(state).append("]"));
+                    String state = consumerGroupListing.state().map(ConsumerGroupState::toString).orElse("");
+                    displayValSB.append(" [").append(state).append("]");
 
-                    TreeItem<T> consumerGroupItem = (TreeItem<T>) new ConsumerGroupTreeItem(displayValSB.toString(), clusterName, consumerGroupId);
+                    TreeItem<T> consumerGroupItem = (TreeItem<T>) new ConsumerGroupTreeItem(displayValSB.toString(), clusterName, consumerGroupId, state);
                     children.add(consumerGroupItem);
                 });
                 // clusterManager.getConsumerGroup(clusterName, consumerGroupListings.stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList()));

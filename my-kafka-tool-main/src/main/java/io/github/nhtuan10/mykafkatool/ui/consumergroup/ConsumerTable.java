@@ -2,6 +2,7 @@ package io.github.nhtuan10.mykafkatool.ui.consumergroup;
 
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
+import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.BooleanProperty;
@@ -10,6 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.ConsumerGroupListing;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -18,8 +20,11 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class ConsumerTable extends EditableTableControl<ConsumerTableItem> {
-    private ConsumerGroupTreeItem consumerGroupTreeItem;
+    //    private ConsumerGroupTreeItem consumerGroupTreeItem;
     //    @Inject
+    private String clusterName;
+    private List<String> consumerGroupIds;
+    private KafkaTopic topic;
     private final ClusterManager clusterManager;
     private BooleanProperty isBusy;
 
@@ -43,8 +48,17 @@ public class ConsumerTable extends EditableTableControl<ConsumerTableItem> {
 //        );
 //    }
 
-    public void loadCG(ConsumerGroupTreeItem consumerGroupTreeItem, BooleanProperty isBusy) {
-        this.consumerGroupTreeItem = consumerGroupTreeItem;
+    public void loadCG(String clusterName, List<String> consumerGroupIds, BooleanProperty isBusy) {
+        this.clusterName = clusterName;
+        this.consumerGroupIds = consumerGroupIds;
+        this.topic = null;
+        this.isBusy = isBusy;
+        refresh();
+    }
+
+    public void loadCG(KafkaTopic topic, BooleanProperty isBusy) {
+        this.clusterName = topic.cluster().getName();
+        this.topic = topic;
         this.isBusy = isBusy;
         refresh();
     }
@@ -55,9 +69,16 @@ public class ConsumerTable extends EditableTableControl<ConsumerTableItem> {
         isBusy.set(true);
         ViewUtils.runBackgroundTask(() -> {
             try {
-                return FXCollections.observableArrayList(clusterManager.listConsumerGroupOffsets(consumerGroupTreeItem.getClusterName(), consumerGroupTreeItem.getConsumerGroupId()));
+                if (topic != null) {
+                    this.consumerGroupIds = clusterManager.getConsumerGroupList(clusterName).stream().map(ConsumerGroupListing::groupId).toList();
+                    return FXCollections.observableArrayList(clusterManager
+                            .listConsumerDetails(clusterName, consumerGroupIds).stream()
+                            .filter(item -> item.getTopic().equals(topic.name())).toList());
+                } else {
+                    return FXCollections.observableArrayList(clusterManager.listConsumerDetails(clusterName, consumerGroupIds));
+                }
             } catch (ExecutionException | InterruptedException e) {
-                isBusy.set(false);
+//                isBusy.set(false);
                 log.error("Error when get consumer group offsets", e);
                 throw new RuntimeException(e);
             }
@@ -65,21 +86,19 @@ public class ConsumerTable extends EditableTableControl<ConsumerTableItem> {
             isBusy.set(false);
             setItems(items);
             ObservableList<TableColumn<ConsumerTableItem, ?>> sortOrder = table.getSortOrder();
-            final List<String> sortedColumnNames = List.of(ConsumerTableItem.CONSUMER_ID, ConsumerTableItem.TOPIC, ConsumerTableItem.PARTITION);
+            final List<String> sortedColumnNames = List.of(ConsumerTableItemFXModel.CONSUMER_ID, ConsumerTableItemFXModel.TOPIC, ConsumerTableItemFXModel.PARTITION);
             if (sortOrder.isEmpty()) {
                 List<TableColumn<ConsumerTableItem, ?>> sortedColumns = table.getColumns().stream()
                         .filter(c -> sortedColumnNames.contains(c.getId()))
-                        .peek(c -> c.setSortType(TableColumn.SortType.ASCENDING))
                         .toList();
-
+                sortedColumns.forEach(c -> c.setSortType(TableColumn.SortType.ASCENDING));
                 table.getSortOrder().addAll(sortedColumns);
                 table.sort();
             }
-        }, (e) -> {
+        }, e -> {
             isBusy.set(false);
             setItems(FXCollections.emptyObservableList());
             throw ((RuntimeException) e);
         });
     }
-
 }

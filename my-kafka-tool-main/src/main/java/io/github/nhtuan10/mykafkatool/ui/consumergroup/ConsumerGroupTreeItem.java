@@ -13,10 +13,12 @@ public class ConsumerGroupTreeItem extends TreeItem<String> {
     private List<ConsumerTableItem> consumerTableItemList;
     private String clusterName;
     private String consumerGroupId;
+    private String state;
 
-    public ConsumerGroupTreeItem(String displayVal, String clusterName, String consumerGroupId) {
+    public ConsumerGroupTreeItem(String displayVal, String clusterName, String consumerGroupId, String state) {
         super(displayVal);
         this.clusterName = clusterName;
         this.consumerGroupId = consumerGroupId;
+        this.state = state;
     }
 }

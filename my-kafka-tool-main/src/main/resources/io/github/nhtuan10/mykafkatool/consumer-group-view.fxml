@@ -4,24 +4,49 @@
 
 <?import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupTable?>
 <?import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerTable?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ToggleButton?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <fx:root prefHeight="627.5" prefWidth="995.0" type="BorderPane" xmlns="http://javafx.com/javafx/17.0.12"
          xmlns:fx="http://javafx.com/fxml/1">
     <top>
         <HBox>
-            <ToggleButton fx:id="toggleConsumerView" text="Consumer View">
+            <ToggleButton fx:id="toggleConsumerView" text="Show Consumer">
                 <HBox.margin>
                     <Insets left="5.0" top="5.0"/>
                 </HBox.margin>
             </ToggleButton>
-            <Label fx:id="consumerGroupId">
+            <Label fx:id="infoLabel">
                 <HBox.margin>
                     <Insets left="5.0" top="5.0"/>
                 </HBox.margin>
             </Label>
+            <HBox styleClass="bordered-container" fx:id="resetCGHBox">
+                <HBox.margin>
+                    <Insets left="20.0"/>
+                </HBox.margin>
+                <Label text="Reset Consumer Group">
+                    <HBox.margin>
+                        <Insets left="10.0" top="5.0"/>
+                    </HBox.margin>
+                </Label>
+                <ComboBox prefWidth="150.0" fx:id="resetCGComboBox">
+                    <HBox.margin>
+                        <Insets left="5.0" top="5.0"/>
+                    </HBox.margin>
+                </ComboBox>
+                <DateTimePicker prefWidth="150.0" fx:id="resetCGStartDateTimePicker">
+                    <HBox.margin>
+                        <Insets left="5.0" top="5.0"/>
+                    </HBox.margin>
+                </DateTimePicker>
+                <Button mnemonicParsing="false" text="Reset" onAction="#resetCG">
+                    <HBox.margin>
+                        <Insets left="5.0" top="5.0"/>
+                    </HBox.margin>
+                </Button>
+            </HBox>
             <!--                   text="${consumerGroupId}"-->
         </HBox>
     </top>

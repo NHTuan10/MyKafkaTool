@@ -19,7 +19,14 @@ public class DragSelectionCell<S, T> extends TableCell<S, T> {
         });
 
         setOnMouseDragEntered(event -> getTableColumn().getTableView().getSelectionModel().select(getIndex(), getTableColumn()));
-
+//        ContextMenu menu = new ContextMenu(new MenuItem());
+//        menu.setOnShowing(e -> {
+//            String cellText = String.valueOf(getTableColumn().getCellData(getIndex()));
+//            menu.getItems().setAll(TableViewConfigurer.getTableContextMenuItems(getTableView(), cellText, this.stageHolder, tableViewConfiguration));
+////                getTableView().setContextMenu(menu);
+////            menu.show(this, e.getScreenX(), e.getScreenY());
+//        });
+//        getTableView().setContextMenu(menu);
         setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
                 String cellText = String.valueOf(getTableColumn().getCellData(getIndex()));

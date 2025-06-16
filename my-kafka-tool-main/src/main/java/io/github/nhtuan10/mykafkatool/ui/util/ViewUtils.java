@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
+import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
 import javafx.concurrent.Task;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -14,6 +15,8 @@ import org.fxmisc.richtext.CodeArea;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -69,5 +72,9 @@ public final class ViewUtils {
         final ClipboardContent content = new ClipboardContent();
         content.putString(text);
         Clipboard.getSystemClipboard().setContent(content);
+    }
+
+    public static Long getTimestamp(DateTimePicker dateTimePicker) {
+        return (dateTimePicker.getValue() != null && dateTimePicker.getDateTimeValue() != null) ? ZonedDateTime.of(dateTimePicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
     }
 }

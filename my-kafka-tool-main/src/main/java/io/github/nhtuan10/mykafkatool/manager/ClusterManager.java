@@ -184,6 +184,7 @@ public class ClusterManager {
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().offset()));
     }
 
+
 //    public Pair<Long, Long> getPartitionOffsetInfo(String clusterName, TopicPartition topicPartition, Long startTimestamp, Long endTimestamp) throws ExecutionException, InterruptedException {
 //        Admin adminClient = adminMap.get(clusterName);
 //        OffsetSpec startOffsetSpec = OffsetSpec.earliest();
@@ -226,65 +227,76 @@ public class ClusterManager {
         return adminMap.get(clusterName).describeConsumerGroups(consumerGroupIds).all().get();
     }
 
-    public Collection<ConsumerGroupTableItem> listConsumerGroupDetails(String clusterName, String consumerGroupId) throws ExecutionException, InterruptedException {
-        return listConsumerGroupOffsets(clusterName, consumerGroupId).stream()
-                .collect(Collectors.groupingBy(ConsumerTableItem::getTopic, Collectors.collectingAndThen(Collectors.toList(), (list) -> {
-                    if (!list.isEmpty()) {
-                        String topic = list.getFirst().getTopic();
-                        String lag = "";
-                        if (list.stream().map(ConsumerTableItem::getLag).allMatch(StringUtils::isNotBlank)) {
-                            lag = String.valueOf(list.stream().map(ConsumerTableItem::getLag).mapToLong(Long::parseLong).sum());
-                        }
-                        int numberOfMember = list.stream().map(ConsumerTableItem::getConsumerID).collect(Collectors.toSet()).size();
-                        String state = list.getFirst().getState().toString();
+    public Collection<ConsumerGroupTableItem> listConsumerGroupDetails(String clusterName, List<String> consumerGroupId) throws ExecutionException, InterruptedException {
+        return getConsumerDetailMap(clusterName, consumerGroupId).entrySet().stream()
+                .flatMap(e ->
+                        e.getValue().stream().collect(Collectors.groupingBy(ConsumerTableItem::getTopic, Collectors.collectingAndThen(Collectors.toList(), list -> {
+                            if (!list.isEmpty()) {
+                                String topic = list.getFirst().getTopic();
+                                String lag = "";
+                                if (list.stream().map(ConsumerTableItem::getLag).allMatch(StringUtils::isNotBlank)) {
+                                    lag = String.valueOf(list.stream().map(ConsumerTableItem::getLag).mapToLong(Long::parseLong).sum());
+                                }
+                                int numberOfMember = list.stream().map(ConsumerTableItem::getConsumerID).collect(Collectors.toSet()).size();
+                                String state = list.getFirst().getState().toString();
 
-                        return ConsumerGroupTableItemFXModel.builder()
-                                .topic(topic)
-                                .lag(lag)
-                                .numberOfMembers(numberOfMember)
-                                .state(state)
-                                .build();
-                    }
-                    return null;
-                }))).values();
+                                return ConsumerGroupTableItemFXModel.builder()
+                                        .groupId(e.getKey())
+                                        .topic(topic)
+                                        .lag(lag)
+                                        .numberOfMembers(numberOfMember)
+                                        .state(state)
+                                        .build();
+                            }
+                            return null;
+                        }))).values().stream()).toList();
+
 //                        ConsumerGroupTableItem consumerGroupTableItem = ConsumerGroupTableItemFXModel.builder().groupId().build();
     }
 
-    public List<ConsumerTableItem> listConsumerGroupOffsets(String clusterName, String consumerGroupId) throws ExecutionException, InterruptedException {
-        CompletableFuture<Map<TopicPartition, OffsetAndMetadata>> cgOffsetFuture = CompletableFuture.supplyAsync(() -> {
-            try {
-                return adminMap.get(clusterName).listConsumerGroupOffsets(consumerGroupId).partitionsToOffsetAndMetadata().get();
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Error when list consumer group offsets {}", consumerGroupId, e);
-                throw new RuntimeException(e);
-            }
-        });
+    public List<ConsumerTableItem> listConsumerDetails(String clusterName, List<String> consumerGroupIdList) throws ExecutionException, InterruptedException {
+        return getConsumerDetailMap(clusterName, consumerGroupIdList).values().stream().flatMap(Collection::stream).toList();
+    }
+
+    private Map<String, List<ConsumerTableItem>> getConsumerDetailMap(String clusterName, List<String> consumerGroupIdList) throws ExecutionException, InterruptedException {
+        CompletableFuture<Map<String, Map<TopicPartition, OffsetAndMetadata>>> cgOffsetFuture = CompletableFuture.supplyAsync(() ->
+                consumerGroupIdList.parallelStream().collect(Collectors.toMap(consumerGroupId -> consumerGroupId, consumerGroupId -> {
+                    try {
+                        return adminMap.get(clusterName).listConsumerGroupOffsets(consumerGroupId).partitionsToOffsetAndMetadata().get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error("Error when list consumer group offsets {}", consumerGroupId, e);
+                        throw new RuntimeException(e);
+                    }
+                })));
+
         CompletableFuture<Map<String, ConsumerGroupDescription>> cgDetailsFuture = CompletableFuture.supplyAsync(() -> {
             try {
-                return getConsumerGroup(clusterName, List.of(consumerGroupId));
+                return getConsumerGroup(clusterName, consumerGroupIdList);
             } catch (InterruptedException | ExecutionException e) {
-                log.error("Error when describe consumer group {}", consumerGroupId, e);
+                log.error("Error when describe consumer group {}", consumerGroupIdList, e);
                 throw new RuntimeException(e);
             }
         });
 
         return CompletableFuture.allOf(cgOffsetFuture, cgDetailsFuture).thenApply((v) -> {
             try {
-                Map<TopicPartition, OffsetAndMetadata> cgOffsets = cgOffsetFuture.get();
+                Map<String, Map<TopicPartition, OffsetAndMetadata>> cgOffsets = cgOffsetFuture.get();
                 Map<String, ConsumerGroupDescription> cgDetails = cgDetailsFuture.get();
                 if (cgDetails != null && !cgDetails.isEmpty()) {
-                    ConsumerGroupDescription consumerGroupDescription = cgDetails.get(consumerGroupId);
-                    return getConsumerTableItems(clusterName, consumerGroupDescription, cgOffsets);
+                    return consumerGroupIdList.stream().collect(Collectors.toMap(cg -> cg, consumerGroupId ->
+                            mapToConsumerTableItems(clusterName, cgDetails.get(consumerGroupId), cgOffsets.get(consumerGroupId)).stream().toList()
+                    ));
                 }
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
-            return List.<ConsumerTableItem>of();
+            return Map.<String, List<ConsumerTableItem>>of();
         }).get();
     }
 
-    private List<ConsumerTableItem> getConsumerTableItems(String clusterName, ConsumerGroupDescription consumerGroupDescription, Map<TopicPartition, OffsetAndMetadata> cgOffsets) {
-        return consumerGroupDescription.members().stream().flatMap(member -> {
+    private List<ConsumerTableItem> mapToConsumerTableItems(String clusterName, ConsumerGroupDescription
+            consumerGroupDescription, Map<TopicPartition, OffsetAndMetadata> cgOffsets) {
+        return consumerGroupDescription.members().parallelStream().flatMap(member -> {
             try {
                 List<TopicPartition> partitions = member.assignment().topicPartitions().stream().toList();
                 Map<TopicPartition, Pair<Long, Long>> startAndEndOffsets = getPartitionOffsetInfo(clusterName, partitions, null, null);
@@ -337,5 +349,13 @@ public class ClusterManager {
                 .collect(Collectors.toMap(Map.Entry::getKey, (entry) -> RecordsToDelete.beforeOffset(entry.getValue().getRight())));
         adminMap.get(clusterName).deleteRecords(map).all().get();
     }
+
+    public void resetConsumerGroupOffset(String clusterName, String topic, String groupId, OffsetSpec offsetSpec) throws ExecutionException, InterruptedException, TimeoutException {
+        var topicPartitionList = getTopicPartitions(clusterName, topic).stream().map(tpi -> new TopicPartition(topic, tpi.partition())).toList();
+        Map<TopicPartition, OffsetAndMetadata> offsets = getPartitionOffsetsBySpec(topicPartitionList, adminMap.get(clusterName), offsetSpec).entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> new OffsetAndMetadata(entry.getValue())));
+        adminMap.get(clusterName).alterConsumerGroupOffsets(groupId, offsets).all().get();
+    }
+
 }
 

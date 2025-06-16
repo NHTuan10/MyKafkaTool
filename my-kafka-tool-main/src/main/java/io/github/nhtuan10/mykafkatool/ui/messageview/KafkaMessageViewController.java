@@ -39,8 +39,6 @@ import org.apache.kafka.common.TopicPartition;
 import org.fxmisc.richtext.CodeArea;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -320,8 +318,8 @@ public class KafkaMessageViewController {
                 KafkaConsumerService.PollingOptions.builder()
                         .pollTime(DEFAULT_POLL_TIME_MS)
                         .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
-                        .startTimestamp(getTimestamp(this.startTimestampPicker))
-                        .endTimestamp(this.endTimestampPicker.isDisabled() ? null : getTimestamp(this.endTimestampPicker))
+                        .startTimestamp(ViewUtils.getTimestamp(this.startTimestampPicker))
+                        .endTimestamp(this.endTimestampPicker.isDisabled() ? null : ViewUtils.getTimestamp(this.endTimestampPicker))
                         .pollingPosition(messagePollingPosition)
                         .valueContentType(valueContentType.getValue())
                         .schema(schema)
@@ -381,11 +379,6 @@ public class KafkaMessageViewController {
         }
     }
 
-    private Long getTimestamp(DateTimePicker dateTimePicker) {
-        return (dateTimePicker.getValue() != null && dateTimePicker.getDateTimeValue() != null) ? ZonedDateTime.of(dateTimePicker.getDateTimeValue(), ZoneId.systemDefault()).toInstant().toEpochMilli() : null;
-
-    }
-
     @FXML
     void addMessage() throws Exception {
         if (selectedTreeItem instanceof KafkaPartitionTreeItem<?>) {
@@ -437,8 +430,8 @@ public class KafkaMessageViewController {
     void countMessages() {
         Callable<Long> callable = () -> {
             try {
-                Long startTimestamp = getTimestamp(this.startTimestampPicker);
-                Long endTimestamp = this.endTimestampPicker.isDisabled() ? null : getTimestamp(this.endTimestampPicker);
+                Long startTimestamp = ViewUtils.getTimestamp(this.startTimestampPicker);
+                Long endTimestamp = this.endTimestampPicker.isDisabled() ? null : ViewUtils.getTimestamp(this.endTimestampPicker);
                 if (startTimestamp != null && endTimestamp != null && endTimestamp <= startTimestamp) {
                     return 0L;
                 }

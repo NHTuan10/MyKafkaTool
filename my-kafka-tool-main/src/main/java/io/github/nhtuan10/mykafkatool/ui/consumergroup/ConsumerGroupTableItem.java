@@ -7,8 +7,8 @@ import javafx.beans.property.SimpleStringProperty;
 
 @FXModel
 public final class ConsumerGroupTableItem implements ConsumerGroupTableItemFXModel {
-    //    @TableViewColumn
-//    SimpleStringProperty groupId;
+    @TableViewColumn
+    SimpleStringProperty groupId;
     @TableViewColumn
     SimpleStringProperty topic;
     @TableViewColumn

@@ -38,6 +38,7 @@ public class ConsumerTest {
         ClusterManager clusterManager = new ClusterManager(authProviderManager,
                 new ProducerCreator(authProviderManager), consumerCreator);
         Consumer<String, Object> consumer = clusterManager.createConsumer(consumerProps);
+        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "CG2");
         Consumer<String, Object> consumer2 = clusterManager.createConsumer(consumerProps);
         consumer.subscribe(List.of("perf", "test2"));
         consumer2.subscribe(List.of("perf", "test2"));

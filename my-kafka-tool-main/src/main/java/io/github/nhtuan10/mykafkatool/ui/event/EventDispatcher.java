@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.event;
 
+import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupView;
 import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryViewController;
 import lombok.RequiredArgsConstructor;
 
@@ -11,7 +12,8 @@ import java.util.function.BiPredicate;
 public class EventDispatcher {
     final SubmissionPublisher<TopicUIEvent> topicEventPublisher;
     final SubmissionPublisher<PartitionUIEvent> partitionEventPublisher;
-    final SubmissionPublisher<SchemaRegistryUIEvent> schemaRegistryEventSubmissionPublisher;
+    final SubmissionPublisher<SchemaRegistryUIEvent> schemaRegistryEventPublisher;
+    final SubmissionPublisher<ConsumerGroupUIEvent> consumerGroupUIEventPublisher;
 
     public void addTopicEventSubscriber(TopicEventSubscriber subscriber) {
         topicEventPublisher.subscribe(subscriber);
@@ -24,7 +26,12 @@ public class EventDispatcher {
     }
 
     public void addSchemaRegistryEventSubscriber(SchemaRegistryViewController.SchemaRegistryEventSubscriber subscriber) {
-        schemaRegistryEventSubmissionPublisher.subscribe(subscriber);
+        schemaRegistryEventPublisher.subscribe(subscriber);
+        subscriber.setEventDispatcher(this);
+    }
+
+    public void addConsumerGroupEventSubscriber(ConsumerGroupView.ConsumerGroupEventSubscriber subscriber) {
+        consumerGroupUIEventPublisher.subscribe(subscriber);
         subscriber.setEventDispatcher(this);
     }
 
@@ -40,8 +47,8 @@ public class EventDispatcher {
         switch (uiEvent) {
             case TopicUIEvent event -> this.topicEventPublisher.offer(event, this.getErrorHandler());
             case PartitionUIEvent event -> this.partitionEventPublisher.offer(event, this.getErrorHandler());
-            case SchemaRegistryUIEvent event ->
-                    this.schemaRegistryEventSubmissionPublisher.offer(event, this.getErrorHandler());
+            case SchemaRegistryUIEvent event -> this.schemaRegistryEventPublisher.offer(event, this.getErrorHandler());
+            case ConsumerGroupUIEvent event -> this.consumerGroupUIEventPublisher.offer(event, this.getErrorHandler());
             default -> throw new IllegalStateException("Unexpected value: " + uiEvent);
         }
     }
