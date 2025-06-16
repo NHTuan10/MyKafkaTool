@@ -6,6 +6,7 @@ import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import javafx.beans.property.*;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -23,40 +24,48 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 //@javax.annotation.processing.SupportedAnnotationTypes("io.github.nhtuan10.mykafkatool.annotationprocessor.FXDataModel")
 //@javax.annotation.processing.SupportedSourceVersion(javax.lang.model.SourceVersion.RELEASE_21)
 public class FXModelAnnotationProcessor extends AbstractProcessor {
     enum FXPropertyType {
-        SIMPLE_STRING_PROPERTY(SimpleStringProperty.class.getName(), "String"),
+        SIMPLE_STRING_PROPERTY(SimpleStringProperty.class.getName(), "String", SimpleStringProperty.class.getName()),
+        STRING_PROPERTY(StringProperty.class.getName(), "String", SimpleStringProperty.class.getName()),
+        SIMPLE_INTEGER_PROPERTY(SimpleIntegerProperty.class.getName(), "int", SimpleIntegerProperty.class.getName()),
+        INTEGER_PROPERTY(IntegerProperty.class.getName(), "int", SimpleIntegerProperty.class.getName()),
+        SIMPLE_LONG_PROPERTY(SimpleLongProperty.class.getName(), "long", SimpleLongProperty.class.getName()),
+        LONG_PROPERTY(LongProperty.class.getName(), "long", SimpleLongProperty.class.getName()),
+        SIMPLE_DOUBLE_PROPERTY(SimpleDoubleProperty.class.getName(), "double", SimpleDoubleProperty.class.getName()),
+        DOUBLE_PROPERTY(DoubleProperty.class.getName(), "double", SimpleDoubleProperty.class.getName()),
+        SIMPLE_OBJECT_PROPERTY(SimpleObjectProperty.class.getName(), "Object", SimpleObjectProperty.class.getName()),
+        OBJECT_PROPERTY(ObjectProperty.class.getName(), "Object", SimpleObjectProperty.class.getName());
 
-        SIMPLE_INTEGER_PROPERTY(SimpleIntegerProperty.class.getName(), "int"),
-
-        SIMPLE_LONG_PROPERTY(SimpleLongProperty.class.getName(), "long"),
-
-        SIMPLE_DOUBLE_PROPERTY(SimpleDoubleProperty.class.getName(), "double"),
-
-        SIMPLE_OBJECT_PROPERTY(SimpleObjectProperty.class.getName(), "Object");
-
-        private final String type;
+        private final String typeName;
         private final String underlyingType;
+        private final String implType;
 
-        public String getType() {
-            return type;
+        public String getTypeName() {
+            return typeName;
         }
 
         public String getUnderlyingType() {
             return underlyingType;
         }
 
-        FXPropertyType(String type, String underlyingType) {
-            this.type = type;
+        public String getImplType() {
+            return implType;
+        }
+
+        FXPropertyType(String typeName, String underlyingType, String implType) {
+            this.typeName = typeName;
             this.underlyingType = underlyingType;
+            this.implType = implType;
         }
 
         public static FXPropertyType getEnumByType(String type) {
             return Arrays.stream(values())
-                    .filter(e -> e.type.equals(type))
+                    .filter(e -> e.typeName.equals(type))
                     .findFirst()
                     .orElse(null);
         }
@@ -85,6 +94,14 @@ public class FXModelAnnotationProcessor extends AbstractProcessor {
         loader.setPrefix("/templates");
         Handlebars handlebars = new Handlebars(loader);
         handlebars.registerHelpers(StringHelpers.class);
+        handlebars.registerHelper("toUpperUnderscore", (obj, opt) -> {
+            if (obj instanceof String str) {
+                return StringUtils.upperCase(StringUtils.join(
+                        StringUtils.splitByCharacterTypeCamelCase(str),
+                        '_'));
+            }
+            return null;
+        });
         Template template;
         try {
             template = handlebars.compile("fx-model");
@@ -105,13 +122,20 @@ public class FXModelAnnotationProcessor extends AbstractProcessor {
                         String qualifiedName = typeElement.getQualifiedName().toString();
                         String simpleName = typeElement.getSimpleName().toString();
                         var fields = ElementFilter.fieldsIn(elementUtils.getAllMembers(typeElement));
-                        List<TemplateContextObject.Field> templateContextObjectFields = fields.stream()
+                        List<TemplateContextObject.Field> templateFxFields = fields.stream()
                                 .filter(field -> !field.getModifiers().contains(Modifier.STATIC))
                                 .filter(field -> FXPropertyType.getEnumByType(field.asType().toString()) != null)
-                                .map(field -> new TemplateContextObject.Field(field.getSimpleName().toString(), field.asType().toString()))
+                                .map(field -> new TemplateContextObject.Field(field.getSimpleName().toString(), field.asType().toString(), true))
                                 .toList();
+                        List<TemplateContextObject.Field> templateNonFxFields = fields.stream()
+                                .flatMap(field -> {
+                                    if (!field.getModifiers().contains(Modifier.STATIC) && templateFxFields.stream().map(TemplateContextObject.Field::getType).noneMatch(f -> f.equals(field.asType().toString()))) {
+                                        return Stream.of(new TemplateContextObject.Field(field.getSimpleName().toString(), field.asType().toString(), false));
+                                    } else
+                                        return Stream.empty();
+                                }).toList();
                         String packageName = elementUtils.getPackageOf(element).getQualifiedName().toString();
-                        TemplateContextObject templateContextObject = new TemplateContextObject(simpleName, packageName, templateContextObjectFields);
+                        TemplateContextObject templateContextObject = new TemplateContextObject(simpleName, packageName, templateFxFields, templateNonFxFields);
                         JavaFileObject fileObject = filer.createSourceFile(qualifiedName + "FXModel");
                         try (Writer writer = fileObject.openWriter()) {
                             String generatedCode = template.apply(templateContextObject);
@@ -131,12 +155,14 @@ public class FXModelAnnotationProcessor extends AbstractProcessor {
     public static class TemplateContextObject {
         private final String className;
         private final String packageName;
-        private final List<Field> fields;
+        private final List<Field> fxFields;
+        private final List<Field> nonFxFields;
 
-        public TemplateContextObject(String className, String packageName, List<Field> fields) {
+        public TemplateContextObject(String className, String packageName, List<Field> fxFields, List<Field> nonFxFields) {
             this.className = className;
             this.packageName = packageName;
-            this.fields = fields;
+            this.fxFields = fxFields;
+            this.nonFxFields = nonFxFields;
         }
 
         public String getClassName() {
@@ -147,28 +173,64 @@ public class FXModelAnnotationProcessor extends AbstractProcessor {
             return packageName;
         }
 
-        public List<Field> getFields() {
-            return fields;
+        public List<Field> getFxFields() {
+            return fxFields;
+        }
+
+        public List<Field> getNonFxFields() {
+            return nonFxFields;
+        }
+
+        public List<Field> getAllFields() {
+            return Stream.concat(fxFields.stream(), nonFxFields.stream()).toList();
         }
 
         public Set<String> getImports() {
-            return fields.stream().map(Field::getType).collect(Collectors.toSet());
+            Stream<String> fxFieldStream = fxFields.stream().flatMap(field -> {
+                        var optional = Optional.ofNullable(FXPropertyType.getEnumByType(field.getType()));
+                        if (optional.isPresent()) {
+                            FXPropertyType fxPropertyType = optional.get();
+                            return Stream.of(fxPropertyType.getTypeName(), fxPropertyType.getImplType());
+                        } else {
+                            return Stream.empty();
+                        }
+                    }
+            );
+            Stream<String> nonFxFieldStream = nonFxFields.stream().map(Field::getType);
+            return Stream.concat(fxFieldStream, nonFxFieldStream).collect(Collectors.toSet());
         }
 
         public static class Field {
             private final String name;
             private final String type;
             private final String underlyingType;
-            private final String simpleTypeName;
+            private final String implType;
+            private final boolean isFxField;
 
-            public Field(String name, String type) {
+            public Field(String name, String type, boolean isFxField) {
                 this.name = name;
                 this.type = type;
-                this.underlyingType = Optional.ofNullable(FXPropertyType.getEnumByType(type))
-                        .map(FXPropertyType::getUnderlyingType)
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid field name: " + name));
+                this.isFxField = isFxField;
+                if (isFxField) {
+                    var optional = Optional.ofNullable(FXPropertyType.getEnumByType(type));
+                    this.underlyingType = optional.map(FXPropertyType::getUnderlyingType)
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid field name: " + name));
+                    this.implType = optional.map(FXPropertyType::getImplType)
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid field name: " + name));
+                } else {
+                    this.underlyingType = null;
+                    this.implType = null;
+                }
+            }
+
+            public String getTypeSimpleName() {
+                return this.type.substring(this.type.lastIndexOf('.') + 1);
+            }
+
+
+            public String getImplTypeSimpleName() {
                 try {
-                    this.simpleTypeName = Class.forName(type).getSimpleName();
+                    return Class.forName(this.implType).getSimpleName();
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
@@ -186,8 +248,8 @@ public class FXModelAnnotationProcessor extends AbstractProcessor {
                 return underlyingType;
             }
 
-            public String getSimpleTypeName() {
-                return simpleTypeName;
+            public String getImplType() {
+                return implType;
             }
         }
     }
