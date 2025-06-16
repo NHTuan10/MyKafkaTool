@@ -10,6 +10,8 @@ import org.apache.kafka.common.ConsumerGroupState;
 @FXModel
 public final class ConsumerTableItem implements ConsumerTableItemFXModel {
     @TableViewColumn
+    StringProperty groupID;
+    @TableViewColumn
     StringProperty consumerID;
     @TableViewColumn
     StringProperty topic;

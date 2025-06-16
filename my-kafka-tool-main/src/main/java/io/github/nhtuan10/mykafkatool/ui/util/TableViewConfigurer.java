@@ -10,7 +10,6 @@ import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
-import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
@@ -349,7 +348,7 @@ public class TableViewConfigurer {
         return false;
     }
 
-    public static Optional<TableColumn<KafkaMessageTableItem, ?>> getTableColumnById(TableView<KafkaMessageTableItem> tableView, String tableColumnId) {
+    public static <T> Optional<TableColumn<T, ?>> getTableColumnById(TableView<T> tableView, String tableColumnId) {
         return tableView.getColumns().stream().filter(c -> c.getId().equals(tableColumnId)).findFirst();
     }
 

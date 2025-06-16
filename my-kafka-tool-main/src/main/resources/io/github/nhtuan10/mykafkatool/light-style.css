@@ -60,4 +60,9 @@
 
 .cluster-tree-root, .cluster-tree-item {
     -fx-font-size: 15;
+    -fx-font-weight: bold;
+}
+
+.cg-info-label {
+    -fx-font-size: 15;
 }

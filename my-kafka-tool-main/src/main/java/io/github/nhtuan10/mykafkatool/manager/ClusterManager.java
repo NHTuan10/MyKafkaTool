@@ -284,7 +284,13 @@ public class ClusterManager {
                 Map<String, ConsumerGroupDescription> cgDetails = cgDetailsFuture.get();
                 if (cgDetails != null && !cgDetails.isEmpty()) {
                     return consumerGroupIdList.stream().collect(Collectors.toMap(cg -> cg, consumerGroupId ->
-                            mapToConsumerTableItems(clusterName, cgDetails.get(consumerGroupId), cgOffsets.get(consumerGroupId)).stream().toList()
+                            {
+                                try {
+                                    return enrichAndMapToConsumerTableItems(clusterName, cgDetails.get(consumerGroupId), cgOffsets.get(consumerGroupId)).stream().toList();
+                                } catch (ExecutionException | InterruptedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
                     ));
                 }
             } catch (InterruptedException | ExecutionException e) {
@@ -294,41 +300,47 @@ public class ClusterManager {
         }).get();
     }
 
-    private List<ConsumerTableItem> mapToConsumerTableItems(String clusterName, ConsumerGroupDescription
-            consumerGroupDescription, Map<TopicPartition, OffsetAndMetadata> cgOffsets) {
-        return consumerGroupDescription.members().parallelStream().flatMap(member -> {
-            try {
-                List<TopicPartition> partitions = member.assignment().topicPartitions().stream().toList();
-                Map<TopicPartition, Pair<Long, Long>> startAndEndOffsets = getPartitionOffsetInfo(clusterName, partitions, null, null);
-                return partitions.stream().map(tp -> {
-                    OffsetAndMetadata metadata = cgOffsets.get(tp);
-                    String offset = null;
-                    String lag = null;
-                    String leaderEpoch = null;
-                    Pair<Long, Long> startEndOffsetPair = startAndEndOffsets.get(tp);
-                    Long endOffset = startEndOffsetPair.getRight();
-                    if (metadata != null) {
-                        offset = String.valueOf(metadata.offset());
-                        lag = String.valueOf(endOffset - metadata.offset());
-                        leaderEpoch = metadata.leaderEpoch().orElse(0).toString();
-                    }
-                    return ConsumerTableItemFXModel.builder()
-                            .consumerID(member.consumerId())
-                            .topic(tp.topic())
-                            .partition(tp.partition())
-                            .start(startEndOffsetPair.getLeft())
-                            .end(endOffset)
-                            .committedOffset(offset)
-                            .lag(lag)
-                            .lastCommit(leaderEpoch)
-                            .state(consumerGroupDescription.state())
-                            .host(member.host())
-                            .build();
-                });
+    private List<ConsumerTableItem> enrichAndMapToConsumerTableItems(String clusterName, ConsumerGroupDescription
+            consumerGroupDescription, Map<TopicPartition, OffsetAndMetadata> cgOffsets) throws ExecutionException, InterruptedException {
+//        List<TopicPartition> partitions = consumerGroupDescription.members().stream()
+//                .collect(Collectors.toMap(m ->  m, m.assignment().topicPartitions().stream()).toList();
+        Map<TopicPartition, MemberDescription> topicPartitionToMemberAssignmentMap = new HashMap<>();
+        for (var member : consumerGroupDescription.members()) {
+            topicPartitionToMemberAssignmentMap.putAll(member.assignment().topicPartitions().stream().collect(Collectors.toMap(tp -> tp, tp -> member)));
+        }
+        Map<TopicPartition, Pair<Long, Long>> startAndEndOffsets = getPartitionOffsetInfo(clusterName, cgOffsets.keySet().stream().toList(), null, null);
 
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
+        return cgOffsets.entrySet().stream().map(entry -> {
+//        return consumerGroupDescription.members().parallelStream().flatMap(member -> {
+//                List<TopicPartition> partitions = member.assignment().topicPartitions().stream().toList();
+
+//                return partitions.stream().map(tp -> {
+            OffsetAndMetadata metadata = entry.getValue();
+            String offset = null;
+            String lag = null;
+            String leaderEpoch = null;
+            TopicPartition tp = entry.getKey();
+            Pair<Long, Long> startEndOffsetPair = startAndEndOffsets.get(tp);
+            Long endOffset = startEndOffsetPair.getRight();
+            if (metadata != null) {
+                offset = String.valueOf(metadata.offset());
+                lag = String.valueOf(endOffset - metadata.offset());
+                leaderEpoch = metadata.leaderEpoch().orElse(0).toString();
             }
+            var memberOpt = Optional.ofNullable(topicPartitionToMemberAssignmentMap.get(tp));
+            return ConsumerTableItemFXModel.builder()
+                    .groupID(consumerGroupDescription.groupId())
+                    .consumerID(memberOpt.map(MemberDescription::consumerId).orElse(""))
+                    .topic(tp.topic())
+                    .partition(tp.partition())
+                    .start(startEndOffsetPair.getLeft())
+                    .end(endOffset)
+                    .committedOffset(offset)
+                    .lag(lag)
+                    .lastCommit(leaderEpoch)
+                    .state(consumerGroupDescription.state())
+                    .host(memberOpt.map(MemberDescription::host).orElse(""))
+                    .build();
         }).toList();
     }
 

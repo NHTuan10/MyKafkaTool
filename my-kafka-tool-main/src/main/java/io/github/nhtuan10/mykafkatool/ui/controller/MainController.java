@@ -185,16 +185,19 @@ public class MainController {
     }
 
     private void setVisibleTabs(Tab... tabs) {
-        for (Tab tab : tabs) {
-            if (!tabPane.getTabs().contains(tab)) {
-                tabPane.getTabs().add(tab);
-            }
-            tab.setDisable(false);
-        }
-        if (Arrays.stream(tabs).noneMatch(t -> t == tabPane.getSelectionModel().getSelectedItem())) {
+//        for (Tab tab : tabs) {
+//            if (!tabPane.getTabs().contains(tab)) {
+//                tabPane.getTabs().add(tab);
+//            }
+//            tab.setDisable(false);
+//        }
+        Arrays.stream(tabs).forEach(t -> t.setDisable(false));
+        tabPane.getTabs().setAll(tabs);
+        Tab currentSelectedTab = tabPane.getSelectionModel().getSelectedItem();
+        if (Arrays.stream(tabs).noneMatch(t -> t == currentSelectedTab)) {
             tabPane.getSelectionModel().select(tabs[0]);
         }
-        allTabs.stream().filter(tab -> !Arrays.asList(tabs).contains(tab)).forEach(tab -> tabPane.getTabs().remove(tab));
+//        allTabs.stream().filter(tab -> !Arrays.asList(tabs).contains(tab)).forEach(tab -> tabPane.getTabs().remove(tab));
 //        tabPane.getTabs().remove(cgOffsetsTab);
 //        if (!tabPane.getTabs().contains(dataTab)) {
 //            tabPane.getTabs().add(dataTab);

@@ -4,8 +4,11 @@ import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
+import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.ConsumerGroupListing;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 //TODO: create a new CG view which includes this table. Then add info such as number of topic, members, partition, members, total lag, topics, etc.
@@ -24,7 +28,7 @@ public class ConsumerTable extends EditableTableControl<ConsumerTableItem> {
     //    @Inject
     private String clusterName;
     private List<String> consumerGroupIds;
-    private KafkaTopic topic;
+    private ObjectProperty<KafkaTopic> topic;
     private final ClusterManager clusterManager;
     private BooleanProperty isBusy;
 
@@ -48,17 +52,27 @@ public class ConsumerTable extends EditableTableControl<ConsumerTableItem> {
 //        );
 //    }
 
+    @FXML
+    protected void initialize() {
+        topic = new SimpleObjectProperty<>();
+        super.initialize();
+        Optional<TableColumn<ConsumerTableItem, ?>> tableColumnOpt = TableViewConfigurer.getTableColumnById(table, ConsumerTableItemFXModel.GROUP_ID);
+        tableColumnOpt.ifPresent((tableColumn) -> {
+            tableColumn.visibleProperty().bind(this.topic.isNotNull());
+        });
+    }
+
     public void loadCG(String clusterName, List<String> consumerGroupIds, BooleanProperty isBusy) {
         this.clusterName = clusterName;
         this.consumerGroupIds = consumerGroupIds;
-        this.topic = null;
+        this.topic.set(null);
         this.isBusy = isBusy;
         refresh();
     }
 
     public void loadCG(KafkaTopic topic, BooleanProperty isBusy) {
         this.clusterName = topic.cluster().getName();
-        this.topic = topic;
+        this.topic.set(topic);
         this.isBusy = isBusy;
         refresh();
     }
@@ -69,11 +83,11 @@ public class ConsumerTable extends EditableTableControl<ConsumerTableItem> {
         isBusy.set(true);
         ViewUtils.runBackgroundTask(() -> {
             try {
-                if (topic != null) {
+                if (topic.get() != null) {
                     this.consumerGroupIds = clusterManager.getConsumerGroupList(clusterName).stream().map(ConsumerGroupListing::groupId).toList();
                     return FXCollections.observableArrayList(clusterManager
                             .listConsumerDetails(clusterName, consumerGroupIds).stream()
-                            .filter(item -> item.getTopic().equals(topic.name())).toList());
+                            .filter(item -> item.getTopic().equals(topic.get().name())).toList());
                 } else {
                     return FXCollections.observableArrayList(clusterManager.listConsumerDetails(clusterName, consumerGroupIds));
                 }
