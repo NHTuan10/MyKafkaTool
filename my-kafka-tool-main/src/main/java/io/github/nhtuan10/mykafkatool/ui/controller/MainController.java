@@ -151,7 +151,7 @@ public class MainController {
                 schemaRegistryView.setVisible(false);
                 kafkaMessageView.setVisible(true);
                 eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
-                this.consumerGroupView.loadCG(topic);
+//                this.consumerGroupView.loadCG(topic);
                 this.eventDispatcher.publishEvent(ConsumerGroupUIEvent.newRefreshConsumerGroupEven(topic.cluster().getName(), null, topic));
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 kafkaMessageView.switchTopicOrPartition((TreeItem) newValue);

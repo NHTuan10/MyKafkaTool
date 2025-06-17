@@ -8,6 +8,7 @@ import io.github.nhtuan10.mykafkatool.configuration.annotation.ViewControllerMap
 import io.github.nhtuan10.mykafkatool.configuration.annotation.WindowControllerMap;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
+import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
 import javafx.fxml.FXMLLoader;
 
@@ -41,4 +42,6 @@ public interface AppComponent {
 
     @SharedObjectMapper
     ObjectMapper sharedObjectMapper();
+
+    EventDispatcher eventDispatcher();
 }

@@ -8,13 +8,13 @@ import javafx.beans.property.StringProperty;
 import org.apache.kafka.common.ConsumerGroupState;
 
 @FXModel
-public final class ConsumerTableItem implements ConsumerTableItemFXModel {
-    @TableViewColumn
-    StringProperty groupID;
+public final class ConsumerTableItem extends ConsumerGroupTopic implements ConsumerTableItemFXModel {
+    //    @TableViewColumn
+//    StringProperty groupID;
     @TableViewColumn
     StringProperty consumerID;
-    @TableViewColumn
-    StringProperty topic;
+    //    @TableViewColumn
+//    StringProperty topic;
     @TableViewColumn
     IntegerProperty partition;
     @TableViewColumn

@@ -227,8 +227,8 @@ public class ClusterManager {
         return adminMap.get(clusterName).describeConsumerGroups(consumerGroupIds).all().get();
     }
 
-    public Collection<ConsumerGroupTableItem> listConsumerGroupDetails(String clusterName, List<String> consumerGroupId) throws ExecutionException, InterruptedException {
-        return getConsumerDetailMap(clusterName, consumerGroupId).entrySet().stream()
+    public Collection<ConsumerGroupTableItem> describeConsumerGroupDetails(String clusterName, List<String> consumerGroupId) throws ExecutionException, InterruptedException {
+        return describeConsumerDetailMap(clusterName, consumerGroupId).entrySet().stream()
                 .flatMap(e ->
                         e.getValue().stream().collect(Collectors.groupingBy(ConsumerTableItem::getTopic, Collectors.collectingAndThen(Collectors.toList(), list -> {
                             if (!list.isEmpty()) {
@@ -237,11 +237,11 @@ public class ClusterManager {
                                 if (list.stream().map(ConsumerTableItem::getLag).allMatch(StringUtils::isNotBlank)) {
                                     lag = String.valueOf(list.stream().map(ConsumerTableItem::getLag).mapToLong(Long::parseLong).sum());
                                 }
-                                int numberOfMember = list.stream().map(ConsumerTableItem::getConsumerID).collect(Collectors.toSet()).size();
+                                int numberOfMember = list.stream().map(ConsumerTableItem::getConsumerID).filter(Objects::nonNull).collect(Collectors.toSet()).size();
                                 String state = list.getFirst().getState().toString();
 
                                 return ConsumerGroupTableItemFXModel.builder()
-                                        .groupId(e.getKey())
+                                        .groupID(e.getKey())
                                         .topic(topic)
                                         .lag(lag)
                                         .numberOfMembers(numberOfMember)
@@ -251,14 +251,13 @@ public class ClusterManager {
                             return null;
                         }))).values().stream()).toList();
 
-//                        ConsumerGroupTableItem consumerGroupTableItem = ConsumerGroupTableItemFXModel.builder().groupId().build();
     }
 
-    public List<ConsumerTableItem> listConsumerDetails(String clusterName, List<String> consumerGroupIdList) throws ExecutionException, InterruptedException {
-        return getConsumerDetailMap(clusterName, consumerGroupIdList).values().stream().flatMap(Collection::stream).toList();
+    public List<ConsumerTableItem> describeConsumerDetails(String clusterName, List<String> consumerGroupIdList) throws ExecutionException, InterruptedException {
+        return describeConsumerDetailMap(clusterName, consumerGroupIdList).values().stream().flatMap(Collection::stream).toList();
     }
 
-    private Map<String, List<ConsumerTableItem>> getConsumerDetailMap(String clusterName, List<String> consumerGroupIdList) throws ExecutionException, InterruptedException {
+    private Map<String, List<ConsumerTableItem>> describeConsumerDetailMap(String clusterName, List<String> consumerGroupIdList) throws ExecutionException, InterruptedException {
         CompletableFuture<Map<String, Map<TopicPartition, OffsetAndMetadata>>> cgOffsetFuture = CompletableFuture.supplyAsync(() ->
                 consumerGroupIdList.parallelStream().collect(Collectors.toMap(consumerGroupId -> consumerGroupId, consumerGroupId -> {
                     try {
@@ -330,7 +329,7 @@ public class ClusterManager {
             var memberOpt = Optional.ofNullable(topicPartitionToMemberAssignmentMap.get(tp));
             return ConsumerTableItemFXModel.builder()
                     .groupID(consumerGroupDescription.groupId())
-                    .consumerID(memberOpt.map(MemberDescription::consumerId).orElse(""))
+                    .consumerID(memberOpt.map(MemberDescription::consumerId).orElse(null))
                     .topic(tp.topic())
                     .partition(tp.partition())
                     .start(startEndOffsetPair.getLeft())
@@ -339,7 +338,7 @@ public class ClusterManager {
                     .lag(lag)
                     .lastCommit(leaderEpoch)
                     .state(consumerGroupDescription.state())
-                    .host(memberOpt.map(MemberDescription::host).orElse(""))
+                    .host(memberOpt.map(MemberDescription::host).orElse(null))
                     .build();
         }).toList();
     }
@@ -362,8 +361,12 @@ public class ClusterManager {
         adminMap.get(clusterName).deleteRecords(map).all().get();
     }
 
-    public void resetConsumerGroupOffset(String clusterName, String topic, String groupId, OffsetSpec offsetSpec) throws ExecutionException, InterruptedException, TimeoutException {
+    public void resetConsumerGroupOffset(String clusterName, String groupId, String topic, OffsetSpec offsetSpec) throws ExecutionException, InterruptedException, TimeoutException {
         var topicPartitionList = getTopicPartitions(clusterName, topic).stream().map(tpi -> new TopicPartition(topic, tpi.partition())).toList();
+        resetConsumerGroupOffset(clusterName, groupId, topicPartitionList, offsetSpec);
+    }
+
+    public void resetConsumerGroupOffset(String clusterName, String groupId, List<TopicPartition> topicPartitionList, OffsetSpec offsetSpec) throws InterruptedException, ExecutionException {
         Map<TopicPartition, OffsetAndMetadata> offsets = getPartitionOffsetsBySpec(topicPartitionList, adminMap.get(clusterName), offsetSpec).entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> new OffsetAndMetadata(entry.getValue())));
         adminMap.get(clusterName).alterConsumerGroupOffsets(groupId, offsets).all().get();

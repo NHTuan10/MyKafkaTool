@@ -328,14 +328,24 @@ public class TableViewConfigurer {
                 .toList();
     }
 
+    public static List<Field> getAllFields(Class<?> clazz) {
+        Stream<Field> r = Arrays.stream(clazz.getDeclaredFields());
+        Class<?> p = clazz.getSuperclass();
+        while (p != null) {
+            r = Stream.concat(Arrays.stream(p.getDeclaredFields()), r);
+            p = p.getSuperclass();
+        }
+        return r.toList();
+    }
+
     public static List<Field> getTableColumnFieldsFromTableItem(Class<?> tableIemClass) {
-        return Arrays.stream(tableIemClass.getDeclaredFields())
+        return getAllFields(tableIemClass).stream()
                 .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(TableViewColumn.class))
                 .toList();
     }
 
     public static List<String> getFilterableFieldsFromTableItem(Class<?> tableIemClass) {
-        return Arrays.stream(tableIemClass.getDeclaredFields())
+        return getAllFields(tableIemClass).stream()
                 .filter(TableViewConfigurer::isFilterableField)
                 .map(Field::getName)
                 .toList();

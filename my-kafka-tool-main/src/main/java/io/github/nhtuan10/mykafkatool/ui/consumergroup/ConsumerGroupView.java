@@ -2,8 +2,10 @@ package io.github.nhtuan10.mykafkatool.ui.consumergroup;
 
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
+import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
 import io.github.nhtuan10.mykafkatool.ui.event.ConsumerGroupUIEvent;
+import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.ui.event.EventSubscriber;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.application.Platform;
@@ -28,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 
 @Slf4j
@@ -40,7 +43,7 @@ public class ConsumerGroupView extends BorderPane {
     private ObjectProperty<KafkaTopic> topic = new SimpleObjectProperty<>();
     @Getter
     private final ConsumerGroupEventSubscriber consumerGroupEventSubscriber;
-
+    private final EventDispatcher eventDispatcher;
     @FXML
     private ConsumerTable consumerTable;
     @FXML
@@ -67,7 +70,8 @@ public class ConsumerGroupView extends BorderPane {
 //        return  consumerGroupId;
 //    }
     public ConsumerGroupView() {
-        this.consumerGroupEventSubscriber = new ConsumerGroupEventSubscriber(this);
+        this.consumerGroupEventSubscriber = new ConsumerGroupEventSubscriber(this, (ex) -> UIErrorHandler.showError(Thread.currentThread(), ex));
+        this.eventDispatcher = MyKafkaToolApplication.DAGGER_APP_COMPONENT.eventDispatcher();
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
                 "consumer-group-view.fxml"));
         fxmlLoader.setRoot(this);
@@ -84,11 +88,16 @@ public class ConsumerGroupView extends BorderPane {
     protected void initialize() {
         toggleConsumerView.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (!Objects.equals(newVal, oldVal)) {
+
                 if (this.topic.get() != null) {
-                    loadCG(this.topic.get());
+//                        loadCG(this.topic.get());
+                    eventDispatcher.publishEvent(ConsumerGroupUIEvent.newRefreshConsumerGroupEven(this.topic.get().cluster().getName(), null, this.topic.get()));
                 } else {
-                    loadCG(this.clusterName, this.consumerGroupIds.stream().toList());
+//                        loadCG(this.clusterName, this.consumerGroupIds.stream().toList());
+                    eventDispatcher.publishEvent(ConsumerGroupUIEvent.newRefreshConsumerGroupEven(this.clusterName, this.consumerGroupIds.stream().toList(), this.topic.get()));
+
                 }
+
 //                if (Boolean.TRUE.equals(newVal)) {
 //                    this.consumerTable.loadCG(this.consumerGroupTreeItem.get().getClusterName(), List.of(this.consumerGroupTreeItem.get().getConsumerGroupId()), isBusy);
 //                } else {
@@ -116,13 +125,14 @@ public class ConsumerGroupView extends BorderPane {
         this.consumerTable.visibleProperty().bind(toggleConsumerView.selectedProperty());
         this.consumerGroupTable.visibleProperty().bind(toggleConsumerView.selectedProperty().not());
         resetCGComboBox.getItems().addAll(CGResetOption.values());
-        resetCGHBox.visibleProperty().bind(toggleConsumerView.selectedProperty().not().and(consumerGroupTable.selectedItemProperty().isNotNull()));
+//        resetCGHBox.visibleProperty().bind(toggleConsumerView.selectedProperty().not().and(consumerGroupTable.selectedItemProperty().isNotNull()));
         resetCGComboBox.getSelectionModel().selectFirst();
         resetCGStartDateTimePicker.visibleProperty().bind(resetCGComboBox.getSelectionModel().selectedItemProperty().isEqualTo(CGResetOption.START_TIMESTAMP));
         resetCGStartDateTimePicker.managedProperty().bind(resetCGComboBox.getSelectionModel().selectedItemProperty().isEqualTo(CGResetOption.START_TIMESTAMP));
+        consumerTable.init();
     }
 
-    public void loadCG(String clusterName, List<String> selectedCG) {
+    public void loadCG(String clusterName, List<String> selectedCG) throws Exception {
         this.consumerGroupIds.setAll(selectedCG);
         this.topic.set(null);
         this.clusterName = clusterName;
@@ -134,7 +144,7 @@ public class ConsumerGroupView extends BorderPane {
         }
     }
 
-    public void loadCG(KafkaTopic topic) {
+    public void loadCG(KafkaTopic topic) throws Exception {
         this.topic.set(topic);
         this.consumerGroupIds.clear();
         this.clusterName = topic.cluster().getName();
@@ -150,23 +160,31 @@ public class ConsumerGroupView extends BorderPane {
     @FXML
     public void resetCG() {
         CGResetOption cgResetOption = resetCGComboBox.getSelectionModel().getSelectedItem();
-
-        consumerGroupTable.resetCG(cgResetOption, ViewUtils.getTimestamp(resetCGStartDateTimePicker));
+        if (toggleConsumerView.isSelected()) {
+            consumerTable.resetCG(cgResetOption, ViewUtils.getTimestamp(resetCGStartDateTimePicker));
+        } else {
+            consumerGroupTable.resetCG(cgResetOption, ViewUtils.getTimestamp(resetCGStartDateTimePicker));
+        }
     }
 
     @Slf4j
     @RequiredArgsConstructor
     public static class ConsumerGroupEventSubscriber extends EventSubscriber<ConsumerGroupUIEvent> {
         private final ConsumerGroupView consumerGroupView;
+        private final Consumer<Exception> onFailure;
 
         @Override
         public void handleOnNext(ConsumerGroupUIEvent item) {
             if (ConsumerGroupUIEvent.isRefreshConsumerGroupEvent(item)) {
                 Platform.runLater(() -> {
-                    if (item.topic() != null) {
-                        consumerGroupView.loadCG(item.topic());
-                    } else {
-                        consumerGroupView.loadCG(item.clusterName(), item.consumerGroupIds());
+                    try {
+                        if (item.topic() != null) {
+                            consumerGroupView.loadCG(item.topic());
+                        } else {
+                            consumerGroupView.loadCG(item.clusterName(), item.consumerGroupIds());
+                        }
+                    } catch (Exception ex) {
+                        onFailure.accept(ex);
                     }
 
                 });

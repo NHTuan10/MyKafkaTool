@@ -6,11 +6,11 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 @FXModel
-public final class ConsumerGroupTableItem implements ConsumerGroupTableItemFXModel {
-    @TableViewColumn
-    SimpleStringProperty groupId;
-    @TableViewColumn
-    SimpleStringProperty topic;
+public final class ConsumerGroupTableItem extends ConsumerGroupTopic implements ConsumerGroupTableItemFXModel {
+    //    @TableViewColumn
+//    SimpleStringProperty groupId;
+//    @TableViewColumn
+//    SimpleStringProperty topic;
     @TableViewColumn
     SimpleIntegerProperty numberOfMembers;
     @TableViewColumn

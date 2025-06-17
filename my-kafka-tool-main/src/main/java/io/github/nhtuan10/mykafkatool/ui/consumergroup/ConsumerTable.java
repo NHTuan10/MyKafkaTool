@@ -1,43 +1,35 @@
 package io.github.nhtuan10.mykafkatool.ui.consumergroup;
 
-import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
-import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
-import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
+import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
-import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.ConsumerGroupListing;
+import org.apache.kafka.common.TopicPartition;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
-//TODO: create a new CG view which includes this table. Then add info such as number of topic, members, partition, members, total lag, topics, etc.
+import java.util.stream.Collectors;
 
 @Slf4j
-public class ConsumerTable extends EditableTableControl<ConsumerTableItem> {
+public class ConsumerTable extends AbstractConsumerGroupTable<ConsumerTableItem> {
     //    private ConsumerGroupTreeItem consumerGroupTreeItem;
     //    @Inject
-    private String clusterName;
-    private List<String> consumerGroupIds;
-    private ObjectProperty<KafkaTopic> topic;
-    private final ClusterManager clusterManager;
-    private BooleanProperty isBusy;
+//    private String clusterName;
+//    private List<String> consumerGroupIds;
+//    private ObjectProperty<KafkaTopic> topic;
+//    private final ClusterManager clusterManager;
+//    private BooleanProperty isBusy;
 
-    public ConsumerTable() {
-        super(false);
-        this.clusterManager = MyKafkaToolApplication.DAGGER_APP_COMPONENT.clusterManager();
-    }
+//    public ConsumerTable() {
+//        super(MyKafkaToolApplication.DAGGER_APP_COMPONENT.clusterManager());
+//    }
 
-//    @Override
+    //    @Override
 //    protected Predicate<ConsumerGroupOffsetTableItem> filterPredicate(Filter filter) {
 //        return Filter.buildFilterPredicate(filter
 //                , ConsumerGroupOffsetTableItem::getTopic
@@ -51,68 +43,91 @@ public class ConsumerTable extends EditableTableControl<ConsumerTableItem> {
 //                , item -> String.valueOf(item.getPartition())
 //        );
 //    }
-
-    @FXML
-    protected void initialize() {
-        topic = new SimpleObjectProperty<>();
-        super.initialize();
-        Optional<TableColumn<ConsumerTableItem, ?>> tableColumnOpt = TableViewConfigurer.getTableColumnById(table, ConsumerTableItemFXModel.GROUP_ID);
-        tableColumnOpt.ifPresent((tableColumn) -> {
+    public void init() {
+        Optional<TableColumn<ConsumerTableItem, ?>> groupIdColumnOpt = TableViewConfigurer.getTableColumnById(table, ConsumerTableItemFXModel.GROUP_ID);
+        groupIdColumnOpt.ifPresent((tableColumn) -> {
             tableColumn.visibleProperty().bind(this.topic.isNotNull());
         });
-    }
-
-    public void loadCG(String clusterName, List<String> consumerGroupIds, BooleanProperty isBusy) {
-        this.clusterName = clusterName;
-        this.consumerGroupIds = consumerGroupIds;
-        this.topic.set(null);
-        this.isBusy = isBusy;
-        refresh();
-    }
-
-    public void loadCG(KafkaTopic topic, BooleanProperty isBusy) {
-        this.clusterName = topic.cluster().getName();
-        this.topic.set(topic);
-        this.isBusy = isBusy;
-        refresh();
+        Optional<TableColumn<ConsumerTableItem, ?>> topicColumnOpt = TableViewConfigurer.getTableColumnById(table, ConsumerTableItemFXModel.TOPIC);
+        topicColumnOpt.ifPresent((tableColumn) -> {
+            tableColumn.visibleProperty().bind(this.topic.isNull());
+        });
     }
 
     @Override
     @FXML
     public void refresh() {
-        isBusy.set(true);
-        ViewUtils.runBackgroundTask(() -> {
+        loadConsumerGroupDetails((clusterName1, consumerGroupId) -> {
             try {
-                if (topic.get() != null) {
-                    this.consumerGroupIds = clusterManager.getConsumerGroupList(clusterName).stream().map(ConsumerGroupListing::groupId).toList();
-                    return FXCollections.observableArrayList(clusterManager
-                            .listConsumerDetails(clusterName, consumerGroupIds).stream()
-                            .filter(item -> item.getTopic().equals(topic.get().name())).toList());
-                } else {
-                    return FXCollections.observableArrayList(clusterManager.listConsumerDetails(clusterName, consumerGroupIds));
-                }
+                return clusterManager.describeConsumerDetails(clusterName1, consumerGroupId);
             } catch (ExecutionException | InterruptedException e) {
-//                isBusy.set(false);
-                log.error("Error when get consumer group offsets", e);
                 throw new RuntimeException(e);
             }
-        }, (items) -> {
-            isBusy.set(false);
-            setItems(items);
-            ObservableList<TableColumn<ConsumerTableItem, ?>> sortOrder = table.getSortOrder();
-            final List<String> sortedColumnNames = List.of(ConsumerTableItemFXModel.CONSUMER_ID, ConsumerTableItemFXModel.TOPIC, ConsumerTableItemFXModel.PARTITION);
-            if (sortOrder.isEmpty()) {
-                List<TableColumn<ConsumerTableItem, ?>> sortedColumns = table.getColumns().stream()
-                        .filter(c -> sortedColumnNames.contains(c.getId()))
-                        .toList();
-                sortedColumns.forEach(c -> c.setSortType(TableColumn.SortType.ASCENDING));
-                table.getSortOrder().addAll(sortedColumns);
-                table.sort();
+        }, List.of(ConsumerTableItemFXModel.CONSUMER_ID, ConsumerTableItemFXModel.TOPIC, ConsumerTableItemFXModel.PARTITION));
+    }
+
+    public void resetCG(CGResetOption resetOption, Long startTimestamp) {
+        var selectedItems = table.getSelectionModel().getSelectedItems();
+        if (selectedItems.isEmpty()) {
+            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Please choose a consumer to reset offsets", "Please choose a consumer to reset offsets", ButtonType.OK);
+            return;
+        }
+        if (resetOption == CGResetOption.START_TIMESTAMP && startTimestamp == null) {
+            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Please select start time to reset", "Please select start time to reset", ButtonType.OK);
+        }
+        Map<String, List<TopicPartition>> topicPartitionMap = selectedItems.stream()
+                .collect(Collectors.groupingBy(
+                        ConsumerTableItem::getGroupID,
+                        Collectors.mapping(item -> new TopicPartition(item.getTopic(), item.getPartition()), Collectors.toList())));
+        topicPartitionMap.forEach((cg, topicPartitions) -> {
+            String tpStr = topicPartitions.stream().map(TopicPartition::toString).collect(Collectors.joining(", "));
+            if (ModalUtils.confirmAlert("Reset Consumer Group Offset", "Do you want to reset consumer group %s for topic partitions %s to the %s".formatted(cg, tpStr, resetOption), "YES", "NO")) {
+                try {
+                    resetCG(resetOption, cg, topicPartitionMap.get(cg), startTimestamp);
+                    ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Reset offset successfully for consumer group %s".formatted(cg), "Reset offset successfully", ButtonType.OK);
+                } catch (ExecutionException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
-        }, e -> {
-            isBusy.set(false);
-            setItems(FXCollections.emptyObservableList());
-            throw ((RuntimeException) e);
         });
     }
+
+//    @Override
+//    @FXML
+//    public void refresh() {
+//        isBusy.set(true);
+//        ViewUtils.runBackgroundTask(() -> {
+//            try {
+//                if (topic.get() != null) {
+//                    this.consumerGroupIds = clusterManager.getConsumerGroupList(clusterName).stream().map(ConsumerGroupListing::groupId).toList();
+//                    return FXCollections.observableArrayList(clusterManager
+//                            .describeConsumerDetails(clusterName, consumerGroupIds).stream()
+//                            .filter(item -> item.getTopic().equals(topic.get().name())).toList());
+//                } else {
+//                    return FXCollections.observableArrayList(clusterManager.describeConsumerDetails(clusterName, consumerGroupIds));
+//                }
+//            } catch (ExecutionException | InterruptedException e) {
+/// /                isBusy.set(false);
+//                log.error("Error when get consumer group offsets", e);
+//                throw new RuntimeException(e);
+//            }
+//        }, (items) -> {
+//            isBusy.set(false);
+//            setItems(items);
+//            ObservableList<TableColumn<ConsumerTableItem, ?>> sortOrder = table.getSortOrder();
+//            final List<String> sortedColumnNames = List.of(ConsumerTableItemFXModel.CONSUMER_ID, ConsumerTableItemFXModel.TOPIC, ConsumerTableItemFXModel.PARTITION);
+//            if (sortOrder.isEmpty()) {
+//                List<TableColumn<ConsumerTableItem, ?>> sortedColumns = table.getColumns().stream()
+//                        .filter(c -> sortedColumnNames.contains(c.getId()))
+//                        .toList();
+//                sortedColumns.forEach(c -> c.setSortType(TableColumn.SortType.ASCENDING));
+//                table.getSortOrder().addAll(sortedColumns);
+//                table.sort();
+//            }
+//        }, e -> {
+//            isBusy.set(false);
+//            setItems(FXCollections.emptyObservableList());
+//            throw ((RuntimeException) e);
+//        });
+//    }
 }
