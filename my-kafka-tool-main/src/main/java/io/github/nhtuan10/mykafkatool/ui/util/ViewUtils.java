@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -49,7 +48,8 @@ public final class ViewUtils {
         };
         task.setOnSucceeded(workerStateEvent -> onSuccess.accept((T) workerStateEvent.getSource().getValue()));
         task.setOnFailed(workerStateEvent -> onError.accept(workerStateEvent.getSource().getException()));
-        CompletableFuture.runAsync(task);
+//        CompletableFuture.runAsync(task);
+        new Thread(task).start();
         return task;
     }
 
