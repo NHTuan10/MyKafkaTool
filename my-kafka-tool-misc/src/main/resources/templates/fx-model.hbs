@@ -1,6 +1,6 @@
 package {{packageName}};
 {{#each imports}}
-    import {{this}};
+import {{this}};
 {{/each}}
 public sealed interface {{className}}FXModel permits {{className}} {
 {{#each fxFields}}
@@ -10,59 +10,59 @@ public sealed interface {{className}}FXModel permits {{className}} {
 {{#each fxFields}}
     public default  {{typeSimpleName}} {{name}}Property() {
     if ((({{className}})this).{{name}} == null) (({{className}})this).{{name}} = new {{implTypeSimpleName}}(this, "{{name}}");
-    return (({{className}})this).{{name}};
+        return (({{className}})this).{{name}};
     }
 
     public default  {{underlyingType}} get{{capitalizeFirst name}}() {
-    return this.{{name}}Property().get();
+        return this.{{name}}Property().get();
     }
 
     public default void set{{capitalizeFirst name}}(final {{underlyingType}} {{name}}) {
-    this.{{name}}Property().set({{name}});
+        this.{{name}}Property().set({{name}});
     }
 {{/each}}
 {{#each nonFxFields}}
     public default  {{typeSimpleName}} get{{capitalizeFirst name}}() {
-    return (({{className}})this).{{name}};
+        return (({{className}})this).{{name}};
     }
 
     public default void set{{capitalizeFirst name}}(final {{typeSimpleName}} {{name}}) {
-    (({{className}})this).{{name}} = {{name}};
+        (({{className}})this).{{name}} = {{name}};
     }
 {{/each}}
-public static {{className}}Builder builder() {
-return new {{className}}Builder();
-}
+    public static {{className}}Builder builder() {
+        return new {{className}}Builder();
+    }
 
-public static class {{className}}Builder {
-{{className}}Builder() {
-}
+    public static class {{className}}Builder {
+        {{className}}Builder() {
+        }
 {{#each fxFields}}
-    private {{underlyingType}} {{name}};
+        private {{underlyingType}} {{name}};
 {{/each}}
 {{#each nonFxFields}}
-    private {{typeSimpleName}} {{name}};
+        private {{typeSimpleName}} {{name}};
 {{/each}}
 {{#each fxFields}}
-    public {{className}}Builder {{name}}({{underlyingType}}  {{name}}) {
-    this.{{name}} = {{name}};
-    return this;
-    }
+        public {{className}}Builder {{name}}({{underlyingType}}  {{name}}) {
+            this.{{name}} = {{name}};
+            return this;
+        }
 {{/each}}
 {{#each nonFxFields}}
-    public {{className}}Builder {{name}}({{typeSimpleName}}  {{name}}) {
-    this.{{name}} = {{name}};
-    return this;
-    }
+        public {{className}}Builder {{name}}({{typeSimpleName}}  {{name}}) {
+            this.{{name}} = {{name}};
+            return this;
+        }
 {{/each}}
-public {{className}} build() {
-{{className}} instance =  new {{className}}();
+        public {{className}} build() {
+            {{className}} instance =  new {{className}}();
 {{#each allFields}}
-    instance.set{{capitalizeFirst name}}(this.{{name}});
+            instance.set{{capitalizeFirst name}}(this.{{name}});
 {{/each}}
-return instance;
-}
-}
+            return instance;
+        }
+    }
 }
 
 
