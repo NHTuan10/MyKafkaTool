@@ -11,6 +11,7 @@
     <modules>
         <module>my-kafka-tool-main</module>
         <module>my-kafka-tool-misc</module>
+        <module>my-kafka-tool-launcher</module>
     </modules>
     <properties>
         <javafx.version>21.0.2</javafx.version>
