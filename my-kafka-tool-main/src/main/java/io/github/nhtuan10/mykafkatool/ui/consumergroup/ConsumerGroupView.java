@@ -126,6 +126,9 @@ public class ConsumerGroupView extends BorderPane {
         this.consumerGroupTable.visibleProperty().bind(toggleConsumerView.selectedProperty().not());
         resetCGComboBox.getItems().addAll(CGResetOption.values());
 //        resetCGHBox.visibleProperty().bind(toggleConsumerView.selectedProperty().not().and(consumerGroupTable.selectedItemProperty().isNotNull()));
+        resetCGHBox.visibleProperty().bind((toggleConsumerView.selectedProperty().not().and(consumerGroupTable.selectedItemProperty().isNotNull()))
+                .or(toggleConsumerView.selectedProperty().and(consumerTable.selectedItemProperty().isNotNull())));
+//        resetCGHBox.visibleProperty().bind(toggleConsumerView.selectedProperty().and(consumerTable.selectedItemProperty().isNotNull()));
         resetCGComboBox.getSelectionModel().selectFirst();
         resetCGStartDateTimePicker.visibleProperty().bind(resetCGComboBox.getSelectionModel().selectedItemProperty().isEqualTo(CGResetOption.START_TIMESTAMP));
         resetCGStartDateTimePicker.managedProperty().bind(resetCGComboBox.getSelectionModel().selectedItemProperty().isEqualTo(CGResetOption.START_TIMESTAMP));
