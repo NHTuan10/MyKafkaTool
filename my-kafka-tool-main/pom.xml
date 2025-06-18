@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.nhtuan10</groupId>
         <artifactId>my-kafka-tool</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>my-kafka-tool-main</artifactId>
@@ -37,7 +37,11 @@
             <artifactId>my-kafka-tool-misc</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.github.nhtuan10</groupId>
+            <artifactId>modular-impl</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <!-- JavaFX -->
         <dependency>
             <groupId>org.openjfx</groupId>
