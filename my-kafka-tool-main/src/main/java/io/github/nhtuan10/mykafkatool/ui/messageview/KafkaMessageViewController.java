@@ -401,9 +401,11 @@ public class KafkaMessageViewController {
         ModalUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
                 Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
                         "schemaTextArea", schemaTextArea.getText()), true, true, stageHolder.getStage());
-        KafkaMessage newMsg = (KafkaMessage) ref.get();
-        if (newMsg != null) {
-            producerUtil.sendMessage(kafkaTopic, partition, newMsg);
+        List<KafkaMessage> newMsgs = (List<KafkaMessage>) ref.get();
+        if (newMsgs != null && !newMsgs.isEmpty()) {
+            for (var msg : newMsgs) {
+                producerUtil.sendMessage(kafkaTopic, partition, msg);
+            }
             getTopicEventDispatcher().publishEvent(TopicUIEvent.newRefreshTopicEven(kafkaTopic));
             if (partition != null) {
                 getTopicEventDispatcher().publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));

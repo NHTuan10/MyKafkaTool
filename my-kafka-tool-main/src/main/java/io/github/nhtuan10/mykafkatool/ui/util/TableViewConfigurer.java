@@ -10,6 +10,7 @@ import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;
 import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
+import io.github.nhtuan10.mykafkatool.util.Utils;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
@@ -328,24 +329,14 @@ public class TableViewConfigurer {
                 .toList();
     }
 
-    public static List<Field> getAllFields(Class<?> clazz) {
-        Stream<Field> r = Arrays.stream(clazz.getDeclaredFields());
-        Class<?> p = clazz.getSuperclass();
-        while (p != null) {
-            r = Stream.concat(Arrays.stream(p.getDeclaredFields()), r);
-            p = p.getSuperclass();
-        }
-        return r.toList();
-    }
-
     public static List<Field> getTableColumnFieldsFromTableItem(Class<?> tableIemClass) {
-        return getAllFields(tableIemClass).stream()
+        return Utils.getAllFields(tableIemClass).stream()
                 .filter(f -> Property.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(TableViewColumn.class))
                 .toList();
     }
 
     public static List<String> getFilterableFieldsFromTableItem(Class<?> tableIemClass) {
-        return getAllFields(tableIemClass).stream()
+        return Utils.getAllFields(tableIemClass).stream()
                 .filter(TableViewConfigurer::isFilterableField)
                 .map(Field::getName)
                 .toList();

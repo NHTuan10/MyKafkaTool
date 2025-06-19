@@ -10,8 +10,8 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController">
     <children>
-        <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="522.0" prefWidth="738.0"
-                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+        <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="558.0" prefWidth="818.0"
+                   AnchorPane.bottomAnchor="-36.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-80.0"
                    AnchorPane.topAnchor="0.0">
             <items>
                 <TabPane prefHeight="385.0" prefWidth="634.0" tabClosingPolicy="UNAVAILABLE">
@@ -34,9 +34,11 @@
                                                                 prefHeight="54.0" vgrow="SOMETIMES"/>
                                                 <RowConstraints maxHeight="216.0" minHeight="10.0" percentHeight="60.0"
                                                                 prefHeight="118.0" vgrow="SOMETIMES"/>
-                                                <RowConstraints maxHeight="178.0" minHeight="10.0" percentHeight="25.0"
+                                                <RowConstraints maxHeight="178.0" minHeight="10.0" percentHeight="20.0"
                                                                 prefHeight="129.0" vgrow="SOMETIMES"/>
                                                 <RowConstraints maxHeight="129.0" minHeight="9.0" percentHeight="5.0"
+                                                                prefHeight="34.0" vgrow="SOMETIMES"/>
+                                                <RowConstraints maxHeight="129.0" minHeight="10.0" percentHeight="5.0"
                                                                 prefHeight="34.0" vgrow="SOMETIMES"/>
                                             </rowConstraints>
                                             <children>
@@ -58,8 +60,7 @@
                                                     </GridPane.margin>
                                                     <content>
                                                         <CodeArea fx:id="valueTextArea" prefHeight="118.0"
-                                                                  prefWidth="552.0"
-                                                                  wrapText="true"/>
+                                                                  prefWidth="552.0" wrapText="true"/>
                                                     </content>
 
                                                 </VirtualizedScrollPane>
@@ -72,8 +73,7 @@
                                                     <content>
                                                         <!--                                                                            layoutX="59.0" layoutY="69.0" -->
                                                         <CodeArea fx:id="schemaTextArea" prefHeight="130.0"
-                                                                  prefWidth="551.0"
-                                                                  wrapText="true"/>
+                                                                  prefWidth="551.0" wrapText="true"/>
                                                             <!--                                    styleClass="text-input"    -->
                                                     </content>
 
@@ -106,6 +106,49 @@
                                                         </ComboBox>
                                                     </children>
                                                 </VBox>
+                                                <HBox fx:id="multipleSendOptionContainer" prefHeight="100.0"
+                                                      prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+                                                    <children>
+                                                        <Label text="How many?"/>
+                                                        <TextField fx:id="numMsgToSend" prefHeight="26.0"
+                                                                   prefWidth="80.0" text="1">
+                                                            <HBox.margin>
+                                                                <Insets left="10.0"/>
+                                                            </HBox.margin>
+                                                        </TextField>
+                                                        <CheckBox fx:id="isHandlebarsEnabled" mnemonicParsing="false"
+                                                                  text="Handlebars Expression">
+                                                            <HBox.margin>
+                                                                <Insets left="10.0"/>
+                                                            </HBox.margin>
+                                                        </CheckBox>
+                                                        <Hyperlink fx:id="expressionHelpLink" text="ⓘ">
+                                                            <!--                                                      text="?&#x20DD;">-->
+                                                            <HBox.margin>
+                                                                <Insets left="10.0"/>
+                                                            </HBox.margin>
+                                                        </Hyperlink>
+                                                        <!--                                           <HBox fx:id="handlebarsPreviewContainer">-->
+                                                        <CheckBox fx:id="previewHandlebars" mnemonicParsing="false"
+                                                                  text="Preview">
+                                                            <HBox.margin>
+                                                                <Insets left="10.0"/>
+                                                            </HBox.margin>
+                                                        </CheckBox>
+                                                        <!--                                               <TextField fx:id="nthMsg" prefHeight="26.0" prefWidth="80.0">-->
+                                                        <!--                                                   <HBox.margin>-->
+                                                        <!--                                                       <Insets left="10.0" />-->
+                                                        <!--                                                   </HBox.margin>-->
+                                                        <!--                                               </TextField>-->
+                                                        <!--                                               <Label text="th Message" />-->
+
+                                                        <!--                                           </HBox>-->
+
+                                                    </children>
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0" top="10.0"/>
+                                                    </GridPane.margin>
+                                                </HBox>
                                             </children>
                                             <padding>
                                                 <Insets bottom="10.0"/>
@@ -164,7 +207,7 @@
                         </Tab>
                     </tabs>
                 </TabPane>
-                <AnchorPane fx:id="choiceButtonContainer" maxHeight="40.0" minHeight="40.0" minWidth="0.0"
+                <AnchorPane fx:id="choiceButtonContainer" maxHeight="40.0" minHeight="40.0" minWidth="593.0"
                             prefHeight="40.0" prefWidth="593.0">
                     <HBox prefHeight="40.0" prefWidth="598.0" spacing="10.0">
                         <Button fx:id="okBtn" mnemonicParsing="false" onAction="#ok" prefHeight="26.0" prefWidth="80.0"
