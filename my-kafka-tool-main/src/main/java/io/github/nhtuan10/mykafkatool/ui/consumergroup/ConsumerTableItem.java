@@ -5,9 +5,13 @@ import io.github.nhtuan10.mykafkatool.annotationprocessor.FXModel;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.StringProperty;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.apache.kafka.common.ConsumerGroupState;
 
 @FXModel
+@EqualsAndHashCode(callSuper = true)
+@ToString
 public final class ConsumerTableItem extends ConsumerGroupTopic implements ConsumerTableItemFXModel {
     //    @TableViewColumn
 //    StringProperty groupID;

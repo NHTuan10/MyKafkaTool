@@ -65,6 +65,10 @@
     -fx-background-color: -color-bg-default;
 }
 
+.styled-text-area:disabled {
+    -fx-opacity: 0.4;
+}
+
 .bordered-container {
     -fx-border-color: -color-border-default;
     -fx-border-width: 1;

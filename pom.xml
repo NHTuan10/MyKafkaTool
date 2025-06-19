@@ -15,6 +15,7 @@
     </modules>
     <properties>
         <javafx.version>21.0.2</javafx.version>
+        <handlebars-version>4.4.0</handlebars-version>
     </properties>
 
 

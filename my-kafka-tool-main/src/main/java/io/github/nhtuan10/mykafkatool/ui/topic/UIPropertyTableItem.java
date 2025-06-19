@@ -1,11 +1,15 @@
 package io.github.nhtuan10.mykafkatool.ui.topic;
 
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
+import io.github.nhtuan10.mykafkatool.annotationprocessor.FXModel;
 import javafx.beans.property.SimpleStringProperty;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-@Data
-public class UIPropertyTableItem {
+@EqualsAndHashCode
+@ToString
+@FXModel
+public final class UIPropertyTableItem implements UIPropertyTableItemFXModel {
     public static final String START_OFFSET = "Start Offset";
     public static final String END_OFFSET = "End Offset";
     public static final String NO_MESSAGES = "No Messages";
@@ -13,38 +17,16 @@ public class UIPropertyTableItem {
     public static final String REPLICA_IN_SYNC = "Replica [In-Sync]";
     public static final String REPLICA_NOT_IN_SYNC = "Replica [Not-In-Sync]";
     @TableViewColumn
-    private final SimpleStringProperty name;
+    SimpleStringProperty name;
     @TableViewColumn
-    private final SimpleStringProperty value;
+    SimpleStringProperty value;
 
     public UIPropertyTableItem(String name, String value) {
         this.name = new SimpleStringProperty(name);
         this.value = new SimpleStringProperty(value);
     }
 
-    public String getName() {
-        return name.get();
+    public UIPropertyTableItem() {
+
     }
-
-    public void setName(String name) {
-        this.name.set(name);
-    }
-
-    public SimpleStringProperty nameProperty() {
-        return name;
-    }
-
-    public String getValue() {
-        return value.get();
-    }
-
-    public void setValue(String value) {
-        this.value.set(value);
-    }
-
-    public SimpleStringProperty valueProperty() {
-        return value;
-    }
-
-
 }

@@ -51,7 +51,7 @@ public class ModularLauncher {
 
         ModuleLoader moduleLoader = ModuleLoader.getInstance();
 
-        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "mvn://" + ARTIFACT.replace(":", "/") + "/" + versionToUpgrade, "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "*");
+        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "mvn://" + ARTIFACT.replace(":", "/") + "/" + versionToUpgrade, "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
         waitForUpgrade.countDown();
         try (OutputStream os = new FileOutputStream(configLocation)) {
             properties.setProperty(VERSION_PROP, versionToUpgrade);
@@ -80,7 +80,7 @@ public class ModularLauncher {
 //        SwingUtilities.invokeLater(() -> {
         int result = JOptionPane.showConfirmDialog(
                 null,
-                "Do you want to upgrade to the new version %s?".formatted(version),
+                "There is a new version available. Do you want to upgrade to the new version %s?".formatted(version),
                 "Upgrade Confirmation",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
