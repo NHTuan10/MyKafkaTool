@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui.topic;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import io.github.nhtuan10.mykafkatool.annotationprocessor.FXModel;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -17,9 +18,9 @@ public final class UIPropertyTableItem implements UIPropertyTableItemFXModel {
     public static final String REPLICA_IN_SYNC = "Replica [In-Sync]";
     public static final String REPLICA_NOT_IN_SYNC = "Replica [Not-In-Sync]";
     @TableViewColumn
-    SimpleStringProperty name;
+    StringProperty name;
     @TableViewColumn
-    SimpleStringProperty value;
+    StringProperty value;
 
     public UIPropertyTableItem(String name, String value) {
         this.name = new SimpleStringProperty(name);

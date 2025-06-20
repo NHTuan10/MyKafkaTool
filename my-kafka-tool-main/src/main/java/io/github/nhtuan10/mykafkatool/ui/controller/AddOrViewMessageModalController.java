@@ -16,7 +16,7 @@ import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.event.TopicUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable;
-import io.github.nhtuan10.mykafkatool.ui.topic.UIPropertyTableItem;
+import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import io.github.nhtuan10.mykafkatool.util.Utils;
@@ -243,7 +243,7 @@ public class AddOrViewMessageModalController extends ModalController {
                 this.isBusy.set(true);
                 progressIndicator.setProgress(-1);
             });
-            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(UIPropertyTableItem::getName, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
+            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getName, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
             List<String> keys, values;
             if (isHandlebarsEnabled.isSelected()) {
                 try {

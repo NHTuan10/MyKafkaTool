@@ -157,6 +157,15 @@ public class FXModelAnnotationProcessor extends AbstractProcessor {
         private final String packageName;
         private final List<Field> fxFields;
         private final List<Field> nonFxFields;
+        static final List<Class<?>> primitiveTypes = List.of(
+                Boolean.TYPE,
+                Character.TYPE,
+                Byte.TYPE,
+                Short.TYPE,
+                Integer.TYPE,
+                Long.TYPE,
+                Float.TYPE,
+                Double.TYPE);
 
         public TemplateContextObject(String className, String packageName, List<Field> fxFields, List<Field> nonFxFields) {
             this.className = className;
@@ -196,7 +205,8 @@ public class FXModelAnnotationProcessor extends AbstractProcessor {
                         }
                     }
             );
-            Stream<String> nonFxFieldStream = nonFxFields.stream().map(Field::getType);
+            Stream<String> nonFxFieldStream = nonFxFields.stream().map(Field::getType)
+                    .filter(t -> primitiveTypes.stream().noneMatch(primitiveType -> primitiveType.getName().equals(t)));
             return Stream.concat(fxFieldStream, nonFxFieldStream).collect(Collectors.toSet());
         }
 

@@ -10,6 +10,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
+import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItemFXModel;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -252,7 +253,18 @@ public class KafkaConsumerService {
                 record.headers(), consumerProps, others);
         String timestamp = formatRecordTimestamp(record);
 
-        return new KafkaMessageTableItem(record.partition(), record.offset(), key, value, timestamp, record.serializedValueSize(), pollingOptions.valueContentType(), record.headers(), pollingOptions.schema(), false);
+        return KafkaMessageTableItemFXModel.builder()
+                .partition(record.partition())
+                .offset(record.offset())
+                .key(key)
+                .value(value)
+                .timestamp(timestamp)
+                .serializedValueSize(record.serializedValueSize())
+                .valueContentType(pollingOptions.valueContentType())
+                .headers(record.headers())
+                .schema(pollingOptions.schema())
+                .isErrorItem(false)
+                .build();
     }
 
     private KafkaMessageTableItem createErrorMessageItem
@@ -265,16 +277,17 @@ public class KafkaConsumerService {
         } catch (IOException e) {
             log.error("Error when display value: {}", record.value(), e);
         }
-        return new KafkaMessageTableItem(record.partition(),
-                record.offset(),
-                record.key() != null ? record.key() : "",
-                displayValue,
-                timestamp,
-                record.serializedValueSize(), pollingOptions.valueContentType(),
-                record.headers(),
-                "",
-                true
-        );
+
+        return KafkaMessageTableItemFXModel.builder().partition(record.partition())
+                .offset(record.offset())
+                .key(record.key() != null ? record.key() : "")
+                .value(displayValue)
+                .timestamp(timestamp)
+                .serializedValueSize(record.serializedValueSize())
+                .valueContentType(pollingOptions.valueContentType())
+                .headers(record.headers())
+                .schema("")
+                .isErrorItem(true).build();
     }
 
     private String formatRecordTimestamp(ConsumerRecord<String, Object> record) {

@@ -44,16 +44,15 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
         // schemaMetadata is null if only subject is loaded from registry
         Optional<SchemaMetadata> schemaMetadataOptional = Optional.ofNullable(schemaMetadataFromRegistry.schemaMetadata());
 
-        return new SchemaTableItem(
-                schemaMetadataFromRegistry.subjectName(),
-                schemaMetadataOptional.map(SchemaMetadata::getId).map(String::valueOf).orElse(null),
-                schemaMetadataOptional.map(SchemaMetadata::getVersion).map(String::valueOf).orElse(null),
-                schemaMetadataOptional.map(SchemaMetadata::getSchemaType).orElse(null),
-                schemaMetadataFromRegistry.compatibility(),
-                schemaMetadataOptional.map(SchemaMetadata::getSchema).orElse(null),
-                clusterName
-        );
-
+        return SchemaTableItemFXModel.builder()
+                .subject(schemaMetadataFromRegistry.subjectName())
+                .schemaId(schemaMetadataOptional.map(SchemaMetadata::getId).map(String::valueOf).orElse(null))
+                .latestVersion(schemaMetadataOptional.map(SchemaMetadata::getVersion).map(String::valueOf).orElse(null))
+                .type(schemaMetadataOptional.map(SchemaMetadata::getSchemaType).orElse(null))
+                .compatibility(schemaMetadataFromRegistry.compatibility())
+                .schema(schemaMetadataOptional.map(SchemaMetadata::getSchema).orElse(null))
+                .clusterName(clusterName)
+                .build();
     }
 
     @FXML

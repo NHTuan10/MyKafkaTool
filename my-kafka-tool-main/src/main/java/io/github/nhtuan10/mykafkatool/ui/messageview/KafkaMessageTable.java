@@ -104,7 +104,7 @@ private void setDefaultColumnWidths() {
                     super.updateItem(item, empty);
                     getStyleClass().removeAll(UIStyleConstant.ERROR_ROW_CLASS);
                     if (!empty && item != null) {
-                        if (item.isErrorItem()) {
+                        if (item.getIsErrorItem()) {
                             getStyleClass().add(UIStyleConstant.ERROR_ROW_CLASS);
                         }
                         getStyleClass().add(UIStyleConstant.TABLE_ROW_BORDER_CLASS);
