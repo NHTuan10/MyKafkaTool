@@ -45,11 +45,13 @@ public class Utils {
         return shell.parse(code);
     }
 
-    public static String evalHandleBar(String templateStr) throws IOException {
-        return evalHandleBar(templateStr, 1).get(0);
+    public static String evalHandlebarsAtNth(String templateStr, int n) throws IOException {
+        Template template = handlebars.compileInline(templateStr);
+        Map<String, Object> context = Map.of("counter", n);
+        return template.apply(context);
     }
 
-    public static List<String> evalHandleBar(String templateStr, int numOfLoop) throws IOException {
+    public static List<String> evalHandlebars(String templateStr, int numOfLoop) throws IOException {
         Template template = handlebars.compileInline(templateStr);
         List<String> r = new ArrayList<>();
         for (int i = 0; i < numOfLoop; i++) {

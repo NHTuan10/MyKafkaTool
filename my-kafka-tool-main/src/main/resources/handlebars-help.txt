@@ -1,0 +1,26 @@
+You can use Handlebars (extensions of Mustache) templates for message keys and values. Some helpers
+
+{{counter}} : counter start from 1
+{{uuid}} : random UUID, example result - 00f18942-5fac-4ba6-a099-a206db33eee2
+{{randomInt}} : no bound random integer values, example result - 1341
+{{randomInt 375}} : random integer values < 375, example result - 233
+{{randomInt 10 100}} : random integer values >= 10 and < 100, example result - 40
+{{randomDouble}} : no bound random integer values, example result - 1341
+{{randomDouble 23.4}} : random integer values < 23.4, example result - 12.34
+{{randomDouble 10.65 100.65}} : random integer values >= 10.65 and < 100.65, example result - 68.44
+{{randomString}} : random alphanumeric string, 36 characters max, example result - az2x23ore
+{{randomString 5}} : random alphanumeric with 5 characters, example result - rNZP2
+{{currentDate}} : only date, example result - 2025-06-18
+{{currentDate 'yyyy'}} or {{currentDate "yyyy"}} : current date with Java date time format, example result - 2025
+{{currentDateTime}} : current date time, example result - 2025-06-18T10:51:51.714037
+{{currentDateTime 'MM/dd/YYYY HH:mm'}} or {{currentDateTime "MM/dd/YYYY HH:mm"}} : current date with format, example result - 06/18/2025 10:49
+{{currentTime}} : only time, example result - 19:52:35.682202
+{{currentDateTime 'HH:mm:ss'}} or {{currentDateTime "HH:mm:ss"}} : current date with format, example result - 19:54:03
+{{epochMillis}} : example result: 1750377294576
+{{epochSeconds}} : example result: 1750377359
+{{round 23.54324}} : return 24 , {{round 23.22}} return 23
+{{round 23.54324 2}} : 2 decimal after point, return 23.54
+{{ceil 23.54324}}, {{ceil 23.54324 2}}, {{floor 23.54324 2}} and {{floor 23.54324 2}} : similar to round
+{{math 20 '+' 40}} return 60, also support substraction (-), multiplication (*) and mod (%). Please not there is a quote around the operations
+{{math 213 '/' 23}} return 9.2608695652 (10 digits after decimal point)
+{{math 213 '/' 23 2}} return 9.26, 2 digits after decimal point

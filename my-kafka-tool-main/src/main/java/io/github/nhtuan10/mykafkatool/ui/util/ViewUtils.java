@@ -28,7 +28,7 @@ public final class ViewUtils {
         try {
             value = prettyPrint ?
                     objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectMapper.readTree(inValue)) :
-                    codeArea.getText();
+                    inValue;
         } catch (JsonProcessingException e) {
         }
         codeArea.replaceText(value);

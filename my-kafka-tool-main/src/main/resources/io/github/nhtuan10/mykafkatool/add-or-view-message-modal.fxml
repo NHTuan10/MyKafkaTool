@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import io.github.nhtuan10.mykafkatool.ui.control.PositiveIntTextField?>
 <?import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -11,10 +12,10 @@
             fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController">
     <children>
         <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="558.0" prefWidth="818.0"
-                   AnchorPane.bottomAnchor="-36.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-80.0"
+                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                    AnchorPane.topAnchor="0.0">
             <items>
-                <TabPane prefHeight="385.0" prefWidth="634.0" tabClosingPolicy="UNAVAILABLE">
+                <TabPane prefHeight="509.0" prefWidth="816.0" tabClosingPolicy="UNAVAILABLE">
                     <tabs>
                         <Tab text="Contents">
                             <content>
@@ -74,7 +75,7 @@
                                                         <!--                                                                            layoutX="59.0" layoutY="69.0" -->
                                                         <CodeArea fx:id="schemaTextArea" prefHeight="130.0"
                                                                   prefWidth="551.0" wrapText="true"/>
-                                                            <!--                                    styleClass="text-input"    -->
+                                                        <!--                                    styleClass="text-input"    -->
                                                     </content>
 
                                                 </VirtualizedScrollPane>
@@ -106,16 +107,27 @@
                                                         </ComboBox>
                                                     </children>
                                                 </VBox>
+
+                                                <Label fx:id="howManyLabel" text="How many?" GridPane.columnIndex="0"
+                                                       GridPane.rowIndex="4">
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0"/>
+                                                    </GridPane.margin>
+                                                </Label>
                                                 <HBox fx:id="multipleSendOptionContainer" prefHeight="100.0"
-                                                      prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+                                                      prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                                     <children>
-                                                        <Label text="How many?"/>
-                                                        <TextField fx:id="numMsgToSend" prefHeight="26.0"
-                                                                   prefWidth="80.0" text="1">
-                                                            <HBox.margin>
-                                                                <Insets left="10.0"/>
-                                                            </HBox.margin>
-                                                        </TextField>
+                                                        <!--                                                      <NonNegativeIntTextField fx:id="numMsgToSend" prefHeight="26.0" prefWidth="80.0" text="1">-->
+                                                        <!--                                                          <default>-->
+                                                        <!--                                                              <Integer fx:value="1" />-->
+                                                        <!--                                                          </default>-->
+                                                        <!--                                                          <isZeroAllowed>-->
+                                                        <!--                                                              <Boolean fx:value="false" />-->
+                                                        <!--                                                          </isZeroAllowed>-->
+                                                        <!--                                                          -->
+                                                        <!--                                                      </NonNegativeIntTextField>-->
+                                                        <PositiveIntTextField fx:id="numMsgToSend" prefHeight="26.0"
+                                                                              prefWidth="80.0" text="1"/>
                                                         <CheckBox fx:id="isHandlebarsEnabled" mnemonicParsing="false"
                                                                   text="Handlebars Expression">
                                                             <HBox.margin>
@@ -128,25 +140,26 @@
                                                                 <Insets left="10.0"/>
                                                             </HBox.margin>
                                                         </Hyperlink>
-                                                        <!--                                           <HBox fx:id="handlebarsPreviewContainer">-->
-                                                        <CheckBox fx:id="previewHandlebars" mnemonicParsing="false"
-                                                                  text="Preview">
-                                                            <HBox.margin>
-                                                                <Insets left="10.0"/>
-                                                            </HBox.margin>
-                                                        </CheckBox>
-                                                        <!--                                               <TextField fx:id="nthMsg" prefHeight="26.0" prefWidth="80.0">-->
-                                                        <!--                                                   <HBox.margin>-->
-                                                        <!--                                                       <Insets left="10.0" />-->
-                                                        <!--                                                   </HBox.margin>-->
-                                                        <!--                                               </TextField>-->
-                                                        <!--                                               <Label text="th Message" />-->
+                                                        <HBox fx:id="handlebarsPreviewContainer">
+                                                            <CheckBox fx:id="previewHandlebars" mnemonicParsing="false"
+                                                                      text="Preview">
+                                                                <HBox.margin>
+                                                                    <Insets left="10.0"/>
+                                                                </HBox.margin>
+                                                            </CheckBox>
+                                                            <PositiveIntTextField fx:id="nthMsg" prefHeight="26.0"
+                                                                                  prefWidth="80.0">
+                                                                <HBox.margin>
+                                                                    <Insets left="10.0"/>
+                                                                </HBox.margin>
+                                                            </PositiveIntTextField>
+                                                            <Label text="th Message"/>
 
-                                                        <!--                                           </HBox>-->
+                                                        </HBox>
 
                                                     </children>
                                                     <GridPane.margin>
-                                                        <Insets left="10.0" top="10.0"/>
+                                                        <Insets left="0.0" top="10.0"/>
                                                     </GridPane.margin>
                                                 </HBox>
                                             </children>

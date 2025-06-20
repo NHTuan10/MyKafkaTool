@@ -12,6 +12,6 @@ class UtilsTest {
 //        String template = "{{randomInt}}, {{randomInt 30}}, {{randomInt 30 435}},, {{randomString}}, {{randomString 12}}, {{randomUUID}}, {{counter}}, {{counter}}";
         String template = "{{randomInt}} {{randomInt 30}} {{randomDouble 23.6 157.99}}  {{counter}} {{randomString 10}}  ?\u20DD {{currentDate}} {{currentDateTime}}";
 //        System.out.println(Utils.evalHandleBar(template,  3));
-        System.out.println(Utils.evalHandleBar("{{currentDate 'YYYY'}} {{epochMillis}}  {{epochSeconds}} {{notInContext}}", 1));
+        System.out.println(Utils.evalHandlebars("{{currentDate 'YYYY'}} {{epochMillis}}  {{epochSeconds}} {{notInContext}}", 1));
     }
 }

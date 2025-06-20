@@ -34,10 +34,7 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -93,11 +90,14 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private CheckBox previewHandlebars;
 
-//    @FXML
-//    private HBox handlebarsPreviewContainer;
-//
-//    @FXML
-//    private TextField nthMsg;
+    @FXML
+    private HBox handlebarsPreviewContainer;
+
+    @FXML
+    private TextField nthMsg;
+
+    @FXML
+    private Label howManyLabel;
 
     @Inject
     public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper, ProducerUtil producerUtil) {
@@ -105,8 +105,12 @@ public class AddOrViewMessageModalController extends ModalController {
         this.jsonHighlighter = jsonHighlighter;
         this.objectMapper = objectMapper;
         this.producerUtil = producerUtil;
-        this.helpDialog = buildHelpDialog();
-        this.editable = new SimpleBooleanProperty();
+        try {
+            this.helpDialog = buildHelpDialog();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        this.editable = new SimpleBooleanProperty(true);
     }
 
     @FXML
@@ -123,43 +127,68 @@ public class AddOrViewMessageModalController extends ModalController {
         });
 //        expressionHelpLink.setText(" ?⃝");
         expressionHelpLink.setOnAction((e) -> showHelp());
-        previewHandlebars.visibleProperty().bind(isHandlebarsEnabled.selectedProperty());
-//        handlebarsPreviewContainer.visibleProperty().bind(isHandlebarsEnabled.selectedProperty());
-        StringProperty origKey = new SimpleStringProperty(keyTextArea.getText());
-        StringProperty origValue = new SimpleStringProperty(valueTextArea.getText());
+//        previewHandlebars.visibleProperty().bind(isHandlebarsEnabled.selectedProperty());
+        handlebarsPreviewContainer.visibleProperty().bind(isHandlebarsEnabled.selectedProperty());
+        StringProperty keyTemplate = new SimpleStringProperty(keyTextArea.getText());
+        StringProperty valueTemplate = new SimpleStringProperty(valueTextArea.getText());
         previewHandlebars.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && !newVal.equals(oldVal)) {
                 if (newVal) {
-                    origKey.setValue(keyTextArea.getText());
-                    origValue.setValue(valueTextArea.getText());
-                    try {
-                        keyTextArea.setText(Utils.evalHandleBar(keyTextArea.getText()));
-                        refreshDisplayedValue(Utils.evalHandleBar(valueTextArea.getText()), valueTextArea, valueDisplayTypeComboBox.getValue(), true);
-                    } catch (Exception e) {
-                        showHandlebarsEvalError(e);
-                        previewHandlebars.setSelected(false);
-                    }
+                    keyTemplate.setValue(keyTextArea.getText());
+                    valueTemplate.setValue(valueTextArea.getText());
+                    int n = 1;
+                    if (StringUtils.isNotBlank(nthMsg.getText()))
+                        n = Integer.parseInt(nthMsg.getText());
+                    nthMsg.setText(String.valueOf(n));
+                    previewKeyAndValueHandlebars(n, keyTextArea.getText(), valueTextArea.getText());
                 } else {
-                    keyTextArea.setText(origKey.get());
-                    refreshDisplayedValue(origValue.get(), valueTextArea, valueDisplayTypeComboBox.getValue(), false);
+                    keyTextArea.setText(keyTemplate.get());
+                    refreshDisplayedValue(valueTemplate.get(), valueTextArea, valueDisplayTypeComboBox.getValue(), false);
                 }
             }
 
         });
+        nthMsg.textProperty().addListener((obs, oldVal, newVal) -> {
+            int n;
+            if (isHandlebarsEnabled.isSelected() && previewHandlebars.isSelected() && StringUtils.isNotBlank(newVal) && (n = Integer.parseInt(newVal)) > 0) {
+                previewKeyAndValueHandlebars(n, keyTemplate.get(), valueTemplate.get());
+            }
+        });
         var handlebarsEditableCheck = isHandlebarsEnabled.selectedProperty().not().or(previewHandlebars.selectedProperty().not());
         keyTextArea.editableProperty().bind(editable.and(handlebarsEditableCheck));
         valueTextArea.editableProperty().bind(editable.and(handlebarsEditableCheck));
+        howManyLabel.visibleProperty().bind(editable);
+        howManyLabel.managedProperty().bind(editable);
+        multipleSendOptionContainer.visibleProperty().bind(editable);
+        multipleSendOptionContainer.managedProperty().bind(editable);
+    }
+
+    private void previewKeyAndValueHandlebars(int n, String keyTemplate, String valueTemplate) {
+        try {
+            keyTextArea.setText(Utils.evalHandlebarsAtNth(keyTemplate, n));
+            refreshDisplayedValue(Utils.evalHandlebarsAtNth(valueTemplate, n), valueTextArea, valueDisplayTypeComboBox.getValue(), true);
+        } catch (Exception e) {
+            showHandlebarsEvalError(e);
+            previewHandlebars.setSelected(false);
+        }
     }
 
     private void showHelp() {
         helpDialog.showAndWait();
     }
 
-    private Alert buildHelpDialog() {
-        TextArea textArea = new TextArea("YOUR_MESSAGE_HERE");
+    private Alert buildHelpDialog() throws IOException {
+        String handlebarsHelp = new String(this.getClass().getClassLoader().getResourceAsStream("handlebars-help.txt").readAllBytes());
+        TextArea textArea = new TextArea(handlebarsHelp);
         textArea.setEditable(false);
         textArea.setWrapText(true);
+        textArea.setWrapText(true);
         AnchorPane anchorPane = new AnchorPane();
+        AnchorPane.setTopAnchor(textArea, 0.0);
+        AnchorPane.setBottomAnchor(textArea, 0.0);
+        AnchorPane.setLeftAnchor(textArea, 0.0);
+        AnchorPane.setRightAnchor(textArea, 0.0);
+
 //        GridPane gridPane = new GridPane();
 //        gridPane.setMaxWidth(Double.MAX_VALUE);
 //        gridPane.add(textArea, 0, 0);
@@ -167,7 +196,7 @@ public class AddOrViewMessageModalController extends ModalController {
         anchorPane.getChildren().add(textArea);
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Stuff");
+        alert.setTitle("Handlebars Expression Help");
         alert.getDialogPane().setContent(anchorPane);
         alert.setResizable(true);
         return alert;
@@ -187,19 +216,13 @@ public class AddOrViewMessageModalController extends ModalController {
         int numberOfMessages = Integer.parseInt(numMsgToSend.getText());
 
         if (!validateSchema(valueContentTypeText, schemaText)) return;
-        SerDesHelper.ValidationResult valueValidationResult = serDesHelper.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
-        if (!valueValidationResult.isValid()) {
-            log.warn("The message is invalid against the schema", valueValidationResult.exception());
-            ModalUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
-            return;
-        }
 
         Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(UIPropertyTableItem::getName, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
         List<String> keys, values;
         if (isHandlebarsEnabled.isSelected()) {
             try {
-                keys = Utils.evalHandleBar(keyText, numberOfMessages);
-                values = Utils.evalHandleBar(valueText, numberOfMessages);
+                keys = Utils.evalHandlebars(keyText, numberOfMessages);
+                values = Utils.evalHandlebars(valueText, numberOfMessages);
             } catch (Exception e) {
                 showHandlebarsEvalError(e);
                 return;
@@ -209,9 +232,18 @@ public class AddOrViewMessageModalController extends ModalController {
             values = IntStream.range(0, numberOfMessages).mapToObj(i -> valueText).toList();
         }
 
-        var kafkaMessages = IntStream.range(0, numberOfMessages).mapToObj((i) ->
-                new KafkaMessage(keys.get(i), values.get(i), valueContentTypeText, schemaText, headers)
-        ).toList();
+//        var kafkaMessages = IntStream.range(0, numberOfMessages).mapToObj((i) -> {
+        var kafkaMessages = new ArrayList<KafkaMessage>();
+        for (int i = 0; i < numberOfMessages; i++) {
+            SerDesHelper.ValidationResult valueValidationResult = serDesHelper.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
+            if (!valueValidationResult.isValid()) {
+                log.warn("The message is invalid against the schema", valueValidationResult.exception());
+                ModalUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
+                return;
+            }
+            kafkaMessages.add(new KafkaMessage(keys.get(i), values.get(i), valueContentTypeText, schemaText, headers));
+        }
+//        }).toList();
         modelRef.set(kafkaMessages);
         Stage stage = (Stage) okBtn.getScene().getWindow();
         stage.close();
@@ -245,8 +277,6 @@ public class AddOrViewMessageModalController extends ModalController {
         DisplayType displayType;
 
         if (editable) { // For Add Message Modal
-            multipleSendOptionContainer.setVisible(true);
-            multipleSendOptionContainer.setManaged(true);
             if (valueContentType != null && serDesHelper.getPluggableSerialize(valueContentType) != null) {
                 valueContentTypeComboBox.getSelectionModel().select(valueContentType);
             }
@@ -257,8 +287,8 @@ public class AddOrViewMessageModalController extends ModalController {
 //            choiceButtonContainer.setVisible(false);
 //            choiceButtonContainer.setMinHeight(0);
 //            choiceButtonContainer.setPrefHeight(0);
-            multipleSendOptionContainer.setVisible(false);
-            multipleSendOptionContainer.setManaged(false);
+//            multipleSendOptionContainer.setVisible(false);
+//            multipleSendOptionContainer.setManaged(false);
             splitPane.getItems().remove(choiceButtonContainer);
 //            ( (SplitPane) choiceButtonContainer.getParent()).getItems().remove(choiceButtonContainer);
             if (valueContentType != null && serDesHelper.getPluggableDeserialize(valueContentType) != null) {
