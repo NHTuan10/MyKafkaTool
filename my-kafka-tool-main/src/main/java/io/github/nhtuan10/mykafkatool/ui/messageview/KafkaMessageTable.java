@@ -3,30 +3,26 @@ package io.github.nhtuan10.mykafkatool.ui.messageview;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
-import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
-import io.github.nhtuan10.mykafkatool.ui.topic.UIPropertyTableItem;
-import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -36,6 +32,8 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
     private SerDesHelper serDesHelper;
     private KafkaConsumerService.MessagePollingPosition messagePollingPosition;
     private ObjectMapper objectMapper = MyKafkaToolApplication.DAGGER_APP_COMPONENT.sharedObjectMapper();
+    @Setter
+    private KafkaMessageViewController parentController;
 
     public KafkaMessageTable() {
         super(false);
@@ -52,6 +50,8 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
 
     @Override
     protected void configureTableView() {
+
+        List<MenuItem> menuItems = createContextMenuItems();
         TableViewConfigurer.TableViewConfiguration<KafkaMessageTableItem> configuration = new TableViewConfigurer.TableViewConfiguration<>(
                 SelectionMode.MULTIPLE
                 , false
@@ -68,12 +68,29 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
             }
             return List.of(headers);
         }
-        ));
+        ), menuItems);
         configureTableView(configuration);
         TableViewConfigurer.getTableColumnById(table, KafkaMessageTableItem.SERIALIZED_VALUE_SIZE).ifPresent(column ->
                 column.setText("Serialized Value Size (Bytes)"));
     }
-//    @Override
+
+    private MenuItem createViewOrReproduceMenuItem(String text, boolean isReproduceMenuItem) {
+        MenuItem menuItem = new MenuItem(text);
+        menuItem.setOnAction(event -> {
+            List<KafkaMessageTableItem> selectedItems = table.getSelectionModel().getSelectedItems();
+            selectedItems.forEach(item -> {
+                parentController.viewOrReproduceMessage(serDesHelper, item, isReproduceMenuItem);
+            });
+        });
+        return menuItem;
+    }
+
+    private List<MenuItem> createContextMenuItems() {
+        return List.of(createViewOrReproduceMenuItem("View Message", false),
+                createViewOrReproduceMenuItem("Re-produce Message", true));
+    }
+
+    //    @Override
 //    public Predicate<KafkaMessageTableItem> filterPredicate(Filter filter) {
 //        return Filter.buildFilterPredicate(filter
 //                , KafkaMessageTableItem::getKey
@@ -83,16 +100,16 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
 //                 ,(item) -> String.valueOf(item.getOffset())
 //        );
 //    }
-private void setDefaultColumnWidths() {
-    table.getColumns().forEach(column -> {
-        switch (column.getId()) {
-            case KafkaMessageTableItem.KEY -> column.setPrefWidth(100d);
-            case KafkaMessageTableItem.VALUE -> column.setPrefWidth(300d);
-            case KafkaMessageTableItem.TIMESTAMP -> column.setPrefWidth(200d);
-            case KafkaMessageTableItem.SERIALIZED_VALUE_SIZE -> column.setPrefWidth(150d);
-        }
-    });
-}
+    private void setDefaultColumnWidths() {
+        table.getColumns().forEach(column -> {
+            switch (column.getId()) {
+                case KafkaMessageTableItem.KEY -> column.setPrefWidth(100d);
+                case KafkaMessageTableItem.VALUE -> column.setPrefWidth(300d);
+                case KafkaMessageTableItem.TIMESTAMP -> column.setPrefWidth(200d);
+                case KafkaMessageTableItem.SERIALIZED_VALUE_SIZE -> column.setPrefWidth(150d);
+            }
+        });
+    }
 
     public void configureMessageTable(SerDesHelper serDesHelper) {
         //TODO: for message table, allow copy more details such as key, offset, partition, timestamp, headers, serialized size, etc.
@@ -117,24 +134,15 @@ private void setDefaultColumnWidths() {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     KafkaMessageTableItem rowData = row.getItem();
                     log.debug("Double click on: {}", rowData.getKey());
-                    Map<String, Object> msgModalFieldMap = Map.of(
-                            "valueContentType", rowData.getValueContentType(),
-                            "serDesHelper", serDesHelper,
-                            "keyTextArea", rowData.getKey(),
-                            "valueTextArea", rowData.getValue(),
-                            "valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()),
-                            "headerTable",
-                            FXCollections.observableArrayList(
-                                    Arrays.stream(rowData.getHeaders().toArray()).map(header -> new UIPropertyTableItem(header.key(), new String(header.value()))).toList()));
-                    try {
-                        ModalUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "View Message", new AtomicReference<>(), msgModalFieldMap, false, true, stageHolder.getStage());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    parentController.viewOrReproduceMessage(serDesHelper, rowData, false);
                 }
             });
             return row;
         });
+    }
+
+    public static List<KafkaMessageHeaderTableItem> mapToMsgHeaderTableItem(Headers headers) {
+        return Arrays.stream(headers.toArray()).map(header -> KafkaMessageHeaderTableItemFXModel.builder().key(header.key()).value(new String(header.value())).build()).toList();
     }
 
     @Override

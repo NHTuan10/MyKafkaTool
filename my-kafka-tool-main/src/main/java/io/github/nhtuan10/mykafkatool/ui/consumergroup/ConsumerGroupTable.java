@@ -30,7 +30,7 @@ public class ConsumerGroupTable extends AbstractConsumerGroupTable<ConsumerGroup
                 , true
                 , true
                 , new TableViewConfigurer.TableViewConfiguration.ExtraFieldsToCopyAndExport<>(List.of()
-                , item -> List.of()));
+                , item -> List.of()), List.of());
         configureTableView(configuration);
     }
 

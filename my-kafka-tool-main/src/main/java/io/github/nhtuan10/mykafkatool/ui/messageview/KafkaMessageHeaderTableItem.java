@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 public final class KafkaMessageHeaderTableItem implements KafkaMessageHeaderTableItemFXModel {
     @TableViewColumn
-    StringProperty name;
+    StringProperty key;
     @TableViewColumn
     StringProperty value;
 }

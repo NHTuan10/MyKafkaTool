@@ -115,6 +115,9 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private ProgressIndicator progressIndicator;
 
+    @FXML
+    private Label clusterTopicAndPartitionInfo;
+
     @Inject
     public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper,
                                            ProducerUtil producerUtil, EventDispatcher eventDispatcher) {
@@ -243,7 +246,7 @@ public class AddOrViewMessageModalController extends ModalController {
                 this.isBusy.set(true);
                 progressIndicator.setProgress(-1);
             });
-            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getName, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
+            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getKey, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
             List<String> keys, values;
             if (isHandlebarsEnabled.isSelected()) {
                 try {
@@ -282,11 +285,11 @@ public class AddOrViewMessageModalController extends ModalController {
             if (kafkaPartition != null) {
                 eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(kafkaPartition));
             }
-            modelRef.set(count);
+            modelRef.set(modelRef.get() != null ? (Integer) modelRef.get() + count : count);
+            ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Added %s message successfully!".formatted(count), "Successfully Added!", ButtonType.OK);
         }, (ex) -> {
             this.isBusy.set(false);
             UIErrorHandler.showError(Thread.currentThread(), ex);
-            modelRef.set(0);
         });
 
 //        Stage stage = (Stage) okBtn.getScene().getWindow();
@@ -347,6 +350,10 @@ public class AddOrViewMessageModalController extends ModalController {
         }
         valueDisplayTypeComboBox.getSelectionModel().select(displayType);
         valueDisplayTypeToggleEventAction(true, initValue);
+        String text = kafkaPartition != null ?
+                "Cluster: %s - Topic: %s - Partition: %s".formatted(kafkaTopic.cluster().getName(), kafkaTopic.name(), kafkaPartition.id()) :
+                "Cluster: %s - Topic: %s".formatted(kafkaTopic.cluster().getName(), kafkaTopic.name());
+        this.clusterTopicAndPartitionInfo.setText(text);
     }
 
     private void valueDisplayTypeToggleEventAction(boolean editable, String initValue) {

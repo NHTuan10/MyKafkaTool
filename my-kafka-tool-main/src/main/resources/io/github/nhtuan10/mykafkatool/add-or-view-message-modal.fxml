@@ -5,6 +5,7 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
 <AnchorPane prefHeight="522.0" prefWidth="738.0" xmlns="http://javafx.com/javafx/17.0.12"
@@ -31,8 +32,10 @@
                                                                    percentWidth="80.0" prefWidth="556.0"/>
                                             </columnConstraints>
                                             <rowConstraints>
+                                                <RowConstraints maxHeight="104.0" minHeight="1.0" percentHeight="5.0"
+                                                                prefHeight="1.0" vgrow="SOMETIMES"/>
                                                 <RowConstraints maxHeight="104.0" minHeight="0.0" percentHeight="10.0"
-                                                                prefHeight="54.0" vgrow="SOMETIMES"/>
+                                                                prefHeight="66.0" vgrow="SOMETIMES"/>
                                                 <RowConstraints maxHeight="216.0" minHeight="10.0" percentHeight="60.0"
                                                                 prefHeight="118.0" vgrow="SOMETIMES"/>
                                                 <RowConstraints maxHeight="178.0" minHeight="10.0" percentHeight="20.0"
@@ -43,19 +46,20 @@
                                                                 prefHeight="34.0" vgrow="SOMETIMES"/>
                                             </rowConstraints>
                                             <children>
-                                                <Label text="Key">
+                                                <Label text="Key" GridPane.rowIndex="1">
                                                     <GridPane.margin>
                                                         <Insets left="10.0"/>
                                                     </GridPane.margin>
                                                 </Label>
                                                 <TextArea fx:id="keyTextArea" prefHeight="200.0" prefWidth="200.0"
-                                                          wrapText="true" GridPane.columnIndex="1">
+                                                          wrapText="true" GridPane.columnIndex="1"
+                                                          GridPane.rowIndex="1">
                                                     <GridPane.margin>
                                                         <Insets right="5.0"/>
                                                     </GridPane.margin>
                                                 </TextArea>
                                                 <!--                                     <AnchorPane GridPane.columnIndex="1" GridPane.rowIndex="1"> -->
-                                                <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="2">
                                                     <GridPane.margin>
                                                         <Insets right="5.0"/>
                                                     </GridPane.margin>
@@ -67,7 +71,7 @@
                                                 </VirtualizedScrollPane>
                                                 <!--                                     </AnchorPane> -->
                                                 <!--                                     <TextArea fx:id="schemaTextArea" layoutX="59.0" layoutY="69.0" prefHeight="108.0" prefWidth="520.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" /> -->
-                                                <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="3">
                                                     <GridPane.margin>
                                                         <Insets right="5.0"/>
                                                     </GridPane.margin>
@@ -80,19 +84,19 @@
 
                                                 </VirtualizedScrollPane>
                                                 <Label layoutX="10.0" layoutY="114.0" text="Value Schema"
-                                                       GridPane.rowIndex="2">
+                                                       GridPane.rowIndex="3">
                                                     <GridPane.margin>
                                                         <Insets left="10.0"/>
                                                     </GridPane.margin>
                                                 </Label>
-                                                <Label text="Value Type" GridPane.rowIndex="3">
+                                                <Label text="Value Type" GridPane.rowIndex="4">
                                                     <GridPane.margin>
                                                         <Insets left="10.0"/>
                                                     </GridPane.margin>
                                                 </Label>
                                                 <ComboBox fx:id="valueContentTypeComboBox" prefWidth="150.0"
-                                                          GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                                                <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
+                                                          GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                                                <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="2">
                                                     <children>
                                                         <Label text="Value">
                                                             <padding>
@@ -109,13 +113,13 @@
                                                 </VBox>
 
                                                 <Label fx:id="howManyLabel" text="How many?" GridPane.columnIndex="0"
-                                                       GridPane.rowIndex="4">
+                                                       GridPane.rowIndex="5">
                                                     <GridPane.margin>
                                                         <Insets left="10.0"/>
                                                     </GridPane.margin>
                                                 </Label>
                                                 <HBox fx:id="multipleSendOptionContainer" prefHeight="100.0"
-                                                      prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                                      prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
                                                     <children>
                                                         <!--                                                      <NonNegativeIntTextField fx:id="numMsgToSend" prefHeight="26.0" prefWidth="80.0" text="1">-->
                                                         <!--                                                          <default>-->
@@ -162,6 +166,15 @@
                                                         <Insets top="10.0"/>
                                                     </GridPane.margin>
                                                 </HBox>
+                                                <Label text="Topic " fx:id="clusterTopicAndPartitionInfo"
+                                                       GridPane.columnSpan="2">
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0"/>
+                                                    </GridPane.margin>
+                                                    <font>
+                                                        <Font size="15.0"/>
+                                                    </font>
+                                                </Label>
                                             </children>
                                             <padding>
                                                 <Insets bottom="10.0"/>

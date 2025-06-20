@@ -29,10 +29,10 @@ public class ModalUtils {
     }
 
     public static void showPopUpModal(String modalFxml, String title, AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, Window parentWindow) throws IOException {
-        showPopUpModal(modalFxml, title, modelRef, inputVarMap, true, false, parentWindow);
+        showPopUpModal(modalFxml, title, modelRef, inputVarMap, true, false, parentWindow, true);
     }
 
-    public static void showPopUpModal(final String modalFxml, final String title, final AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable, final boolean resizable, Window parentWindow) throws IOException {
+    public static void showPopUpModal(final String modalFxml, final String title, final AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable, final boolean resizable, Window parentWindow, final boolean showAndWait) throws IOException {
         Stage stage = new Stage();
         AppComponent appComponent = MyKafkaToolApplication.DAGGER_APP_COMPONENT;
         FXMLLoader modalLoader = appComponent.loader(MyKafkaToolApplication.class.getResource(modalFxml));
@@ -54,8 +54,11 @@ public class ModalUtils {
         stage.setScene(scene);
 //        URL cssResource = MyKafkaToolApplication.class.getResource(UIStyleConstant.LIGHT_STYLE_CSS_FILE);
 //        scene.getStylesheets().add(cssResource.toExternalForm());
-
-        stage.showAndWait();
+        if (showAndWait) {
+            stage.showAndWait();
+        } else {
+            stage.show();
+        }
     }
 
     public static void showAlertDialog(Alert.AlertType alertType, String text, String title, ButtonType... buttonTypes) {

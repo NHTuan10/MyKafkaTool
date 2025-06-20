@@ -7,10 +7,10 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
 
-public class DragSelectionCell<S, T> extends TableCell<S, T> {
+public class BaseTableCell<S, T> extends TableCell<S, T> {
     private StageHolder stageHolder;
 
-    public DragSelectionCell(StageHolder stageHolder, TableViewConfigurer.TableViewConfiguration<S> tableViewConfiguration) {
+    public BaseTableCell(StageHolder stageHolder, TableViewConfigurer.TableViewConfiguration<S> tableViewConfiguration) {
         super();
         this.stageHolder = stageHolder;
         setOnDragDetected(event -> {
@@ -32,7 +32,8 @@ public class DragSelectionCell<S, T> extends TableCell<S, T> {
                 String cellText = String.valueOf(getTableColumn().getCellData(getIndex()));
 
                 ContextMenu menu = new ContextMenu();
-                menu.getItems().setAll(TableViewConfigurer.getTableContextMenuItems(getTableView(), cellText, this.stageHolder, tableViewConfiguration));
+                menu.getItems().addAll(tableViewConfiguration.extraContextMenuItems());
+                menu.getItems().addAll(TableViewConfigurer.getTableContextMenuItems(getTableView(), cellText, this.stageHolder, tableViewConfiguration));
 //                getTableView().setContextMenu(menu);
                 menu.show(this, e.getScreenX(), e.getScreenY());
             }

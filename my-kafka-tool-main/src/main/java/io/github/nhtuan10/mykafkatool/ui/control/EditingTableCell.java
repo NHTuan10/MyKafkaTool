@@ -5,7 +5,7 @@ import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
-public class EditingTableCell<T> extends DragSelectionCell<T, String> {
+public class EditingTableCell<T> extends BaseTableCell<T, String> {
 
     private TextField textField;
 

@@ -7,8 +7,8 @@ import io.github.nhtuan10.mykafkatool.annotation.FilterableTableItemField;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
+import io.github.nhtuan10.mykafkatool.ui.control.BaseTableCell;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;
-import io.github.nhtuan10.mykafkatool.ui.control.DragSelectionCell;
 import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
 import io.github.nhtuan10.mykafkatool.util.Utils;
 import javafx.beans.property.Property;
@@ -69,7 +69,7 @@ public class TableViewConfigurer {
 //            label.setTooltip(new Tooltip(columnHeader));
 //            tableColumn.setGraphic(label);
             tableColumn.setCellValueFactory(new PropertyValueFactory<>(fieldNames.get(i)));
-            tableColumn.setCellFactory((column) -> new DragSelectionCell<>(stageHolder, tableViewConfiguration));
+            tableColumn.setCellFactory((column) -> new BaseTableCell<>(stageHolder, tableViewConfiguration));
         });
         // Enable copy by Ctrl + C or by right click -> Copy
         enableCopyDataFromTableByShortcutKeys(tableView, tableViewConfiguration.isHeadersIncludedInRowCopy(), tableViewConfiguration);
@@ -359,8 +359,9 @@ public class TableViewConfigurer {
             , boolean isHeadersIncludedInRowCopy
             , boolean isHeadersIncludedInRowExport
             , ExtraFieldsToCopyAndExport<T> extraFieldsToCopyAndExport
+            , List<MenuItem> extraContextMenuItems
     ) {
-        public static final TableViewConfiguration<?> DEFAULT = new TableViewConfiguration<>(SelectionMode.MULTIPLE, false, true, true, new ExtraFieldsToCopyAndExport(List.of(), (item) -> List.of()));
+        public static final TableViewConfiguration<?> DEFAULT = new TableViewConfiguration<>(SelectionMode.MULTIPLE, false, true, true, new ExtraFieldsToCopyAndExport(List.of(), (item) -> List.of()), List.of());
 
         public record ExtraFieldsToCopyAndExport<T>(List<String> extraFieldsHeadersToCopyAndExport,
                                                     Function<T, List<String>> extraFieldsToCopyAndExportFunc) {

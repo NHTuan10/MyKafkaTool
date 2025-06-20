@@ -37,6 +37,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.TopicPartition;
 import org.fxmisc.richtext.CodeArea;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +74,11 @@ public class KafkaMessageViewController {
 
     private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
 
-    TreeItem selectedTreeItem;
+    private TreeItem selectedTreeItem;
+
+    private KafkaTopic kafkaTopic;
+
+    private KafkaPartition kafkaPartition;
 
     private final EventDispatcher eventDispatcher;
 
@@ -160,6 +165,26 @@ public class KafkaMessageViewController {
         this.eventDispatcher = eventDispatcher;
     }
 
+    public void viewOrReproduceMessage(SerDesHelper serDesHelper, KafkaMessageTableItem rowData, boolean reproduce) {
+//        TreeItem selectedTreeItemBeforeAdding = this.selectedTreeItem;
+        Map<String, Object> msgModalFieldMap = new HashMap<>();
+        msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
+        msgModalFieldMap.put("serDesHelper", serDesHelper);
+        msgModalFieldMap.put("keyTextArea", rowData.getKey());
+        msgModalFieldMap.put("valueTextArea", rowData.getValue());
+        msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
+        msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
+        msgModalFieldMap.put("kafkaTopic", kafkaTopic);
+        msgModalFieldMap.put("kafkaPartition", kafkaPartition);
+        try {
+            AtomicReference<Object> count = new AtomicReference<>(0);
+            ModalUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, reproduce ? "Add Message" : "View Message", count, msgModalFieldMap, reproduce, true, stageHolder.getStage(), false);
+//            msgPollingPrompt(count, selectedTreeItemBeforeAdding);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 //    private SerDesHelper initSerDeserializer() {
 //        StringSerializer stringSerializer = new StringSerializer();
 //        StringDeserializer stringDeserializer = new StringDeserializer();
@@ -182,6 +207,7 @@ public class KafkaMessageViewController {
     void initialize() {
         // TODO: need to think about pagination for message table, may implement it if it's a good option
         initPollingOptionsUI();
+        kafkaMessageTable.setParentController(this);
         kafkaMessageTable.configureMessageTable(serDesHelper);
         isPollingMsgProgressIndicator.visibleProperty().bindBidirectional(isPolling);
         isPollingMsgProgressIndicator.managedProperty().bindBidirectional(isPolling);
@@ -262,6 +288,8 @@ public class KafkaMessageViewController {
         KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
         isPolling.set(false);
         if (newValue instanceof KafkaTopicTreeItem<?>) {
+            this.kafkaTopic = (KafkaTopic) newValue.getValue();
+            this.kafkaPartition = null;
             // if some clear msg table
             if (treeMsgTableItemCache.containsKey(newValue)) {
                 KafkaMessageView.MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
@@ -275,6 +303,8 @@ public class KafkaMessageViewController {
             countMessages();
         } else if (newValue instanceof KafkaPartitionTreeItem<?>) {
             KafkaPartition partition = (KafkaPartition) newValue.getValue();
+            this.kafkaPartition = partition;
+            this.kafkaTopic = partition.topic();
             Predicate<KafkaMessageTableItem> partitionPredicate = item -> item.getPartition() == partition.id();
             TreeItem<?> topicTreeItem = newValue.getParent();
             ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList();
@@ -400,8 +430,8 @@ public class KafkaMessageViewController {
 
 
     public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws Exception {
-
-        AtomicReference<Object> ref = new AtomicReference<>();
+        TreeItem selectedTreeItemBeforeAdding = this.selectedTreeItem;
+        AtomicReference<Object> ref = new AtomicReference<>(0);
         Map<String, Object> propertiesMap = new HashMap<>();
         propertiesMap.put("serDesHelper", serDesHelper);
         propertiesMap.put("valueContentType", valueContentType);
@@ -410,18 +440,22 @@ public class KafkaMessageViewController {
         propertiesMap.put("kafkaTopic", kafkaTopic);
         propertiesMap.put("kafkaPartition", partition);
         ModalUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
-                propertiesMap, true, true, stageHolder.getStage());
-        Integer noNewMsgs = (Integer) ref.get();
-        if (noNewMsgs != null && noNewMsgs > 0) {
-            if (isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
-                ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Live-update is on, polling the messages", "Added message successfully!",
-                        ButtonType.OK);
-            } else {
-                if (ModalUtils.confirmAlert("Added message successfully!", "Added message successfully! Do you want to poll the messages?", "Yes", "No")) {
-                    if (!isPolling.get()) pollMessages();
+                propertiesMap, true, true, stageHolder.getStage(), true);
+        msgPollingPrompt(ref, selectedTreeItemBeforeAdding);
+    }
 
-                }
+    private void msgPollingPrompt(AtomicReference<Object> ref, TreeItem selectedTreeItemBeforeAdding) {
+        Integer noNewMsgs = (Integer) ref.get();
+        // if the same topic and partition is selected after user close the dialog, then ask users if they want to poll the messages
+        if (noNewMsgs != null && noNewMsgs > 0 && selectedTreeItemBeforeAdding == this.selectedTreeItem) {
+//            if (isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
+//                ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Live-update is on, polling the messages", "Added message successfully!",
+//                        ButtonType.OK);
+//            } else {
+            if (ModalUtils.confirmAlert("Added message successfully!", "Added %s message successfully! Do you want to poll to get the new messages?".formatted(noNewMsgs), "Yes", "No")) {
+                if (!isPolling.get()) pollMessages();
             }
+//            }
 
         }
     }
