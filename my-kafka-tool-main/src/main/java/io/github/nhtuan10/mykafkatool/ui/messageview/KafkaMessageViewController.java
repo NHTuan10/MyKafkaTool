@@ -400,7 +400,7 @@ public class KafkaMessageViewController {
         AtomicReference<Object> ref = new AtomicReference<>();
         ModalUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
                 Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
-                        "schemaTextArea", schemaTextArea.getText()), true, true, stageHolder.getStage());
+                        "schemaTextArea", schemaTextArea.getText(), "kafkaTopic", kafkaTopic, "kakaPartition", partition), true, true, stageHolder.getStage());
         List<KafkaMessage> newMsgs = (List<KafkaMessage>) ref.get();
         if (newMsgs != null && !newMsgs.isEmpty()) {
             for (var msg : newMsgs) {

@@ -6,6 +6,8 @@ import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
+import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
+import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
@@ -26,6 +28,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +51,10 @@ public class AddOrViewMessageModalController extends ModalController {
     private String valueContentType;
     private Alert helpDialog;
     private BooleanProperty editable;
+    StringProperty keyTemplate;
+    StringProperty valueTemplate;
+    KafkaTopic kafkaTopic;
+    KafkaPartition kakaPartition;
 
     @FXML
     private TextArea keyTextArea;
@@ -129,8 +136,8 @@ public class AddOrViewMessageModalController extends ModalController {
         expressionHelpLink.setOnAction((e) -> showHelp());
 //        previewHandlebars.visibleProperty().bind(isHandlebarsEnabled.selectedProperty());
         handlebarsPreviewContainer.visibleProperty().bind(isHandlebarsEnabled.selectedProperty());
-        StringProperty keyTemplate = new SimpleStringProperty(keyTextArea.getText());
-        StringProperty valueTemplate = new SimpleStringProperty(valueTextArea.getText());
+        keyTemplate = new SimpleStringProperty(keyTextArea.getText());
+        valueTemplate = new SimpleStringProperty(valueTextArea.getText());
         previewHandlebars.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && !newVal.equals(oldVal)) {
                 if (newVal) {
@@ -199,6 +206,7 @@ public class AddOrViewMessageModalController extends ModalController {
         alert.setTitle("Handlebars Expression Help");
         alert.getDialogPane().setContent(anchorPane);
         alert.setResizable(true);
+        alert.initModality(Modality.WINDOW_MODAL);
         return alert;
     }
 
@@ -221,8 +229,8 @@ public class AddOrViewMessageModalController extends ModalController {
         List<String> keys, values;
         if (isHandlebarsEnabled.isSelected()) {
             try {
-                keys = Utils.evalHandlebars(keyText, numberOfMessages);
-                values = Utils.evalHandlebars(valueText, numberOfMessages);
+                keys = Utils.evalHandlebars(keyTemplate.get(), numberOfMessages);
+                values = Utils.evalHandlebars(valueTemplate.get(), numberOfMessages);
             } catch (Exception e) {
                 showHandlebarsEvalError(e);
                 return;
