@@ -1,0 +1,11 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Fri Jun 20 19:01:53 EDT 2025
+file\://${project.parent.basedir}/repackage-repo/.error=
+file\://${project.parent.basedir}/repackage-repo/.lastUpdated=1750460479304
+file\:///Users/tuan/Library/CloudStorage/OneDrive-Personal/CS/Java/MyKafkaTool/my-kafka-tool-launcher/repackage-repo/.error=
+file\:///Users/tuan/Library/CloudStorage/OneDrive-Personal/CS/Java/MyKafkaTool/my-kafka-tool-launcher/repackage-repo/.lastUpdated=1750459893145
+file\:///Users/tuan/Library/CloudStorage/OneDrive-Personal/CS/Java/MyKafkaTool/my-kafka-tool-main/repackage-repo/.lastUpdated=1750460513713
+https\://packages.confluent.io/maven/.error=
+https\://packages.confluent.io/maven/.lastUpdated=1750460513709
+https\://repo.maven.apache.org/maven2/.error=
+https\://repo.maven.apache.org/maven2/.lastUpdated=1750460479389

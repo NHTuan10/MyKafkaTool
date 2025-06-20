@@ -1,0 +1,5 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Fri Jun 20 19:16:16 EDT 2025
+modular-api-0.0.1-sources.jar>=
+modular-api-0.0.1.jar>=
+modular-api-0.0.1.pom>=

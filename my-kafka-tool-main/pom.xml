@@ -30,6 +30,19 @@
             <id>confluent</id>
             <url>https://packages.confluent.io/maven</url>
         </repository>
+        <repository>
+            <id>repackage-repo</id>
+            <url>file://${project.basedir}/repackage-repo</url>
+        </repository>
+        <!--        <repository>-->
+        <!--            <id>central</id>-->
+        <!--            <name>Default Repository</name>-->
+        <!--            <layout>default</layout>-->
+        <!--            <url>https://repo1.maven.org/maven2</url>-->
+        <!--            <snapshots>-->
+        <!--                <enabled>false</enabled>-->
+        <!--            </snapshots>-->
+        <!--        </repository>-->
     </repositories>
 
     <dependencies>
@@ -42,6 +55,11 @@
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
             <artifactId>modular-impl</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.nhtuan10</groupId>
+            <artifactId>modular-api</artifactId>
             <version>0.0.1</version>
         </dependency>
         <!-- JavaFX -->
