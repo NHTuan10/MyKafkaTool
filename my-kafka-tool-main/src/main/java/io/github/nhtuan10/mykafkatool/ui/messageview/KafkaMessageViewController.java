@@ -1,7 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.messageview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
@@ -39,6 +38,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.fxmisc.richtext.CodeArea;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -74,6 +74,8 @@ public class KafkaMessageViewController {
     private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
 
     TreeItem selectedTreeItem;
+
+    private final EventDispatcher eventDispatcher;
 
     @Getter
     private TopicEventSubscriber topicEventSubscriber;
@@ -127,7 +129,8 @@ public class KafkaMessageViewController {
 
     @Inject
     public KafkaMessageViewController(ClusterManager clusterManager, SerDesHelper serDesHelper, ProducerUtil producerUtil,
-                                      KafkaConsumerService kafkaConsumerService, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper) {
+                                      KafkaConsumerService kafkaConsumerService, JsonHighlighter jsonHighlighter,
+                                      @RichTextFxObjectMapper ObjectMapper objectMapper, EventDispatcher eventDispatcher) {
 //        clusterManager = ClusterManager.getInstance();
 //        serDesHelper = initSerDeserializer();
         this.clusterManager = clusterManager;
@@ -154,6 +157,7 @@ public class KafkaMessageViewController {
                 }
             }
         };
+        this.eventDispatcher = eventDispatcher;
     }
 
 //    private SerDesHelper initSerDeserializer() {
@@ -324,9 +328,9 @@ public class KafkaMessageViewController {
                         .valueContentType(valueContentType.getValue())
                         .schema(schema)
                         .pollCallback(() -> {
-                            if (firstPoll.get()) {
-                                Platform.runLater(() -> kafkaMessageTable.resizeColumn());
-                            }
+//                            if (firstPoll.get()) {
+//                                Platform.runLater(() -> kafkaMessageTable.resizeColumn());
+//                            }
                             Platform.runLater(() -> {
                                 isBlockingAppUINeeded.set(false);
                                 kafkaMessageTable.handleNumOfMsgChanged(kafkaMessageTable.getShownItems().size());
@@ -398,18 +402,17 @@ public class KafkaMessageViewController {
     public void addMessage(@NonNull KafkaTopic kafkaTopic, KafkaPartition partition, String keyContentType, String valueContentType, String schema) throws Exception {
 
         AtomicReference<Object> ref = new AtomicReference<>();
+        Map<String, Object> propertiesMap = new HashMap<>();
+        propertiesMap.put("serDesHelper", serDesHelper);
+        propertiesMap.put("valueContentType", valueContentType);
+        propertiesMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()));
+        propertiesMap.put("schemaTextArea", schemaTextArea.getText());
+        propertiesMap.put("kafkaTopic", kafkaTopic);
+        propertiesMap.put("kafkaPartition", partition);
         ModalUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, "Add New Message", ref,
-                Map.of("serDesHelper", serDesHelper, "valueContentType", valueContentType, "valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()),
-                        "schemaTextArea", schemaTextArea.getText(), "kafkaTopic", kafkaTopic, "kakaPartition", partition), true, true, stageHolder.getStage());
-        List<KafkaMessage> newMsgs = (List<KafkaMessage>) ref.get();
-        if (newMsgs != null && !newMsgs.isEmpty()) {
-            for (var msg : newMsgs) {
-                producerUtil.sendMessage(kafkaTopic, partition, msg);
-            }
-            getTopicEventDispatcher().publishEvent(TopicUIEvent.newRefreshTopicEven(kafkaTopic));
-            if (partition != null) {
-                getTopicEventDispatcher().publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
-            }
+                propertiesMap, true, true, stageHolder.getStage());
+        Integer noNewMsgs = (Integer) ref.get();
+        if (noNewMsgs != null && noNewMsgs > 0) {
             if (isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
                 ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Added message successfully! Live-update is on, polling the messages", "Added message successfully!",
                         ButtonType.OK);
@@ -424,7 +427,7 @@ public class KafkaMessageViewController {
     }
 
     public EventDispatcher getTopicEventDispatcher() {
-        return topicEventSubscriber.getEventDispatcher();
+        return this.eventDispatcher;
     }
 
     // Count message with end offset

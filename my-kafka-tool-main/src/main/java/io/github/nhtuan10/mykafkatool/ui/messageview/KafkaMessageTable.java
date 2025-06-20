@@ -47,7 +47,7 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
         super.initialize();
         messagePollingPosition = KafkaConsumerService.MessagePollingPosition.LAST;
         numberOfRowsLabel.textProperty().bind(new SimpleStringProperty("Showing: ").concat(noRowsIntProp.asString().concat(" Messages")));
-//        setDefaultColumnWidths();
+        setDefaultColumnWidths();
     }
 
     @Override
@@ -83,15 +83,16 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
 //                 ,(item) -> String.valueOf(item.getOffset())
 //        );
 //    }
-//    private void setDefaultColumnWidths() {
-//        table.getColumns().forEach(column -> {
-//           switch (column.getId()){
-//               case KafkaMessageTableItem.KEY -> column.setPrefWidth(100d);
-//               case KafkaMessageTableItem.VALUE -> column.setPrefWidth(440d);
-//               case KafkaMessageTableItem.TIMESTAMP -> column.setPrefWidth(300d);
-//           }
-//        });
-//    }
+private void setDefaultColumnWidths() {
+    table.getColumns().forEach(column -> {
+        switch (column.getId()) {
+            case KafkaMessageTableItem.KEY -> column.setPrefWidth(100d);
+            case KafkaMessageTableItem.VALUE -> column.setPrefWidth(300d);
+            case KafkaMessageTableItem.TIMESTAMP -> column.setPrefWidth(200d);
+            case KafkaMessageTableItem.SERIALIZED_VALUE_SIZE -> column.setPrefWidth(150d);
+        }
+    });
+}
 
     public void configureMessageTable(SerDesHelper serDesHelper) {
         //TODO: for message table, allow copy more details such as key, offset, partition, timestamp, headers, serialized size, etc.

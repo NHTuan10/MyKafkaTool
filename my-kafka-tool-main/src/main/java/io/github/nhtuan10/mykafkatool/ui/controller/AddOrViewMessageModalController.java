@@ -10,13 +10,18 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
+import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
+import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
+import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
+import io.github.nhtuan10.mykafkatool.ui.event.TopicUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable;
 import io.github.nhtuan10.mykafkatool.ui.topic.UIPropertyTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import io.github.nhtuan10.mykafkatool.util.Utils;
 import jakarta.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -38,6 +43,7 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -48,13 +54,15 @@ public class AddOrViewMessageModalController extends ModalController {
     private final JsonHighlighter jsonHighlighter;
     private final ObjectMapper objectMapper;
     private final ProducerUtil producerUtil;
+    private final Alert helpDialog;
+    private final EventDispatcher eventDispatcher;
+    private final BooleanProperty editable;
+    private final BooleanProperty isBusy;
     private String valueContentType;
-    private Alert helpDialog;
-    private BooleanProperty editable;
-    StringProperty keyTemplate;
-    StringProperty valueTemplate;
-    KafkaTopic kafkaTopic;
-    KafkaPartition kakaPartition;
+    private StringProperty keyTemplate;
+    private StringProperty valueTemplate;
+    private KafkaTopic kafkaTopic;
+    private KafkaPartition kafkaPartition;
 
     @FXML
     private TextArea keyTextArea;
@@ -63,9 +71,7 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private CodeArea schemaTextArea;
     @FXML
-    private Button okBtn;
-    @FXML
-    private Button cancelBtn;
+    private Button closeBtn;
     @FXML
     private Pane choiceButtonContainer;
     @FXML
@@ -106,8 +112,12 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private Label howManyLabel;
 
+    @FXML
+    private ProgressIndicator progressIndicator;
+
     @Inject
-    public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper, ProducerUtil producerUtil) {
+    public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper,
+                                           ProducerUtil producerUtil, EventDispatcher eventDispatcher) {
         this.serDesHelper = serDesHelper;
         this.jsonHighlighter = jsonHighlighter;
         this.objectMapper = objectMapper;
@@ -118,6 +128,8 @@ public class AddOrViewMessageModalController extends ModalController {
             throw new RuntimeException(e);
         }
         this.editable = new SimpleBooleanProperty(true);
+        this.eventDispatcher = eventDispatcher;
+        this.isBusy = new SimpleBooleanProperty(false);
     }
 
     @FXML
@@ -168,6 +180,8 @@ public class AddOrViewMessageModalController extends ModalController {
         howManyLabel.managedProperty().bind(editable);
         multipleSendOptionContainer.visibleProperty().bind(editable);
         multipleSendOptionContainer.managedProperty().bind(editable);
+//        progressIndicator.setIndeterminate(true);
+        progressIndicator.visibleProperty().bind(isBusy);
     }
 
     private void previewKeyAndValueHandlebars(int n, String keyTemplate, String valueTemplate) {
@@ -216,7 +230,7 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     @FXML
-    protected void ok() {
+    protected void send() {
         String schemaText = schemaTextArea.getText();
         String keyText = keyTextArea.getText();
         String valueText = valueTextArea.getText();
@@ -224,37 +238,59 @@ public class AddOrViewMessageModalController extends ModalController {
         int numberOfMessages = Integer.parseInt(numMsgToSend.getText());
 
         if (!validateSchema(valueContentTypeText, schemaText)) return;
-
-        Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(UIPropertyTableItem::getName, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
-        List<String> keys, values;
-        if (isHandlebarsEnabled.isSelected()) {
-            try {
-                keys = Utils.evalHandlebars(keyTemplate.get(), numberOfMessages);
-                values = Utils.evalHandlebars(valueTemplate.get(), numberOfMessages);
-            } catch (Exception e) {
-                showHandlebarsEvalError(e);
-                return;
+        Callable<Integer> task = () -> {
+            Platform.runLater(() -> {
+                this.isBusy.set(true);
+                progressIndicator.setProgress(-1);
+            });
+            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(UIPropertyTableItem::getName, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
+            List<String> keys, values;
+            if (isHandlebarsEnabled.isSelected()) {
+                try {
+                    keys = Utils.evalHandlebars(keyTemplate.get(), numberOfMessages);
+                    values = Utils.evalHandlebars(valueTemplate.get(), numberOfMessages);
+                } catch (Exception e) {
+                    showHandlebarsEvalError(e);
+                    return 0;
+                }
+            } else {
+                keys = IntStream.range(0, numberOfMessages).mapToObj(i -> keyText).toList();
+                values = IntStream.range(0, numberOfMessages).mapToObj(i -> valueText).toList();
             }
-        } else {
-            keys = IntStream.range(0, numberOfMessages).mapToObj(i -> keyText).toList();
-            values = IntStream.range(0, numberOfMessages).mapToObj(i -> valueText).toList();
-        }
 
 //        var kafkaMessages = IntStream.range(0, numberOfMessages).mapToObj((i) -> {
-        var kafkaMessages = new ArrayList<KafkaMessage>();
-        for (int i = 0; i < numberOfMessages; i++) {
-            SerDesHelper.ValidationResult valueValidationResult = serDesHelper.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
-            if (!valueValidationResult.isValid()) {
-                log.warn("The message is invalid against the schema", valueValidationResult.exception());
-                ModalUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
-                return;
+            var kafkaMessages = new ArrayList<KafkaMessage>();
+            for (int i = 0; i < numberOfMessages; i++) {
+                SerDesHelper.ValidationResult valueValidationResult = serDesHelper.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
+                if (!valueValidationResult.isValid()) {
+                    log.warn("The message is invalid against the schema", valueValidationResult.exception());
+                    ModalUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
+                    return 0;
+                }
+                kafkaMessages.add(new KafkaMessage(keys.get(i), values.get(i), valueContentTypeText, schemaText, headers));
             }
-            kafkaMessages.add(new KafkaMessage(keys.get(i), values.get(i), valueContentTypeText, schemaText, headers));
-        }
 //        }).toList();
-        modelRef.set(kafkaMessages);
-        Stage stage = (Stage) okBtn.getScene().getWindow();
-        stage.close();
+
+            for (var msg : kafkaMessages) {
+                producerUtil.sendMessage(kafkaTopic, kafkaPartition, msg);
+            }
+            return kafkaMessages.size();
+        };
+        ViewUtils.runBackgroundTask(task, (count) -> {
+            this.isBusy.set(false);
+            eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(kafkaTopic));
+            if (kafkaPartition != null) {
+                eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(kafkaPartition));
+            }
+            modelRef.set(count);
+        }, (ex) -> {
+            this.isBusy.set(false);
+            UIErrorHandler.showError(Thread.currentThread(), ex);
+            modelRef.set(0);
+        });
+
+//        Stage stage = (Stage) okBtn.getScene().getWindow();
+//        stage.close();
     }
 
     private void showHandlebarsEvalError(Exception e) {
@@ -262,8 +298,8 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     @FXML
-    protected void cancel() throws IOException {
-        Stage stage = (Stage) cancelBtn.getScene().getWindow();
+    protected void close() throws IOException {
+        Stage stage = (Stage) closeBtn.getScene().getWindow();
         stage.close();
     }
 
@@ -327,7 +363,7 @@ public class AddOrViewMessageModalController extends ModalController {
                 ViewUtils.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, objectMapper, jsonHighlighter);
             } else if (displayType == DisplayType.TEXT) {
 //                if (prettyPrint) {
-                    codeArea.replaceText(inValue);
+                codeArea.replaceText(inValue);
 //                }
                 codeArea.clearStyle(0, inValue.length());
                 StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<Collection<String>>()

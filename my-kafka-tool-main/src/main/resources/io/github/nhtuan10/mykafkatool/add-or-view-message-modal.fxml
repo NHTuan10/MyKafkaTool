@@ -159,7 +159,7 @@
 
                                                     </children>
                                                     <GridPane.margin>
-                                                        <Insets left="0.0" top="10.0"/>
+                                                        <Insets top="10.0"/>
                                                     </GridPane.margin>
                                                 </HBox>
                                             </children>
@@ -223,14 +223,13 @@
                 <AnchorPane fx:id="choiceButtonContainer" maxHeight="40.0" minHeight="40.0" minWidth="593.0"
                             prefHeight="40.0" prefWidth="593.0">
                     <HBox prefHeight="40.0" prefWidth="598.0" spacing="10.0">
-                        <Button fx:id="okBtn" mnemonicParsing="false" onAction="#ok" prefHeight="26.0" prefWidth="80.0"
-                                text="OK">
+                        <Button mnemonicParsing="false" onAction="#send" prefHeight="26.0" prefWidth="80.0" text="Send">
                             <HBox.margin>
                                 <Insets left="5.0" top="5.0"/>
                             </HBox.margin>
                         </Button>
-                        <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#cancel" prefWidth="80.0"
-                                text="Cancel">
+                        <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#close" prefWidth="80.0"
+                                text="Close">
                             <HBox.margin>
                                 <Insets left="5.0" top="5.0"/>
                             </HBox.margin>
@@ -239,5 +238,8 @@
                 </AnchorPane>
             </items>
         </SplitPane>
+        <ProgressIndicator fx:id="progressIndicator" prefHeight="522.0" prefWidth="738.0" progress="0.0" visible="false"
+                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                           AnchorPane.topAnchor="0.0"/>
     </children>
 </AnchorPane>
