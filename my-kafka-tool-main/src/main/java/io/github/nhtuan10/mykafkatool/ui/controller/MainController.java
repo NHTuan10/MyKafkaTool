@@ -29,6 +29,7 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.awt.*;
 import java.io.File;
@@ -238,13 +239,23 @@ public class MainController {
     }
 
     @FXML
-    protected void showConfigFileInFileBrowser() {
-        Desktop.getDesktop().browseFileDirectory(new File(userPreferenceManager.getUserPrefFilePath()));
+    protected void showConfigFileInFileBrowser() throws IOException {
+        File file = new File(userPreferenceManager.getUserPrefFilePath());
+        openAndSelectFileInFileExplore(file);
     }
 
     @FXML
-    protected void showLogsInFileBrowser() {
-        Desktop.getDesktop().browseFileDirectory(new File(MyKafkaToolApplication.getLogsPath()));
+    protected void showLogsInFileBrowser() throws IOException {
+        File file = new File(MyKafkaToolApplication.getLogsPath());
+        openAndSelectFileInFileExplore(file);
+    }
+
+    private void openAndSelectFileInFileExplore(File file) throws IOException {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            Runtime.getRuntime().exec(new String[]{"explorer", "/select", file.getAbsolutePath()});
+        } else {
+            Desktop.getDesktop().browseFileDirectory(file);
+        }
     }
 
 }
