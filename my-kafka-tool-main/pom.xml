@@ -42,7 +42,7 @@
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
             <artifactId>modular-impl</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
         <!-- JavaFX -->
         <dependency>
