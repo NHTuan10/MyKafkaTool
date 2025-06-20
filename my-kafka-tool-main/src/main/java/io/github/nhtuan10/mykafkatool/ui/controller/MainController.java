@@ -252,7 +252,7 @@ public class MainController {
 
     private void openAndSelectFileInFileExplore(File file) throws IOException {
         if (SystemUtils.IS_OS_WINDOWS) {
-            Runtime.getRuntime().exec(new String[]{"explorer", "/select", file.getAbsolutePath()});
+            Runtime.getRuntime().exec("explorer /select, %s".formatted(file.getAbsolutePath()));
         } else {
             Desktop.getDesktop().browseFileDirectory(file);
         }
