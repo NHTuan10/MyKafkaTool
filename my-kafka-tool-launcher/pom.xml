@@ -26,12 +26,12 @@
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
             <artifactId>modular-impl</artifactId>
-            <version>0.0.1</version>
+            <version>${modular.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
             <artifactId>modular-api</artifactId>
-            <version>0.0.1</version>
+            <version>${modular.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.shrinkwrap.resolver</groupId>

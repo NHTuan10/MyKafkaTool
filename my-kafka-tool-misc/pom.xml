@@ -21,12 +21,12 @@
         <dependency>
             <groupId>com.github.jknack</groupId>
             <artifactId>handlebars</artifactId>
-            <version>${handlebars-version}</version>
+            <version>${handlebars.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
-            <version>21.0.2</version>
+            <version>${javafx.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

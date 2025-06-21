@@ -55,12 +55,12 @@
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
             <artifactId>modular-impl</artifactId>
-            <version>0.0.1</version>
+            <version>${modular.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
             <artifactId>modular-api</artifactId>
-            <version>0.0.1</version>
+            <version>${modular.version}</version>
         </dependency>
         <!-- JavaFX -->
         <dependency>
@@ -177,7 +177,7 @@
         <dependency>
             <groupId>com.github.jknack</groupId>
             <artifactId>handlebars</artifactId>
-            <version>${handlebars-version}</version>
+            <version>${handlebars.version}</version>
         </dependency>
         <!--        <dependency>-->
         <!--            <groupId>com.gluonhq</groupId>-->
