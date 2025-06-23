@@ -1,0 +1,9 @@
+mvn install:install-file -DlocalRepositoryPath=../my-kafka-tool-main/repackage-repo -DcreateChecksum=true -Dpackaging=pom  -Dfile=modular-api-0.0.1.jar  -DgroupId=io.github.nhtuan10 -DartifactId=modular -Dversion=0.0.1
+mvn install:install-file -DlocalRepositoryPath=../my-kafka-tool-main/repackage-repo -DcreateChecksum=true -Dpackaging=jar  -Dfile=modular-api-0.0.1.jar  -DgroupId=io.github.nhtuan10 -DartifactId=modular-api -Dversion=0.0.1
+mvn install:install-file -DlocalRepositoryPath=../my-kafka-tool-main/repackage-repo -DcreateChecksum=true -Dpackaging=jar  -Dfile=modular-impl-0.0.1.jar  -DgroupId=io.github.nhtuan10 -DartifactId=modular-impl -Dversion=0.0.1
+mvn install:install-file -DlocalRepositoryPath=../my-kafka-tool-main/repackage-repo -DcreateChecksum=true -Dpackaging=jar  -Dfile=modular-spring-0.0.1.jar  -DgroupId=io.github.nhtuan10 -DartifactId=modular-spring -Dversion=0.0.1
+
+mvn install:install-file -DlocalRepositoryPath=../my-kafka-tool-launcher/repackage-repo -DcreateChecksum=true -Dpackaging=pom  -Dfile=modular-api-0.0.1.jar  -DgroupId=io.github.nhtuan10 -DartifactId=modular -Dversion=0.0.1
+mvn install:install-file -DlocalRepositoryPath=../my-kafka-tool-launcher/repackage-repo -DcreateChecksum=true -Dpackaging=jar  -Dfile=modular-api-0.0.1.jar  -DgroupId=io.github.nhtuan10 -DartifactId=modular-api -Dversion=0.0.1
+mvn install:install-file -DlocalRepositoryPath=../my-kafka-tool-launcher/repackage-repo -DcreateChecksum=true -Dpackaging=jar  -Dfile=modular-impl-0.0.1.jar  -DgroupId=io.github.nhtuan10 -DartifactId=modular-impl -Dversion=0.0.1
+mvn install:install-file -DlocalRepositoryPath=../my-kafka-tool-launcher/repackage-repo -DcreateChecksum=true -Dpackaging=jar  -Dfile=modular-spring-0.0.1.jar  -DgroupId=io.github.nhtuan10 -DartifactId=modular-spring -Dversion=0.0.1
