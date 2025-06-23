@@ -1,0 +1,1 @@
+java -jar -XX:+UseZGC -XX:+ZGenerational my-kafka-tool-main-0.1.1-SNAPSHOT.jar
