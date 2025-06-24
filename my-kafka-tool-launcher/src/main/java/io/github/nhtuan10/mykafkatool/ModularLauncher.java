@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ModularLauncher {
     public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
-    public static final String MINIMUM_VERSION = "0.1.0-SNAPSHOT";
+    public static final String MINIMUM_VERSION = "0.1.1-SNAPSHOT";
     public static final String VERSION_PROP_KEY = "version";
     public static final String MAVEN_METADATA_URL_PROP_KEY = "maven.metadata.url";
     public static final String JAR_URI_PROP_KEY = "jar.uri";
@@ -42,7 +42,7 @@ public class ModularLauncher {
         }
         String newVersion = getLatestVersionFromMaven(properties);
         String versionToUpgrade = installedVer;
-        String uri = properties.getProperty(JAR_URI_PROP_KEY);
+        String uri = Optional.ofNullable(properties.getProperty(JAR_URI_PROP_KEY)).orElse(getJarLocationUri(installedVer));
         if (newVersion.compareTo(installedVer) > 0) {
             boolean agreeToUpgrade = showDialog(newVersion);
 //            UpgradeDialog.main(new String[]{newVersion});
