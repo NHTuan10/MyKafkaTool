@@ -22,7 +22,7 @@ public class ModularLauncher {
     public static final String MINIMUM_VERSION = "0.1.1-SNAPSHOT";
     public static final String VERSION_PROP_KEY = "version";
     public static final String MAVEN_METADATA_URL_PROP_KEY = "maven.metadata.url";
-    public static final String JAR_URI_PROP_KEY = "jar.uri";
+    public static final String JAR_URI_PROP_KEY = "main.artifact.uri";
     private static AtomicBoolean shouldUpgrade = new AtomicBoolean(false);
     private static CountDownLatch waitForUpgrade = new CountDownLatch(1);
 
