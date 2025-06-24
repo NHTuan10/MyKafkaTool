@@ -22,7 +22,6 @@
         <junit.version>5.8.1</junit.version>
         <lombok.version>1.18.38</lombok.version>
         <native.maven.plugin.version>0.10.6</native.maven.plugin.version>
-        <my-kafka-tool.version>0.1.1-SNAPSHOT</my-kafka-tool.version>
     </properties>
 
     <repositories>
@@ -30,10 +29,10 @@
             <id>confluent</id>
             <url>https://packages.confluent.io/maven</url>
         </repository>
-        <repository>
-            <id>repackage-repo</id>
-            <url>file://${project.basedir}/repackage-repo</url>
-        </repository>
+        <!--        <repository>-->
+        <!--            <id>repackage-repo</id>-->
+        <!--            <url>file://${project.basedir}/repackage-repo</url>-->
+        <!--        </repository>-->
         <!--        <repository>-->
         <!--            <id>central</id>-->
         <!--            <name>Default Repository</name>-->
@@ -277,7 +276,6 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib</classpathPrefix>
                             <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher</mainClass>
                         </manifest>
                     </archive>

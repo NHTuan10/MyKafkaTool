@@ -7,25 +7,36 @@
     <formats>
         <format>zip</format>
     </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <moduleSets>
+        <moduleSet>
+            <!-- Enable access to all projects in the current multimodule build! -->
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <binaries>
+                <outputDirectory>lib</outputDirectory>
+                <unpack>false</unpack>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
     <fileSets>
         <fileSet>
             <directory>${project.basedir}/src/main/bin</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}</directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>*.jar</include>
-            </includes>
-        </fileSet>
+        <!--        <fileSet>-->
+        <!--            <directory>${project.build.directory}</directory>-->
+        <!--            <outputDirectory>/</outputDirectory>-->
+        <!--            <includes>-->
+        <!--                <include>*.jar</include>-->
+        <!--            </includes>-->
+        <!--        </fileSet>-->
     </fileSets>
-    <dependencySets>
-        <dependencySet>
-            <outputDirectory>lib</outputDirectory>
-            <excludes>
-                <exclude>${project.groupId}:${project.artifactId}:jar:*</exclude>
-            </excludes>
-        </dependencySet>
-    </dependencySets>
+    <!--    <dependencySets>-->
+    <!--        <dependencySet>-->
+    <!--            <outputDirectory>lib</outputDirectory>-->
+    <!--            <excludes>-->
+    <!--                <exclude>${project.groupId}:${project.artifactId}:jar:*</exclude>-->
+    <!--            </excludes>-->
+    <!--        </dependencySet>-->
+    <!--    </dependencySets>-->
 </assembly>

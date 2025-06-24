@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool;
 
 import io.github.nhtuan10.modular.api.module.ModuleLoader;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenArtifactInfo;
 import org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinate;
@@ -8,54 +9,57 @@ import org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinate;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class ModularLauncher {
-    public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main:jar:jar-with-dependencies";
+    public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
     public static final String MINIMUM_VERSION = "0.1.0-SNAPSHOT";
-    public static final String VERSION_PROP = "version";
+    public static final String VERSION_PROP_KEY = "version";
+    public static final String MAVEN_METADATA_URL_PROP_KEY = "maven.metadata.url";
+    public static final String JAR_URI_PROP_KEY = "jar.uri";
     private static AtomicBoolean shouldUpgrade = new AtomicBoolean(false);
     private static CountDownLatch waitForUpgrade = new CountDownLatch(1);
 
     //    private static CountDownLatch waitForConfirmation = new CountDownLatch(1);
     public static void main(String[] args) throws IOException {
         String userHome = System.getProperty("user.home");
-        String configLocation = MessageFormat.format("{0}/{1}/config/{2}", userHome, "MyKafkaTool", "config.properties");
-        Files.createDirectories(Paths.get(configLocation).getParent());
+//        String configLocation = MessageFormat.format("{0}/{1}/config/{2}", userHome, "MyKafkaTool", "config.properties");
+        String configLocation = "config.properties";
+//        Files.createDirectories(Paths.get(configLocation).getParent());
         Properties properties = new Properties();
         String installedVer = MINIMUM_VERSION;
         try (InputStream is = new FileInputStream(configLocation)) {
             properties.load(is);
-            installedVer = properties.get(VERSION_PROP).toString();
+            installedVer = Optional.ofNullable(properties.getProperty(VERSION_PROP_KEY)).orElse(MINIMUM_VERSION);
         } catch (Exception e) {
             System.err.println("Cannot load config.properties file");
         }
-        String newVersion = Arrays.stream(Maven.resolver()
-                        .resolve(getLatestVersionFromMaven()).withoutTransitivity().asResolvedArtifact())
-                .map(MavenArtifactInfo::getCoordinate)
-                .filter(artifact -> ARTIFACT.equals(artifact.getGroupId() + ":" + artifact.getArtifactId()))
-                .findFirst().map(MavenCoordinate::getVersion).orElse(MINIMUM_VERSION);
+        String newVersion = getLatestVersionFromMaven(properties);
         String versionToUpgrade = installedVer;
+        String uri = properties.getProperty(JAR_URI_PROP_KEY);
         if (newVersion.compareTo(installedVer) > 0) {
-            showDialog(newVersion);
+            boolean agreeToUpgrade = showDialog(newVersion);
 //            UpgradeDialog.main(new String[]{newVersion});
-            versionToUpgrade = newVersion;
+            if (agreeToUpgrade) {
+                versionToUpgrade = newVersion;
+                uri = getJarLocationUri(versionToUpgrade);
+            }
         }
 
-        ModuleLoader moduleLoader = ModuleLoader.getInstance();
 
-        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "mvn://" + ARTIFACT.replace(":", "/") + "/" + versionToUpgrade, "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
+        ModuleLoader moduleLoader = ModuleLoader.getInstance();
+        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
 //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
         waitForUpgrade.countDown();
         try (OutputStream os = new FileOutputStream(configLocation)) {
-            properties.setProperty(VERSION_PROP, versionToUpgrade);
+            properties.setProperty(VERSION_PROP_KEY, versionToUpgrade);
+            properties.setProperty(JAR_URI_PROP_KEY, uri);
             properties.store(os, "Global MyKafkaTool Properties");
         } catch (IOException e) {
             System.err.println("Failed to save config.properties file");
@@ -65,6 +69,22 @@ public class ModularLauncher {
 
     }
 
+    private static String getJarLocationUri(String versionToUpgrade) {
+        return "mvn://" + ARTIFACT.replace(":", "/") + "/" + versionToUpgrade;
+    }
+
+    private static String getLatestVersionFromMaven(Properties properties) {
+        if (StringUtils.isBlank(properties.getProperty(MAVEN_METADATA_URL_PROP_KEY))) {
+            return Arrays.stream(Maven.resolver()
+                            .resolve(getMavenLatestVersionQuery()).withoutTransitivity().asResolvedArtifact())
+                    .map(MavenArtifactInfo::getCoordinate)
+                    .filter(artifact -> ARTIFACT.equals(artifact.getGroupId() + ":" + artifact.getArtifactId()))
+                    .findFirst().map(MavenCoordinate::getVersion).orElse(MINIMUM_VERSION);
+        } else {
+            return MINIMUM_VERSION;
+        }
+    }
+
 //    private static boolean showUpdateConfirmationDialog(String newVersion) {
 //        ButtonType yesBtn = new ButtonType("Yes", ButtonBar.ButtonData.YES);
 //        ButtonType noBtn = new ButtonType("No", ButtonBar.ButtonData.NO);
@@ -72,7 +92,7 @@ public class ModularLauncher {
 //        return alert.showAndWait().filter(response -> response == yesBtn).isPresent();
 //    }
 
-    private static String getLatestVersionFromMaven() {
+    private static String getMavenLatestVersionQuery() {
         return "%s:[%s,)".formatted(ARTIFACT, MINIMUM_VERSION);
     }
 
