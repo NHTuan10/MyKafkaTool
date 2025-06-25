@@ -1,1 +1,2 @@
-java -jar -XX:+UseZGC -XX:+ZGenerational my-kafka-tool-launcher-0.1.1-SNAPSHOT.jar
+java -jar -XX:+UseZGC -XX:+ZGenerational lib/my-kafka-tool-launcher-0.1.1-SNAPSHOT.jar
+# -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005

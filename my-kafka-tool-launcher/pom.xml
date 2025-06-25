@@ -17,16 +17,23 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <repositories>
-        <repository>
-            <id>repackage-repo</id>
-            <url>file://${project.basedir}/repackage-repo</url>
-        </repository>
+        <!--        <repository>-->
+        <!--            <id>repackage-repo</id>-->
+        <!--            <url>file://${project.basedir}/repackage-repo</url>-->
+        <!--        </repository>-->
     </repositories>
     <dependencies>
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
             <artifactId>modular-impl</artifactId>
             <version>${modular.version}</version>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>org.jboss.shrinkwrap.resolver</groupId>-->
+            <!--                    <artifactId>shrinkwrap-resolver-depchain</artifactId>-->
+            <!--                </exclusion>-->
+
+            <!--            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
@@ -36,7 +43,7 @@
         <dependency>
             <groupId>org.jboss.shrinkwrap.resolver</groupId>
             <artifactId>shrinkwrap-resolver-depchain</artifactId>
-            <version>3.3.4</version>
+            <version>3.1.4</version>
             <scope>compile</scope>
             <type>pom</type>
             <exclusions>
@@ -71,6 +78,16 @@
             <artifactId>byte-buddy</artifactId>
             <version>1.15.11</version>
         </dependency>
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>2.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <version>2.16.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -90,7 +107,6 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib</classpathPrefix>
                             <mainClass>io.github.nhtuan10.mykafkatool.ModularLauncher</mainClass>
                         </manifest>
                     </archive>

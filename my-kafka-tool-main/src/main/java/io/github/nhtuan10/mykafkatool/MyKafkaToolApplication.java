@@ -108,6 +108,6 @@ public class MyKafkaToolApplication extends javafx.application.Application {
 
     public static String getLogsPath() {
         String userHome = System.getProperty("user.home");
-        return MessageFormat.format("{0}/{1}/log/{2}.log", userHome, APP_NAME, APP_NAME);
+        return MessageFormat.format("{0}/{1}/logs/{2}.log", userHome, APP_NAME, APP_NAME);
     }
 }

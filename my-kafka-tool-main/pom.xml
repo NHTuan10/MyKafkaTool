@@ -22,7 +22,6 @@
         <junit.version>5.8.1</junit.version>
         <lombok.version>1.18.38</lombok.version>
         <native.maven.plugin.version>0.10.6</native.maven.plugin.version>
-        <my-kafka-tool.version>0.1.1-SNAPSHOT</my-kafka-tool.version>
     </properties>
 
     <repositories>
@@ -30,10 +29,10 @@
             <id>confluent</id>
             <url>https://packages.confluent.io/maven</url>
         </repository>
-        <repository>
-            <id>repackage-repo</id>
-            <url>file://${project.basedir}/repackage-repo</url>
-        </repository>
+        <!--        <repository>-->
+        <!--            <id>repackage-repo</id>-->
+        <!--            <url>file://${project.basedir}/repackage-repo</url>-->
+        <!--        </repository>-->
         <!--        <repository>-->
         <!--            <id>central</id>-->
         <!--            <name>Default Repository</name>-->
@@ -51,11 +50,6 @@
             <artifactId>my-kafka-tool-misc</artifactId>
             <version>${my-kafka-tool.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.nhtuan10</groupId>
-            <artifactId>modular-impl</artifactId>
-            <version>${modular.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
@@ -271,6 +265,19 @@
             <!--            </plugin>-->
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
@@ -278,19 +285,72 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assembly/assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
             </plugin>
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-dependency-plugin</artifactId>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>copy-dependencies</id>-->
+            <!--                        <phase>prepare-package</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>copy-dependencies</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>-->
+            <!--                            <overWriteReleases>false</overWriteReleases>-->
+            <!--                            <overWriteSnapshots>false</overWriteSnapshots>-->
+            <!--                            <overWriteIfNewer>true</overWriteIfNewer>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
+
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-jar-plugin</artifactId>-->
+            <!--                <configuration>-->
+            <!--                    <archive>-->
+            <!--                        <manifest>-->
+            <!--                            <addClasspath>true</addClasspath>-->
+            <!--&lt;!&ndash;                             <classpathPrefix>lib</classpathPrefix>&ndash;&gt;-->
+            <!--                             <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher</mainClass>-->
+            <!--                        </manifest>-->
+            <!--                        <manifestEntries>-->
+            <!--                            <Class-Path>lib/</Class-Path>-->
+            <!--                        </manifestEntries>-->
+            <!--                    </archive>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
+            <!--            <plugin>-->
+            <!--                <artifactId>maven-assembly-plugin</artifactId>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <phase>package</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>single</goal>-->
+            <!--                        </goals>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--                <configuration>-->
+            <!--                    <archive>-->
+            <!--                        <manifest>-->
+            <!--                            <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher</mainClass>-->
+            <!--                        </manifest>-->
+            <!--                    </archive>-->
+            <!--                    <descriptorRefs>-->
+            <!--                        <descriptorRef>jar-with-dependencies</descriptorRef>-->
+            <!--                    </descriptorRefs>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
