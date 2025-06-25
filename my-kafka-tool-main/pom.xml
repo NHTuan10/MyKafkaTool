@@ -53,11 +53,6 @@
         </dependency>
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
-            <artifactId>modular-impl</artifactId>
-            <version>${modular.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.nhtuan10</groupId>
             <artifactId>modular-api</artifactId>
             <version>${modular.version}</version>
         </dependency>

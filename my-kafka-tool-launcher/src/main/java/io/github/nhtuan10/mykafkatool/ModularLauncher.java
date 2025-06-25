@@ -1,6 +1,9 @@
 package io.github.nhtuan10.mykafkatool;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.github.nhtuan10.modular.api.module.ModuleLoader;
+import net.lingala.zip4j.ZipFile;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenArtifactInfo;
@@ -9,10 +12,18 @@ import org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinate;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.util.Arrays;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,14 +31,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ModularLauncher {
     public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
     public static final String MINIMUM_VERSION = "0.1.1-SNAPSHOT";
-    public static final String VERSION_PROP_KEY = "version";
-    public static final String MAVEN_METADATA_URL_PROP_KEY = "maven.metadata.url";
-    public static final String JAR_URI_PROP_KEY = "main.artifact.uri";
+    public static final String VERSION_PROP_KEY = "main.artifact.version";
+    public static final String MAVEN_METADATA_URL_PROP_KEY = "main.artifact.maven-metadata-url";
+    public static final String JAR_LOCATION_PROP_KEY = "main.artifact.location";
+    public static final String JAR_DOWNLOAD_URL_PROP_KEY = "main.artifact.download-url";
+    public static final String MAIN_ARTIFACT_FILE_NAME = "main.artifact.fileName-prefix";
+    public static final String MAVEN_SNAPSHOT_METADATA_URL_PROP_KEY = "main.artifact.snapshot-maven-metadata-url";
+    public static final String ARCHIVE_FORMAT = "zip";
     private static AtomicBoolean shouldUpgrade = new AtomicBoolean(false);
     private static CountDownLatch waitForUpgrade = new CountDownLatch(1);
+    private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     //    private static CountDownLatch waitForConfirmation = new CountDownLatch(1);
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
         String userHome = System.getProperty("user.home");
 //        String configLocation = MessageFormat.format("{0}/{1}/config/{2}", userHome, "MyKafkaTool", "config.properties");
         String configLocation = "config.properties";
@@ -42,13 +58,19 @@ public class ModularLauncher {
         }
         String newVersion = getLatestVersionFromMaven(properties);
         String versionToUpgrade = installedVer;
-        String uri = Optional.ofNullable(properties.getProperty(JAR_URI_PROP_KEY)).orElse(getJarLocationUri(installedVer));
+        Optional<String> locationOptional = Optional.ofNullable(properties.getProperty(JAR_LOCATION_PROP_KEY));
+        String uri;
+        if (locationOptional.isPresent()) {
+            uri = Paths.get(locationOptional.get().replace("${version}", installedVer)).toUri().toString();
+        } else {
+            uri = getJarLocationUri(installedVer, properties);
+        }
         if (newVersion.compareTo(installedVer) > 0) {
             boolean agreeToUpgrade = showDialog(newVersion);
 //            UpgradeDialog.main(new String[]{newVersion});
             if (agreeToUpgrade) {
                 versionToUpgrade = newVersion;
-                uri = getJarLocationUri(versionToUpgrade);
+                uri = getJarLocationUri(versionToUpgrade, properties);
             }
         }
 
@@ -59,7 +81,6 @@ public class ModularLauncher {
         waitForUpgrade.countDown();
         try (OutputStream os = new FileOutputStream(configLocation)) {
             properties.setProperty(VERSION_PROP_KEY, versionToUpgrade);
-            properties.setProperty(JAR_URI_PROP_KEY, uri);
             properties.store(os, "Global MyKafkaTool Properties");
         } catch (IOException e) {
             System.err.println("Failed to save config.properties file");
@@ -69,11 +90,48 @@ public class ModularLauncher {
 
     }
 
-    private static String getJarLocationUri(String versionToUpgrade) {
-        return "mvn://" + ARTIFACT.replace(":", "/") + "/" + versionToUpgrade;
+    private static String getJarLocationUri(String versionToUpgrade, Properties properties) throws URISyntaxException, IOException, InterruptedException {
+        if (properties.get(JAR_DOWNLOAD_URL_PROP_KEY) != null) {
+            String version = versionToUpgrade;
+            if (isSnapShotVersion(versionToUpgrade)) {
+                // TODO: snapshot may have maven-metadata file, so need to handle it
+                String metadata = properties.getProperty(MAVEN_SNAPSHOT_METADATA_URL_PROP_KEY).replace("${version}", version);
+                HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().build();
+                String res = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+                XmlMapper xmlMapper = new XmlMapper();
+                JsonNode node = xmlMapper.readTree(res);
+                for (var n : node.at("/versioning/snapshotVersions/snapshotVersion")) {
+                    if (n.at("/extension").asText().equals(ARCHIVE_FORMAT)) {
+                        version = n.at("/value").asText();
+                        break;
+                    }
+                }
+            }
+            String filePrefix = properties.getProperty(MAIN_ARTIFACT_FILE_NAME).replace("${version}", version);
+            String downloadFileName = filePrefix + "." + ARCHIVE_FORMAT;
+            String downloadUrl = properties.getProperty(JAR_DOWNLOAD_URL_PROP_KEY) + "/" + version + "/" + downloadFileName;
+            Path parentPath = Paths.get("lib");
+            Path filePath = parentPath.resolve(downloadFileName);
+            ReadableByteChannel rbc = Channels.newChannel(new URI(downloadUrl).toURL().openStream());
+            try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
+                long size = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                try (ZipFile zipFile = new ZipFile(filePath.toFile())) {
+                    zipFile.extractAll(parentPath.toAbsolutePath().toString());
+                }
+            }
+            Files.deleteIfExists(filePath);
+            return parentPath.resolve(filePrefix + ".jar").toUri().toString();
+
+        } else {
+            return "mvn://" + ARTIFACT.replace(":", "/") + "/" + versionToUpgrade;
+        }
     }
 
-    private static String getLatestVersionFromMaven(Properties properties) {
+    private static boolean isSnapShotVersion(String version) {
+        return version.endsWith("-SNAPSHOT");
+    }
+
+    private static String getLatestVersionFromMaven(Properties properties) throws IOException, InterruptedException {
         if (StringUtils.isBlank(properties.getProperty(MAVEN_METADATA_URL_PROP_KEY))) {
             return Arrays.stream(Maven.resolver()
                             .resolve(getMavenLatestVersionQuery()).withoutTransitivity().asResolvedArtifact())
@@ -81,7 +139,23 @@ public class ModularLauncher {
                     .filter(artifact -> ARTIFACT.equals(artifact.getGroupId() + ":" + artifact.getArtifactId()))
                     .findFirst().map(MavenCoordinate::getVersion).orElse(MINIMUM_VERSION);
         } else {
-            return MINIMUM_VERSION;
+            //TODO: replace hard-code with logic to parse maven-metadata files
+            String metadata = properties.getProperty(MAVEN_METADATA_URL_PROP_KEY);
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().build();
+            String res = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+            XmlMapper xmlMapper = new XmlMapper();
+            JsonNode node = xmlMapper.readTree(res);
+            List<String> versions = new ArrayList<>();
+            JsonNode versionNode = node.at("/versioning/versions/version");
+            if (versionNode.isArray()) {
+                for (var n : versionNode) {
+                    versions.add(n.asText());
+                }
+            } else if (versionNode.isTextual()) {
+                versions.add(versionNode.asText());
+            }
+            versions.sort(Comparator.reverseOrder());
+            return versions.getFirst() != null ? versions.getFirst() : MINIMUM_VERSION;
         }
     }
 
