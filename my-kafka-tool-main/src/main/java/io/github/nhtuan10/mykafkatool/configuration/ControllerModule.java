@@ -1,16 +1,22 @@
 package io.github.nhtuan10.mykafkatool.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
+import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.ViewControllerMap;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.WindowControllerMap;
+import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
+import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
+import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.controller.AddConnectionModalController;
 import io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController;
 import io.github.nhtuan10.mykafkatool.ui.controller.MainController;
+import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageViewController;
 import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryViewController;
 import javafx.fxml.FXMLLoader;
@@ -38,12 +44,12 @@ abstract class ControllerModule {
     abstract Object addConnectionModalController(AddConnectionModalController controller);
 
 
-    @Binds
-    @IntoMap
-    @ClassKey(AddOrViewMessageModalController.class)
-    @WindowControllerMap
-    @AppScoped
-    abstract Object addOrViewMessageModalController(AddOrViewMessageModalController controller);
+    //    @IntoMap
+//    @ClassKey(AddOrViewMessageModalController.class)
+//    @WindowControllerMap
+
+//    @Binds
+//    abstract Object addOrViewMessageModalController(AddOrViewMessageModalController controller);
 
     @Binds
     @IntoMap
@@ -79,7 +85,10 @@ abstract class ControllerModule {
     @AppScoped
     @Provides
     @WindowControllerMap
-    static Callback<Class<?>, Object> controllerFactory(@WindowControllerMap Map<Class<?>, Object> controllerMap) {
+//    static Callback<Class<?>, Object> controllerFactory(@WindowControllerMap Map<Class<?>, Object> controllerMap, AddOrViewMessageModalController addOrViewMessageModalController) {
+    static Callback<Class<?>, Object> controllerFactory(@WindowControllerMap Map<Class<?>, Object> controllerMap, SerDesHelper serDesHelper,
+                                                        JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper,
+                                                        ProducerUtil producerUtil, EventDispatcher eventDispatcher) {
 //        return new DaggerCallback() {
 //            @Override
 //            public Object call(Class<?> clazz) {
@@ -90,6 +99,8 @@ abstract class ControllerModule {
         return (clazz) -> {
             if (controllerMap.containsKey(clazz)) {
                 return controllerMap.get(clazz);
+            } else if (clazz.equals(AddOrViewMessageModalController.class)) {
+                return new AddOrViewMessageModalController(serDesHelper, jsonHighlighter, objectMapper, producerUtil, eventDispatcher);
             } else {
                 try {
                     return clazz.getConstructor().newInstance();
