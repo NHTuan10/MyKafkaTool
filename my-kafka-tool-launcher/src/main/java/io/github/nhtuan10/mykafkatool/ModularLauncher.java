@@ -76,7 +76,7 @@ public class ModularLauncher {
 
 
         ModuleLoader moduleLoader = ModuleLoader.getInstance();
-        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
+        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of(""));
 //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
         waitForUpgrade.countDown();
         try (OutputStream os = new FileOutputStream(configLocation)) {
