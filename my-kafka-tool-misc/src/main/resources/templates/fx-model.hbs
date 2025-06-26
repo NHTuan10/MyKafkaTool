@@ -8,12 +8,12 @@ public sealed interface {{className}}FXModel permits {{className}} {
 {{/each}}
 
 {{#each fxFields}}
-    public default  {{typeSimpleName}} {{name}}Property() {
+    public default {{typeSimpleName}} {{name}}Property() {
     if ((({{className}})this).{{name}} == null) (({{className}})this).{{name}} = new {{implTypeSimpleName}}(this, "{{name}}");
         return (({{className}})this).{{name}};
     }
 
-    public default  {{underlyingType}} get{{capitalizeFirst name}}() {
+    public default {{underlyingType}} get{{capitalizeFirst name}}() {
         return this.{{name}}Property().get();
     }
 
@@ -22,7 +22,7 @@ public sealed interface {{className}}FXModel permits {{className}} {
     }
 {{/each}}
 {{#each nonFxFields}}
-    public default  {{typeSimpleName}} get{{capitalizeFirst name}}() {
+    public default {{typeSimpleName}} get{{capitalizeFirst name}}() {
         return (({{className}})this).{{name}};
     }
 

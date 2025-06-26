@@ -30,16 +30,18 @@ import java.util.stream.Stream;
 //@javax.annotation.processing.SupportedSourceVersion(javax.lang.model.SourceVersion.RELEASE_21)
 public class FXModelAnnotationProcessor extends AbstractProcessor {
     enum FXPropertyType {
-        SIMPLE_STRING_PROPERTY(SimpleStringProperty.class.getName(), "String", SimpleStringProperty.class.getName()),
         STRING_PROPERTY(StringProperty.class.getName(), "String", SimpleStringProperty.class.getName()),
-        SIMPLE_INTEGER_PROPERTY(SimpleIntegerProperty.class.getName(), "int", SimpleIntegerProperty.class.getName()),
+        SIMPLE_STRING_PROPERTY(SimpleStringProperty.class.getName(), "String", SimpleStringProperty.class.getName()),
         INTEGER_PROPERTY(IntegerProperty.class.getName(), "int", SimpleIntegerProperty.class.getName()),
-        SIMPLE_LONG_PROPERTY(SimpleLongProperty.class.getName(), "long", SimpleLongProperty.class.getName()),
+        SIMPLE_INTEGER_PROPERTY(SimpleIntegerProperty.class.getName(), "int", SimpleIntegerProperty.class.getName()),
         LONG_PROPERTY(LongProperty.class.getName(), "long", SimpleLongProperty.class.getName()),
-        SIMPLE_DOUBLE_PROPERTY(SimpleDoubleProperty.class.getName(), "double", SimpleDoubleProperty.class.getName()),
+        SIMPLE_LONG_PROPERTY(SimpleLongProperty.class.getName(), "long", SimpleLongProperty.class.getName()),
         DOUBLE_PROPERTY(DoubleProperty.class.getName(), "double", SimpleDoubleProperty.class.getName()),
+        SIMPLE_DOUBLE_PROPERTY(SimpleDoubleProperty.class.getName(), "double", SimpleDoubleProperty.class.getName()),
+        OBJECT_PROPERTY(ObjectProperty.class.getName(), "Object", SimpleObjectProperty.class.getName()),
         SIMPLE_OBJECT_PROPERTY(SimpleObjectProperty.class.getName(), "Object", SimpleObjectProperty.class.getName()),
-        OBJECT_PROPERTY(ObjectProperty.class.getName(), "Object", SimpleObjectProperty.class.getName());
+        BOOLEAN_PROPERTY(BooleanProperty.class.getName(), "boolean", SimpleBooleanProperty.class.getName()),
+        SIMPLE_BOOLEAN_PROPERTY(SimpleBooleanProperty.class.getName(), "boolean", SimpleBooleanProperty.class.getName());
 
         private final String typeName;
         private final String underlyingType;
