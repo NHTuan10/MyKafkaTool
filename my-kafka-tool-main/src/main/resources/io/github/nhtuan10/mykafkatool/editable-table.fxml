@@ -5,7 +5,8 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<fx:root prefHeight="437.0" prefWidth="730.0" type="AnchorPane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="437.0" prefWidth="730.0" type="AnchorPane" xmlns="http://javafx.com/javafx/17.0.12"
+         xmlns:fx="http://javafx.com/fxml/1">
    <children>
 
                                     <SplitPane dividerPositions="0.12440944881889764" minHeight="200.0" orientation="VERTICAL" prefHeight="473.0" prefWidth="876.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -30,7 +31,7 @@
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </Button>
-                         <HBox prefHeight="40.0" prefWidth="320.0" styleClass="bordered-container">
+                         <HBox prefHeight="36.0" prefWidth="423.0" styleClass="bordered-container">
                            <children>
                               <Label fx:id="filterLabel" text="Filter">
                                  <HBox.margin>
@@ -42,6 +43,23 @@
                                     <Insets left="10.0" />
                                  </HBox.margin>
                               </TextField>
+                               <ToggleButton fx:id="caseSensitiveFilterToggleBtn" mnemonicParsing="false"
+                                             prefHeight="26.0" prefWidth="41.0" text="Cc">
+                                   <HBox.margin>
+                                       <Insets left="10.0"/>
+                                   </HBox.margin>
+                                   <tooltip>
+                                       <Tooltip text="Case Sensitive"/>
+                                   </tooltip>
+                               </ToggleButton>
+                               <ToggleButton fx:id="negativeFilterToggleBtn" mnemonicParsing="false" text="-">
+                                   <HBox.margin>
+                                       <Insets left="10.0"/>
+                                   </HBox.margin>
+                                   <tooltip>
+                                       <Tooltip text="NOT"/>
+                                   </tooltip>
+                               </ToggleButton>
                               <ToggleButton fx:id="regexFilterToggleBtn" mnemonicParsing="false" text=".*">
                                  <HBox.margin>
                                     <Insets left="10.0" />

@@ -29,6 +29,21 @@ import java.util.function.Predicate;
 @Slf4j
 public class EditableTableControl<T> extends AnchorPane {
 
+    protected ObservableList<T> tableItems;
+
+    protected Class<T> itemClass;
+
+    protected BooleanProperty editable;
+
+    //    protected StringProperty filterTextProperty;
+    protected ObjectProperty<Filter> filterProperty;
+
+    protected SimpleIntegerProperty noRowsIntProp = new SimpleIntegerProperty();
+
+    protected StageHolder stageHolder;
+
+    private final List<Function<T, String>> tableItemFieldGetters;
+
     @FXML
     protected Button addItemBtn;
 
@@ -41,30 +56,23 @@ public class EditableTableControl<T> extends AnchorPane {
     @FXML
     protected TableView<T> table;
 
-    protected ObservableList<T> tableItems;
-
-    protected Class<T> itemClass;
-
-    protected BooleanProperty editable;
     @FXML
     protected TextField filterTextField;
 
-    protected StringProperty filterTextProperty;
-
     @FXML
     protected ToggleButton regexFilterToggleBtn;
+
+    @FXML
+    protected ToggleButton caseSensitiveFilterToggleBtn;
+
+    @FXML
+    protected ToggleButton negativeFilterToggleBtn;
 
     @FXML
     protected Label filterLabel;
 
     @FXML
     protected Label numberOfRowsLabel;
-
-    protected SimpleIntegerProperty noRowsIntProp = new SimpleIntegerProperty();
-
-    protected StageHolder stageHolder;
-
-    private final List<Function<T, String>> tableItemFieldGetters;
 
     public void setStage(Stage stage) {
         stageHolder.setStage(stage);
@@ -77,7 +85,7 @@ public class EditableTableControl<T> extends AnchorPane {
     public EditableTableControl(@NamedArg(value = "editable", defaultValue = "true") Boolean editable) {
         this.editable = new SimpleBooleanProperty(editable);
         this.stageHolder = new StageHolder();
-        this.filterTextProperty = new SimpleStringProperty("");
+        this.filterProperty = new SimpleObjectProperty<>(new Filter());
         this.itemClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         tableItemFieldGetters = getTableItemFieldGetters();
         FXMLLoader fxmlLoader = new FXMLLoader(MyKafkaToolApplication.class.getResource(
@@ -112,14 +120,18 @@ public class EditableTableControl<T> extends AnchorPane {
         table.getColumns().clear();
         configureTableView();
         tableItems = FXCollections.observableArrayList();
-        applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
-        filterTextField.textProperty().bindBidirectional(filterTextProperty);
-        filterTextProperty.addListener((observable, oldValue, newValue) -> {
-            applyFilter(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
-        });
-        regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            applyFilter(new Filter(filterTextProperty.get(), regexFilterToggleBtn.isSelected()));
-        });
+        applyFilter(new Filter());
+//        List.of(filterProperty.get().filterTextProperty(), filterProperty.get().isRegexFilterProperty(),filterProperty.get().isCaseSensitiveProperty(), filterProperty.get().isNegativeProperty() )
+        List.of(filterTextField.textProperty(), regexFilterToggleBtn.selectedProperty(), caseSensitiveFilterToggleBtn.selectedProperty(), negativeFilterToggleBtn.selectedProperty())
+                .forEach(property -> property.addListener((observable, oldValue, newValue) -> filterItems()));
+
+//        filterProperty.get().filterTextProperty().addListener((observable, oldValue, newValue) -> {
+//            filterItems();
+//        });
+//        filterProperty.get().isCaseSensitiveProperty().addListener((observable, oldValue, newValue) -> {
+//            filterItems();
+//        });
+
         numberOfRowsLabel.textProperty().bind(noRowsIntProp.asString().concat(" Rows"));
         table.itemsProperty().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> noRowsIntProp.set(newValue.size()));
@@ -154,8 +166,30 @@ public class EditableTableControl<T> extends AnchorPane {
     }
 
     public void applyFilter(Filter filter, Predicate<T>... extraPredicates) {
-        this.filterTextProperty.set(filter.getFilterText());
-        this.regexFilterToggleBtn.setSelected(filter.isRegexFilter());
+//        filterTextField.textProperty().unbindBidirectional(filterProperty.get().filterTextProperty());
+//        regexFilterToggleBtn.selectedProperty().unbindBidirectional(filterProperty.get().isRegexFilterProperty());
+//        negativeFilterToggleBtn.selectedProperty().unbindBidirectional(filterProperty.get().isNegativeProperty());
+//        caseSensitiveFilterToggleBtn.selectedProperty().unbindBidirectional(filterProperty.get().isCaseSensitiveProperty());
+
+        Filter filterProp = this.filterProperty.get();
+        filterProp.setFilterText(filter.getFilterText());
+        filterProp.setIsRegexFilter(filter.getIsRegexFilter());
+        filterProp.setIsNegative(filter.getIsNegative());
+        filterProp.setIsCaseSensitive(filter.getIsCaseSensitive());
+
+        filterTextField.textProperty().bindBidirectional(filterProp.filterTextProperty());
+        regexFilterToggleBtn.selectedProperty().bindBidirectional(filterProp.isRegexFilterProperty());
+        negativeFilterToggleBtn.selectedProperty().bindBidirectional(filterProp.isNegativeProperty());
+        caseSensitiveFilterToggleBtn.selectedProperty().bindBidirectional(filterProp.isCaseSensitiveProperty());
+
+        filterItems(filter, extraPredicates);
+    }
+
+    protected void filterItems() {
+        filterItems(this.filterProperty.get());
+    }
+
+    protected void filterItems(Filter filter, Predicate<T>... extraPredicates) {
         Predicate<T> predicate = Arrays.stream(extraPredicates).reduce(filterPredicate(filter), Predicate::and);
         SortedList<T> sortedList = new SortedList<>(tableItems.filtered(predicate));
         sortedList.comparatorProperty().bind(table.comparatorProperty());
@@ -210,7 +244,7 @@ public class EditableTableControl<T> extends AnchorPane {
     public void setItems(ObservableList<T> items, boolean doesApplyFilter) {
         tableItems = items;
         if (doesApplyFilter) {
-            applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
+            filterItems();
         }
     }
 

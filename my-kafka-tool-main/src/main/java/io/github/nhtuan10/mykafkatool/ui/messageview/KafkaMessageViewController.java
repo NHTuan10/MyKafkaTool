@@ -276,7 +276,7 @@ public class KafkaMessageViewController {
     public void cacheMessages(TreeItem oldValue) {
         treeMsgTableItemCache.put(oldValue, KafkaMessageView.MessageTableState.builder()
                 .items(kafkaMessageTable.getItems())
-                .filter(kafkaMessageTable.getFilter())
+                .filter(kafkaMessageTable.getFilter().copy())
                 .build());
     }
 
@@ -298,7 +298,7 @@ public class KafkaMessageViewController {
                 kafkaMessageTable.configureSortAndFilterForMessageTable(messageTableState.getFilter(), messagePollingPosition);
             } else {
                 kafkaMessageTable.setItems(FXCollections.observableArrayList(), false);
-                kafkaMessageTable.configureSortAndFilterForMessageTable(new Filter("", false), messagePollingPosition);
+                kafkaMessageTable.configureSortAndFilterForMessageTable(new Filter(), messagePollingPosition);
             }
             countMessages();
         } else if (newValue instanceof KafkaPartitionTreeItem<?>) {
@@ -316,7 +316,7 @@ public class KafkaMessageViewController {
                 messageTableState = treeMsgTableItemCache.get(topicTreeItem);
                 msgItems = FXCollections.observableArrayList(treeMsgTableItemCache.get(topicTreeItem).getItems());
             }
-            Filter filter = new Filter("", false);
+            Filter filter = new Filter();
             kafkaMessageTable.setItems(msgItems, false);
             if (messageTableState != null) {
                 filter = messageTableState.getFilter();

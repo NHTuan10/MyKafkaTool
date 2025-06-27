@@ -83,16 +83,33 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                 fireEvent(selectedSchemaEvent);
             }
         });
-        this.filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            applyFilter(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
-            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
-                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setFilterText(newValue));
+        List.of(filterTextField.textProperty(), regexFilterToggleBtn.selectedProperty(), caseSensitiveFilterToggleBtn.selectedProperty(), negativeFilterToggleBtn.selectedProperty()).forEach(property -> {
+            property.addListener((observable, oldValue, newValue) -> {
+//                filterItems();
+                Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
+                        .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.setFilter(this.filterProperty.get().copy()));
+            });
         });
-        this.regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            applyFilter(new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
-            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
-                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setRegexFilter(newValue));
-        });
+//        this.filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+//            filterItems();
+//            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
+//                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setFilterText(newValue));
+//        });
+//        this.regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+//            filterItems();
+//            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
+//                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setIsRegexFilter(newValue));
+//        });
+//        this.caseSensitiveFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+//            filterItems();
+//            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
+//                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setIsCaseSensitive(newValue));
+//        });
+//        this.negativeFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+//            filterItems();
+//            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
+//                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setIsNegative(newValue));
+//        });
         // TODO: functionality to add a new schema
     }
 
@@ -124,7 +141,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                 isBlockingUINeeded.set(false);
                 throw ((RuntimeException) e);
             });
-            setTableItemsAndFilter(items, new Filter(this.filterTextProperty.get(), this.regexFilterToggleBtn.isSelected()));
+            setTableItemsAndFilter(items, this.filterProperty.get());
         }
     }
 
@@ -132,7 +149,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
         this.selectedClusterName = kafkaCluster;
         this.isBlockingUINeeded = isBusy;
         if (!clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName)) {
-            setTableItemsAndFilter(refresh(onSuccess, onError), new Filter("", this.regexFilterToggleBtn.isSelected()));
+            setTableItemsAndFilter(refresh(onSuccess, onError), new Filter());
         } else {
             SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName);
             setTableItemsAndFilter(schemaTableItemsAndFilter.getItems(), schemaTableItemsAndFilter.getFilter());
@@ -156,7 +173,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                                 .stream()
                                 .map(schemaMetadata -> mapFromSchemaMetaData(schemaMetadata, this.selectedClusterName.getName()))
                                 .toList());
-                clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(items, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected()), DEFAULT_SCHEMA_TABLE_PLACEHOLDER));
+                clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(items, this.filterProperty.get().copy(), DEFAULT_SCHEMA_TABLE_PLACEHOLDER));
                 Platform.runLater(() -> {
                     this.isBlockingUINeeded.set(false);
                     table.setPlaceholder(new Label(DEFAULT_SCHEMA_TABLE_PLACEHOLDER));
@@ -167,8 +184,8 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                 Platform.runLater(() -> {
                     var emptyItems = FXCollections.<SchemaTableItem>emptyObservableList();
                     setItems(emptyItems);
-                    clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(emptyItems, new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected()), ERROR_MESSAGE_TABLE_PLACEHOLDER));
-                    table.setPlaceholder(new Label("Error when get topic config properties: " + e.getMessage()));
+                    clusterNameToSchemaTableItemsCache.put(this.selectedClusterName, new SchemaTableItemsAndFilter(emptyItems, this.filterProperty.get().copy(), ERROR_MESSAGE_TABLE_PLACEHOLDER));
+                    table.setPlaceholder(new Label("Error when get schemas: " + e.getMessage()));
                 });
                 throw new RuntimeException(e);
             }

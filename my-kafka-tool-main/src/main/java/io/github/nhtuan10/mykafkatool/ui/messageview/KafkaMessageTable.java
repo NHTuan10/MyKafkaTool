@@ -167,7 +167,7 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
     }
 
     public Filter getFilter() {
-        return new Filter(this.filterTextField.getText(), this.regexFilterToggleBtn.isSelected());
+        return this.filterProperty.get();
     }
 
     public void handleNumOfMsgChanged(int numOfMsgLongProp) {
@@ -179,15 +179,22 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
     }
 
     public void addFilterListener(Consumer<Filter> runnable) {
-        this.filterTextProperty.addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                runnable.accept(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
-            }
-        });
-        this.regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                runnable.accept(new Filter(this.filterTextField.getText(), newValue));
-            }
-        });
+//        this.filterTextProperty.addListener((observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                runnable.accept(new Filter(newValue, this.regexFilterToggleBtn.isSelected()));
+//            }
+//        });
+//        this.regexFilterToggleBtn.selectedProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                runnable.accept(new Filter(this.filterTextField.getText(), newValue));
+//            }
+//        });
+        Filter filter = this.filterProperty.get();
+        List.of(filterTextField.textProperty(), regexFilterToggleBtn.selectedProperty(), caseSensitiveFilterToggleBtn.selectedProperty(), negativeFilterToggleBtn.selectedProperty())
+                .forEach(property -> property.addListener((observable, oldValue, newValue) -> {
+                    if (newValue != null) {
+                        runnable.accept(this.filterProperty.get().copy());
+                    }
+                }));
     }
 }

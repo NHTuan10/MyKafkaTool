@@ -1,7 +1,10 @@
 package io.github.nhtuan10.mykafkatool.ui;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import io.github.nhtuan10.mykafkatool.annotationprocessor.FXModel;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import lombok.NonNull;
 
 import java.util.Arrays;
@@ -10,31 +13,56 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-@Data
-@AllArgsConstructor
-public class Filter {
-    private String filterText;
-    private boolean isRegexFilter;
+//@Data
+//@AllArgsConstructor
+@FXModel
+public final class Filter implements FilterFXModel {
+    StringProperty filterText;
+    BooleanProperty isRegexFilter;
+    BooleanProperty isCaseSensitive;
+    BooleanProperty isNegative;
+
+    public Filter() {
+        this.filterText = new SimpleStringProperty("");
+        this.isRegexFilter = new SimpleBooleanProperty(false);
+        this.isCaseSensitive = new SimpleBooleanProperty(false);
+        this.isNegative = new SimpleBooleanProperty(false);
+    }
+
+    public Filter(String filterText, boolean isRegexFilter, boolean isCaseSensitive, boolean isNegative) {
+        this.filterText = new SimpleStringProperty(filterText);
+        this.isRegexFilter = new SimpleBooleanProperty(isRegexFilter);
+        this.isCaseSensitive = new SimpleBooleanProperty(isCaseSensitive);
+        this.isNegative = new SimpleBooleanProperty(isNegative);
+    }
+
+    public Filter copy() {
+        return FilterFXModel.builder().filterText(filterText.get())
+                .isRegexFilter(isRegexFilter.get())
+                .isCaseSensitive(isCaseSensitive.get())
+                .isNegative(isNegative.get()).build();
+    }
 
     public static <T> Predicate<T> buildFilterPredicate(@NonNull Filter filter, List<Function<T, String>> fieldGetters) {
         assert (filter.getFilterText() != null);
         String filterText = filter.getFilterText().trim();
-        if (filter.isRegexFilter()) {
-            Pattern pattern = Pattern.compile(filterText, Pattern.CASE_INSENSITIVE);
+        if (filter.getIsRegexFilter()) {
+            Pattern pattern = filter.getIsCaseSensitive() ? Pattern.compile(filterText) : Pattern.compile(filterText, Pattern.CASE_INSENSITIVE);
             return item -> {
                 boolean isMatched = false;
                 for (Function<T, String> fieldGetter : fieldGetters) {
                     isMatched = isMatched || (fieldGetter.apply(item) != null && pattern.matcher(fieldGetter.apply(item)).find());
                 }
-                return isMatched;
+                return filter.getIsNegative() ? !isMatched : isMatched;
             };
         } else {
             return item -> {
                 boolean isMatched = false;
                 for (Function<T, String> fieldGetter : fieldGetters) {
-                    isMatched = isMatched || (fieldGetter.apply(item) != null && fieldGetter.apply(item).toLowerCase().contains(filterText.toLowerCase()));
+                    isMatched = isMatched || (fieldGetter.apply(item) != null &&
+                            (filter.getIsCaseSensitive() ? fieldGetter.apply(item).contains(filterText) : fieldGetter.apply(item).toLowerCase().contains(filterText.toLowerCase())));
                 }
-                return isMatched;
+                return filter.getIsNegative() ? !isMatched : isMatched;
             };
 
         }
