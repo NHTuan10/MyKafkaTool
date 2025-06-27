@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.github.nhtuan10.modular.api.module.ModuleLoader;
+import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
+@Slf4j
 public class ModularLauncher {
     public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
     public static final String MINIMUM_VERSION = "0.1.1-SNAPSHOT";
@@ -54,7 +55,7 @@ public class ModularLauncher {
             properties.load(is);
             installedVer = Optional.ofNullable(properties.getProperty(VERSION_PROP_KEY)).orElse(MINIMUM_VERSION);
         } catch (Exception e) {
-            System.err.println("Cannot load config.properties file");
+            log.error("Cannot load config.properties file", e);
         }
         String newVersion = getLatestVersionFromMaven(properties);
         String versionToUpgrade = installedVer;

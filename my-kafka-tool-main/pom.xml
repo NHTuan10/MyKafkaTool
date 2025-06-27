@@ -20,7 +20,6 @@
         <maven.compiler.target>21</maven.compiler.target>
 
         <junit.version>5.8.1</junit.version>
-        <lombok.version>1.18.38</lombok.version>
         <native.maven.plugin.version>0.10.6</native.maven.plugin.version>
     </properties>
 
