@@ -36,7 +36,7 @@ public class ModularLauncher {
     public static final String MAVEN_METADATA_URL_PROP_KEY = "main.artifact.maven-metadata-url";
     public static final String JAR_LOCATION_PROP_KEY = "main.artifact.location";
     public static final String JAR_DOWNLOAD_URL_PROP_KEY = "main.artifact.download-url";
-    public static final String MAIN_ARTIFACT_FILE_NAME = "main.artifact.fileName-prefix";
+    public static final String MAIN_ARTIFACT_FILE_NAME_PREFIX = "main.artifact.fileName-prefix";
     public static final String MAVEN_SNAPSHOT_METADATA_URL_PROP_KEY = "main.artifact.snapshot-maven-metadata-url";
     public static final String ARCHIVE_FORMAT = "zip";
     private static AtomicBoolean shouldUpgrade = new AtomicBoolean(false);
@@ -83,25 +83,24 @@ public class ModularLauncher {
                 }
             }
         }
-
-        Modular.startModuleSyncWithMainClass("my-kafka-tool", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of(""));
-//        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
-        waitForUpgrade.countDown();
         try (OutputStream os = new FileOutputStream(configLocation)) {
             properties.setProperty(VERSION_PROP_KEY, versionToUpgrade);
             properties.store(os, "Global MyKafkaTool Properties");
         } catch (IOException e) {
             System.err.println("Failed to save config.properties file");
         }
+        Modular.startModuleSyncWithMainClass("my-kafka-tool", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of(""));
+//        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
+        waitForUpgrade.countDown();
 
         //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "mvn://io.github.nhtuan10/my-kafka-tool-main/0.1.0-SNAPSHOT", "io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher", "*");
 
     }
 
-    private static String getJarLocationUri(String versionToUpgrade, Properties properties) throws URISyntaxException, IOException, InterruptedException {
+    private static String getJarLocationUri(String version, Properties properties) throws URISyntaxException, IOException, InterruptedException {
         if (properties.get(JAR_DOWNLOAD_URL_PROP_KEY) != null) {
-            String version = versionToUpgrade;
-            if (isSnapShotVersion(versionToUpgrade)) {
+            String zipFileVersion = version;
+            if (isSnapShotVersion(version)) {
                 // TODO: snapshot may have maven-metadata file, so need to handle it
                 String metadata = properties.getProperty(MAVEN_SNAPSHOT_METADATA_URL_PROP_KEY).replace("${version}", version);
                 HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().build();
@@ -110,13 +109,12 @@ public class ModularLauncher {
                 JsonNode node = xmlMapper.readTree(res);
                 for (var n : node.at("/versioning/snapshotVersions/snapshotVersion")) {
                     if (n.at("/extension").asText().equals(ARCHIVE_FORMAT)) {
-                        version = n.at("/value").asText();
+                        zipFileVersion = n.at("/value").asText();
                         break;
                     }
                 }
             }
-            String filePrefix = properties.getProperty(MAIN_ARTIFACT_FILE_NAME).replace("${version}", version);
-            String downloadFileName = filePrefix + "." + ARCHIVE_FORMAT;
+            String downloadFileName = properties.getProperty(MAIN_ARTIFACT_FILE_NAME_PREFIX).replace("${version}", zipFileVersion) + "." + ARCHIVE_FORMAT;
             String downloadUrl = properties.getProperty(JAR_DOWNLOAD_URL_PROP_KEY) + "/" + version + "/" + downloadFileName;
             Path parentPath = Paths.get("lib");
             Path filePath = parentPath.resolve(downloadFileName);
@@ -128,10 +126,10 @@ public class ModularLauncher {
                 }
             }
             Files.deleteIfExists(filePath);
-            return parentPath.resolve(filePrefix + ".jar").toUri().toString();
+            return parentPath.resolve(properties.getProperty(MAIN_ARTIFACT_FILE_NAME_PREFIX).replace("${version}", version) + ".jar").toUri().toString();
 
         } else {
-            return "mvn://" + ARTIFACT.replace(":", "/") + "/" + versionToUpgrade;
+            return "mvn://" + ARTIFACT.replace(":", "/") + "/" + version;
         }
     }
 
