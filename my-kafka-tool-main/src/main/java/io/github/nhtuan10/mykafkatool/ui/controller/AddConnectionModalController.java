@@ -110,7 +110,7 @@ public class AddConnectionModalController extends ModalController {
         AuthProvider authProvider = authProviderManager.getAuthProvider(authConfig.name());
         securityTypeComboxBox.getSelectionModel().select(authProvider);
         try {
-            securityConfigTextArea.replaceText(authProvider.toConfigText(authConfig));
+            ViewUtils.highlightJsonInCodeArea(authProvider.toConfigText(authConfig), securityConfigTextArea, false, objectMapper, jsonHighlighter);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
