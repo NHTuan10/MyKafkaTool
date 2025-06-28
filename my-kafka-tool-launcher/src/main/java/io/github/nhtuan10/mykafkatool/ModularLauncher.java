@@ -2,7 +2,7 @@ package io.github.nhtuan10.mykafkatool;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import io.github.nhtuan10.modular.api.module.ModuleLoader;
+import io.github.nhtuan10.modular.api.Modular;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +44,7 @@ public class ModularLauncher {
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     //    private static CountDownLatch waitForConfirmation = new CountDownLatch(1);
-    public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
+    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
         String userHome = System.getProperty("user.home");
 //        String configLocation = MessageFormat.format("{0}/{1}/config/{2}", userHome, "MyKafkaTool", "config.properties");
         String configLocation = "config.properties";
@@ -57,7 +57,12 @@ public class ModularLauncher {
         } catch (Exception e) {
             log.error("Cannot load config.properties file", e);
         }
-        String newVersion = getLatestVersionFromMaven(properties);
+        String newVersion = MINIMUM_VERSION;
+        try {
+            newVersion = getLatestVersionFromMaven(properties);
+        } catch (IOException | InterruptedException e) {
+            log.error("Cannot get latest version from maven", e);
+        }
         String versionToUpgrade = installedVer;
         Optional<String> locationOptional = Optional.ofNullable(properties.getProperty(JAR_LOCATION_PROP_KEY));
         String uri;
@@ -71,13 +76,15 @@ public class ModularLauncher {
 //            UpgradeDialog.main(new String[]{newVersion});
             if (agreeToUpgrade) {
                 versionToUpgrade = newVersion;
-                uri = getJarLocationUri(versionToUpgrade, properties);
+                try {
+                    uri = getJarLocationUri(versionToUpgrade, properties);
+                } catch (URISyntaxException | IOException | InterruptedException e) {
+                    log.error("Cannot get jar location uri for the new version {}", versionToUpgrade, e);
+                }
             }
         }
 
-
-        ModuleLoader moduleLoader = ModuleLoader.getInstance();
-        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of(""));
+        Modular.startModuleSyncWithMainClass("my-kafka-tool", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of(""));
 //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
         waitForUpgrade.countDown();
         try (OutputStream os = new FileOutputStream(configLocation)) {

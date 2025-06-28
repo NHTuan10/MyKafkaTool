@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool;
 
-import io.github.nhtuan10.modular.api.module.ModuleLoader;
+import io.github.nhtuan10.modular.api.Modular;
 import io.github.nhtuan10.mykafkatool.configuration.AppComponent;
 import io.github.nhtuan10.mykafkatool.configuration.DaggerAppComponent;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
@@ -51,8 +51,8 @@ public class MyKafkaToolApplication extends javafx.application.Application {
         stage.setOnCloseRequest(event -> {
             exit();
         });
-        if (ModuleLoader.isManaged(this)) {
-            ModuleLoader.getContext().notifyModuleReady();
+        if (Modular.isManaged(this)) {
+            Modular.notifyModuleReady();
         }
     }
 

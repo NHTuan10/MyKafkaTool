@@ -21,6 +21,6 @@ You can use Handlebars (extensions of Mustache) templates for message keys and v
 {{round 23.54324}} : return 24 , {{round 23.22}} return 23
 {{round 23.54324 2}} : 2 decimal after point, return 23.54
 {{ceil 23.54324}}, {{ceil 23.54324 2}}, {{floor 23.54324 2}} and {{floor 23.54324 2}} : similar to round
-{{math 20 '+' 40}} return 60, also support substraction (-), multiplication (*) and mod (%). Please not there is a quote around the operations
+{{math 20 '+' 40}} return 60, also support substraction (-), multiplication (*) and mod (%). Please note that there is a quote around the operations
 {{math 213 '/' 23}} return 9.2608695652 (10 digits after decimal point)
 {{math 213 '/' 23 2}} return 9.26, 2 digits after decimal point

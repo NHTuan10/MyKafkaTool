@@ -198,7 +198,9 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     private void showHelp() {
-        helpDialog.showAndWait();
+        if (!helpDialog.isShowing()) {
+            helpDialog.showAndWait();
+        }
     }
 
     private Alert buildHelpDialog() throws IOException {
