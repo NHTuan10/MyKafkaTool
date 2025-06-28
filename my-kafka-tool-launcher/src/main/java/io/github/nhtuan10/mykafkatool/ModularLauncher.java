@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class ModularLauncher {
     public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
-    public static final String MINIMUM_VERSION = "0.1.0-SNAPSHOT";
+    public static final String MINIMUM_VERSION = "0.1.1-SNAPSHOT";
     public static final String VERSION_PROP_KEY = "main.artifact.version";
     public static final String MAVEN_METADATA_URL_PROP_KEY = "main.artifact.maven-metadata-url";
     public static final String MAIN_ARTIFACT_DIRECTORY_PROP_KEY = "main.artifact.directory";
