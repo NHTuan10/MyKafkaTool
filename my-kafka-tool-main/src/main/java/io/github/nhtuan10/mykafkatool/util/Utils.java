@@ -3,9 +3,6 @@ package io.github.nhtuan10.mykafkatool.util;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.StringHelpers;
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -38,12 +35,12 @@ public class Utils {
         return r.toList();
     }
 
-    public static Script groovyParse(String code) throws IOException, ClassNotFoundException {
-        Binding binding = new Binding();
-        binding.setProperty("counter", 0);
-        GroovyShell shell = new GroovyShell(binding);
-        return shell.parse(code);
-    }
+//    public static Script groovyParse(String code) throws IOException, ClassNotFoundException {
+//        Binding binding = new Binding();
+//        binding.setProperty("counter", 0);
+//        GroovyShell shell = new GroovyShell(binding);
+//        return shell.parse(code);
+//    }
 
     public static String evalHandlebarsAtNth(String templateStr, int n) throws IOException {
         Template template = handlebars.compileInline(templateStr);

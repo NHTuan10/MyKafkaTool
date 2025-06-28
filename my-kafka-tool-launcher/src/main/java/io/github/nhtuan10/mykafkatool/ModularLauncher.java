@@ -33,11 +33,11 @@ public class ModularLauncher {
     public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
     public static final String MINIMUM_VERSION = "0.1.1-SNAPSHOT";
     public static final String VERSION_PROP_KEY = "main.artifact.version";
-    public static final String MAVEN_METADATA_URL_PROP_KEY = "main.artifact.maven-metadata-url";
+    public static final String MAVEN_METADATA_FILE_NAME_PROP_KEY = "main.artifact.maven-metadata-fileName";
     public static final String MAIN_ARTIFACT_DIRECTORY_PROP_KEY = "main.artifact.directory";
     public static final String MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY = "main.artifact.download-url";
     public static final String MAIN_ARTIFACT_FILE_NAME_PREFIX = "main.artifact.fileName-prefix";
-    public static final String MAVEN_SNAPSHOT_METADATA_URL_PROP_KEY = "main.artifact.snapshot-maven-metadata-url";
+    public static final String MAVEN_SNAPSHOT_METADATA_FILE_NAME_PROP_KEY = "main.artifact.snapshot-maven-metadata-fileName";
     public static final String ARCHIVE_FORMAT = "zip";
     public static final String APP_NAME = "MyKafkaTool";
     private static AtomicBoolean shouldUpgrade = new AtomicBoolean(false);
@@ -107,8 +107,7 @@ public class ModularLauncher {
         if (properties.get(MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY) != null) {
             String zipFileVersion = version;
             if (isSnapShotVersion(version)) {
-                // TODO: snapshot may have maven-metadata file, so need to handle it
-                String metadata = properties.getProperty(MAVEN_SNAPSHOT_METADATA_URL_PROP_KEY).replace("${version}", version);
+                String metadata = properties.get(MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY) + "/" + properties.getProperty(MAVEN_SNAPSHOT_METADATA_FILE_NAME_PROP_KEY).replace("${version}", version);
                 HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().build();
                 String res = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
                 XmlMapper xmlMapper = new XmlMapper();
@@ -145,15 +144,16 @@ public class ModularLauncher {
     }
 
     private static String getLatestVersionFromMaven(Properties properties) throws IOException, InterruptedException {
-        if (StringUtils.isBlank(properties.getProperty(MAVEN_METADATA_URL_PROP_KEY))) {
+        // TODO: implement checking Github for the latest release files
+// Consider using Shrinkwrap maven resolver or not.Alternative way is directly checking maven metadata files
+        if (StringUtils.isBlank(properties.getProperty(MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY))) {
             return Arrays.stream(Maven.resolver()
                             .resolve(getMavenLatestVersionQuery()).withoutTransitivity().asResolvedArtifact())
                     .map(MavenArtifactInfo::getCoordinate)
                     .filter(artifact -> ARTIFACT.equals(artifact.getGroupId() + ":" + artifact.getArtifactId()))
                     .findFirst().map(MavenCoordinate::getVersion).orElse(MINIMUM_VERSION);
         } else {
-            //TODO: replace hard-code with logic to parse maven-metadata files
-            String metadata = properties.getProperty(MAVEN_METADATA_URL_PROP_KEY);
+            String metadata = properties.getProperty(MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY) + "/" + properties.getProperty(MAVEN_METADATA_FILE_NAME_PROP_KEY);
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().build();
             String res = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
             XmlMapper xmlMapper = new XmlMapper();
@@ -198,6 +198,7 @@ public class ModularLauncher {
 //                shouldUpgrade.set(true);
 //                waitForConfirmation.countDown();
             // Create and show progress dialog
+            log.info("Users accepted to upgrade to the new version {}. Processing...", version);
             Thread t = new Thread(() -> {
                 JDialog progressDialog = new JDialog();
                 progressDialog.setTitle("Processing...");
@@ -238,7 +239,7 @@ public class ModularLauncher {
         } else {
 //                waitForConfirmation.countDown();
             // Handle 'No' option
-            System.out.println("Operation cancelled");
+            log.info("Users declined to upgrade to the new version {}", version);
             // Add your next code here for 'No' option
             return false;
         }
