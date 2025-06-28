@@ -31,16 +31,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class ModularLauncher {
     public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
-    public static final String MINIMUM_VERSION = "0.1.1-SNAPSHOT";
+    public static final String MINIMUM_VERSION = "0.1.0-SNAPSHOT";
     public static final String VERSION_PROP_KEY = "main.artifact.version";
     public static final String MAVEN_METADATA_URL_PROP_KEY = "main.artifact.maven-metadata-url";
-    public static final String JAR_LOCATION_PROP_KEY = "main.artifact.location";
-    public static final String JAR_DOWNLOAD_URL_PROP_KEY = "main.artifact.download-url";
+    public static final String MAIN_ARTIFACT_DIRECTORY_PROP_KEY = "main.artifact.directory";
+    public static final String MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY = "main.artifact.download-url";
     public static final String MAIN_ARTIFACT_FILE_NAME_PREFIX = "main.artifact.fileName-prefix";
     public static final String MAVEN_SNAPSHOT_METADATA_URL_PROP_KEY = "main.artifact.snapshot-maven-metadata-url";
     public static final String ARCHIVE_FORMAT = "zip";
+    public static final String APP_NAME = "MyKafkaTool";
     private static AtomicBoolean shouldUpgrade = new AtomicBoolean(false);
-    private static CountDownLatch waitForUpgrade = new CountDownLatch(1);
+    private static final CountDownLatch waitForUpgrade = new CountDownLatch(1);
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     //    private static CountDownLatch waitForConfirmation = new CountDownLatch(1);
@@ -57,20 +58,22 @@ public class ModularLauncher {
         } catch (Exception e) {
             log.error("Cannot load config.properties file", e);
         }
-        String newVersion = MINIMUM_VERSION;
+        String newVersion = installedVer;
         try {
             newVersion = getLatestVersionFromMaven(properties);
         } catch (IOException | InterruptedException e) {
             log.error("Cannot get latest version from maven", e);
         }
+//        Optional<String> locationOptional = Optional.ofNullable();
+        String uri = Paths
+                .get((properties.getProperty(MAIN_ARTIFACT_DIRECTORY_PROP_KEY) + "/" + properties.get(MAIN_ARTIFACT_FILE_NAME_PREFIX) + ".jar").replace("${version}", installedVer))
+                .toUri().toString();
+//        if (locationOptional.isPresent()) {
+//            uri = Paths.get(locationOptional.get().replace("${version}", installedVer)).toUri().toString();
+//        } else {
+//            uri = getJarLocationUri(installedVer, properties);
+//        }
         String versionToUpgrade = installedVer;
-        Optional<String> locationOptional = Optional.ofNullable(properties.getProperty(JAR_LOCATION_PROP_KEY));
-        String uri;
-        if (locationOptional.isPresent()) {
-            uri = Paths.get(locationOptional.get().replace("${version}", installedVer)).toUri().toString();
-        } else {
-            uri = getJarLocationUri(installedVer, properties);
-        }
         if (newVersion.compareTo(installedVer) > 0) {
             boolean agreeToUpgrade = showDialog(newVersion);
 //            UpgradeDialog.main(new String[]{newVersion});
@@ -79,7 +82,10 @@ public class ModularLauncher {
                 try {
                     uri = getJarLocationUri(versionToUpgrade, properties);
                 } catch (URISyntaxException | IOException | InterruptedException e) {
+                    waitForUpgrade.countDown();
                     log.error("Cannot get jar location uri for the new version {}", versionToUpgrade, e);
+                    versionToUpgrade = installedVer;
+                    JOptionPane.showMessageDialog(null, "Cannot upgrade to the new version %s, fallback to the current version %s. Please check the logs at %s/%s/logs for details".formatted(newVersion, installedVer, userHome, APP_NAME), "Upgrade Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
@@ -98,7 +104,7 @@ public class ModularLauncher {
     }
 
     private static String getJarLocationUri(String version, Properties properties) throws URISyntaxException, IOException, InterruptedException {
-        if (properties.get(JAR_DOWNLOAD_URL_PROP_KEY) != null) {
+        if (properties.get(MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY) != null) {
             String zipFileVersion = version;
             if (isSnapShotVersion(version)) {
                 // TODO: snapshot may have maven-metadata file, so need to handle it
@@ -115,17 +121,18 @@ public class ModularLauncher {
                 }
             }
             String downloadFileName = properties.getProperty(MAIN_ARTIFACT_FILE_NAME_PREFIX).replace("${version}", zipFileVersion) + "." + ARCHIVE_FORMAT;
-            String downloadUrl = properties.getProperty(JAR_DOWNLOAD_URL_PROP_KEY) + "/" + version + "/" + downloadFileName;
-            Path parentPath = Paths.get("lib");
-            Path filePath = parentPath.resolve(downloadFileName);
+            String downloadUrl = properties.getProperty(MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY) + "/" + version + "/" + downloadFileName;
+            Path parentPath = Paths.get(properties.getProperty(MAIN_ARTIFACT_DIRECTORY_PROP_KEY));
+            Path zipFilePath = parentPath.resolve(downloadFileName);
             ReadableByteChannel rbc = Channels.newChannel(new URI(downloadUrl).toURL().openStream());
-            try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
+            try (FileOutputStream fos = new FileOutputStream(zipFilePath.toFile())) {
                 long size = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                try (ZipFile zipFile = new ZipFile(filePath.toFile())) {
+                log.info("Downloaded main zip file with {} bytes from {}", size, downloadUrl);
+                try (ZipFile zipFile = new ZipFile(zipFilePath.toFile())) {
                     zipFile.extractAll(parentPath.toAbsolutePath().toString());
                 }
             }
-            Files.deleteIfExists(filePath);
+            Files.deleteIfExists(zipFilePath);
             return parentPath.resolve(properties.getProperty(MAIN_ARTIFACT_FILE_NAME_PREFIX).replace("${version}", version) + ".jar").toUri().toString();
 
         } else {
