@@ -376,14 +376,14 @@
             <!--                </configuration>-->
             <!--            </plugin>-->
             <!--            Gluon not working-->
-            <plugin>
-                <groupId>com.gluonhq</groupId>
-                <artifactId>gluonfx-maven-plugin</artifactId>
-                <version>1.0.26</version>
-                <configuration>
-                    <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolApplication</mainClass>
-                </configuration>
-            </plugin>
+            <!--            <plugin>-->
+            <!--                <groupId>com.gluonhq</groupId>-->
+            <!--                <artifactId>gluonfx-maven-plugin</artifactId>-->
+            <!--                <version>1.0.26</version>-->
+            <!--                <configuration>-->
+            <!--                    <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolApplication</mainClass>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
         </plugins>
     </build>
 </project>
