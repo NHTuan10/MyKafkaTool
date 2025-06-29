@@ -62,9 +62,9 @@ public class AddConnectionModalController extends ModalController {
         this.hyperlinks = authProviderManager.getAllAuthProviders().stream().collect(Collectors.toMap(
                 auth -> auth
                 , authProvider -> authProvider.getSampleConfig().stream().map(sample -> {
-                    Hyperlink hyperlink = new Hyperlink(sample.getKey());
+                    Hyperlink hyperlink = new Hyperlink(sample.name());
                     hyperlink.setOnAction(event -> {
-                        this.securityConfigTextArea.replaceText(sample.getValue());
+                        ViewUtils.highlightJsonInCodeArea(sample.sampleValue(), securityConfigTextArea, true, objectMapper, jsonHighlighter);
                     });
                     return hyperlink;
                 }).toList()));

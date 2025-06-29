@@ -1,7 +1,6 @@
 package io.github.nhtuan10.mykafkatool.api.auth;
 
-import javafx.util.Pair;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,10 @@ public interface AuthProvider {
         return authConfig.properties();
     }
 
-    default List<Pair<String, String>> getSampleConfig() {
+    default List<SampleAuthConfig> getSampleConfig() {
         return new ArrayList<>();
+    }
+
+    public record SampleAuthConfig(String name, String sampleValue) implements Serializable {
     }
 }

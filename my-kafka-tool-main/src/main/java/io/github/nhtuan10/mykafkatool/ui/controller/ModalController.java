@@ -1,10 +1,12 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
-import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.Setter;
 import org.fxmisc.richtext.CodeArea;
@@ -30,15 +32,15 @@ public abstract class ModalController {
                 field.setAccessible(true);
                 Object fieldObject = field.get(modalController);
                 if (fieldClass.equals(TextField.class) || fieldClass.equals(TextArea.class)) {
-                    TextInputControl.class.getDeclaredMethod("setText", String.class).invoke(fieldObject, value);
+                    fieldClass.getMethod("setText", String.class).invoke(fieldObject, value);
                 } else if (fieldObject instanceof CodeArea codeArea && value instanceof String str) {
                     codeArea.replaceText(str);
                 } else if ((fieldClass.equals(TableView.class) || fieldClass.equals(ComboBox.class)) && value instanceof ObservableList) {
-                    fieldClass.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
+                    fieldClass.getMethod("setItems", ObservableList.class).invoke(fieldObject, value);
                 } else if (fieldClass.equals(KafkaMessageHeaderTable.class) && value instanceof ObservableList) {
-                    EditableTableControl.class.getDeclaredMethod("setItems", ObservableList.class).invoke(fieldObject, value);
+                    fieldClass.getMethod("setItems", ObservableList.class).invoke(fieldObject, value);
                 } else if (fieldObject instanceof ObjectProperty<?> property) {
-                    fieldClass.getDeclaredMethod("setValue", Object.class).invoke(property, value);
+                    fieldClass.getMethod("setValue", Object.class).invoke(property, value);
                 } else {
                     field.set(modalController, value);
                 }

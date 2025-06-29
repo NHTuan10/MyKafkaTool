@@ -30,9 +30,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class ModularLauncher {
-    public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
+    public static final String MAIN_ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
     public static final String MINIMUM_VERSION = "0.1.1-SNAPSHOT";
-    public static final String VERSION_PROP_KEY = "main.artifact.version";
+    public static final String MAIN_ARTIFACT_URI_PROP_KEY = "main.artifact.uri";
+    public static final String MAIN_ARTIFACT_VERSION_PROP_KEY = "main.artifact.version";
     public static final String MAVEN_METADATA_FILE_NAME_PROP_KEY = "main.artifact.maven-metadata-fileName";
     public static final String MAIN_ARTIFACT_DIRECTORY_PROP_KEY = "main.artifact.directory";
     public static final String MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY = "main.artifact.download-url";
@@ -54,7 +55,7 @@ public class ModularLauncher {
         String installedVer = MINIMUM_VERSION;
         try (InputStream is = new FileInputStream(configLocation)) {
             properties.load(is);
-            installedVer = Optional.ofNullable(properties.getProperty(VERSION_PROP_KEY)).orElse(MINIMUM_VERSION);
+            installedVer = Optional.ofNullable(properties.getProperty(MAIN_ARTIFACT_VERSION_PROP_KEY)).orElse(MINIMUM_VERSION);
         } catch (Exception e) {
             log.error("Cannot load config.properties file", e);
         }
@@ -64,15 +65,15 @@ public class ModularLauncher {
         } catch (IOException | InterruptedException e) {
             log.error("Cannot get latest version from maven", e);
         }
-//        Optional<String> locationOptional = Optional.ofNullable();
-        String uri = Paths
-                .get((properties.getProperty(MAIN_ARTIFACT_DIRECTORY_PROP_KEY) + "/" + properties.get(MAIN_ARTIFACT_FILE_NAME_PREFIX) + ".jar").replace("${version}", installedVer))
-                .toUri().toString();
-//        if (locationOptional.isPresent()) {
-//            uri = Paths.get(locationOptional.get().replace("${version}", installedVer)).toUri().toString();
-//        } else {
-//            uri = getJarLocationUri(installedVer, properties);
-//        }
+        Optional<String> uriFromPropertyFileOptional = Optional.ofNullable(properties.getProperty(MAIN_ARTIFACT_URI_PROP_KEY));
+        String uri;
+        if (uriFromPropertyFileOptional.isPresent()) {
+            uri = uriFromPropertyFileOptional.get().replace("${version}", installedVer);
+        } else {
+            uri = Paths
+                    .get((properties.getProperty(MAIN_ARTIFACT_DIRECTORY_PROP_KEY) + "/" + properties.get(MAIN_ARTIFACT_FILE_NAME_PREFIX) + ".jar").replace("${version}", installedVer))
+                    .toUri().toString();
+        }
         String versionToUpgrade = installedVer;
         if (newVersion.compareTo(installedVer) > 0) {
             boolean agreeToUpgrade = showDialog(newVersion);
@@ -90,12 +91,12 @@ public class ModularLauncher {
             }
         }
         try (OutputStream os = new FileOutputStream(configLocation)) {
-            properties.setProperty(VERSION_PROP_KEY, versionToUpgrade);
+            properties.setProperty(MAIN_ARTIFACT_VERSION_PROP_KEY, versionToUpgrade);
             properties.store(os, "Global MyKafkaTool Properties");
         } catch (IOException e) {
             System.err.println("Failed to save config.properties file");
         }
-        Modular.startModuleSyncWithMainClass("my-kafka-tool", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of(""));
+        Modular.startModuleSyncWithMainClass("my-kafka-tool-main", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of(""));
 //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
         waitForUpgrade.countDown();
 
@@ -135,7 +136,7 @@ public class ModularLauncher {
             return parentPath.resolve(properties.getProperty(MAIN_ARTIFACT_FILE_NAME_PREFIX).replace("${version}", version) + ".jar").toUri().toString();
 
         } else {
-            return "mvn://" + ARTIFACT.replace(":", "/") + "/" + version;
+            return "mvn://" + MAIN_ARTIFACT.replace(":", "/") + "/" + version;
         }
     }
 
@@ -150,7 +151,7 @@ public class ModularLauncher {
             return Arrays.stream(Maven.resolver()
                             .resolve(getMavenLatestVersionQuery()).withoutTransitivity().asResolvedArtifact())
                     .map(MavenArtifactInfo::getCoordinate)
-                    .filter(artifact -> ARTIFACT.equals(artifact.getGroupId() + ":" + artifact.getArtifactId()))
+                    .filter(artifact -> MAIN_ARTIFACT.equals(artifact.getGroupId() + ":" + artifact.getArtifactId()))
                     .findFirst().map(MavenCoordinate::getVersion).orElse(MINIMUM_VERSION);
         } else {
             String metadata = properties.getProperty(MAIN_ARTIFACT_DOWNLOAD_URL_PROP_KEY) + "/" + properties.getProperty(MAVEN_METADATA_FILE_NAME_PROP_KEY);
@@ -180,7 +181,7 @@ public class ModularLauncher {
 //    }
 
     private static String getMavenLatestVersionQuery() {
-        return "%s:[%s,)".formatted(ARTIFACT, MINIMUM_VERSION);
+        return "%s:[%s,)".formatted(MAIN_ARTIFACT, MINIMUM_VERSION);
     }
 
     public static boolean showDialog(String version) {

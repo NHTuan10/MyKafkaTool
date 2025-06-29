@@ -10,6 +10,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.File;
@@ -24,18 +25,20 @@ import java.util.function.Consumer;
 public final class ViewUtils {
 
     public static void highlightJsonInCodeArea(String inValue, CodeArea codeArea, boolean prettyPrint, ObjectMapper objectMapper, JsonHighlighter jsonHighlighter) {
-        String value = inValue;
-        try {
-            value = prettyPrint ?
-                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectMapper.readTree(inValue)) :
-                    inValue;
-        } catch (JsonProcessingException e) {
-        }
-        codeArea.replaceText(value);
-        try {
-            codeArea.setStyleSpans(0, jsonHighlighter.highlight(value));
-        } catch (Exception e) {
-            log.error("Error highlighting json in code area", e);
+        if (StringUtils.isNotBlank(inValue)) {
+            String value = inValue;
+            try {
+                value = prettyPrint ?
+                        objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectMapper.readTree(inValue)) :
+                        inValue;
+            } catch (JsonProcessingException e) {
+            }
+            codeArea.replaceText(value);
+            try {
+                codeArea.setStyleSpans(0, jsonHighlighter.highlight(value));
+            } catch (Exception e) {
+                log.error("Error highlighting json in code area", e);
+            }
         }
     }
 
