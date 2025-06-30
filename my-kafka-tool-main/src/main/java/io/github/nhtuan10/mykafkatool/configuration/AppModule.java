@@ -2,18 +2,17 @@ package io.github.nhtuan10.mykafkatool.configuration;
 
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.collect.ImmutableMap;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.IntoMap;
-import dagger.multibindings.StringKey;
+import io.github.nhtuan10.modular.api.Modular;
+import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
-import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
-import io.github.nhtuan10.mykafkatool.api.auth.SaslProvider;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
+import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
+import io.github.nhtuan10.mykafkatool.auth.NoAuthProvider;
+import io.github.nhtuan10.mykafkatool.auth.SaslProvider;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
@@ -31,8 +30,11 @@ import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepo;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepoImpl;
+import jakarta.inject.Named;
 
+import java.util.*;
 import java.util.concurrent.SubmissionPublisher;
+import java.util.stream.Collectors;
 
 @Module
 public abstract class AppModule {
@@ -47,20 +49,34 @@ public abstract class AppModule {
     @AppScoped
     @Provides
     static SerDesHelper serDesHelper() {
-        StringSerializer stringSerializer = new StringSerializer();
-        StringDeserializer stringDeserializer = new StringDeserializer();
-        ByteArraySerializer byteArraySerializer = new ByteArraySerializer();
-        ByteArrayDeserializer byteArrayDeserializer = new ByteArrayDeserializer();
-        SchemaRegistryAvroSerializer schemaRegistryAvroSerializer = new SchemaRegistryAvroSerializer();
-        SchemaRegistryAvroDeserializer schemaRegistryAvroDeserializer = new SchemaRegistryAvroDeserializer();
+//        StringSerializer stringSerializer = new StringSerializer();
+//        StringDeserializer stringDeserializer = new StringDeserializer();
+//        ByteArraySerializer byteArraySerializer = new ByteArraySerializer();
+//        ByteArrayDeserializer byteArrayDeserializer = new ByteArrayDeserializer();
+//        SchemaRegistryAvroSerializer schemaRegistryAvroSerializer = new SchemaRegistryAvroSerializer();
+//        SchemaRegistryAvroDeserializer schemaRegistryAvroDeserializer = new SchemaRegistryAvroDeserializer();
+//        Map<String, PluggableSerializer> serializers = new LinkedHashMap<>();
+//        Map<String, PluggableDeserializer> deserializers = new LinkedHashMap<>();
+
+        List<PluggableSerializer> serializers = new ArrayList<>(List.of(new StringSerializer(), new ByteArraySerializer(), new SchemaRegistryAvroSerializer()));
+
+        List<PluggableDeserializer> deserializers = new ArrayList<>(List.of(new StringDeserializer(), new ByteArrayDeserializer(), new SchemaRegistryAvroDeserializer()));
+
+//        serializers.put(stringSerializer.getName(), stringSerializer);
+//        serializers.put(byteArraySerializer.getName(), byteArraySerializer);
+//        serializers.put(schemaRegistryAvroSerializer.getName(), schemaRegistryAvroSerializer);
+//
+//        deserializers.put(stringDeserializer.getName(), stringDeserializer);
+//        deserializers.put(byteArrayDeserializer.getName(), byteArrayDeserializer);
+//        deserializers.put(schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer);
+
+        if (Modular.isManaged(AppModule.class)) {
+            serializers.addAll(Modular.getModularServices(PluggableSerializer.class));
+            deserializers.addAll(Modular.getModularServices(PluggableDeserializer.class));
+        }
         return new SerDesHelper(
-                ImmutableMap.of(stringSerializer.getName(), stringSerializer,
-                        byteArraySerializer.getName(), byteArraySerializer,
-                        schemaRegistryAvroSerializer.getName(), schemaRegistryAvroSerializer),
-                ImmutableMap.of(stringDeserializer.getName(), stringDeserializer,
-                        byteArrayDeserializer.getName(), byteArrayDeserializer,
-                        schemaRegistryAvroDeserializer.getName(), schemaRegistryAvroDeserializer
-                )
+                Collections.unmodifiableMap((Map<? extends String, ? extends PluggableSerializer>) serializers.stream().collect(Collectors.toMap(PluggableSerializer::getName, s -> s, (x, y) -> y, LinkedHashMap::new))),
+                Collections.unmodifiableMap((Map<? extends String, ? extends PluggableDeserializer>) deserializers.stream().collect(Collectors.toMap(PluggableDeserializer::getName, s -> s, (x, y) -> y, LinkedHashMap::new)))
         );
     }
 
@@ -86,10 +102,7 @@ public abstract class AppModule {
     @Provides
     @SharedPrettyPrintObjectMapper
     static ObjectMapper sharedPrettyPrintObjectMapper() {
-        return new ObjectMapper()
-                .findAndRegisterModules()
-                .configure(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS, false)
-                .enable(SerializationFeature.INDENT_OUTPUT);
+        return Config.constructPrettyPrintObjectMapper();
     }
 
     @AppScoped
@@ -106,19 +119,39 @@ public abstract class AppModule {
     }
 
     @Binds
-    @IntoMap
-    @StringKey(AuthProvider.NO_AUTH)
+//    @IntoMap
+//    @StringKey(AuthProvider.NO_AUTH)
     @AppScoped
-//    @Named("noAuthProvider")
+    @Named("noAuthProvider")
     abstract AuthProvider noAuthProvider(NoAuthProvider provider);
 
     @Binds
-    @IntoMap
-    @StringKey(SaslProvider.SASL)
+//    @IntoMap
+//    @StringKey(SaslProvider.SASL)
     @AppScoped
-//    @Named("saslProvider")
-    abstract AuthProvider saslProvider(SaslProvider controller);
+    @Named("saslProvider")
+    abstract AuthProvider saslProvider(SaslProvider provider);
 
+    @Provides
+    @AppScoped
+    static Map<String, AuthProvider> authProviderMap(@Named("noAuthProvider") AuthProvider noAuthProvide, @Named("saslProvider") AuthProvider saslProvide) {
+        Map<String, AuthProvider> authProviderMap = new LinkedHashMap<>();
+        authProviderMap.put(noAuthProvide.getName(), noAuthProvide);
+        authProviderMap.put(saslProvide.getName(), saslProvide);
+        if (Modular.isManaged(AppModule.class)) {
+            List<AuthProvider> extAuthProviders = Modular.getModularServices(AuthProvider.class);
+            extAuthProviders.forEach(authProvider -> authProviderMap.put(authProvider.getName(), authProvider));
+        }
+        return Collections.unmodifiableMap(authProviderMap);
+    }
+//    @Provides
+//    @IntoMap
+//    @StringKey(SaslProvider.SASL)
+//    @AppScoped
+//    @Named("saslProvider")
+//    abstract AuthProvider modularSampleSaslProvider(){
+
+//    }
 //    @Provides
 //    Callback<Class<?>, Object>  provideControllerFactory(Map<Class<?>, Object> controllerFactory) {
 //        return controllerFactory::get;

@@ -2,7 +2,7 @@ package io.github.nhtuan10.mykafkatool.manager;
 
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
-import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
+import io.github.nhtuan10.mykafkatool.auth.NoAuthProvider;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import jakarta.inject.Inject;
 

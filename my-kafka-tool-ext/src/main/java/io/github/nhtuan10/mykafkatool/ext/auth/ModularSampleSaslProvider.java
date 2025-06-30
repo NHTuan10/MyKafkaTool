@@ -1,13 +1,13 @@
-package io.github.nhtuan10.mykafkatool.api.auth;
+package io.github.nhtuan10.mykafkatool.ext.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
-import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedPrettyPrintObjectMapper;
-import jakarta.inject.Inject;
+import io.github.nhtuan10.modular.api.annotation.ModularService;
+import io.github.nhtuan10.mykafkatool.api.Config;
+import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,15 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@AppScoped
 @Slf4j
-public class SaslProvider implements AuthProvider {
-    public static final String SASL = "SASL";
+@ModularService
+public class ModularSampleSaslProvider implements AuthProvider {
+    public static final String SASL = "Modular SASL";
     protected final ObjectMapper objectMapper;
 
-    @Inject
-    public SaslProvider(@SharedPrettyPrintObjectMapper ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public ModularSampleSaslProvider() {
+        this.objectMapper = Config.constructPrettyPrintObjectMapper();
     }
 
     @Override
@@ -51,7 +50,7 @@ public class SaslProvider implements AuthProvider {
     @Override
     public List<SampleAuthConfig> getSampleConfig() {
         try {
-            return List.of(new SampleAuthConfig("PLAIN", IOUtils.toString(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("sasl-plain.json")), StandardCharsets.UTF_8)));
+            return List.of(new SampleAuthConfig("PLAIN", new String(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("sasl-plain.json")).readAllBytes(), StandardCharsets.UTF_8)));
         } catch (IOException e) {
             log.error("Failed to load sasl-plain.json", e);
             return List.of(new SampleAuthConfig("", ""));

@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SerDesHelper {
 
-    public static final String SERDE_STRING = "String";
-    public static final String SERDE_AVRO = "AVRO";
     private final Map<String, PluggableSerializer> serializerMap;
     private final Map<String, PluggableDeserializer> deserializerMap;
 
@@ -71,7 +69,7 @@ public class SerDesHelper {
     }
 
     public Set<String> getSupportedKeyDeserializer() {
-        return Set.of(SERDE_STRING);
+        return Set.of(KafkaMessage.SERDES_STRING);
     }
 
     public Class<? extends Deserializer> getDeserializeClass(String contentType) {

@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.api.serdes;
 
+import io.github.nhtuan10.modular.api.annotation.ModularService;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+@ModularService
 public interface PluggableSerializer {
     String getName();
 

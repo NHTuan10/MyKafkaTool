@@ -1,5 +1,7 @@
-package io.github.nhtuan10.mykafkatool.api.auth;
+package io.github.nhtuan10.mykafkatool.auth;
 
+import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
 import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 

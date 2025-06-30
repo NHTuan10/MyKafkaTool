@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.producer.creator;
 
-import io.github.nhtuan10.mykafkatool.api.auth.NoAuthProvider;
+import io.github.nhtuan10.mykafkatool.auth.NoAuthProvider;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
 import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;

@@ -96,6 +96,7 @@ public class ModularLauncher {
         } catch (IOException e) {
             System.err.println("Failed to save config.properties file");
         }
+        Modular.startModuleSync("my-kafka-tool-ext", List.of("mvn://io.github.nhtuan10/my-kafka-tool-ext/0.1.1-SNAPSHOT"), List.of("io.github.nhtuan10.mykafkatool.ext"));
         Modular.startModuleSyncWithMainClass("my-kafka-tool-main", List.of(uri), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of(""));
 //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
         waitForUpgrade.countDown();

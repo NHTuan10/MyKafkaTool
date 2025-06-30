@@ -1,9 +1,11 @@
 package io.github.nhtuan10.mykafkatool.api.serdes;
 
+import io.github.nhtuan10.modular.api.annotation.ModularService;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 
 import java.util.Map;
 
+@ModularService
 public interface PluggableDeserializer {
     String getName();
 

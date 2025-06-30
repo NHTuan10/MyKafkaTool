@@ -1,10 +1,12 @@
 package io.github.nhtuan10.mykafkatool.api.auth;
 
-import java.io.Serializable;
+import io.github.nhtuan10.modular.api.annotation.ModularService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@ModularService
 public interface AuthProvider {
     String NO_AUTH = "No Auth";
 
@@ -24,6 +26,6 @@ public interface AuthProvider {
         return new ArrayList<>();
     }
 
-    public record SampleAuthConfig(String name, String sampleValue) implements Serializable {
+    public record SampleAuthConfig(String name, String sampleValue) {
     }
 }
