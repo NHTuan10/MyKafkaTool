@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool;
 
+import io.github.nhtuan10.modular.ModularContext;
 import io.github.nhtuan10.modular.api.Modular;
 import io.github.nhtuan10.mykafkatool.configuration.AppComponent;
 import io.github.nhtuan10.mykafkatool.configuration.DaggerAppComponent;
@@ -52,7 +53,7 @@ public class MyKafkaToolApplication extends javafx.application.Application {
             exit();
         });
         if (Modular.isManaged(this)) {
-            Modular.notifyModuleReady();
+            ModularContext.notifyModuleReady();
         }
     }
 
@@ -99,7 +100,7 @@ public class MyKafkaToolApplication extends javafx.application.Application {
     @Override
     public void stop() {
         log.info("App is closing");
-        System.exit(0);
+//        System.exit(0);
     }
 
     public static void main(String[] args) {
