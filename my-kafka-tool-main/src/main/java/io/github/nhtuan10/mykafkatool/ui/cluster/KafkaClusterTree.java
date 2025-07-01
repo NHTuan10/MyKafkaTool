@@ -16,6 +16,7 @@ import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
+import io.github.nhtuan10.mykafkatool.userpreference.UserPreference;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -64,16 +65,7 @@ public class KafkaClusterTree {
         clustersItem.setExpanded(true);
         clusterTree.setRoot(clustersItem);
 
-        userPreferenceManager.loadUserPreference().connections().forEach((cluster -> {
-            try {
-                if (!isClusterNameExistedInTree(clusterTree, cluster.getName())) {
-                    connectToClusterAndSchemaRegistry(clusterTree, cluster, false, true);
-                }
-            } catch (ClusterNameExistedException e) {
-                log.error("Error when add new connection during loading user preferences", e);
-                throw new RuntimeException(e);
-            }
-        }));
+        addAllConnectionsFromUserPreference(userPreferenceManager.loadUserPreference());
         //TODO: add  search topic, cluster, consumer groups function. Also show brokers & topic table, in-sync replicas, total topics, partitions
 
 
@@ -117,6 +109,19 @@ public class KafkaClusterTree {
 
             }
         });
+    }
+
+    public void addAllConnectionsFromUserPreference(UserPreference userPreference) {
+        userPreference.connections().forEach((cluster -> {
+            try {
+                if (!isClusterNameExistedInTree(clusterTree, cluster.getName())) {
+                    connectToClusterAndSchemaRegistry(clusterTree, cluster, false, true);
+                }
+            } catch (ClusterNameExistedException e) {
+                log.error("Error when add new connection during loading user preferences", e);
+                throw new RuntimeException(e);
+            }
+        }));
     }
 
     public static boolean isClusterNameExistedInTree(TreeView clusterTree, String clusterName) throws ClusterNameExistedException {

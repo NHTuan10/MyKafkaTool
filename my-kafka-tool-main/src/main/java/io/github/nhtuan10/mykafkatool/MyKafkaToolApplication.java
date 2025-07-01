@@ -98,9 +98,8 @@ public class MyKafkaToolApplication extends javafx.application.Application {
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         log.info("App is closing");
-//        Thread.sleep(100);
 //        System.exit(0);
     }
 

@@ -30,10 +30,8 @@ import javafx.collections.FXCollections;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -126,7 +124,7 @@ public class AddOrViewMessageModalController extends ModalController {
         this.objectMapper = objectMapper;
         this.producerUtil = producerUtil;
         try {
-            this.helpDialog = buildHelpDialog();
+            this.helpDialog = ModalUtils.buildHelpDialog("handlebars-help.txt", "Handlebars Expression Help");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -201,32 +199,6 @@ public class AddOrViewMessageModalController extends ModalController {
         if (!helpDialog.isShowing()) {
             helpDialog.showAndWait();
         }
-    }
-
-    private Alert buildHelpDialog() throws IOException {
-        String handlebarsHelp = new String(this.getClass().getClassLoader().getResourceAsStream("handlebars-help.txt").readAllBytes());
-        TextArea textArea = new TextArea(handlebarsHelp);
-        textArea.setEditable(false);
-        textArea.setWrapText(true);
-        textArea.setWrapText(true);
-        AnchorPane anchorPane = new AnchorPane();
-        AnchorPane.setTopAnchor(textArea, 0.0);
-        AnchorPane.setBottomAnchor(textArea, 0.0);
-        AnchorPane.setLeftAnchor(textArea, 0.0);
-        AnchorPane.setRightAnchor(textArea, 0.0);
-
-//        GridPane gridPane = new GridPane();
-//        gridPane.setMaxWidth(Double.MAX_VALUE);
-//        gridPane.add(textArea, 0, 0);
-//        gridPane.
-        anchorPane.getChildren().add(textArea);
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Handlebars Expression Help");
-        alert.getDialogPane().setContent(anchorPane);
-        alert.setResizable(true);
-        alert.initModality(Modality.WINDOW_MODAL);
-        return alert;
     }
 
     private void enableDisableSchemaTextArea() {
