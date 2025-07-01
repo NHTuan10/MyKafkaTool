@@ -1,0 +1,6 @@
+MyKafkaTool 0.1.1-SNAPSHOT
+
+License: Apache License 2.0 - https://github.com/NHTuan10/MyKafkaTool/blob/main/LICENSE
+Copyright 2021 Hoang Tuan "Tim" Nguyen
+Homepage: https://github.com/NHTuan10/MyKafkaTool
+This software is free to use, reproduce and distribute under Apache License 2.0

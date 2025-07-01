@@ -22,6 +22,13 @@ public class UserPreferenceManager {
         userPreferenceRepo.saveUserPreference(userPreference);
     }
 
+    @Locked.Write
+    public UserPreference saveUserPreference(String userPrefString) throws IOException {
+        UserPreference userPreference = userPreferenceRepo.parseUserPreference(userPrefString);
+        userPreferenceRepo.saveUserPreference(userPreference);
+        return userPreference;
+    }
+
     @Locked.Read
     public UserPreference loadUserPreference() {
         UserPreference userPreference;

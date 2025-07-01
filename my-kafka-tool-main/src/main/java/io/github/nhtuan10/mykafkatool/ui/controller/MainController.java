@@ -9,6 +9,7 @@ import io.github.nhtuan10.mykafkatool.manager.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
+import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.cluster.KafkaClusterTree;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupView;
@@ -18,6 +19,9 @@ import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryView;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.TopicAndPartitionPropertyView;
+import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import io.github.nhtuan10.mykafkatool.userpreference.UserPreference;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
 import jakarta.inject.Inject;
 import javafx.beans.property.BooleanProperty;
@@ -26,6 +30,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +39,8 @@ import org.apache.commons.lang3.SystemUtils;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -50,6 +57,7 @@ public class MainController {
     private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
     private KafkaClusterTree kafkaClusterTree;
     private Set<Tab> allTabs;
+    private Stage stage;
 
     @FXML
     private TreeView clusterTree;
@@ -96,6 +104,7 @@ public class MainController {
     private MenuItem lightModeMenuItem;
 
     public void setStage(Stage stage) {
+        this.stage = stage;
         this.kafkaClusterTree.setStage(stage);
         this.schemaRegistryView.setStage(stage);
         this.topicAndPartitionPropertyView.setStage(stage);
@@ -110,7 +119,6 @@ public class MainController {
     /// /        this.eventDispatcher = new EventDispatcher(new SubmissionPublisher<>()
     /// /                , new SubmissionPublisher<>(), new SubmissionPublisher<>());
 //    }
-
     @FXML
     public void initialize() {
         topicAndPartitionPropertyView.setProperties(isBlockingAppUINeeded, this.propertiesTab.selectedProperty());
@@ -212,40 +220,40 @@ public class MainController {
     }
 
     @FXML
-    protected void addTopic() throws IOException, ExecutionException, InterruptedException {
+    void addTopic() throws IOException, ExecutionException, InterruptedException {
         kafkaClusterTree.addTopic();
     }
 
     @FXML
-    protected void addNewConnection() {
+    void addNewConnection() {
         kafkaClusterTree.addNewConnection();
     }
 
     @FXML
-    protected void exit() {
+    void exit() {
         MyKafkaToolApplication.exit();
     }
 
     @FXML
-    protected void switchToDarkMode() {
+    void switchToDarkMode() {
         if (MyKafkaToolApplication.getCurrentTheme() != Theme.DARK) {
             MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.DARK);
         }
     }
 
     @FXML
-    protected void switchToLightMode() {
+    void switchToLightMode() {
         MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.LIGHT);
     }
 
     @FXML
-    protected void showConfigFileInFileBrowser() throws IOException {
+    void showConfigFileInFileBrowser() throws IOException {
         File file = new File(userPreferenceManager.getUserPrefFilePath());
         openAndSelectFileInFileExplore(file);
     }
 
     @FXML
-    protected void showLogsInFileBrowser() throws IOException {
+    void showLogsInFileBrowser() throws IOException {
         File file = new File(MyKafkaToolApplication.getLogsPath());
         openAndSelectFileInFileExplore(file);
     }
@@ -258,4 +266,29 @@ public class MainController {
         }
     }
 
+    @FXML
+    void importConfigFile() {
+        try {
+            Path path = ViewUtils.openFile("Import Configuration File", AppConstant.USER_PREF_FILENAME, new StageHolder(stage)
+                    , new FileChooser.ExtensionFilter("JSON Files", "*.json")
+                    , new FileChooser.ExtensionFilter("All Files", "*.*")
+            );
+            if (path != null) {
+                if (ModalUtils.confirmAlert("Importing configuration confirmation", "Do you want to import the new configuration file %s? It will overwrite your existing configuration".formatted(path.getFileName()), "Yes", "No")) {
+                    UserPreference pref = userPreferenceManager.saveUserPreference(Files.readString(path));
+                    kafkaClusterTree.addAllConnectionsFromUserPreference(pref);
+                    MyKafkaToolApplication.applyThemeFromCurrentUserPreference(stage.getScene());
+                }
+            }
+        } catch (IOException e) {
+            ModalUtils.showAlertDialog(Alert.AlertType.ERROR, "Importing configuration file error: " + e.getMessage(), "Error", ButtonType.OK);
+        }
+    }
+
+    @FXML
+    protected void aboutDialog() throws IOException {
+        Alert about = ModalUtils.buildHelpDialog("about.txt", "About MyKafkaTool");
+        about.showAndWait();
+
+    }
 }

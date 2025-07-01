@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.userpreference;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedPrettyPrintObjectMapper;
@@ -59,4 +60,7 @@ public class UserPreferenceRepoImpl implements UserPreferenceRepo {
         return MessageFormat.format("{0}/{1}/config/{2}", userHome, APP_NAME, USER_PREF_FILENAME);
     }
 
+    public UserPreference parseUserPreference(String data) throws JsonProcessingException {
+        return objectMapper.readValue(data, UserPreference.class);
+    }
 }

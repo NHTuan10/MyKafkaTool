@@ -8,11 +8,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import lombok.Cleanup;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,5 +72,34 @@ public class ModalUtils {
         }
 
         alert.showAndWait();
+    }
+
+    public static Alert buildHelpDialog(String resourceFileName, String title) throws IOException {
+        @Cleanup
+        InputStream is = ModalUtils.class.getClassLoader().getResourceAsStream(resourceFileName);
+        assert is != null;
+        String handlebarsHelp = new String(is.readAllBytes());
+        TextArea textArea = new TextArea(handlebarsHelp);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setWrapText(true);
+        AnchorPane anchorPane = new AnchorPane();
+        AnchorPane.setTopAnchor(textArea, 0.0);
+        AnchorPane.setBottomAnchor(textArea, 0.0);
+        AnchorPane.setLeftAnchor(textArea, 0.0);
+        AnchorPane.setRightAnchor(textArea, 0.0);
+
+//        GridPane gridPane = new GridPane();
+//        gridPane.setMaxWidth(Double.MAX_VALUE);
+//        gridPane.add(textArea, 0, 0);
+//        gridPane.
+        anchorPane.getChildren().add(textArea);
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.getDialogPane().setContent(anchorPane);
+        alert.setResizable(true);
+        alert.initModality(Modality.WINDOW_MODAL);
+        return alert;
     }
 }

@@ -16,6 +16,7 @@ import org.fxmisc.richtext.CodeArea;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.concurrent.Callable;
@@ -56,19 +57,31 @@ public final class ViewUtils {
         return task;
     }
 
-    public static void saveDataToFile(String data, StageHolder parentStageHolder) throws IOException {
+    public static void saveDataToFile(String title, String data, StageHolder parentStageHolder, FileChooser.ExtensionFilter... extensionFilters) throws IOException {
         assert parentStageHolder != null && parentStageHolder.getStage() != null;
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export");
+        fileChooser.setTitle(title);
 //        fileChooser.setInitialFileName();
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Text Files", "*.csv"),
-                new FileChooser.ExtensionFilter("All Files", "*.*"));
+                extensionFilters);
         File selectedFile = fileChooser.showSaveDialog(parentStageHolder.getStage());
         if (selectedFile != null) {
             Files.writeString(selectedFile.toPath(), data);
         }
+    }
 
+    public static Path openFile(String title, String initFileName, StageHolder parentStageHolder, FileChooser.ExtensionFilter... extensionFilters) throws IOException {
+        assert parentStageHolder != null && parentStageHolder.getStage() != null;
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(title);
+        fileChooser.setInitialFileName(initFileName);
+        fileChooser.getExtensionFilters().addAll(
+                extensionFilters);
+        File selectedFile = fileChooser.showOpenDialog(parentStageHolder.getStage());
+        if (selectedFile != null) {
+            return selectedFile.toPath();
+        }
+        return null;
     }
 
     public static void copyTextToClipboard(String text) {

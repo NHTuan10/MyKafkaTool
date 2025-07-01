@@ -20,6 +20,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.skin.TableColumnHeader;
 import javafx.scene.input.*;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import lombok.NonNull;
@@ -205,7 +206,8 @@ public class TableViewConfigurer {
         exportTableItem.setOnAction(event -> {
             String data = getTableDataInCSV(tableView, isHeadersIncludedInRowExport, tableViewConfiguration.extraFieldsToCopyAndExport());
             try {
-                ViewUtils.saveDataToFile(data, stage);
+                ViewUtils.saveDataToFile("Export", data, stage, new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
+                        new FileChooser.ExtensionFilter("All Files", "*.*"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -215,7 +217,8 @@ public class TableViewConfigurer {
         exportSelectedItem.setOnAction(event -> {
             String selectedData = getSelectedRowsData(tableView, isHeadersIncludedInRowExport, tableViewConfiguration.extraFieldsToCopyAndExport());
             try {
-                ViewUtils.saveDataToFile(selectedData, stage);
+                ViewUtils.saveDataToFile("Export Selected Data", selectedData, stage, new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
+                        new FileChooser.ExtensionFilter("All Files", "*.*"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -238,7 +241,7 @@ public class TableViewConfigurer {
 
     private static <S> String getTableDataInCSV(TableView<S> tableView, boolean isHeaderIncluded, TableViewConfiguration.ExtraFieldsToCopyAndExport<S> extraFieldsToCopyAndExport) {
         Set<Integer> rows = IntStream.range(0, tableView.getItems().size()).boxed().collect(Collectors.toSet());
-        return getRowData(tableView, rows, true, extraFieldsToCopyAndExport);
+        return getRowData(tableView, rows, isHeaderIncluded, extraFieldsToCopyAndExport);
     }
 
     // Doesn't have any use case for cell select or copy data from the table by cells.
