@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.github.nhtuan10.modular.api.Modular;
+import io.github.nhtuan10.modular.api.module.ModuleLoadConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.lang3.StringUtils;
@@ -119,7 +120,13 @@ public class ModularLauncher {
         } catch (IOException e) {
             System.err.println("Failed to save config.properties file");
         }
-        Modular.startModuleSyncWithMainClass("my-kafka-tool-main", uris, "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of("*"));
+        Modular.startModuleSync("my-kafka-tool-main",
+                ModuleLoadConfiguration.builder()
+                        .locationUris(uris)
+                        .packagesToScan(List.of("*"))
+                        .mainClass("io.github.nhtuan10.mykafkatool.MyKafkaToolApplication")
+                        .build());
+//        Modular.startModuleSyncWithMainClass("my-kafka-tool-main", uris, "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of("*"));
 //        Modular.startModuleSync("my-kafka-tool-ext", List.of("mvn://io.github.nhtuan10/my-kafka-tool-ext/0.1.1-SNAPSHOT"), List.of("io.github.nhtuan10.mykafkatool.ext"));
 //        Modular.startModuleSync("my-kafka-tool-ext", List.of("file:///Users/tuan/Library/CloudStorage/OneDrive-Personal/CS/Java/MyKafkaTool/my-kafka-tool-launcher/target/my-kafka-tool-launcher-0.1.1-SNAPSHOT/lib/my-kafka-tool-ext-0.1.1-SNAPSHOT.jar"), List.of("io.github.nhtuan10.mykafkatool.ext"));
 //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
