@@ -1,9 +1,8 @@
 package io.github.nhtuan10.mykafkatool.ext.deserializer;
 
-import io.github.nhtuan10.modular.api.annotation.ModularService;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 
-@ModularService
+//@ModularService
 public class ModularSampleStringDeserializer implements PluggableDeserializer {
     @Override
     public String getName() {

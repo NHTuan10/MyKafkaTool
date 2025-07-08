@@ -3,7 +3,6 @@ package io.github.nhtuan10.mykafkatool.ext.auth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.nhtuan10.modular.api.annotation.ModularService;
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
@@ -16,7 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
-@ModularService
+//@ModularService
 public class ModularSampleSaslProvider implements AuthProvider {
     public static final String SASL = "Modular SASL";
     protected final ObjectMapper objectMapper;
