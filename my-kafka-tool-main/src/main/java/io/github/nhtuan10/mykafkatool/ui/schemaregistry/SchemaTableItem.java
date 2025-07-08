@@ -4,6 +4,10 @@ import io.github.nhtuan10.mykafkatool.annotation.FilterableTableItemField;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import io.github.nhtuan10.mykafkatool.annotationprocessor.FXModel;
 import javafx.beans.property.StringProperty;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
 
 @FXModel
 public final class SchemaTableItem implements SchemaTableItemFXModel {
@@ -12,7 +16,7 @@ public final class SchemaTableItem implements SchemaTableItemFXModel {
     @TableViewColumn
     StringProperty schemaId;
     @TableViewColumn
-    StringProperty latestVersion;
+    StringProperty version;
     @TableViewColumn
     StringProperty type;
     @TableViewColumn
@@ -21,4 +25,7 @@ public final class SchemaTableItem implements SchemaTableItemFXModel {
     StringProperty schema;
 
     String clusterName;
+    @Getter
+    @Setter
+    List allVersions;
 }

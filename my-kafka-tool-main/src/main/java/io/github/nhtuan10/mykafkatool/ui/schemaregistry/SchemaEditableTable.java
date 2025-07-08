@@ -9,14 +9,18 @@ import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
 import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
+import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +51,8 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
         return SchemaTableItemFXModel.builder()
                 .subject(schemaMetadataFromRegistry.subjectName())
                 .schemaId(schemaMetadataOptional.map(SchemaMetadata::getId).map(String::valueOf).orElse(null))
-                .latestVersion(schemaMetadataOptional.map(SchemaMetadata::getVersion).map(String::valueOf).orElse(null))
+                .version(schemaMetadataOptional.map(SchemaMetadata::getVersion).map(String::valueOf).orElse(null))
+                .allVersions(schemaMetadataFromRegistry.allVersions().stream().map(String::valueOf).toList())
                 .type(schemaMetadataOptional.map(SchemaMetadata::getSchemaType).orElse(null))
                 .compatibility(schemaMetadataFromRegistry.compatibility())
                 .schema(schemaMetadataOptional.map(SchemaMetadata::getSchema).orElse(null))
@@ -59,6 +64,38 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
     protected void initialize() {
         clusterNameToSchemaTableItemsCache = new ConcurrentHashMap<>();
         super.initialize();
+        TableColumn<SchemaTableItem, String> versionCol =
+                new TableColumn<>("Version");
+        versionCol.setCellValueFactory(cellData -> {
+            StringProperty versionProperty = cellData.getValue().versionProperty();
+            versionProperty.addListener((obs, oldVal, newVal) -> {
+                try {
+                    SchemaMetadata schemaMetadata = schemaRegistryManager.getSubjectMetadata(selectedClusterName.getName(), cellData.getValue().getSubject(), Integer.parseInt(newVal));
+                    String schema = schemaMetadata.getSchema();
+                    cellData.getValue().setSchema(schema);
+//                    cellData.getTableView().refresh();
+                    SchemaRegistryViewController.SelectedSchemaEvent selectedSchemaEvent = new SchemaRegistryViewController.SelectedSchemaEvent(new SimpleStringProperty(schema));
+                    fireEvent(selectedSchemaEvent);
+                } catch (RestClientException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return versionProperty;
+        });
+        versionCol.setCellFactory((tableColumn) -> new ComboBoxTableCell<>() {
+            @Override
+            public void startEdit() {
+                getItems().setAll(getTableRow().getItem().getAllVersions());
+                super.startEdit();
+            }
+        });
+
+//                ComboBoxTableCell.forTableColumn(
+//                        "1", "2", "3"
+//                )
+
+        table.getColumns().remove(TableViewConfigurer.getTableColumnById(table, SchemaTableItem.VERSION).orElse(null));
+        table.getColumns().add(versionCol);
         table.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 String subjectName = newValue.getSubject();
@@ -68,12 +105,17 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                 if (schema == null) {
                     try {
                         SchemaMetadata schemaMetadata = schemaRegistryManager.getSubject(selectedClusterName.getName(), subjectName);
+                        List<Integer> allVersions = schemaRegistryManager.getAllVersions(selectedClusterName.getName(), subjectName);
+                        String compatibility = schemaRegistryManager.getCompatibility(selectedClusterName.getName(), subjectName);
                         schema = schemaMetadata.getSchema();
                         newValue.setSchemaId(String.valueOf(schemaMetadata.getId()));
                         newValue.setSchema(schema);
                         newValue.setType(schemaMetadata.getSchemaType());
-                        newValue.setLatestVersion(String.valueOf(schemaMetadata.getVersion()));
-                        newValue.setCompatibility(schemaRegistryManager.getCompatibility(selectedClusterName.getName(), subjectName));
+                        newValue.setVersion(String.valueOf(schemaMetadata.getVersion()));
+                        newValue.setAllVersions(allVersions.stream().map(String::valueOf).toList());
+                        newValue.setCompatibility(compatibility);
+//                        newValue = mapFromSchemaMetaData(new SchemaMetadataFromRegistry(subjectName, schemaMetadata, compatibility, allVersions), selectedClusterName.getName());
+//                        schema = schemaMetadata.getSchema();
                         table.refresh();
                     } catch (RestClientException | IOException e) {
                         throw new RuntimeException("Error when loading subject {} from Schema Registry", e);

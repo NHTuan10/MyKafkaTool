@@ -57,21 +57,30 @@ public class SchemaRegistryManager {
         return compatibility;
     }
 
+    public List<Integer> getAllVersions(String clusterName, String subject) throws RestClientException, IOException {
+        return schemaRegistryClientMap.get(clusterName).getAllVersions(subject);
+    }
 
+    public SchemaMetadata getSubjectMetadata(String clusterName, String subject, Integer version) throws RestClientException, IOException {
+        return schemaRegistryClientMap.get(clusterName).getSchemaMetadata(subject, version);
+    }
     public List<SchemaMetadataFromRegistry> getAllSubjectMetadata(String clusterName, boolean isOnlySubjectLoaded) throws RestClientException, IOException {
         Collection<String> subjects = getAllSubjects(clusterName);
         List<SchemaMetadataFromRegistry> result = subjects.parallelStream().map((subject) -> {
             SchemaMetadata schemaMetadata = null;
             String compatibility = null;
+            List<Integer> allVersions = List.of();
+
             try {
                 if (!isOnlySubjectLoaded) {
                     schemaMetadata = getSubject(clusterName, subject);
                     compatibility = getCompatibility(clusterName, subject);
+                    allVersions = getAllVersions(clusterName, subject);
                 }
             } catch (Exception e) {
                 log.warn("Error when get compatibility level", e);
             }
-            return new SchemaMetadataFromRegistry(subject, schemaMetadata, compatibility);
+            return new SchemaMetadataFromRegistry(subject, schemaMetadata, compatibility, allVersions);
         }).toList();
         return result;
     }
