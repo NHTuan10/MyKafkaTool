@@ -9,7 +9,7 @@ import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.control.BaseTableCell;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;
-import io.github.nhtuan10.mykafkatool.ui.control.EditingTableCell;
+import io.github.nhtuan10.mykafkatool.ui.control.EditableTableCell;
 import io.github.nhtuan10.mykafkatool.util.Utils;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -165,7 +165,7 @@ public class TableViewConfigurer {
     public static <S> void configureEditableTableCell(TableView<S> tableView, Class<S> tableItemClass, @NonNull StageHolder stageHolder, TableViewConfigurer.TableViewConfiguration<S> tableViewConfiguration) {
         Callback<TableColumn<S, String>,
                 TableCell<S, String>> cellFactory
-                = (TableColumn<S, String> p) -> new EditingTableCell<>(stageHolder, tableViewConfiguration);
+                = (TableColumn<S, String> p) -> new EditableTableCell<>(stageHolder, tableViewConfiguration);
         List<Field> fields = getTableColumnFieldsFromTableItem(tableItemClass);
         IntStream.range(0, fields.size()).forEach(i -> {
             Field field = fields.get(i);
