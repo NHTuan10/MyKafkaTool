@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui.consumergroup;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
+import io.github.nhtuan10.mykafkatool.ui.control.FilterableTreeItem;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -18,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 @Slf4j
-public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
+public class ConsumerGroupListTreeItem<T> extends FilterableTreeItem<T> {
     private final ClusterManager clusterManager;
 
     public ConsumerGroupListTreeItem(T value, ClusterManager clusterManager) {
@@ -50,7 +51,8 @@ public class ConsumerGroupListTreeItem<T> extends TreeItem<T> {
 
             // First getChildren() call, so we actually go off and
             // determine the children of the File contained in this TreeItem.
-            super.getChildren().setAll(buildChildren(this));
+//            super.getChildren().setAll(buildChildren(this));
+            super.getSourceChildren().setAll(buildChildren(this));
         }
         return super.getChildren();
     }

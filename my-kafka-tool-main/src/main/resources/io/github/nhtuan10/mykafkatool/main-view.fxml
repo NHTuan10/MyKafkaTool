@@ -79,8 +79,11 @@
                                 <!--              </rowConstraints>-->
                                 <children>
                                     <!--                  <TreeView fx:id="clusterTree" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2"GridPane.rowIndex="1" />-->
+                                    <TextField fx:id="clusterTreeSearchTextField" prefHeight="30.0" prefWidth="345.0"
+                                               promptText="Search topics or consumer groups"
+                                               GridPane.hgrow="NEVER" GridPane.vgrow="SOMETIMES" GridPane.rowIndex="0"/>
                                     <TreeView fx:id="clusterTree" prefHeight="600.0" prefWidth="345.0"
-                                              GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS"/>
+                                              GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" GridPane.rowIndex="1"/>
                                     <!--                  <ComboBox fx:id="clusterComboBox"   prefWidth="150.0" GridPane.halignment="LEFT" GridPane.valignment="TOP" />-->
                                     <!--                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">-->
                                     <!--                     <children>-->

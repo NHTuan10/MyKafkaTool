@@ -11,6 +11,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;
+import io.github.nhtuan10.mykafkatool.ui.control.FilterableTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 @Slf4j
 public class KafkaClusterTree {
@@ -111,6 +113,14 @@ public class KafkaClusterTree {
         });
     }
 
+    public void setTreeItemFilterPredicate(Predicate<Object> predicate) {
+        @SuppressWarnings("unchecked")
+        List<FilterableTreeItem<Object>> l = clusterTree.getRoot().getChildren().stream().flatMap(clusterTreeItem -> {
+            TreeItem<?> item = (TreeItem<?>) clusterTreeItem;
+            return item.getChildren().stream().filter(treeItem -> treeItem instanceof KafkaTopicListTreeItem<?> || treeItem instanceof ConsumerGroupListTreeItem<?>);
+        }).toList();
+        l.forEach(filterableTreeItem -> filterableTreeItem.predicateProperty().set(predicate));
+    }
     public void addAllConnectionsFromUserPreference(UserPreference userPreference) {
         userPreference.connections().forEach((cluster -> {
             try {

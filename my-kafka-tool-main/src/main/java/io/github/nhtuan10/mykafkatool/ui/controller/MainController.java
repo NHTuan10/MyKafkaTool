@@ -30,6 +30,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
@@ -103,6 +104,9 @@ public class MainController {
     @FXML
     private MenuItem lightModeMenuItem;
 
+    @FXML
+    private TextField clusterTreeSearchTextField;
+
     public void setStage(Stage stage) {
         this.stage = stage;
         this.kafkaClusterTree.setStage(stage);
@@ -144,6 +148,9 @@ public class MainController {
         this.darkModeMenuItem.textProperty().bind(MyKafkaToolApplication.themeProperty.map(theme -> theme == Theme.DARK ? "✅ " + UIStyleConstant.DARK_MODE : UIStyleConstant.DARK_MODE));
         this.lightModeMenuItem.textProperty().bind(MyKafkaToolApplication.themeProperty.map(theme -> theme == Theme.LIGHT ? "✅ " + UIStyleConstant.LIGHT_MODE : UIStyleConstant.LIGHT_MODE));
 
+        clusterTreeSearchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            kafkaClusterTree.setTreeItemFilterPredicate(item -> item != null && item.toString().toLowerCase().contains(newValue.toLowerCase()));
+        });
     }
 
     private void configureClusterTreeSelectedItemChanged() {
