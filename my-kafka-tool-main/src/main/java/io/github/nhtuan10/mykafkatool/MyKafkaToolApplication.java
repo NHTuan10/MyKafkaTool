@@ -1,7 +1,7 @@
 package io.github.nhtuan10.mykafkatool;
 
-import io.github.nhtuan10.modular.ModularContext;
 import io.github.nhtuan10.modular.api.Modular;
+import io.github.nhtuan10.modular.context.ModularContext;
 import io.github.nhtuan10.mykafkatool.configuration.AppComponent;
 import io.github.nhtuan10.mykafkatool.configuration.DaggerAppComponent;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
