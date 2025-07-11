@@ -174,6 +174,8 @@ public class KafkaMessageViewController {
         if (!reproduce) {
             msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
             msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
+        } else {
+            msgModalFieldMap.put("schemaTextArea", schemaTextArea.getText());
         }
         msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
         msgModalFieldMap.put("kafkaTopic", kafkaTopic);
