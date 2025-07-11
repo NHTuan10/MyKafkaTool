@@ -298,8 +298,11 @@ public class AddOrViewMessageModalController extends ModalController {
         DisplayType displayType;
 
         if (editable) { // For Add Message Modal
+            valueContentTypeComboBox.getItems().setAll(FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()));
             if (valueContentType != null && serDesHelper.getPluggableSerialize(valueContentType) != null) {
                 valueContentTypeComboBox.getSelectionModel().select(valueContentType);
+            } else {
+                valueContentTypeComboBox.getSelectionModel().selectFirst();
             }
             displayType = Optional.ofNullable(serDesHelper.getPluggableSerialize(valueContentType))
                     .map(PluggableSerializer::getDisplayType).orElse(DisplayType.TEXT);

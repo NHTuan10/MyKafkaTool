@@ -168,11 +168,13 @@ public class KafkaMessageViewController {
     public void viewOrReproduceMessage(SerDesHelper serDesHelper, KafkaMessageTableItem rowData, boolean reproduce) {
 //        TreeItem selectedTreeItemBeforeAdding = this.selectedTreeItem;
         Map<String, Object> msgModalFieldMap = new HashMap<>();
-        msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
         msgModalFieldMap.put("serDesHelper", serDesHelper);
         msgModalFieldMap.put("keyTextArea", rowData.getKey());
         msgModalFieldMap.put("valueTextArea", rowData.getValue());
-        msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
+        if (!reproduce) {
+            msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
+            msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
+        }
         msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
         msgModalFieldMap.put("kafkaTopic", kafkaTopic);
         msgModalFieldMap.put("kafkaPartition", kafkaPartition);
@@ -435,7 +437,7 @@ public class KafkaMessageViewController {
         Map<String, Object> propertiesMap = new HashMap<>();
         propertiesMap.put("serDesHelper", serDesHelper);
         propertiesMap.put("valueContentType", valueContentType);
-        propertiesMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()));
+//        propertiesMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()));
         propertiesMap.put("schemaTextArea", schemaTextArea.getText());
         propertiesMap.put("kafkaTopic", kafkaTopic);
         propertiesMap.put("kafkaPartition", partition);
