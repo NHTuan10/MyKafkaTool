@@ -57,7 +57,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.nhtuan10</groupId>
-            <artifactId>modular-api</artifactId>
+            <artifactId>modular-impl</artifactId>
             <version>${modular.version}</version>
         </dependency>
         <!-- JavaFX -->
