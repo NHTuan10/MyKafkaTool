@@ -177,7 +177,7 @@ public class KafkaMessageViewController {
         } else {
             msgModalFieldMap.put("schemaTextArea", schemaTextArea.getText());
         }
-        if (withHeaders) {
+        if (!reproduce || withHeaders) {
             msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
         }
         msgModalFieldMap.put("kafkaTopic", kafkaTopic);
