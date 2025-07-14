@@ -165,7 +165,7 @@ public class KafkaMessageViewController {
         this.eventDispatcher = eventDispatcher;
     }
 
-    public void viewOrReproduceMessage(SerDesHelper serDesHelper, KafkaMessageTableItem rowData, boolean reproduce) {
+    public void viewOrReproduceMessage(SerDesHelper serDesHelper, KafkaMessageTableItem rowData, boolean reproduce, boolean withHeaders) {
 //        TreeItem selectedTreeItemBeforeAdding = this.selectedTreeItem;
         Map<String, Object> msgModalFieldMap = new HashMap<>();
         msgModalFieldMap.put("serDesHelper", serDesHelper);
@@ -177,7 +177,9 @@ public class KafkaMessageViewController {
         } else {
             msgModalFieldMap.put("schemaTextArea", schemaTextArea.getText());
         }
-        msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
+        if (withHeaders) {
+            msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
+        }
         msgModalFieldMap.put("kafkaTopic", kafkaTopic);
         msgModalFieldMap.put("kafkaPartition", kafkaPartition);
         try {

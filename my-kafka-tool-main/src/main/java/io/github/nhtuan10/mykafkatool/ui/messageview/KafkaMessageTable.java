@@ -74,20 +74,22 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
                 column.setText("Serialized Value Size (Bytes)"));
     }
 
-    private MenuItem createViewOrReproduceMenuItem(String text, boolean isReproduceMenuItem) {
+    private MenuItem createViewOrReproduceMenuItem(String text, boolean isReproduceMenuItem, boolean withHeaders) {
         MenuItem menuItem = new MenuItem(text);
         menuItem.setOnAction(event -> {
             List<KafkaMessageTableItem> selectedItems = table.getSelectionModel().getSelectedItems();
             selectedItems.forEach(item -> {
-                parentController.viewOrReproduceMessage(serDesHelper, item, isReproduceMenuItem);
+                parentController.viewOrReproduceMessage(serDesHelper, item, isReproduceMenuItem, withHeaders);
             });
         });
         return menuItem;
     }
 
     private List<MenuItem> createContextMenuItems() {
-        return List.of(createViewOrReproduceMenuItem("View Message", false),
-                createViewOrReproduceMenuItem("Re-produce Message", true));
+        return List.of(createViewOrReproduceMenuItem("View Message", false, false),
+                createViewOrReproduceMenuItem("Re-produce Message", true, false),
+                createViewOrReproduceMenuItem("Re-produce Message with Headers", true, true)
+        );
     }
 
     //    @Override
@@ -134,7 +136,7 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     KafkaMessageTableItem rowData = row.getItem();
                     log.debug("Double click on: {}", rowData.getKey());
-                    parentController.viewOrReproduceMessage(serDesHelper, rowData, false);
+                    parentController.viewOrReproduceMessage(serDesHelper, rowData, false, false);
                 }
             });
             return row;
