@@ -44,6 +44,8 @@ public class ModularLauncher {
     public static final String APP_NAME = "MyKafkaTool";
     public static final String VERSION_PLACEHOLDER = "${version}";
     public static final String ARTIFACT_NAME_PLACEHOLDER = "${artifact-name}";
+    public static final String MAIN_ARTIFACT_NAME = "main";
+    public static final String EXT_ARTIFACT_NAME = "ext";
     private static AtomicBoolean shouldUpgrade = new AtomicBoolean(false);
     private static final CountDownLatch waitForUpgrade = new CountDownLatch(1);
     private static final HttpClient httpClient = HttpClient.newHttpClient();
@@ -64,11 +66,11 @@ public class ModularLauncher {
         }
         String newVersion = installedVer;
         try {
-            newVersion = getLatestVersionFromMaven("main", properties);
+            newVersion = getLatestVersionFromMaven(MAIN_ARTIFACT_NAME, properties);
         } catch (IOException | InterruptedException e) {
             log.error("Cannot get latest version from maven", e);
         }
-        List<String> uris = new ArrayList<>();
+        Map<String, String> uris = new HashMap<>();
         String versionToUpgrade = installedVer;
         boolean isUpgraded;
         if (newVersion.compareTo(installedVer) > 0) {
@@ -78,9 +80,9 @@ public class ModularLauncher {
             if (agreeToUpgrade) {
                 versionToUpgrade = newVersion;
                 try {
-                    for (String artifactName : List.of("main", "ext")) {
+                    for (String artifactName : List.of(MAIN_ARTIFACT_NAME, EXT_ARTIFACT_NAME)) {
                         String uri = getJarLocationUri(artifactName, versionToUpgrade, properties);
-                        uris.add(uri);
+                        uris.put(artifactName, uri);
                     }
                     isUpgraded = true;
                 } catch (URISyntaxException | IOException | InterruptedException e) {
@@ -98,7 +100,7 @@ public class ModularLauncher {
         }
         if (!isUpgraded) {
             uris.clear();
-            for (String artifactName : List.of("main", "ext")) {
+            for (String artifactName : List.of(MAIN_ARTIFACT_NAME, EXT_ARTIFACT_NAME)) {
                 String uri;
                 Optional<String> uriFromPropertyFileOptional = Optional.ofNullable(properties.getProperty(ARTIFACT_URI_PROP_KEY));
 
@@ -110,7 +112,7 @@ public class ModularLauncher {
                                     .replace(VERSION_PLACEHOLDER, installedVer).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName))
                             .toUri().toString();
                 }
-                uris.add(uri);
+                uris.put(artifactName, uri);
             }
         }
 
@@ -120,10 +122,17 @@ public class ModularLauncher {
         } catch (IOException e) {
             System.err.println("Failed to save config.properties file");
         }
+        Modular.startModuleSync("my-kafka-tool-ext",
+                ModuleLoadConfiguration.builder()
+                        .locationUris(List.of(uris.get(EXT_ARTIFACT_NAME)))
+                        .packagesToScan(List.of("*"))
+                        .modularClassLoaderName("main-class-loader")
+                        .build());
         Modular.startModuleSync("my-kafka-tool-main",
                 ModuleLoadConfiguration.builder()
-                        .locationUris(uris)
+                        .locationUris(List.of(uris.get(MAIN_ARTIFACT_NAME)))
                         .packagesToScan(List.of("*"))
+                        .modularClassLoaderName("main-class-loader")
                         .mainClass("io.github.nhtuan10.mykafkatool.MyKafkaToolApplication")
                         .build());
 //        Modular.startModuleSyncWithMainClass("my-kafka-tool-main", uris, "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of("*"));

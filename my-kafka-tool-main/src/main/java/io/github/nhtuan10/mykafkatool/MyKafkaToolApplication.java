@@ -18,6 +18,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.IOException;
 import java.net.URL;
@@ -53,7 +54,7 @@ public class MyKafkaToolApplication extends javafx.application.Application {
             exit();
         });
         if (Modular.isManaged(this)) {
-            ModularContext.notifyModuleReady();
+            ModularContext.notifyModuleReady(getParameters().getUnnamed().get(0));
         }
     }
 
@@ -104,7 +105,12 @@ public class MyKafkaToolApplication extends javafx.application.Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        if (Modular.isManaged(MyKafkaToolLauncher.class)) {
+            String moduleName = ModularContext.getCurrentModuleName();
+            launch(ArrayUtils.insert(0, args, moduleName));
+        } else {
+            launch(args);
+        }
     }
 
     public static String getLogsPath() {
