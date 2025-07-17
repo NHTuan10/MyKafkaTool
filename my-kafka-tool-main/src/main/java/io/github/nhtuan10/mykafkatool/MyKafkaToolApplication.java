@@ -23,6 +23,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.List;
 
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
 
@@ -54,7 +55,8 @@ public class MyKafkaToolApplication extends javafx.application.Application {
             exit();
         });
         if (Modular.isManaged(this)) {
-            ModularContext.notifyModuleReady(getParameters().getUnnamed().get(0));
+            List<String> params = getParameters().getUnnamed();
+            ModularContext.notifyModuleReady(params.get(params.size() - 1));
         }
     }
 
@@ -107,7 +109,7 @@ public class MyKafkaToolApplication extends javafx.application.Application {
     public static void main(String[] args) {
         if (Modular.isManaged(MyKafkaToolLauncher.class)) {
             String moduleName = ModularContext.getCurrentModuleName();
-            launch(ArrayUtils.insert(0, args, moduleName));
+            launch(ArrayUtils.add(args, moduleName));
         } else {
             launch(args);
         }
