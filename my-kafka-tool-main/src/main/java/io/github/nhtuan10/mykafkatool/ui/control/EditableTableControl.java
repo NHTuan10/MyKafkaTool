@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -206,7 +207,7 @@ public class EditableTableControl<T> extends AnchorPane {
 
     @FXML
     protected void removeItems() {
-        List<Integer> indicesToRemove = table.getSelectionModel().getSelectedIndices().reversed();
+        List<Integer> indicesToRemove = table.getSelectionModel().getSelectedIndices().stream().sorted(Comparator.reverseOrder()).toList();
         indicesToRemove.forEach((i) -> {
             T item = tableItems.get(i);
             boolean success = doRemoveItem(i, item);

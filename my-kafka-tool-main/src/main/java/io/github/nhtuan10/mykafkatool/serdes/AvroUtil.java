@@ -57,23 +57,23 @@ public class AvroUtil {
     public static String toString(Object deserializedObject) throws IOException {
         String result;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        switch (deserializedObject) {
-            case null -> result = null;
-            case String str -> result = str;
-            case byte[] bytes -> result = new String(bytes);
-            case GenericRecord avroRecord -> {
-                Schema schema = avroRecord.getSchema();
-                JsonEncoder jsonEncoder = EncoderFactory.get().jsonEncoder(schema, outputStream);
-                GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
-                writer.write(avroRecord, jsonEncoder);
-                jsonEncoder.flush();
-                result = outputStream.toString();
-            }
-            default -> {
+        if (deserializedObject == null) {
+            result = null;
+        } else if (deserializedObject instanceof String str) {
+            result = str;
+        } else if (deserializedObject instanceof byte[] bytes) {
+            result = new String(bytes);
+        } else if (deserializedObject instanceof GenericRecord avroRecord) {
+            Schema schema = avroRecord.getSchema();
+            JsonEncoder jsonEncoder = EncoderFactory.get().jsonEncoder(schema, outputStream);
+            GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
+            writer.write(avroRecord, jsonEncoder);
+            jsonEncoder.flush();
+            result = outputStream.toString();
+        } else {
 //                objectMapper.writeValue(outputStream, deserializedObject);
 //                result = outputStream.toString();
-                result = deserializedObject.toString(); // TODO:[Low Priority] find a better approach than toString
-            }
+            result = deserializedObject.toString(); // TODO:[Low Priority] find a better approach than toString
         }
         outputStream.close();
         return result;

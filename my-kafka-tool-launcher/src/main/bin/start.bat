@@ -1,1 +1,1 @@
-java -jar -XX:+UseZGC -XX:+ZGenerational lib/my-kafka-tool-launcher-0.1.1.3-SNAPSHOT.jar
+java -jar -XX:+UseZGC lib/my-kafka-tool-launcher-0.1.1.4-SNAPSHOT.jar

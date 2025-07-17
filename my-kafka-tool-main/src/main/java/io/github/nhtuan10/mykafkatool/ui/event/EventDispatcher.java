@@ -43,13 +43,16 @@ public class EventDispatcher {
     }
 
     public void publishEvent(UIEvent uiEvent) {
-
-        switch (uiEvent) {
-            case TopicUIEvent event -> this.topicEventPublisher.offer(event, this.getErrorHandler());
-            case PartitionUIEvent event -> this.partitionEventPublisher.offer(event, this.getErrorHandler());
-            case SchemaRegistryUIEvent event -> this.schemaRegistryEventPublisher.offer(event, this.getErrorHandler());
-            case ConsumerGroupUIEvent event -> this.consumerGroupUIEventPublisher.offer(event, this.getErrorHandler());
-            default -> throw new IllegalStateException("Unexpected value: " + uiEvent);
+        if (uiEvent instanceof TopicUIEvent event) {
+            this.topicEventPublisher.offer(event, this.getErrorHandler());
+        } else if (uiEvent instanceof PartitionUIEvent event) {
+            this.partitionEventPublisher.offer(event, this.getErrorHandler());
+        } else if (uiEvent instanceof SchemaRegistryUIEvent event) {
+            this.schemaRegistryEventPublisher.offer(event, this.getErrorHandler());
+        } else if (uiEvent instanceof ConsumerGroupUIEvent event) {
+            this.consumerGroupUIEventPublisher.offer(event, this.getErrorHandler());
+        } else {
+            throw new IllegalStateException("Unexpected value: " + uiEvent);
         }
     }
 }

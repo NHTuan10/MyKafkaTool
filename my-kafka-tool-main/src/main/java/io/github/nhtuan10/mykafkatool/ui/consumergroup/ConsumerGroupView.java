@@ -118,7 +118,7 @@ public class ConsumerGroupView extends BorderPane {
 
         consumerGroupIds.addListener((ListChangeListener<? super String>) (change) -> {
             if (change != null && !consumerGroupIds.isEmpty()) {
-                this.infoLabel.setText("Consumer Group: " + consumerGroupIds.getFirst());
+                this.infoLabel.setText("Consumer Group: " + consumerGroupIds.get(0));
             }
         });
 

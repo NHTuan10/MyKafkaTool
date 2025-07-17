@@ -232,13 +232,13 @@ public class ClusterManager {
                 .flatMap(e ->
                         e.getValue().stream().collect(Collectors.groupingBy(ConsumerTableItem::getTopic, Collectors.collectingAndThen(Collectors.toList(), list -> {
                             if (!list.isEmpty()) {
-                                String topic = list.getFirst().getTopic();
+                                String topic = list.get(0).getTopic();
                                 String lag = "";
                                 if (list.stream().map(ConsumerTableItem::getLag).allMatch(StringUtils::isNotBlank)) {
                                     lag = String.valueOf(list.stream().map(ConsumerTableItem::getLag).mapToLong(Long::parseLong).sum());
                                 }
                                 int numberOfMember = list.stream().map(ConsumerTableItem::getConsumerID).filter(Objects::nonNull).collect(Collectors.toSet()).size();
-                                String state = list.getFirst().getState().toString();
+                                String state = list.get(0).getState().toString();
 
                                 return ConsumerGroupTableItemFXModel.builder()
                                         .groupID(e.getKey())

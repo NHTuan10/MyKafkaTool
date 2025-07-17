@@ -59,7 +59,7 @@ public class TableViewConfigurer {
         tableView.getSelectionModel().setSelectionMode(tableViewConfiguration.selectionMode());
         tableView.getSelectionModel().setCellSelectionEnabled(tableViewConfiguration.isCellSelectionEnabled());
         TableColumn<S, S> numberCol = buildIndexTableColumn();
-        tableView.getColumns().addFirst(numberCol);
+        tableView.getColumns().add(0, numberCol);
 
         List<String> fieldNames = getTableColumnNamesFromTableItem(clazz);
         IntStream.range(0, fieldNames.size()).forEach(i -> {
