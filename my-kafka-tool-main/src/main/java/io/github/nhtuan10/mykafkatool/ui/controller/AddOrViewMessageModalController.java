@@ -141,7 +141,17 @@ public class AddOrViewMessageModalController extends ModalController {
         valueDisplayTypeComboBox.setItems(FXCollections.observableArrayList(DisplayType.values()));
         valueTextArea.textProperty().addListener((obs, oldText, newText) -> {
             refreshDisplayedValue(newText, valueTextArea, valueDisplayTypeComboBox.getValue(), false);
+            if (isHandlebarsEnabled.isSelected() && !previewHandlebars.isSelected()) {
+                this.valueTemplate.set(this.valueTextArea.getText());
+            }
         });
+
+        keyTextArea.textProperty().addListener((obs, oldText, newText) -> {
+            if (isHandlebarsEnabled.isSelected() && !previewHandlebars.isSelected()) {
+                this.keyTemplate.set(this.keyTextArea.getText());
+            }
+        });
+
         schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
             refreshDisplayedValue(newText, schemaTextArea, DisplayType.JSON, false);
         });
@@ -151,6 +161,12 @@ public class AddOrViewMessageModalController extends ModalController {
         handlebarsPreviewContainer.visibleProperty().bind(isHandlebarsEnabled.selectedProperty());
         keyTemplate = new SimpleStringProperty(keyTextArea.getText());
         valueTemplate = new SimpleStringProperty(valueTextArea.getText());
+        isHandlebarsEnabled.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && newVal && !previewHandlebars.isSelected()) {
+                keyTemplate.set(keyTextArea.getText());
+                valueTemplate.set(valueTextArea.getText());
+            }
+        });
         previewHandlebars.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && !newVal.equals(oldVal)) {
                 if (newVal) {
