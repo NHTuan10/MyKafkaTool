@@ -137,6 +137,9 @@ public class MainController {
 
         consumerGroupView.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
         this.eventDispatcher.addConsumerGroupEventSubscriber(consumerGroupView.getConsumerGroupEventSubscriber());
+
+        this.eventDispatcher.addMessageEventSubscriber(kafkaMessageView.getMessageEventSubscriber());
+
         blockAppProgressInd.visibleProperty().bindBidirectional(isBlockingAppUINeeded);
         this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaRegistryManager, eventDispatcher, userPreferenceManager);
 

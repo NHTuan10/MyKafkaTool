@@ -43,7 +43,7 @@ public abstract class AppModule {
     @Provides
     static EventDispatcher eventDispatcher() {
         return new EventDispatcher(new SubmissionPublisher<>()
-                , new SubmissionPublisher<>(), new SubmissionPublisher<>(), new SubmissionPublisher<>());
+                , new SubmissionPublisher<>(), new SubmissionPublisher<>(), new SubmissionPublisher<>(), new SubmissionPublisher<>());
     }
 
     @AppScoped

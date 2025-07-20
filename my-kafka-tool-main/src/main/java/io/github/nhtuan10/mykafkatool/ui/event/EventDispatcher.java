@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.event;
 
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupView;
+import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageViewController;
 import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryViewController;
 import lombok.RequiredArgsConstructor;
 
@@ -14,6 +15,7 @@ public class EventDispatcher {
     final SubmissionPublisher<PartitionUIEvent> partitionEventPublisher;
     final SubmissionPublisher<SchemaRegistryUIEvent> schemaRegistryEventPublisher;
     final SubmissionPublisher<ConsumerGroupUIEvent> consumerGroupUIEventPublisher;
+    final SubmissionPublisher<MessageUIEvent> messageUIEventPublisher;
 
     public void addTopicEventSubscriber(TopicEventSubscriber subscriber) {
         topicEventPublisher.subscribe(subscriber);
@@ -35,6 +37,11 @@ public class EventDispatcher {
         subscriber.setEventDispatcher(this);
     }
 
+    public void addMessageEventSubscriber(KafkaMessageViewController.MessageEventSubscriber subscriber) {
+        messageUIEventPublisher.subscribe(subscriber);
+        subscriber.setEventDispatcher(this);
+    }
+
     public <T> BiPredicate<Flow.Subscriber<? super T>, ? super T> getErrorHandler() {
         return (subscriber, e) -> {
             subscriber.onError(new RuntimeException(e.getClass().getSimpleName() + " event is not accepted by subscriber"));
@@ -51,6 +58,8 @@ public class EventDispatcher {
             this.schemaRegistryEventPublisher.offer(event, this.getErrorHandler());
         } else if (uiEvent instanceof ConsumerGroupUIEvent event) {
             this.consumerGroupUIEventPublisher.offer(event, this.getErrorHandler());
+        } else if (uiEvent instanceof MessageUIEvent event) {
+            this.messageUIEventPublisher.offer(event, this.getErrorHandler());
         } else {
             throw new IllegalStateException("Unexpected value: " + uiEvent);
         }

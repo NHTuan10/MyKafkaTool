@@ -8,6 +8,8 @@ import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
 import io.github.nhtuan10.mykafkatool.ui.control.EditableTableControl;
+import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
+import io.github.nhtuan10.mykafkatool.ui.event.MessageUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
@@ -31,7 +33,8 @@ import java.util.stream.Collectors;
 public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableItem> {
     private SerDesHelper serDesHelper;
     private KafkaConsumerService.MessagePollingPosition messagePollingPosition;
-    private ObjectMapper objectMapper = MyKafkaToolApplication.DAGGER_APP_COMPONENT.sharedObjectMapper();
+    private final ObjectMapper objectMapper = MyKafkaToolApplication.DAGGER_APP_COMPONENT.sharedObjectMapper();
+    private final EventDispatcher eventDispatcher = MyKafkaToolApplication.DAGGER_APP_COMPONENT.eventDispatcher();
     @Setter
     private KafkaMessageViewController parentController;
 
@@ -46,6 +49,11 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
         messagePollingPosition = KafkaConsumerService.MessagePollingPosition.LAST;
         numberOfRowsLabel.textProperty().bind(new SimpleStringProperty("Showing: ").concat(noRowsIntProp.asString().concat(" Messages")));
         setDefaultColumnWidths();
+        table.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                this.eventDispatcher.publishEvent(MessageUIEvent.newMessageSelectionEvent(newValue));
+            }
+        });
     }
 
     @Override

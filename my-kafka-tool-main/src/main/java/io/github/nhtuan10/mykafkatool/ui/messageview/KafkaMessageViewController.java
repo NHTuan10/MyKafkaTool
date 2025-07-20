@@ -31,6 +31,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -90,6 +91,9 @@ public class KafkaMessageViewController {
 
     private Map<TreeItem, KafkaMessageView.MessageTableState> treeMsgTableItemCache = new ConcurrentHashMap<>();
 
+    @Getter
+    private MessageEventSubscriber messageEventSubscriber;
+
     @FXML
     private TextField maxMessagesTextField;
 
@@ -130,6 +134,8 @@ public class KafkaMessageViewController {
     @FXML
     private KafkaMessageTable kafkaMessageTable;
 
+    @FXML
+    private CodeArea valueTextArea;
     //    @Inject
 
     @Inject
@@ -229,6 +235,7 @@ public class KafkaMessageViewController {
                 });
             }
         });
+        this.messageEventSubscriber = new MessageEventSubscriber(valueTextArea, objectMapper, jsonHighlighter);
     }
 
     private void initPollingOptionsUI() {
@@ -506,4 +513,31 @@ public class KafkaMessageViewController {
         });
     }
 
+    @Slf4j
+    @RequiredArgsConstructor
+    public static class MessageEventSubscriber extends EventSubscriber<MessageUIEvent> {
+        private final CodeArea valueTextArea;
+        private final ObjectMapper objectMapper;
+        private final JsonHighlighter jsonHighlighter;
+
+        @Override
+        public void handleOnNext(MessageUIEvent item) {
+            if (MessageUIEvent.isMessageSelectionEvent(item)) {
+                Platform.runLater(() -> {
+                    ViewUtils.setValueAndHighlightJsonInCodeArea(item.message().getValue(), valueTextArea, true, objectMapper, jsonHighlighter);
+                });
+            }
+        }
+
+
+        @Override
+        public void onError(Throwable throwable) {
+            log.error("Error when select message", throwable);
+        }
+
+        @Override
+        public void onComplete() {
+            log.info("Message selection is complete");
+        }
+    }
 }

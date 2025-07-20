@@ -10,11 +10,11 @@
 <?import org.fxmisc.richtext.CodeArea?>
 <fx:root dividerPositions="0.1662971175166297, 0.5" orientation="VERTICAL" prefHeight="627.5" prefWidth="995.0"
          type="SplitPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-         AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+         AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
     <items>
-        <AnchorPane maxHeight="83.0" minHeight="40.0" minWidth="0.0" prefHeight="83.0" prefWidth="993.0">
+        <AnchorPane maxHeight="200.0" minHeight="40.0" minWidth="0.0" prefHeight="180.0">
             <children>
-                <FlowPane minHeight="40.0" prefHeight="83.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"
+                <FlowPane minHeight="40.0" prefHeight="101.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"
                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
                         <ProgressIndicator fx:id="isPollingMsgProgressIndicator" prefHeight="31.0" prefWidth="26.0"
@@ -79,7 +79,7 @@
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </Button>
-                        <Label text="No. of Msgs/Partition To Poll">
+                        <Label text="No. of Msgs/Partition ">
                             <FlowPane.margin>
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
@@ -95,6 +95,21 @@
                                 <Insets left="10.0" top="5.0"/>
                             </FlowPane.margin>
                         </NonNegativeIntTextField>
+                        <Label prefHeight="17.0" prefWidth="73.0" text="Key Type">
+                            <padding>
+                                <Insets left="5.0"/>
+                            </padding>
+                        </Label>
+                        <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="120.0"/>
+                        <Label prefHeight="17.0" prefWidth="72.0" text="Value Type"/>
+                        <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="120.0"/>
+                        <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema"/>
+                        <VirtualizedScrollPane>
+                            <content>
+                                <CodeArea fx:id="schemaTextArea" disable="true" prefWidth="220.0" wrapText="true">
+                                </CodeArea>
+                            </content>
+                        </VirtualizedScrollPane>
                         <!--                                                      <Label text="Filter">-->
                         <!--                                                         <FlowPane.margin>-->
                         <!--                                                            <Insets left="10.0" top="5.0" />-->
@@ -118,49 +133,20 @@
                         <!--                                                             <Insets left="10.0" top="5.0" /> -->
                         <!--                                                          </FlowPane.margin> -->
                         <!--                                                                       </Label> -->
+
                     </children>
                 </FlowPane>
             </children>
         </AnchorPane>
-        <AnchorPane maxHeight="200.0" minHeight="50.0" minWidth="0.0" prefHeight="100.0" prefWidth="993.0">
-            <children>
-                <HBox prefHeight="100.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <children>
-                        <Label prefHeight="17.0" prefWidth="73.0" text="Key Type">
-                            <HBox.margin>
-                                <Insets right="10.0"/>
-                            </HBox.margin>
-                            <padding>
-                                <Insets left="5.0"/>
-                            </padding>
-                        </Label>
-                        <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="130.0"/>
-                        <Label prefHeight="17.0" prefWidth="72.0" text="Value Type">
-                            <HBox.margin>
-                                <Insets left="10.0" right="10.0"/>
-                            </HBox.margin>
-                        </Label>
-                        <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="130.0"/>
-                        <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema">
-                            <HBox.margin>
-                                <Insets left="10.0" right="10.0"/>
-                            </HBox.margin>
-                        </Label>
-                        <VirtualizedScrollPane>
-                            <HBox.margin>
-                                <Insets right="5.0"/>
-                            </HBox.margin>
-                            <content>
-                                <CodeArea fx:id="schemaTextArea" disable="true" prefHeight="93.0" prefWidth="388.0"
-                                          wrapText="true">
-                                </CodeArea>
-                            </content>
-                        </VirtualizedScrollPane>
-                    </children>
-                </HBox>
-            </children>
-        </AnchorPane>
+        <!--        <AnchorPane maxHeight="200.0" minHeight="50.0" minWidth="0.0" prefHeight="100.0" prefWidth="993.0">-->
+        <!--            <children>-->
+        <!--                <HBox prefHeight="100.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
+        <!--                    <children>-->
+
+        <!--                    </children>-->
+        <!--                </HBox>-->
+        <!--            </children>-->
+        <!--        </AnchorPane>-->
         <AnchorPane maxHeight="1.7976931348623157E308" minHeight="50.0" minWidth="0.0" prefHeight="461.0"
                     prefWidth="993.0">
             <children>
@@ -180,6 +166,15 @@
                     </children>
                 </StackPane>
             </children>
+        </AnchorPane>
+        <AnchorPane maxHeight="200.0" prefHeight="200.0" prefWidth="993.0">
+            <VirtualizedScrollPane prefHeight="200.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"
+                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <content>
+                    <CodeArea fx:id="valueTextArea" editable="false" wrapText="true">
+                    </CodeArea>
+                </content>
+            </VirtualizedScrollPane>
         </AnchorPane>
     </items>
 
