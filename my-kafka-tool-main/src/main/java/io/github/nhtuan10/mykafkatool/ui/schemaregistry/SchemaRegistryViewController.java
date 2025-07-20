@@ -79,10 +79,10 @@ public class SchemaRegistryViewController extends SplitPane {
     public void initialize() {
         // TODO: Multiple version for an schema, make the schema table editable
         schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtils.highlightJsonInCodeArea(newText, schemaRegistryTextArea, true, objectMapper, jsonHighlighter);
+            ViewUtils.setValueAndHighlightJsonInCodeArea(newText, schemaRegistryTextArea, true, objectMapper, jsonHighlighter);
         });
         schemaEditableTable.addEventHandler(SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
-                (event) -> ViewUtils.highlightJsonInCodeArea(event.getData().getValue(), schemaRegistryTextArea, true, objectMapper, jsonHighlighter));
+                (event) -> ViewUtils.setValueAndHighlightJsonInCodeArea(event.getData().getValue(), schemaRegistryTextArea, true, objectMapper, jsonHighlighter));
     }
 
     public void loadAllSchema(KafkaCluster cluster) throws ExecutionException, InterruptedException {
