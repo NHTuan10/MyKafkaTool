@@ -254,7 +254,7 @@ public class KafkaMessageViewController {
         });
         schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
         schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtils.highlightJsonInCodeArea(newText, schemaTextArea, false, objectMapper, jsonHighlighter);
+            ViewUtils.setValueAndHighlightJsonInCodeArea(newText, schemaTextArea, false, objectMapper, jsonHighlighter);
         });
         isLiveUpdateCheckBox.setOnAction(event -> {
             if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {

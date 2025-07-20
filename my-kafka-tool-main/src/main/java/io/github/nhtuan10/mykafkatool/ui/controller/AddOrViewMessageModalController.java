@@ -360,7 +360,7 @@ public class AddOrViewMessageModalController extends ModalController {
         if (StringUtils.isNotBlank(inValue)) {
 
             if (displayType == DisplayType.JSON) {
-                ViewUtils.highlightJsonInCodeArea(inValue, codeArea, prettyPrint, objectMapper, jsonHighlighter);
+                ViewUtils.setValueAndHighlightJsonInCodeArea(inValue, codeArea, prettyPrint, objectMapper, jsonHighlighter);
             } else if (displayType == DisplayType.TEXT) {
 //                if (prettyPrint) {
                 codeArea.replaceText(inValue);

@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 @Slf4j
 public final class ViewUtils {
 
-    public static void highlightJsonInCodeArea(String inValue, CodeArea codeArea, boolean prettyPrint, ObjectMapper objectMapper, JsonHighlighter jsonHighlighter) {
+    public static void setValueAndHighlightJsonInCodeArea(String inValue, CodeArea codeArea, boolean prettyPrint, ObjectMapper objectMapper, JsonHighlighter jsonHighlighter) {
         if (StringUtils.isNotBlank(inValue)) {
             String value = inValue;
             try {
