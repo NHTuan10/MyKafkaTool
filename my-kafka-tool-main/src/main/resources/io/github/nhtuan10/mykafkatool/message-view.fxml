@@ -12,130 +12,149 @@
          type="SplitPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
          AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
     <items>
-        <AnchorPane maxHeight="200.0" minHeight="40.0" minWidth="0.0" prefHeight="180.0">
+        <AnchorPane maxHeight="200.0" minHeight="40.0" minWidth="0.0" prefHeight="139.0" prefWidth="993.0">
             <children>
-                <FlowPane minHeight="40.0" prefHeight="101.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"
-                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <children>
-                        <ProgressIndicator fx:id="isPollingMsgProgressIndicator" prefHeight="31.0" prefWidth="26.0"
-                                           visible="false">
-                            <FlowPane.margin>
-                                <Insets left="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </ProgressIndicator>
-                        <Button fx:id="pollMessagesBtn" mnemonicParsing="false" onAction="#pollMessages"
-                                text="Poll Msgs">
-                            <FlowPane.margin>
-                                <Insets left="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </Button>
-                        <CheckBox fx:id="isLiveUpdateCheckBox" mnemonicParsing="false" text="Live Update">
-                            <FlowPane.margin>
-                                <Insets left="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </CheckBox>
-                        <Button mnemonicParsing="false" onAction="#addMessage" text="Add Msg">
-                            <FlowPane.margin>
-                                <Insets left="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </Button>
-                        <!--                                                                        <Label text="Poll Time">-->
-                        <!--                                                                            <FlowPane.margin>-->
-                        <!--                                                                                <Insets left="10.0" top="5.0"/>-->
-                        <!--                                                                            </FlowPane.margin>-->
-                        <!--                                                                        </Label>-->
-                        <!--                                                                        <TextField fx:id="pollTimeTextField"-->
-                        <!--                                                                                   prefHeight="26.0" prefWidth="60.0"-->
-                        <!--                                                                                   text="5000">-->
-                        <!--                                                                            <FlowPane.margin>-->
-                        <!--                                                                                <Insets top="5.0"/>-->
-                        <!--                                                                            </FlowPane.margin>-->
-                        <!--                                                                        </TextField>-->
-                        <Label text="After">
-                            <FlowPane.margin>
-                                <Insets left="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </Label>
-                        <DateTimePicker fx:id="startTimestampPicker" prefWidth="200.0">
-                            <FlowPane.margin>
-                                <Insets left="10.0" right="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </DateTimePicker>
-                        <Label text="Before">
-                            <FlowPane.margin>
-                                <Insets left="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </Label>
-                        <DateTimePicker fx:id="endTimestampPicker" prefWidth="200.0">
-                            <FlowPane.margin>
-                                <Insets left="10.0" right="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </DateTimePicker>
-                        <!--                                                                        <Label fx:id="endTimestampLabel" text="Before" visible="false" />-->
-                        <!--                                                                        <DateTimePicker fx:id="endTimestampPicker" disable="true" prefWidth="180.0" visible="false" />-->
-                        <Button fx:id="countMessagesBtn" mnemonicParsing="false" onAction="#countMessages"
-                                text="Count: 0">
-                            <FlowPane.margin>
-                                <Insets left="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </Button>
-                        <Label text="No. of Msgs/Partition ">
-                            <FlowPane.margin>
-                                <Insets left="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </Label>
-                        <ComboBox fx:id="msgPollingPosition" promptText="LAST">
-                            <FlowPane.margin>
-                                <Insets left="5.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </ComboBox>
-                        <NonNegativeIntTextField fx:id="maxMessagesTextField" prefHeight="26.0" prefWidth="72.0"
-                                                 text="1000">
-                            <FlowPane.margin>
-                                <Insets left="10.0" top="5.0"/>
-                            </FlowPane.margin>
-                        </NonNegativeIntTextField>
-                        <Label prefHeight="17.0" prefWidth="73.0" text="Key Type">
-                            <padding>
-                                <Insets left="5.0"/>
-                            </padding>
-                        </Label>
-                        <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="120.0"/>
-                        <Label prefHeight="17.0" prefWidth="72.0" text="Value Type"/>
-                        <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="120.0"/>
-                        <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema"/>
-                        <VirtualizedScrollPane>
-                            <content>
-                                <CodeArea fx:id="schemaTextArea" disable="true" prefWidth="220.0" wrapText="true">
-                                </CodeArea>
-                            </content>
-                        </VirtualizedScrollPane>
-                        <!--                                                      <Label text="Filter">-->
-                        <!--                                                         <FlowPane.margin>-->
-                        <!--                                                            <Insets left="10.0" top="5.0" />-->
-                        <!--                                                         </FlowPane.margin>-->
-                        <!--                                                      </Label>-->
-                        <!--                                                       <TextField fx:id="filterMsgTextField" promptText="Enter a filter"> -->
-                        <!--                                                          <FlowPane.margin> -->
-                        <!--                                                             <Insets left="10.0" top="5.0" /> -->
-                        <!--                                                          </FlowPane.margin> -->
-                        <!--                                                       </TextField> -->
-                        <!--                                                       <ToggleButton fx:id="regexFilterToggleBtn" mnemonicParsing="false" text=".*"> -->
-                        <!--                                                          <tooltip> -->
-                        <!--                                                             <Tooltip text="Regex" /> -->
-                        <!--                                                          </tooltip> -->
-                        <!--                                                          <FlowPane.margin> -->
-                        <!--                                                             <Insets left="10.0" top="5.0" /> -->
-                        <!--                                                          </FlowPane.margin> -->
-                        <!--                                                       </ToggleButton> -->
-                        <!--                                                                       <Label fx:id="noMessagesLabel" text="0 Messages"> -->
-                        <!--                                                          <FlowPane.margin> -->
-                        <!--                                                             <Insets left="10.0" top="5.0" /> -->
-                        <!--                                                          </FlowPane.margin> -->
-                        <!--                                                                       </Label> -->
+                <!--                <FlowPane minHeight="40.0" prefHeight="101.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"-->
+                <!--                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
+                <!--                    <children>-->
 
+
+                <!--                                                      <Label text="Filter">-->
+                <!--                                                         <HBox.margin>-->
+                <!--                                                            <Insets left="10.0" top="5.0" />-->
+                <!--                                                         </HBox.margin>-->
+                <!--                                                      </Label>-->
+                <!--                                                       <TextField fx:id="filterMsgTextField" promptText="Enter a filter"> -->
+                <!--                                                          <HBox.margin> -->
+                <!--                                                             <Insets left="10.0" top="5.0" /> -->
+                <!--                                                          </HBox.margin> -->
+                <!--                                                       </TextField> -->
+                <!--                                                       <ToggleButton fx:id="regexFilterToggleBtn" mnemonicParsing="false" text=".*"> -->
+                <!--                                                          <tooltip> -->
+                <!--                                                             <Tooltip text="Regex" /> -->
+                <!--                                                          </tooltip> -->
+                <!--                                                          <HBox.margin> -->
+                <!--                                                             <Insets left="10.0" top="5.0" /> -->
+                <!--                                                          </HBox.margin> -->
+                <!--                                                       </ToggleButton> -->
+                <!--                                                                       <Label fx:id="noMessagesLabel" text="0 Messages"> -->
+                <!--                                                          <HBox.margin> -->
+                <!--                                                             <Insets left="10.0" top="5.0" /> -->
+                <!--                                                          </HBox.margin> -->
+                <!--                                                                       </Label> -->
+
+                <!--                    </children>-->
+                <!--                </FlowPane>-->
+                <GridPane prefHeight="156.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="100.0"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                        <RowConstraints maxHeight="100.0" minHeight="40.0" prefHeight="100.0" vgrow="ALWAYS"/>
+                    </rowConstraints>
+                    <children>
+
+                        <HBox prefHeight="29.0" prefWidth="993.0">
+                            <ProgressIndicator fx:id="isPollingMsgProgressIndicator" prefHeight="31.0" prefWidth="26.0"
+                                               visible="false">
+                                <HBox.margin>
+                                    <Insets left="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </ProgressIndicator>
+                            <Button fx:id="pollMessagesBtn" mnemonicParsing="false" onAction="#pollMessages"
+                                    text="Poll Msgs">
+                                <HBox.margin>
+                                    <Insets left="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </Button>
+                            <CheckBox fx:id="isLiveUpdateCheckBox" mnemonicParsing="false" text="Live Update">
+                                <HBox.margin>
+                                    <Insets left="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </CheckBox>
+                            <Button mnemonicParsing="false" onAction="#addMessage" text="Add Msg">
+                                <HBox.margin>
+                                    <Insets left="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </Button>
+                            <!--                                                                        <Label text="Poll Time">-->
+                            <!--                                                                            <HBox.margin>-->
+                            <!--                                                                                <Insets left="10.0" top="5.0"/>-->
+                            <!--                                                                            </HBox.margin>-->
+                            <!--                                                                        </Label>-->
+                            <!--                                                                        <TextField fx:id="pollTimeTextField"-->
+                            <!--                                                                                   prefHeight="26.0" prefWidth="60.0"-->
+                            <!--                                                                                   text="5000">-->
+                            <!--                                                                            <HBox.margin>-->
+                            <!--                                                                                <Insets top="5.0"/>-->
+                            <!--                                                                            </HBox.margin>-->
+                            <!--                                                                        </TextField>-->
+                            <Label text="After">
+                                <HBox.margin>
+                                    <Insets left="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </Label>
+                            <DateTimePicker fx:id="startTimestampPicker" prefWidth="200.0">
+                                <HBox.margin>
+                                    <Insets left="10.0" right="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </DateTimePicker>
+                            <Label text="Before">
+                                <HBox.margin>
+                                    <Insets left="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </Label>
+                            <DateTimePicker fx:id="endTimestampPicker" prefWidth="200.0">
+                                <HBox.margin>
+                                    <Insets left="10.0" right="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </DateTimePicker>
+                            <!--                                                                        <Label fx:id="endTimestampLabel" text="Before" visible="false" />-->
+                            <!--                                                                        <DateTimePicker fx:id="endTimestampPicker" disable="true" prefWidth="180.0" visible="false" />-->
+                            <Button fx:id="countMessagesBtn" mnemonicParsing="false" onAction="#countMessages"
+                                    text="Count: 0">
+                                <HBox.margin>
+                                    <Insets left="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </Button>
+                        </HBox>
+                        <HBox GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                            <Label text="No. of Msgs/Partition ">
+                                <HBox.margin>
+                                    <Insets left="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </Label>
+                            <ComboBox fx:id="msgPollingPosition" promptText="LAST">
+                                <HBox.margin>
+                                    <Insets left="5.0" top="5.0"/>
+                                </HBox.margin>
+                            </ComboBox>
+                            <NonNegativeIntTextField fx:id="maxMessagesTextField" prefHeight="26.0" prefWidth="72.0"
+                                                     text="1000">
+                                <HBox.margin>
+                                    <Insets left="10.0" top="5.0"/>
+                                </HBox.margin>
+                            </NonNegativeIntTextField>
+                            <Label prefHeight="17.0" prefWidth="73.0" text="Key Type">
+                                <padding>
+                                    <Insets left="5.0"/>
+                                </padding>
+                            </Label>
+                            <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="120.0"/>
+                            <Label prefHeight="17.0" prefWidth="72.0" text="Value Type"/>
+                            <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="120.0"/>
+                            <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema"/>
+                            <VirtualizedScrollPane prefWidth="220.0">
+                                <content>
+                                    <CodeArea fx:id="schemaTextArea" disable="true" prefWidth="220.0" wrapText="true">
+                                    </CodeArea>
+                                </content>
+                            </VirtualizedScrollPane>
+                        </HBox>
                     </children>
-                </FlowPane>
+                </GridPane>
             </children>
         </AnchorPane>
         <!--        <AnchorPane maxHeight="200.0" minHeight="50.0" minWidth="0.0" prefHeight="100.0" prefWidth="993.0">-->
@@ -153,7 +172,7 @@
                 <StackPane AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0"
                            AnchorPane.topAnchor="0.0">
                     <children>
-                        <KafkaMessageTable fx:id="kafkaMessageTable"/>
+                        <KafkaMessageTable fx:id="kafkaMessageTable" prefHeight="276.0" prefWidth="987.0"/>
                         <!--                                                                     <TableView fx:id="messageTable"> -->
                         <!--                                                                         <columns> -->
                         <!--                                                                             <TableColumn prefWidth="75.0" text="Partition" /> -->
@@ -167,7 +186,7 @@
                 </StackPane>
             </children>
         </AnchorPane>
-        <AnchorPane minHeight="50" maxHeight="200.0" prefHeight="200.0" prefWidth="993.0">
+        <AnchorPane maxHeight="200.0" minHeight="50" prefHeight="200.0" prefWidth="993.0">
             <VirtualizedScrollPane prefHeight="200.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"
                                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <content>
