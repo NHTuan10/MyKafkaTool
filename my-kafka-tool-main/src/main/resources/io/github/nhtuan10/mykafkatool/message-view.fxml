@@ -146,7 +146,7 @@
                             <Label prefHeight="17.0" prefWidth="72.0" text="Value Type"/>
                             <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="120.0"/>
                             <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema"/>
-                            <VirtualizedScrollPane prefWidth="220.0">
+                            <VirtualizedScrollPane>
                                 <content>
                                     <CodeArea fx:id="schemaTextArea" disable="true" prefWidth="220.0" wrapText="true">
                                     </CodeArea>
