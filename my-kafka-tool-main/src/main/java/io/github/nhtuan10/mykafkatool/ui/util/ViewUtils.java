@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
@@ -40,7 +41,7 @@ public final class ViewUtils {
             } catch (Exception e) {
                 log.error("Error highlighting json in code area", e);
             }
-        }
+        } else codeArea.replaceText(Objects.requireNonNullElse(inValue, ""));
     }
 
     public static <T> Task<T> runBackgroundTask(Callable<T> callable, Consumer<T> onSuccess, Consumer<Throwable> onError) {

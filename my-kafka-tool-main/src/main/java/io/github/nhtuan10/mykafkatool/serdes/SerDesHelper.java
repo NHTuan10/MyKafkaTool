@@ -107,7 +107,9 @@ public class SerDesHelper {
                 throw new DeserializationException("Internal Error: custom deserialize non byte array is not supported yet", payload);
             }
         } else {
-            if (payload instanceof byte[] payloadBytes) {
+            if (payload == null) {
+                return "";
+            } else if (payload instanceof byte[] payloadBytes) {
                 return Base64.getEncoder().encodeToString(payloadBytes);
             } else {
                 return payload.toString();

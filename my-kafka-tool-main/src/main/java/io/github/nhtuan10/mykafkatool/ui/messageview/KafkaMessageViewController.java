@@ -39,7 +39,10 @@ import org.apache.kafka.common.TopicPartition;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -290,6 +293,7 @@ public class KafkaMessageViewController {
         treeMsgTableItemCache.put(oldValue, KafkaMessageView.MessageTableState.builder()
                 .items(kafkaMessageTable.getItems())
                 .filter(kafkaMessageTable.getFilter().copy())
+                .pollingOptions(getPollingOptionsBuilder().build())
                 .build());
     }
 
@@ -309,9 +313,11 @@ public class KafkaMessageViewController {
                 ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList(messageTableState.getItems());
                 kafkaMessageTable.setItems(msgItems, false);
                 kafkaMessageTable.configureSortAndFilterForMessageTable(messageTableState.getFilter(), messagePollingPosition);
+                fillPollingOptionControls(messageTableState.getPollingOptions());
             } else {
                 kafkaMessageTable.setItems(FXCollections.observableArrayList(), false);
                 kafkaMessageTable.configureSortAndFilterForMessageTable(new Filter(), messagePollingPosition);
+                fillPollingOptionControlsWithDefaultValues();
             }
             countMessages();
         } else if (newValue instanceof KafkaPartitionTreeItem<?>) {
@@ -333,6 +339,9 @@ public class KafkaMessageViewController {
             kafkaMessageTable.setItems(msgItems, false);
             if (messageTableState != null) {
                 filter = messageTableState.getFilter();
+                fillPollingOptionControls(messageTableState.getPollingOptions());
+            } else {
+                fillPollingOptionControlsWithDefaultValues();
             }
             kafkaMessageTable.configureSortAndFilterForMessageTable(filter, messagePollingPosition, partitionPredicate);
             countMessages();
@@ -350,7 +359,7 @@ public class KafkaMessageViewController {
             ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
             return;
         }
-        String schema = schemaTextArea.getText();
+//        String schema = schemaTextArea.getText();
         ObservableList<KafkaMessageTableItem> list = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
         kafkaMessageTable.setItems(list);
         // clear message cache for partitions
@@ -359,29 +368,40 @@ public class KafkaMessageViewController {
                 treeMsgTableItemCache.remove(treeItem);
             }
         });
-        BooleanProperty firstPoll = new SimpleBooleanProperty(true);
-        KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
-        KafkaConsumerService.PollingOptions pollingOptions =
-                KafkaConsumerService.PollingOptions.builder()
-                        .pollTime(DEFAULT_POLL_TIME_MS)
-                        .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
-                        .startTimestamp(ViewUtils.getTimestamp(this.startTimestampPicker))
-                        .endTimestamp(this.endTimestampPicker.isDisabled() ? null : ViewUtils.getTimestamp(this.endTimestampPicker))
-                        .pollingPosition(messagePollingPosition)
-                        .valueContentType(valueContentType.getValue())
-                        .schema(schema)
-                        .pollCallback(() -> {
+//        BooleanProperty firstPoll = new SimpleBooleanProperty(true);
+        KafkaConsumerService.PollingOptions pollingOptions = getPollingOptionsBuilder()
+                .pollCallback(() -> {
 //                            if (firstPoll.get()) {
 //                                Platform.runLater(() -> kafkaMessageTable.resizeColumn());
 //                            }
-                            Platform.runLater(() -> {
-                                isBlockingAppUINeeded.set(false);
-                                kafkaMessageTable.handleNumOfMsgChanged(kafkaMessageTable.getShownItems().size());
-                            });
-                            return new KafkaConsumerService.PollCallback(list, isPolling);
-                        })
-                        .isLiveUpdate(!isLiveUpdateCheckBox.isDisabled() && isLiveUpdateCheckBox.isSelected())
-                        .build();
+                    Platform.runLater(() -> {
+                        isBlockingAppUINeeded.set(false);
+                        kafkaMessageTable.handleNumOfMsgChanged(kafkaMessageTable.getShownItems().size());
+                    });
+                    return new KafkaConsumerService.PollCallback(list, isPolling);
+                }).build();
+//        KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
+//        KafkaConsumerService.PollingOptions pollingOptions =
+//                KafkaConsumerService.PollingOptions.builder()
+//                        .pollTime(DEFAULT_POLL_TIME_MS)
+//                        .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
+//                        .startTimestamp(ViewUtils.getTimestamp(this.startTimestampPicker))
+//                        .endTimestamp(this.endTimestampPicker.isDisabled() ? null : ViewUtils.getTimestamp(this.endTimestampPicker))
+//                        .pollingPosition(messagePollingPosition)
+//                        .valueContentType(valueContentType.getValue())
+//                        .schema(schema)
+//                        .pollCallback(() -> {
+////                            if (firstPoll.get()) {
+////                                Platform.runLater(() -> kafkaMessageTable.resizeColumn());
+////                            }
+//                            Platform.runLater(() -> {
+//                                isBlockingAppUINeeded.set(false);
+//                                kafkaMessageTable.handleNumOfMsgChanged(kafkaMessageTable.getShownItems().size());
+//                            });
+//                            return new KafkaConsumerService.PollCallback(list, isPolling);
+//                        })
+//                        .isLiveUpdate(!isLiveUpdateCheckBox.isDisabled() && isLiveUpdateCheckBox.isSelected())
+//                        .build();
 
         isBlockingAppUINeeded.set(true);
         isPolling.set(true);
@@ -416,6 +436,45 @@ public class KafkaMessageViewController {
             UIErrorHandler.showError(Thread.currentThread(), exception);
         };
         ViewUtils.runBackgroundTask(pollMsgTask, onSuccess, onFailure);
+    }
+
+    public KafkaConsumerService.PollingOptions.PollingOptionsBuilder getPollingOptionsBuilder() {
+        return KafkaConsumerService.PollingOptions.builder()
+                .pollTime(DEFAULT_POLL_TIME_MS)
+                .noMessages(StringUtils.isBlank(maxMessagesTextField.getText()) ? Integer.MAX_VALUE : Integer.parseInt(maxMessagesTextField.getText()))
+                .startTimestamp(ViewUtils.getTimestamp(this.startTimestampPicker))
+                .endTimestamp(this.endTimestampPicker.isDisabled() ? null : ViewUtils.getTimestamp(this.endTimestampPicker))
+                .pollingPosition(msgPollingPosition.getValue())
+                .valueContentType(valueContentType.getValue())
+                .schema(schemaTextArea.getText())
+                .isLiveUpdate(!isLiveUpdateCheckBox.isDisabled() && isLiveUpdateCheckBox.isSelected());
+    }
+
+    private void fillPollingOptionControls(KafkaConsumerService.PollingOptions pollingOptions) {
+        maxMessagesTextField.setText((pollingOptions.noMessages() == null || pollingOptions.noMessages() == Integer.MAX_VALUE) ? "" : pollingOptions.noMessages().toString());
+        setDateTimePickerValue(startTimestampPicker, pollingOptions.startTimestamp());
+        setDateTimePickerValue(endTimestampPicker, pollingOptions.endTimestamp());
+        msgPollingPosition.setValue(pollingOptions.pollingPosition());
+        valueContentType.setValue(pollingOptions.valueContentType());
+//        schemaTextArea.replaceText(pollingOptions.schema());
+        ViewUtils.setValueAndHighlightJsonInCodeArea(pollingOptions.schema(), schemaTextArea, true, objectMapper, jsonHighlighter);
+        isLiveUpdateCheckBox.setSelected(pollingOptions.isLiveUpdate());
+    }
+
+    private KafkaConsumerService.PollingOptions defaultPollingOptions() {
+        return KafkaConsumerService.PollingOptions.builder()
+                .noMessages(DEFAULT_MAX_POLL_RECORDS)
+                .pollingPosition(msgPollingPosition.getValue())
+                .valueContentType(valueContentType.getItems().get(0))
+                .pollingPosition(KafkaConsumerService.MessagePollingPosition.LAST).build();
+    }
+
+    private void fillPollingOptionControlsWithDefaultValues() {
+        fillPollingOptionControls(defaultPollingOptions());
+    }
+
+    private void setDateTimePickerValue(DateTimePicker dateTimePicker, Long epochMillis) {
+        dateTimePicker.setDateTimeValue(epochMillis != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), ZoneId.systemDefault()) : null);
     }
 
     public KafkaTopic getTopic() {
