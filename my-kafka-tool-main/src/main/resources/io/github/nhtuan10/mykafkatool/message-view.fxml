@@ -186,7 +186,7 @@
                 </StackPane>
             </children>
         </AnchorPane>
-        <AnchorPane maxHeight="200.0" minHeight="50" prefHeight="200.0" prefWidth="993.0">
+        <AnchorPane minHeight="50" prefHeight="150.0" prefWidth="993.0">
             <VirtualizedScrollPane prefHeight="200.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"
                                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <content>
