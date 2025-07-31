@@ -137,6 +137,8 @@ public class AddOrViewMessageModalController extends ModalController {
     void initialize() {
         valueContentTypeComboBox.setOnAction(event -> {
             enableDisableSchemaTextArea();
+            DisplayType displayType = serDesHelper.getPluggableSerialize(valueContentTypeComboBox.getValue()).getDisplayType();
+            valueDisplayTypeComboBox.getSelectionModel().select(displayType);
         });
         valueDisplayTypeComboBox.setItems(FXCollections.observableArrayList(DisplayType.values()));
         valueTextArea.textProperty().addListener((obs, oldText, newText) -> {
@@ -311,7 +313,7 @@ public class AddOrViewMessageModalController extends ModalController {
         valueContentTypeComboBox.getSelectionModel().selectFirst();
         headerTable.setEditable(editable);
 
-        DisplayType displayType;
+        DisplayType displayType = DisplayType.TEXT;
 
         if (editable) { // For Add Message Modal
             valueContentTypeComboBox.getItems().setAll(FXCollections.observableArrayList(serDesHelper.getSupportedValueSerializer()));
@@ -320,8 +322,11 @@ public class AddOrViewMessageModalController extends ModalController {
             } else {
                 valueContentTypeComboBox.getSelectionModel().selectFirst();
             }
-            displayType = Optional.ofNullable(serDesHelper.getPluggableSerialize(valueContentType))
-                    .map(PluggableSerializer::getDisplayType).orElse(DisplayType.TEXT);
+            if (serDesHelper.getPluggableSerialize(valueContentType) != null) {
+                displayType = serDesHelper.getPluggableSerialize(valueContentType).getDisplayType();
+            } else if (serDesHelper.getPluggableDeserialize(valueContentType) != null) {
+                displayType = serDesHelper.getPluggableDeserialize(valueContentType).getDisplayType();
+            }
             enableDisableSchemaTextArea();
         } else { // For View Message Modal
 //            choiceButtonContainer.setVisible(false);

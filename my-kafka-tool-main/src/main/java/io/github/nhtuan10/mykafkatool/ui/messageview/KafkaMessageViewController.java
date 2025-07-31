@@ -28,6 +28,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.NonNull;
@@ -139,6 +140,10 @@ public class KafkaMessageViewController {
 
     @FXML
     private CodeArea valueTextArea;
+
+    @FXML
+    private HBox valueSchemaContainer;
+
     //    @Inject
 
     @Inject
@@ -259,10 +264,10 @@ public class KafkaMessageViewController {
         msgPollingPosition.setValue(KafkaConsumerService.MessagePollingPosition.LAST);
         valueContentType.setOnAction(event -> {
             PluggableDeserializer deserializer = serDesHelper.getPluggableDeserialize(valueContentType.getValue());
-            schemaTextArea.setDisable(!deserializer.mayNeedUserInputForSchema());
+            valueSchemaContainer.setVisible(deserializer.mayNeedUserInputForSchema());
             isPolling.set(false);
         });
-        schemaTextArea.setDisable(!serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
+        valueSchemaContainer.setVisible(serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
         schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
             ViewUtils.setValueAndHighlightJsonInCodeArea(newText, schemaTextArea, false, objectMapper, jsonHighlighter);
         });
