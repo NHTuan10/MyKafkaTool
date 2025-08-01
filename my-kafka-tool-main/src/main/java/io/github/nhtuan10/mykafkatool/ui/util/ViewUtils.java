@@ -41,7 +41,9 @@ public final class ViewUtils {
             } catch (Exception e) {
                 log.error("Error highlighting json in code area", e);
             }
-        } else codeArea.replaceText(Objects.requireNonNullElse(inValue, ""));
+        } else {
+            codeArea.replaceText(Objects.requireNonNullElse(inValue, ""));
+        }
     }
 
     public static <T> Task<T> runBackgroundTask(Callable<T> callable, Consumer<T> onSuccess, Consumer<Throwable> onError) {

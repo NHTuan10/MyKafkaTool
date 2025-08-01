@@ -306,6 +306,7 @@ public class KafkaMessageViewController {
         if (!(newValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
             return;
         }
+        ViewUtils.setValueAndHighlightJsonInCodeArea("", valueTextArea, false, objectMapper, jsonHighlighter);
         this.selectedTreeItem = newValue;
         KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
         isPolling.set(false);
