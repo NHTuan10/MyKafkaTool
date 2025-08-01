@@ -185,8 +185,8 @@ public class KafkaMessageViewController {
         msgModalFieldMap.put("serDesHelper", serDesHelper);
         msgModalFieldMap.put("keyTextArea", rowData.getKey());
         msgModalFieldMap.put("valueTextArea", rowData.getValue());
+        msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
         if (!reproduce) {
-            msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
             msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
         } else {
             msgModalFieldMap.put("schemaTextArea", schemaTextArea.getText());
