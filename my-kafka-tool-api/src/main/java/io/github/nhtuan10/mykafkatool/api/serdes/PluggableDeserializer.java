@@ -21,6 +21,7 @@ public interface PluggableDeserializer {
         return false;
     }
 
+    // TODO: return object with value, schema and extra info if needed
     default String deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
         return new String(payload);
     }

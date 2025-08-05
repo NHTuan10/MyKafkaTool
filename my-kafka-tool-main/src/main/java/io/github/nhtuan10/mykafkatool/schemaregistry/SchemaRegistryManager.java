@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.manager;
+package io.github.nhtuan10.mykafkatool.schemaregistry;
 
 import io.confluent.kafka.schemaregistry.CompatibilityLevel;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;

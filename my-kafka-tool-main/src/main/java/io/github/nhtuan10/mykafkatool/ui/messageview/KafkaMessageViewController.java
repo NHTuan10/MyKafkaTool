@@ -185,6 +185,7 @@ public class KafkaMessageViewController {
         msgModalFieldMap.put("serDesHelper", serDesHelper);
         msgModalFieldMap.put("keyTextArea", rowData.getKey());
         msgModalFieldMap.put("valueTextArea", rowData.getValue());
+        // TODO: choose serializer depends on the deserializer
         msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
         if (!reproduce) {
             msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
