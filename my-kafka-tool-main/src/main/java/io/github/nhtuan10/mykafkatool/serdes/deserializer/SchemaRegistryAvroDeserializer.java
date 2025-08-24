@@ -34,8 +34,7 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
     public String deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
         KafkaAvroDeserializer kafkaAvroDeserializer;
         boolean isKey = Boolean.getBoolean(others.getOrDefault(Config.IS_KEY_PROP, "false"));
-        Map<String, Object> serializerMapKey = new HashMap<>();
-        serializerMapKey.putAll(Map.of(Config.IS_KEY_PROP, isKey));
+        Map<String, Object> serializerMapKey = new HashMap<>(Map.of(Config.IS_KEY_PROP, isKey));
         if (!kafkaAvroDeserializerMap.containsKey(serializerMapKey)) {
             kafkaAvroDeserializer = new KafkaAvroDeserializer();
             kafkaAvroDeserializer.configure(consumerProps, isKey);

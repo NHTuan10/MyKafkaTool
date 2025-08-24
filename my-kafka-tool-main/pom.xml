@@ -188,6 +188,11 @@
         <!--            <artifactId>ignite-dagger</artifactId>-->
         <!--            <version>1.2.2</version>-->
         <!--        </dependency>-->
+        <dependency>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+            <version>11.2.2</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -216,6 +221,10 @@
                             <version>${my-kafka-tool.version}</version>
                         </path>
                     </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>--add-reads</arg>
+                        <arg>io.github.nhtuan10.mykafkatool=ALL-UNNAMED</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
@@ -225,6 +234,13 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>io.github.nhtuan10.mykafkatool.MyKafkaToolApplication</mainClass>
+                    <compress>2</compress>
+                    <noHeaderFiles>true</noHeaderFiles>
+                    <stripDebug>true</stripDebug>
+                    <noManPages>true</noManPages>
+                    <launcher>MyKafkaToolMain</launcher>
+                    <jlinkImageName>MyKafkaToolMain</jlinkImageName>
+                    <jlinkZipName>MyKafkaToolMain</jlinkZipName>
                 </configuration>
                 <executions>
                     <execution>
@@ -238,6 +254,15 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-jlink-plugin</artifactId>-->
+            <!--                <extensions>true</extensions>-->
+            <!--                <configuration>-->
+            <!--                    &lt;!&ndash; configuration elements goes here &ndash;&gt;-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
 
             <!--            <plugin>-->
             <!--                <groupId>org.apache.maven.plugins</groupId>-->
