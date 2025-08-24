@@ -79,7 +79,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>io.github.nhtuan10.mykafkatool.ModularLauncher</mainClass>
+                            <mainClass>io.github.nhtuan10.mykafkatool.launcher.ModularLauncher</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -108,7 +108,7 @@
 
             <!--                    <archive>-->
             <!--                        <manifest>-->
-            <!--                            <mainClass>io.github.nhtuan10.mykafkatool.ModularLauncher</mainClass>-->
+            <!--                            <mainClass>io.github.nhtuan10.mykafkatool.launcher.ModularLauncher</mainClass>-->
             <!--                        </manifest>-->
             <!--                    </archive>-->
             <!--                    <descriptorRefs>-->

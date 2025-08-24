@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool;
+package io.github.nhtuan10.mykafkatool.launcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -40,6 +40,7 @@ public class ModularLauncher {
     public static final String ARTIFACT_DOWNLOAD_URL_PROP_KEY = "artifact.download-url";
     public static final String ARTIFACT_FILE_NAME_PREFIX = "artifact.fileName-prefix";
     public static final String MAVEN_SNAPSHOT_METADATA_FILE_NAME_PROP_KEY = "artifact.snapshot-maven-metadata-fileName";
+    public static final String IS_DEPLOYED = "isDeployed";
     public static final String ARCHIVE_FORMAT = "zip";
     public static final String APP_NAME = "MyKafkaTool";
     public static final String VERSION_PLACEHOLDER = "${version}";
@@ -58,7 +59,7 @@ public class ModularLauncher {
 //        Files.createDirectories(Paths.get(configLocation).getParent());
         Properties properties = new Properties();
         String installedVer = MINIMUM_VERSION;
-        try (InputStream is = new FileInputStream(configLocation)) {
+        try (InputStream is = ModularLauncher.class.getClassLoader().getResourceAsStream(configLocation)) {
             properties.load(is);
             installedVer = Optional.ofNullable(properties.getProperty(ARTIFACT_VERSION_PROP_KEY)).orElse(MINIMUM_VERSION);
         } catch (Exception e) {
@@ -108,7 +109,7 @@ public class ModularLauncher {
                     uri = uriFromPropertyFileOptional.get().replace(VERSION_PLACEHOLDER, installedVer).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName);
                 } else {
                     uri = Paths
-                            .get((properties.getProperty(ARTIFACT_DIRECTORY_PROP_KEY) + "/" + properties.get(ARTIFACT_FILE_NAME_PREFIX) + ".jar")
+                            .get((getArtifactDirectory(properties) + "/" + properties.get(ARTIFACT_FILE_NAME_PREFIX) + ".jar")
                                     .replace(VERSION_PLACEHOLDER, installedVer).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName))
                             .toUri().toString();
                 }
@@ -145,6 +146,18 @@ public class ModularLauncher {
 
     }
 
+    private static String getArtifactDirectory(Properties properties) {
+        boolean isDeployed = Boolean.parseBoolean(getPropertyValue(IS_DEPLOYED, properties));
+        String dir = getPropertyValue(ARTIFACT_DIRECTORY_PROP_KEY, properties);
+        if (isDeployed) {
+            dir = new File(ModularLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() + "/" + dir;
+        }
+        return dir;
+    }
+
+    private static String getPropertyValue(String key, Properties properties) {
+        return Optional.ofNullable(System.getProperty(key)).orElse(properties.getProperty(key));
+    }
     private static String getJarLocationUri(String artifactName, String version, Properties properties) throws URISyntaxException, IOException, InterruptedException {
         if (properties.get(ARTIFACT_DOWNLOAD_URL_PROP_KEY) != null) {
             String zipFileVersion = version;
@@ -164,7 +177,7 @@ public class ModularLauncher {
             }
             String downloadFileName = properties.getProperty(ARTIFACT_FILE_NAME_PREFIX).replace(VERSION_PLACEHOLDER, zipFileVersion).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName) + "." + ARCHIVE_FORMAT;
             String downloadUrl = properties.getProperty(ARTIFACT_DOWNLOAD_URL_PROP_KEY).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName) + "/" + version + "/" + downloadFileName;
-            Path parentPath = Paths.get(properties.getProperty(ARTIFACT_DIRECTORY_PROP_KEY));
+            Path parentPath = Paths.get(getArtifactDirectory(properties));
             Path zipFilePath = parentPath.resolve(downloadFileName);
             ReadableByteChannel rbc = Channels.newChannel(new URI(downloadUrl).toURL().openStream());
             try (FileOutputStream fos = new FileOutputStream(zipFilePath.toFile())) {
