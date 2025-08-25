@@ -24,6 +24,10 @@
             <directory>${project.basedir}/src/main/bin</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/config</directory>
+            <outputDirectory>/lib</outputDirectory>
+        </fileSet>
         <!--        <fileSet>-->
         <!--            <directory>${project.build.directory}</directory>-->
         <!--            <outputDirectory>/</outputDirectory>-->

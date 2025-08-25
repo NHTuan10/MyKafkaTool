@@ -60,11 +60,11 @@ public class ModularLauncher {
     public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
         String userHome = System.getProperty("user.home");
 //        String configLocation = MessageFormat.format("{0}/{1}/config/{2}", userHome, "MyKafkaTool", "config.properties");
-        String configLocation = "config.properties";
+        String configLocation = getArtifactDirectory(new Properties()) + "/config.properties";
 //        Files.createDirectories(Paths.get(configLocation).getParent());
         Properties properties = new Properties();
         String installedVer = MINIMUM_VERSION;
-        try (InputStream is = ModularLauncher.class.getClassLoader().getResourceAsStream(configLocation)) {
+        try (InputStream is = new FileInputStream(configLocation)) {
             properties.load(is);
             installedVer = Optional.ofNullable(properties.getProperty(ARTIFACT_VERSION_PROP_KEY)).orElse(MINIMUM_VERSION);
         } catch (Exception e) {
@@ -152,8 +152,8 @@ public class ModularLauncher {
     }
 
     private static String getArtifactDirectory(Properties properties) {
-        boolean isDeployed = Boolean.parseBoolean(getPropertyValue(IS_DEPLOYED, properties));
-        String dir = getPropertyValue(ARTIFACT_DIRECTORY_PROP_KEY, properties);
+        boolean isDeployed = Boolean.parseBoolean(getPropertyValue(IS_DEPLOYED, properties, "true"));
+        String dir = getPropertyValue(ARTIFACT_DIRECTORY_PROP_KEY, properties, ".");
         if (isDeployed) {
            dir = new File(URLDecoder.decode(ModularLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath(), StandardCharsets.UTF_8)).getParentFile().toPath().resolve(dir).toString();
         }
@@ -161,7 +161,12 @@ public class ModularLauncher {
     }
 
     private static String getPropertyValue(String key, Properties properties) {
-        return Optional.ofNullable(System.getProperty(key)).orElse(properties.getProperty(key));
+        return getPropertyValue(key, properties, null);
+    }
+
+    private static String getPropertyValue(String key, Properties properties, String defaultValue) {
+        return Optional.ofNullable(System.getProperty(key))
+                .orElse(Optional.ofNullable(properties.getProperty(key)).orElse(defaultValue));
     }
     private static String getJarLocationUri(String artifactName, String version, Properties properties) throws URISyntaxException, IOException, InterruptedException {
         if (properties.get(ARTIFACT_DOWNLOAD_URL_PROP_KEY) != null) {
