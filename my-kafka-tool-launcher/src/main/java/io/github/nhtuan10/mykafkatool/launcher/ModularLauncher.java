@@ -24,9 +24,11 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -164,7 +166,7 @@ public class ModularLauncher {
             if (isSnapShotVersion(version)) {
                 String metadata = properties.getProperty(ARTIFACT_DOWNLOAD_URL_PROP_KEY).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName) + "/"
                         + properties.getProperty(MAVEN_SNAPSHOT_METADATA_FILE_NAME_PROP_KEY).replace(VERSION_PLACEHOLDER, version);
-                HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().build();
+                HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().timeout(Duration.ofSeconds(2)).build();
                 String res = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
                 XmlMapper xmlMapper = new XmlMapper();
                 JsonNode node = xmlMapper.readTree(res);
@@ -210,7 +212,7 @@ public class ModularLauncher {
                     .findFirst().map(MavenCoordinate::getVersion).orElse(MINIMUM_VERSION);
         } else {
             String metadata = properties.getProperty(ARTIFACT_DOWNLOAD_URL_PROP_KEY).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName) + "/" + properties.getProperty(MAVEN_METADATA_FILE_NAME_PROP_KEY);
-            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().build();
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().timeout(Duration.ofSeconds(2)).build();
             String res = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
             XmlMapper xmlMapper = new XmlMapper();
             JsonNode node = xmlMapper.readTree(res);
