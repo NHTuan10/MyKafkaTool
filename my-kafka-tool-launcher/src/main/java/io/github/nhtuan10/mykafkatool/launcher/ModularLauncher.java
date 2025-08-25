@@ -16,11 +16,13 @@ import java.awt.*;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -152,7 +154,7 @@ public class ModularLauncher {
         boolean isDeployed = Boolean.parseBoolean(getPropertyValue(IS_DEPLOYED, properties));
         String dir = getPropertyValue(ARTIFACT_DIRECTORY_PROP_KEY, properties);
         if (isDeployed) {
-            dir = new File(ModularLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() + "/" + dir;
+           dir = new File(URLDecoder.decode(ModularLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath(), StandardCharsets.UTF_8)).getParentFile().toPath().resolve(dir).toString();
         }
         return dir;
     }
