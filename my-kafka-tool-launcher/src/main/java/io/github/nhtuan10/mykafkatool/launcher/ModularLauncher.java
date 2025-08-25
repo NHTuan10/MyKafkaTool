@@ -30,7 +30,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -51,6 +50,8 @@ public class ModularLauncher {
     public static final String ARTIFACT_NAME_PLACEHOLDER = "${artifact-name}";
     public static final String MAIN_ARTIFACT_NAME = "main";
     public static final String EXT_ARTIFACT_NAME = "ext";
+    public static final String MAVEN_HTTP_TIMEOUT = "maven.http.timeout";
+
     private static AtomicBoolean shouldUpgrade = new AtomicBoolean(false);
     private static final CountDownLatch waitForUpgrade = new CountDownLatch(1);
     private static final HttpClient httpClient = HttpClient.newHttpClient();
@@ -168,7 +169,7 @@ public class ModularLauncher {
             if (isSnapShotVersion(version)) {
                 String metadata = properties.getProperty(ARTIFACT_DOWNLOAD_URL_PROP_KEY).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName) + "/"
                         + properties.getProperty(MAVEN_SNAPSHOT_METADATA_FILE_NAME_PROP_KEY).replace(VERSION_PLACEHOLDER, version);
-                HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().timeout(Duration.ofSeconds(2)).build();
+                HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().timeout(getMavenHttpTimeout(properties)).build();
                 String res = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
                 XmlMapper xmlMapper = new XmlMapper();
                 JsonNode node = xmlMapper.readTree(res);
@@ -199,6 +200,11 @@ public class ModularLauncher {
         }
     }
 
+    private static Duration getMavenHttpTimeout(Properties properties) {
+        Duration timeout = Duration.ofSeconds(Long.parseLong(getPropertyValue(MAVEN_HTTP_TIMEOUT, properties)));
+        return timeout;
+    }
+
     private static boolean isSnapShotVersion(String version) {
         return version.endsWith("-SNAPSHOT");
     }
@@ -214,7 +220,7 @@ public class ModularLauncher {
                     .findFirst().map(MavenCoordinate::getVersion).orElse(MINIMUM_VERSION);
         } else {
             String metadata = properties.getProperty(ARTIFACT_DOWNLOAD_URL_PROP_KEY).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName) + "/" + properties.getProperty(MAVEN_METADATA_FILE_NAME_PROP_KEY);
-            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().timeout(Duration.ofSeconds(2)).build();
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(metadata)).GET().timeout(getMavenHttpTimeout(properties)).build();
             String res = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
             XmlMapper xmlMapper = new XmlMapper();
             JsonNode node = xmlMapper.readTree(res);
