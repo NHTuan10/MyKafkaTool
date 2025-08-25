@@ -12,7 +12,8 @@ module io.github.nhtuan10.mykafkatool.launcher {
     requires zip4j;
     requires java.desktop;
     requires java.net.http;
-
+    requires java.scripting;
+    requires jdk.dynalink;
 //    requires kafka.clients;
 //    requires kafka.clients;
 //    requires static kafka.schema.serializer;

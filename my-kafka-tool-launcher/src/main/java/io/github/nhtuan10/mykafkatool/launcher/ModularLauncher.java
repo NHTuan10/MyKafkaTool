@@ -123,6 +123,7 @@ public class ModularLauncher {
         } catch (IOException e) {
             System.err.println("Failed to save config.properties file");
         }
+        //TODO: still not work with JPMS modules yet
         Modular.startModuleSync("my-kafka-tool-ext",
                 ModuleLoadConfiguration.builder()
                         .locationUris(List.of(uris.get(EXT_ARTIFACT_NAME)))
