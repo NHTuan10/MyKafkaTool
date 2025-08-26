@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool.api;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class Config {
     public static final String IS_KEY_PROP = "isKey";
@@ -16,7 +17,8 @@ public class Config {
 
     public static ObjectMapper constructPrettyPrintObjectMapper() {
         return new ObjectMapper()
-                .findAndRegisterModules()
+                .registerModule(new JavaTimeModule())
+//                .findAndRegisterModules()
                 .configure(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS, false)
                 .enable(SerializationFeature.INDENT_OUTPUT);
     }
