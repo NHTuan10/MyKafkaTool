@@ -64,11 +64,11 @@
                     <configuration>
                         <name>MyKafkaTool</name>
                         <type>IMAGE</type>
-]                        <appversion>1.0</appversion>
+                        <appversion>1.0</appversion>
                         <dest>${project.build.directory}/MyKafkaTool-${my-kafka-tool.version}</dest>
                         <input>${project.build.directory}/my-kafka-tool-launcher-${my-kafka-tool.version}</input>
                         <mainjar>my-kafka-tool-launcher-${my-kafka-tool.version}.jar</mainjar>
-                        <javaoptions>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -XX:+UseZGC</javaoptions>o
+                        <javaoptions>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -XX:+UseZGC</javaoptions>
                     </configuration>
                 </plugin>
             </plugins>
