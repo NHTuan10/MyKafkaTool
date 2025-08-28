@@ -11,6 +11,7 @@ import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectM
 import io.github.nhtuan10.mykafkatool.configuration.annotation.ViewControllerMap;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.WindowControllerMap;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
+import io.github.nhtuan10.mykafkatool.schemaregistry.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.controller.AddConnectionModalController;
@@ -88,7 +89,7 @@ abstract class ControllerModule {
 //    static Callback<Class<?>, Object> controllerFactory(@WindowControllerMap Map<Class<?>, Object> controllerMap, AddOrViewMessageModalController addOrViewMessageModalController) {
     static Callback<Class<?>, Object> controllerFactory(@WindowControllerMap Map<Class<?>, Object> controllerMap, SerDesHelper serDesHelper,
                                                         JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper,
-                                                        ProducerUtil producerUtil, EventDispatcher eventDispatcher) {
+                                                        ProducerUtil producerUtil, EventDispatcher eventDispatcher, SchemaRegistryManager schemaRegistryManager) {
 //        return new DaggerCallback() {
 //            @Override
 //            public Object call(Class<?> clazz) {
@@ -100,7 +101,7 @@ abstract class ControllerModule {
             if (controllerMap.containsKey(clazz)) {
                 return controllerMap.get(clazz);
             } else if (clazz.equals(AddOrViewMessageModalController.class)) {
-                return new AddOrViewMessageModalController(serDesHelper, jsonHighlighter, objectMapper, producerUtil, eventDispatcher);
+                return new AddOrViewMessageModalController(serDesHelper, jsonHighlighter, objectMapper, producerUtil, eventDispatcher, schemaRegistryManager);
             } else {
                 try {
                     return clazz.getConstructor().newInstance();

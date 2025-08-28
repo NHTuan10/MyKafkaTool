@@ -6,15 +6,12 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
+<?import org.controlsfx.control.SearchableComboBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
-<AnchorPane prefHeight="522.0" prefWidth="738.0" xmlns="http://javafx.com/javafx/17.0.12"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController">
+<AnchorPane prefHeight="522.0" prefWidth="738.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController">
     <children>
-        <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="558.0" prefWidth="818.0"
-                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                   AnchorPane.topAnchor="0.0">
+        <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="558.0" prefWidth="818.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <items>
                 <TabPane prefHeight="509.0" prefWidth="816.0" tabClosingPolicy="UNAVAILABLE">
                     <tabs>
@@ -22,104 +19,86 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                     <children>
-                                        <GridPane layoutY="12.0" prefHeight="429.0" prefWidth="736.0" vgap="10.0"
-                                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="12.0">
+                                        <GridPane layoutY="12.0" prefHeight="429.0" prefWidth="736.0" vgap="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="12.0">
                                             <columnConstraints>
-                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="280.0" minWidth="10.0"
-                                                                   prefWidth="86.0"/>
-                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="556.0" minWidth="10.0"
-                                                                   percentWidth="80.0" prefWidth="556.0"/>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="280.0" minWidth="10.0" prefWidth="86.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="556.0" minWidth="10.0" percentWidth="80.0" prefWidth="556.0" />
                                             </columnConstraints>
                                             <rowConstraints>
-                                                <RowConstraints maxHeight="104.0" minHeight="1.0" percentHeight="5.0"
-                                                                prefHeight="1.0" vgrow="SOMETIMES"/>
-                                                <RowConstraints maxHeight="104.0" minHeight="0.0" percentHeight="10.0"
-                                                                prefHeight="66.0" vgrow="SOMETIMES"/>
-                                                <RowConstraints maxHeight="216.0" minHeight="10.0" percentHeight="60.0"
-                                                                prefHeight="118.0" vgrow="SOMETIMES"/>
-                                                <RowConstraints maxHeight="178.0" minHeight="10.0" percentHeight="20.0"
-                                                                prefHeight="129.0" vgrow="SOMETIMES"/>
-                                                <RowConstraints maxHeight="129.0" minHeight="9.0" percentHeight="5.0"
-                                                                prefHeight="34.0" vgrow="SOMETIMES"/>
-                                                <RowConstraints maxHeight="129.0" minHeight="10.0" percentHeight="5.0"
-                                                                prefHeight="34.0" vgrow="SOMETIMES"/>
+                                                <RowConstraints maxHeight="104.0" minHeight="1.0" percentHeight="5.0" prefHeight="1.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="104.0" minHeight="0.0" percentHeight="10.0" prefHeight="66.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="216.0" minHeight="10.0" percentHeight="60.0" prefHeight="118.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="178.0" minHeight="10.0" percentHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="178.0" minHeight="10.0" percentHeight="20.0" prefHeight="79.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="129.0" minHeight="9.0" percentHeight="5.0" prefHeight="34.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="129.0" minHeight="10.0" percentHeight="5.0" prefHeight="34.0" vgrow="SOMETIMES" />
                                             </rowConstraints>
                                             <children>
                                                 <Label text="Key" GridPane.rowIndex="1">
                                                     <GridPane.margin>
-                                                        <Insets left="10.0"/>
+                                                        <Insets left="10.0" />
                                                     </GridPane.margin>
                                                 </Label>
-                                                <TextArea fx:id="keyTextArea" prefHeight="200.0" prefWidth="200.0"
-                                                          wrapText="true" GridPane.columnIndex="1"
-                                                          GridPane.rowIndex="1">
+                                                <TextArea fx:id="keyTextArea" prefHeight="200.0" prefWidth="200.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                                     <GridPane.margin>
-                                                        <Insets right="5.0"/>
+                                                        <Insets right="5.0" />
                                                     </GridPane.margin>
                                                 </TextArea>
                                                 <!--                                     <AnchorPane GridPane.columnIndex="1" GridPane.rowIndex="1"> -->
                                                 <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="2">
                                                     <GridPane.margin>
-                                                        <Insets right="5.0"/>
+                                                        <Insets right="5.0" />
                                                     </GridPane.margin>
                                                     <content>
-                                                        <CodeArea fx:id="valueTextArea" prefHeight="118.0"
-                                                                  prefWidth="552.0" wrapText="true"/>
+                                                        <CodeArea fx:id="valueTextArea" prefHeight="118.0" prefWidth="552.0" wrapText="true" />
                                                     </content>
 
                                                 </VirtualizedScrollPane>
                                                 <!--                                     </AnchorPane> -->
                                                 <!--                                     <TextArea fx:id="schemaTextArea" layoutX="59.0" layoutY="69.0" prefHeight="108.0" prefWidth="520.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" /> -->
-                                                <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                                <VirtualizedScrollPane GridPane.columnIndex="1" GridPane.rowIndex="4">
                                                     <GridPane.margin>
-                                                        <Insets right="5.0"/>
+                                                        <Insets right="5.0" />
                                                     </GridPane.margin>
                                                     <content>
                                                         <!--                                                                            layoutX="59.0" layoutY="69.0" -->
-                                                        <CodeArea fx:id="schemaTextArea" prefHeight="130.0"
-                                                                  prefWidth="551.0" wrapText="true"/>
+                                                        <CodeArea fx:id="schemaTextArea" prefHeight="130.0" prefWidth="551.0" wrapText="true" />
                                                         <!--                                    styleClass="text-input"    -->
                                                     </content>
 
                                                 </VirtualizedScrollPane>
-                                                <Label layoutX="10.0" layoutY="114.0" text="Value Schema"
-                                                       GridPane.rowIndex="3">
+                                                <Label layoutX="10.0" layoutY="114.0" text="Value Schema" GridPane.rowIndex="4">
                                                     <GridPane.margin>
-                                                        <Insets left="10.0"/>
+                                                        <Insets left="10.0" />
                                                     </GridPane.margin>
                                                 </Label>
-                                                <Label text="Value Type" GridPane.rowIndex="4">
+                                                <Label text="Value Type" GridPane.rowIndex="5">
                                                     <GridPane.margin>
-                                                        <Insets left="10.0"/>
+                                                        <Insets left="10.0" />
                                                     </GridPane.margin>
                                                 </Label>
-                                                <ComboBox fx:id="valueContentTypeComboBox" prefWidth="150.0"
-                                                          GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                                                <ComboBox fx:id="valueContentTypeComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                                 <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="2">
                                                     <children>
                                                         <Label text="Value">
                                                             <padding>
-                                                                <Insets left="10.0"/>
+                                                                <Insets left="10.0" />
                                                             </padding>
                                                         </Label>
-                                                        <ComboBox fx:id="valueDisplayTypeComboBox" prefHeight="26.0"
-                                                                  prefWidth="92.0">
+                                                        <ComboBox fx:id="valueDisplayTypeComboBox" prefHeight="25.0" prefWidth="92.0">
                                                             <VBox.margin>
-                                                                <Insets left="10.0" top="10.0"/>
+                                                                <Insets left="10.0" top="10.0" />
                                                             </VBox.margin>
                                                         </ComboBox>
                                                     </children>
                                                 </VBox>
 
-                                                <Label fx:id="howManyLabel" text="How many?" GridPane.columnIndex="0"
-                                                       GridPane.rowIndex="5">
+                                                <Label fx:id="howManyLabel" text="How many?" GridPane.columnIndex="0" GridPane.rowIndex="6">
                                                     <GridPane.margin>
-                                                        <Insets left="10.0"/>
+                                                        <Insets left="10.0" />
                                                     </GridPane.margin>
                                                 </Label>
-                                                <HBox fx:id="multipleSendOptionContainer" prefHeight="100.0"
-                                                      prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                                <HBox fx:id="multipleSendOptionContainer" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
                                                     <children>
                                                         <!--                                                      <NonNegativeIntTextField fx:id="numMsgToSend" prefHeight="26.0" prefWidth="80.0" text="1">-->
                                                         <!--                                                          <default>-->
@@ -130,54 +109,57 @@
                                                         <!--                                                          </isZeroAllowed>-->
                                                         <!--                                                          -->
                                                         <!--                                                      </NonNegativeIntTextField>-->
-                                                        <PositiveIntTextField fx:id="numMsgToSend" prefHeight="26.0"
-                                                                              prefWidth="80.0" text="1"/>
-                                                        <CheckBox fx:id="isHandlebarsEnabled" mnemonicParsing="false"
-                                                                  text="Handlebars Expression">
+                                                        <PositiveIntTextField fx:id="numMsgToSend" prefHeight="26.0" prefWidth="80.0" text="1" />
+                                                        <CheckBox fx:id="isHandlebarsEnabled" mnemonicParsing="false" text="Handlebars Expression">
                                                             <HBox.margin>
-                                                                <Insets left="10.0"/>
+                                                                <Insets left="10.0" />
                                                             </HBox.margin>
                                                         </CheckBox>
                                                         <Hyperlink fx:id="expressionHelpLink" text="ⓘ">
                                                             <!--                                                      text="?&#x20DD;">-->
                                                             <HBox.margin>
-                                                                <Insets left="10.0"/>
+                                                                <Insets left="10.0" />
                                                             </HBox.margin>
                                                         </Hyperlink>
                                                         <HBox fx:id="handlebarsPreviewContainer">
-                                                            <CheckBox fx:id="previewHandlebars" mnemonicParsing="false"
-                                                                      text="Preview">
+                                                            <CheckBox fx:id="previewHandlebars" mnemonicParsing="false" text="Preview">
                                                                 <HBox.margin>
-                                                                    <Insets left="10.0"/>
+                                                                    <Insets left="10.0" />
                                                                 </HBox.margin>
                                                             </CheckBox>
-                                                            <PositiveIntTextField fx:id="nthMsg" prefHeight="26.0"
-                                                                                  prefWidth="80.0">
+                                                            <PositiveIntTextField fx:id="nthMsg" prefHeight="26.0" prefWidth="80.0">
                                                                 <HBox.margin>
-                                                                    <Insets left="10.0"/>
+                                                                    <Insets left="10.0" />
                                                                 </HBox.margin>
                                                             </PositiveIntTextField>
-                                                            <Label text="th Message"/>
+                                                            <Label text="th Message" />
 
                                                         </HBox>
 
                                                     </children>
                                                     <GridPane.margin>
-                                                        <Insets top="10.0"/>
+                                                        <Insets top="10.0" />
                                                     </GridPane.margin>
                                                 </HBox>
-                                                <Label text="Topic " fx:id="clusterTopicAndPartitionInfo"
-                                                       GridPane.columnSpan="2">
+                                                <Label fx:id="clusterTopicAndPartitionInfo" text="Topic " GridPane.columnSpan="2">
                                                     <GridPane.margin>
-                                                        <Insets left="10.0"/>
+                                                        <Insets left="10.0" />
                                                     </GridPane.margin>
                                                     <font>
-                                                        <Font size="15.0"/>
+                                                        <Font size="15.0" />
                                                     </font>
                                                 </Label>
+                                    <HBox fx:id="schemaSelectionHBox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                       <children>
+                                                      <SearchableComboBox fx:id="schemaComboBox" maxHeight="25.0" prefHeight="25.0" prefWidth="550.0" />
+                                          <Button fx:id="refreshSchema" mnemonicParsing="false" text="↻">
+                                              <tooltip><Tooltip text="Refresh" /></tooltip>
+                                          </Button>
+                                       </children>
+                                    </HBox>
                                             </children>
                                             <padding>
-                                                <Insets bottom="10.0"/>
+                                                <Insets bottom="10.0" />
                                             </padding>
                                         </GridPane>
                                     </children>
@@ -188,12 +170,7 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                     <children>
-                                        <KafkaMessageHeaderTable fx:id="headerTable" layoutY="7.0" minHeight="200.0"
-                                                                 prefHeight="297.0" prefWidth="924.0"
-                                                                 AnchorPane.bottomAnchor="-7.0"
-                                                                 AnchorPane.leftAnchor="5.0"
-                                                                 AnchorPane.rightAnchor="5.0"
-                                                                 AnchorPane.topAnchor="5.0"/>
+                                        <KafkaMessageHeaderTable fx:id="headerTable" layoutY="7.0" minHeight="200.0" prefHeight="297.0" prefWidth="924.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
 
                                         <!--                               <SplitPane dividerPositions="0.12440944881889764" orientation="VERTICAL" prefHeight="319.5" prefWidth="598.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
                                         <!--                                 <items> -->
@@ -233,26 +210,22 @@
                         </Tab>
                     </tabs>
                 </TabPane>
-                <AnchorPane fx:id="choiceButtonContainer" maxHeight="40.0" minHeight="40.0" minWidth="593.0"
-                            prefHeight="40.0" prefWidth="593.0">
+                <AnchorPane fx:id="choiceButtonContainer" maxHeight="40.0" minHeight="40.0" minWidth="593.0" prefHeight="40.0" prefWidth="593.0">
                     <HBox prefHeight="40.0" prefWidth="598.0" spacing="10.0">
                         <Button mnemonicParsing="false" onAction="#send" prefHeight="26.0" prefWidth="80.0" text="Send">
                             <HBox.margin>
-                                <Insets left="5.0" top="5.0"/>
+                                <Insets left="5.0" top="5.0" />
                             </HBox.margin>
                         </Button>
-                        <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#close" prefWidth="80.0"
-                                text="Close">
+                        <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#close" prefWidth="80.0" text="Close">
                             <HBox.margin>
-                                <Insets left="5.0" top="5.0"/>
+                                <Insets left="5.0" top="5.0" />
                             </HBox.margin>
                         </Button>
                     </HBox>
                 </AnchorPane>
             </items>
         </SplitPane>
-        <ProgressIndicator fx:id="progressIndicator" prefHeight="522.0" prefWidth="738.0" progress="0.0" visible="false"
-                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                           AnchorPane.topAnchor="0.0"/>
+        <ProgressIndicator fx:id="progressIndicator" prefHeight="522.0" prefWidth="738.0" progress="0.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
     </children>
 </AnchorPane>

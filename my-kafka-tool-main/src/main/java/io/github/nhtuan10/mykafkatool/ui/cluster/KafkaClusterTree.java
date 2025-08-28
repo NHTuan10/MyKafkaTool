@@ -272,6 +272,7 @@ public class KafkaClusterTree {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
                 selectedTopicTreeItem.reloadChildren();
                 eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
+                eventDispatcher.publishEvent(SchemaRegistryUIEvent.newBackgroundRefreshEven(topic.cluster()));
             }
         });
         return refreshTopicItem;

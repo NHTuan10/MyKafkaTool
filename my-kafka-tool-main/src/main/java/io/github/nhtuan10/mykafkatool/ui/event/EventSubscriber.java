@@ -33,12 +33,12 @@ public abstract class EventSubscriber<T extends UIEvent> implements Flow.Subscri
 
     @Override
     public void onError(Throwable throwable) {
-        log.error("Error when refresh topic", throwable);
+        log.error("Error when handling ", throwable);
     }
 
     @Override
     public void onComplete() {
-        log.info("Topic refresh subscription complete");
+        log.info("Event subscription complete");
     }
 
 }

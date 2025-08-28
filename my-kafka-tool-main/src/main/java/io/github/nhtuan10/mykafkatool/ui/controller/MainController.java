@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.Theme;
@@ -135,6 +136,31 @@ public class MainController {
         schemaRegistryView.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
         this.eventDispatcher.addSchemaRegistryEventSubscriber(schemaRegistryView.getSchemaRegistryEventSubscriber());
 
+        EventSubscriber<SchemaRegistryUIEvent> backgroundSchemaRegistrySub = new EventSubscriber<>() {
+
+            @Override
+            protected void handleOnNext(SchemaRegistryUIEvent item) {
+                if (SchemaRegistryUIEvent.isBackgroundRefreshEvent(item)) {
+                    try {
+                        schemaRegistryManager.getAllSubjectMetadata(item.cluster().getName(), false, false);
+                    } catch (RestClientException | IOException ex) {
+                        log.error("Error when refresh schema registry in background", ex);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                log.error("Error when refresh schema registry in background", throwable);
+            }
+
+            @Override
+            public void onComplete() {
+                log.info("Refresh schema registry was complete in background");
+            }
+        };
+        this.eventDispatcher.addSchemaRegistryEventSubscriber(backgroundSchemaRegistrySub);
+
         consumerGroupView.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
         this.eventDispatcher.addConsumerGroupEventSubscriber(consumerGroupView.getConsumerGroupEventSubscriber());
 
@@ -172,6 +198,9 @@ public class MainController {
                 eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
 //                this.consumerGroupView.loadCG(topic);
                 this.eventDispatcher.publishEvent(ConsumerGroupUIEvent.newRefreshConsumerGroupEven(topic.cluster().getName(), null, topic));
+                if (!schemaRegistryManager.isSchemaCachedForCluster(topic.cluster().getName())){
+                    eventDispatcher.publishEvent(SchemaRegistryUIEvent.newBackgroundRefreshEven(topic.cluster()));
+                }
             } else if (newValue instanceof KafkaPartitionTreeItem<?> selectedItem) {
                 kafkaMessageView.switchTopicOrPartition((TreeItem) newValue);
                 setVisibleTabs(dataTab, propertiesTab);

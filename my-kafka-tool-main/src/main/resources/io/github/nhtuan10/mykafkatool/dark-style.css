@@ -82,3 +82,8 @@
 .cg-info-label {
     -fx-font-size: 15;
 }
+/*controlsfx CustomTextField css*/
+.custom-text-field  {
+    -fx-text-fill: white;
+/*!important;*/
+}

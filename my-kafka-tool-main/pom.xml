@@ -188,6 +188,11 @@
         <!--            <artifactId>ignite-dagger</artifactId>-->
         <!--            <version>1.2.2</version>-->
         <!--        </dependency>-->
+        <dependency>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+            <version>11.2.2</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

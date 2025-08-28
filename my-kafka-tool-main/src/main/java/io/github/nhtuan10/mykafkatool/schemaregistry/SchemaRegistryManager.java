@@ -39,6 +39,8 @@ public class SchemaRegistryManager {
 
     private final Map<String, SchemaRegistryClient> schemaRegistryClientMap = new ConcurrentHashMap<>();
 
+    private final Map<String, List<SchemaMetadataFromRegistry>> schemaStore = new ConcurrentHashMap<>();
+
     public Collection<String> getAllSubjects(String clusterName) throws RestClientException, IOException {
         return schemaRegistryClientMap.get(clusterName).getAllSubjects();
     }
@@ -64,7 +66,28 @@ public class SchemaRegistryManager {
     public SchemaMetadata getSubjectMetadata(String clusterName, String subject, Integer version) throws RestClientException, IOException {
         return schemaRegistryClientMap.get(clusterName).getSchemaMetadata(subject, version);
     }
-    public List<SchemaMetadataFromRegistry> getAllSubjectMetadata(String clusterName, boolean isOnlySubjectLoaded) throws RestClientException, IOException {
+
+    public List<SchemaMetadataFromRegistry> getAllSubjectMetadata(String clusterName, boolean isOnlySubjectLoaded, boolean useCache) throws RestClientException, IOException {
+        if (useCache) {
+            return schemaStore.computeIfAbsent(clusterName, cluster -> {
+                try {
+                    return getSchemaMetadataFromRegistry(clusterName, isOnlySubjectLoaded);
+                } catch (RestClientException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } else {
+            List<SchemaMetadataFromRegistry> result = getSchemaMetadataFromRegistry(clusterName, isOnlySubjectLoaded);
+            schemaStore.put(clusterName, result);
+            return result;
+        }
+    }
+
+    public boolean isSchemaCachedForCluster(String clusterName) {
+        return schemaStore.containsKey(clusterName);
+    }
+
+    private List<SchemaMetadataFromRegistry> getSchemaMetadataFromRegistry(String clusterName, boolean isOnlySubjectLoaded) throws RestClientException, IOException {
         Collection<String> subjects = getAllSubjects(clusterName);
         List<SchemaMetadataFromRegistry> result = subjects.parallelStream().map((subject) -> {
             SchemaMetadata schemaMetadata = null;

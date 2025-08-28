@@ -2,7 +2,6 @@ package io.github.nhtuan10.mykafkatool.ui.event;
 
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupView;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageViewController;
-import io.github.nhtuan10.mykafkatool.ui.schemaregistry.SchemaRegistryViewController;
 import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.Flow;
@@ -27,7 +26,7 @@ public class EventDispatcher {
         subscriber.setEventDispatcher(this);
     }
 
-    public void addSchemaRegistryEventSubscriber(SchemaRegistryViewController.SchemaRegistryEventSubscriber subscriber) {
+    public void addSchemaRegistryEventSubscriber(EventSubscriber<SchemaRegistryUIEvent>  subscriber) {
         schemaRegistryEventPublisher.subscribe(subscriber);
         subscriber.setEventDispatcher(this);
     }

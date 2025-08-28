@@ -209,7 +209,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
             ObservableList<SchemaTableItem> items;
             try {
                 Platform.runLater(() -> this.isBlockingUINeeded.set(true));
-                List<SchemaMetadataFromRegistry> schemaMetadataList = schemaRegistryManager.getAllSubjectMetadata(this.selectedClusterName.getName(), this.selectedClusterName.isOnlySubjectLoaded());
+                List<SchemaMetadataFromRegistry> schemaMetadataList = schemaRegistryManager.getAllSubjectMetadata(this.selectedClusterName.getName(), this.selectedClusterName.isOnlySubjectLoaded(), false);
                 items = FXCollections.observableArrayList(
                         schemaMetadataList
                                 .stream()

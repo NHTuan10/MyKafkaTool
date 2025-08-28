@@ -6,4 +6,8 @@ import java.util.List;
 
 public record SchemaMetadataFromRegistry(String subjectName, SchemaMetadata schemaMetadata, String compatibility,
                                          List<Integer> allVersions) {
+    @Override
+    public String toString() {
+        return subjectName;
+    }
 }

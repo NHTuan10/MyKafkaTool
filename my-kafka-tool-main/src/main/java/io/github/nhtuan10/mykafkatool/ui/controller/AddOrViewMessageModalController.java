@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
@@ -8,7 +9,9 @@ import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
+import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
+import io.github.nhtuan10.mykafkatool.schemaregistry.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
@@ -27,6 +30,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -35,6 +39,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.controlsfx.control.SearchableComboBox;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
@@ -48,10 +53,12 @@ import java.util.stream.IntStream;
 @Slf4j
 public class AddOrViewMessageModalController extends ModalController {
 
+    public static final String CUSTOM_SUBJECT_PLACEHOLDER = "<Custom>";
     private final SerDesHelper serDesHelper;
     private final JsonHighlighter jsonHighlighter;
     private final ObjectMapper objectMapper;
     private final ProducerUtil producerUtil;
+    private final SchemaRegistryManager schemaRegistryManager;
     private final Alert helpDialog;
     private final EventDispatcher eventDispatcher;
     private final BooleanProperty editable;
@@ -116,13 +123,23 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private Label clusterTopicAndPartitionInfo;
 
+    @FXML
+    private SearchableComboBox<SchemaMetadataFromRegistry> schemaComboBox;
+
+    @FXML
+    private Button refreshSchema;
+
+    @FXML
+    private HBox schemaSelectionHBox;
+
     @Inject
     public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper,
-                                           ProducerUtil producerUtil, EventDispatcher eventDispatcher) {
+                                           ProducerUtil producerUtil, EventDispatcher eventDispatcher, SchemaRegistryManager schemaRegistryManager) {
         this.serDesHelper = serDesHelper;
         this.jsonHighlighter = jsonHighlighter;
         this.objectMapper = objectMapper;
         this.producerUtil = producerUtil;
+        this.schemaRegistryManager = schemaRegistryManager;
         try {
             this.helpDialog = ModalUtils.buildHelpDialog("handlebars-help.txt", "Handlebars Expression Help");
         } catch (IOException e) {
@@ -201,6 +218,20 @@ public class AddOrViewMessageModalController extends ModalController {
         multipleSendOptionContainer.managedProperty().bind(editable);
 //        progressIndicator.setIndeterminate(true);
         progressIndicator.visibleProperty().bind(isBusy);
+        schemaComboBox.setOnAction(event -> {
+            SchemaMetadataFromRegistry selectedSchema = schemaComboBox.getValue();
+            if (selectedSchema != null) {
+                if (selectedSchema.subjectName().equals(CUSTOM_SUBJECT_PLACEHOLDER)){
+                    schemaTextArea.setEditable(true);
+                } else {
+                    schemaTextArea.setEditable(false);
+                    refreshDisplayedValue(selectedSchema.schemaMetadata().getSchema(), schemaTextArea, DisplayType.JSON, true);
+                }
+            }
+        });
+        refreshSchema.setOnAction(event -> {
+            refreshSchema(false);
+        });
     }
 
     private void previewKeyAndValueHandlebars(int n, String keyTemplate, String valueTemplate) {
@@ -345,6 +376,7 @@ public class AddOrViewMessageModalController extends ModalController {
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(Event::consume);
             schemaTextArea.setEditable(false);
+            schemaSelectionHBox.setDisable(true);
         }
         valueDisplayTypeComboBox.getSelectionModel().select(displayType);
         valueDisplayTypeToggleEventAction(true, initValue);
@@ -352,6 +384,18 @@ public class AddOrViewMessageModalController extends ModalController {
                 "Cluster: %s - Topic: %s - Partition: %s".formatted(kafkaTopic.cluster().getName(), kafkaTopic.name(), kafkaPartition.id()) :
                 "Cluster: %s - Topic: %s".formatted(kafkaTopic.cluster().getName(), kafkaTopic.name());
         this.clusterTopicAndPartitionInfo.setText(text);
+        refreshSchema(true);
+    }
+
+    private void refreshSchema(boolean useCache) {
+        SchemaMetadataFromRegistry customSchemaPlaceholder = new SchemaMetadataFromRegistry(CUSTOM_SUBJECT_PLACEHOLDER,null,null,null);
+        try {
+            ObservableList<SchemaMetadataFromRegistry> schemas = FXCollections.observableArrayList(schemaRegistryManager.getAllSubjectMetadata(kafkaTopic.cluster().getName(),false, useCache));
+            schemas.add(0, customSchemaPlaceholder);
+            schemaComboBox.setItems(schemas);
+        } catch (RestClientException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void valueDisplayTypeToggleEventAction(boolean editable, String initValue) {
