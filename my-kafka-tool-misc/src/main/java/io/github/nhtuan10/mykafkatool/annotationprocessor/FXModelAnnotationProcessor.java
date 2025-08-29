@@ -125,13 +125,13 @@ public class FXModelAnnotationProcessor extends AbstractProcessor {
                         String simpleName = typeElement.getSimpleName().toString();
                         var fields = ElementFilter.fieldsIn(elementUtils.getAllMembers(typeElement));
                         List<TemplateContextObject.Field> templateFxFields = fields.stream()
-                                .filter(field -> !field.getModifiers().contains(Modifier.STATIC))
+                                .filter(field -> (!field.getModifiers().contains(Modifier.STATIC) && field.getAnnotation(FXModelIgnore.class) == null))
                                 .filter(field -> FXPropertyType.getEnumByType(field.asType().toString()) != null)
                                 .map(field -> new TemplateContextObject.Field(field.getSimpleName().toString(), field.asType().toString(), true))
                                 .toList();
                         List<TemplateContextObject.Field> templateNonFxFields = fields.stream()
                                 .flatMap(field -> {
-                                    if (!field.getModifiers().contains(Modifier.STATIC) && templateFxFields.stream().map(TemplateContextObject.Field::getType).noneMatch(f -> f.equals(field.asType().toString()))) {
+                                    if (!field.getModifiers().contains(Modifier.STATIC) && field.getAnnotation(FXModelIgnore.class) == null && templateFxFields.stream().map(TemplateContextObject.Field::getType).noneMatch(f -> f.equals(field.asType().toString()))) {
                                         return Stream.of(new TemplateContextObject.Field(field.getSimpleName().toString(), field.asType().toString(), false));
                                     } else
                                         return Stream.empty();

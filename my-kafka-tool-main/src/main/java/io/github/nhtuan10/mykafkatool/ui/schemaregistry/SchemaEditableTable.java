@@ -104,7 +104,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                 String schema = newValue.getSchema();
                 if (schema == null) {
                     try {
-                        SchemaMetadata schemaMetadata = schemaRegistryManager.getSubject(selectedClusterName.getName(), subjectName);
+                        SchemaMetadata schemaMetadata = schemaRegistryManager.getSubjectMetadata(selectedClusterName.getName(), subjectName);
                         List<Integer> allVersions = schemaRegistryManager.getAllVersions(selectedClusterName.getName(), subjectName);
                         String compatibility = schemaRegistryManager.getCompatibility(selectedClusterName.getName(), subjectName);
                         schema = schemaMetadata.getSchema();

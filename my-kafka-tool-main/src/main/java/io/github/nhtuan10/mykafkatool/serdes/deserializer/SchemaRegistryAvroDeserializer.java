@@ -10,6 +10,7 @@ import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +46,7 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
         }
         Headers headers = new RecordHeaders(headerMap.entrySet().stream().map(entry -> (Header) new RecordHeader(entry.getKey(), entry.getValue())).toList());
         Object deserializedObject = kafkaAvroDeserializer.deserialize(topic, headers, payload);
+        others.put(Config.SCHEMA_ID, String.valueOf(extractSchemaId(payload)));
         return AvroUtil.convertObjectToJsonString(deserializedObject);
     }
 
@@ -53,6 +55,12 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
         return DisplayType.JSON;
     }
 
+    public int extractSchemaId(byte[] payload) {
+        if (payload.length >= 5 && payload[0] == 0x0) {
+            return ByteBuffer.wrap(payload, 1, 4).getInt();
+        }
+        return -1;
+    }
 //    @Override
 //    public boolean mayNeedUserInputForSchema() {
 //        return true;

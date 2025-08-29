@@ -189,9 +189,9 @@ public class KafkaMessageViewController {
         msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
         if (!reproduce) {
             msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
-        } else {
-            msgModalFieldMap.put("schemaTextArea", schemaTextArea.getText());
         }
+        msgModalFieldMap.put("schemaTextArea", rowData.getSchema());
+        msgModalFieldMap.put("schemaList", rowData.getSchemaList());
         if (!reproduce || withHeaders) {
             msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
         }
@@ -376,7 +376,16 @@ public class KafkaMessageViewController {
             }
         });
 //        BooleanProperty firstPoll = new SimpleBooleanProperty(true);
+        KafkaTopic kafkaTopic;
+        if (selectedTreeItem instanceof KafkaPartitionTreeItem<?> selectedItem) {
+            KafkaPartition partition = (KafkaPartition) selectedItem.getValue();
+            kafkaTopic = partition.topic();
+        } else {
+            KafkaTopicTreeItem<?> selectedItem = (KafkaTopicTreeItem<?>) selectedTreeItem;
+            kafkaTopic = (KafkaTopic) selectedItem.getValue();
+        }
         KafkaConsumerService.PollingOptions pollingOptions = getPollingOptionsBuilder()
+                .kafkaTopic(kafkaTopic)
                 .pollCallback(() -> {
 //                            if (firstPoll.get()) {
 //                                Platform.runLater(() -> kafkaMessageTable.resizeColumn());

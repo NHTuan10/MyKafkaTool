@@ -4,6 +4,7 @@ import io.confluent.kafka.schemaregistry.CompatibilityLevel;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
+import io.confluent.kafka.schemaregistry.client.rest.entities.SubjectVersion;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
@@ -16,9 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -45,7 +44,7 @@ public class SchemaRegistryManager {
         return schemaRegistryClientMap.get(clusterName).getAllSubjects();
     }
 
-    public SchemaMetadata getSubject(String clusterName, String subjectName) throws RestClientException, IOException {
+    public SchemaMetadata getSubjectMetadata(String clusterName, String subjectName) throws RestClientException, IOException {
         return schemaRegistryClientMap.get(clusterName).getLatestSchemaMetadata(subjectName);
     }
 
@@ -65,6 +64,13 @@ public class SchemaRegistryManager {
 
     public SchemaMetadata getSubjectMetadata(String clusterName, String subject, Integer version) throws RestClientException, IOException {
         return schemaRegistryClientMap.get(clusterName).getSchemaMetadata(subject, version);
+    }
+
+    public SchemaMetadataFromRegistry getSubjectMetadataFromRegistry(String clusterName, String subject, Integer version) throws RestClientException, IOException {
+        SchemaMetadata schemaMetadata = getSubjectMetadata(clusterName, subject, version);
+        String compatibility = getCompatibility(clusterName, subject);
+        List<Integer> allVersions = List.of(version);
+        return new SchemaMetadataFromRegistry(subject, schemaMetadata, compatibility, allVersions);
     }
 
     public List<SchemaMetadataFromRegistry> getAllSubjectMetadata(String clusterName, boolean isOnlySubjectLoaded, boolean useCache) throws RestClientException, IOException {
@@ -96,7 +102,7 @@ public class SchemaRegistryManager {
 
             try {
                 if (!isOnlySubjectLoaded) {
-                    schemaMetadata = getSubject(clusterName, subject);
+                    schemaMetadata = getSubjectMetadata(clusterName, subject);
                     compatibility = getCompatibility(clusterName, subject);
                     allVersions = getAllVersions(clusterName, subject);
                 }
@@ -131,6 +137,26 @@ public class SchemaRegistryManager {
             }
         }
     }
+
+    public List<SchemaMetadataFromRegistry> getSchemasById(String clusterName, int id) throws RestClientException, IOException {
+//        Collection<String> subjects = schemaRegistryClientMap.get(clusterName).getAllSubjectsById(id);
+        Collection<SubjectVersion> subjectVersions = schemaRegistryClientMap.get(clusterName).getAllVersionsById(id);
+        List<SchemaMetadataFromRegistry> schemaTableItems = new ArrayList<>();
+        for (SubjectVersion subjectVersion : subjectVersions) {
+//            String schema = schemaRegistryClientMap.get(clusterName).getSchemaBySubjectAndId(subject, id).toString();
+//            ParsedSchema parsedSchema = schemaRegistryClientMap.get(clusterName).getSchemaById(id);
+//            SchemaMetadata schemaMetadata = new SchemaMetadata(id, parsedSchema.version(), parsedSchema.toString());
+            String subject = subjectVersion.getSubject();
+            Optional<SchemaMetadataFromRegistry> optional = schemaTableItems.stream().filter(s -> subject.equals(s.subjectName())).findFirst();
+            if (optional.isPresent()) {
+                optional.get().allVersions().add(subjectVersion.getVersion());
+            } else {
+                schemaTableItems.add(getSubjectMetadataFromRegistry(clusterName, subjectVersion.getSubject(), subjectVersion.getVersion()));
+            }
+        }
+        return schemaTableItems;
+    }
+
     public static void main(String[] args) {
         String schemaRegistryUrl = "http://localhost:8081"; // Replace with your Schema Registry URL
         // Maximum number of schemas to cache

@@ -8,6 +8,6 @@ public record SchemaMetadataFromRegistry(String subjectName, SchemaMetadata sche
                                          List<Integer> allVersions) {
     @Override
     public String toString() {
-        return subjectName;
+        return subjectName ;
     }
 }

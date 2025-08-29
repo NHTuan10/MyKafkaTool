@@ -7,6 +7,8 @@ import io.github.nhtuan10.mykafkatool.exception.DeserializationException;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
+import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
+import io.github.nhtuan10.mykafkatool.schemaregistry.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
@@ -44,14 +46,16 @@ public class KafkaConsumerService {
     private final SerDesHelper serDesHelper;
     private final ClusterManager clusterManager;
     private final ConsumerCreator consumerCreator;
+    private final SchemaRegistryManager schemaRegistryManager;
 
     private List<Consumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
     @Inject
-    public KafkaConsumerService(SerDesHelper serDesHelper, ClusterManager clusterManager, ConsumerCreator consumerCreator) {
+    public KafkaConsumerService(SerDesHelper serDesHelper, ClusterManager clusterManager, ConsumerCreator consumerCreator, SchemaRegistryManager schemaRegistryManager) {
         this.serDesHelper = serDesHelper;
         this.clusterManager = clusterManager;
         this.consumerCreator = consumerCreator;
+        this.schemaRegistryManager = schemaRegistryManager;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             consumers.forEach(Consumer::wakeup);
         }));
@@ -247,13 +251,23 @@ public class KafkaConsumerService {
     private KafkaMessageTableItem createMessageItem
             (ConsumerRecord<String, Object> record, PollingOptions pollingOptions, Map<String, Object> consumerProps) throws DeserializationException {
         String key = record.key() != null ? record.key() : "";
-        Map<String, String> others = Map.of(Config.IS_KEY_PROP, Boolean.toString(false), Config.SCHEMA_PROP, pollingOptions.schema());
+        Map<String, String> others = new HashMap<>(Map.of(Config.IS_KEY_PROP, Boolean.toString(false), Config.SCHEMA_PROP, pollingOptions.schema()));
         String value = serDesHelper.deserializeToJsonString(record,
                 pollingOptions.valueContentType,
                 record.headers(), consumerProps, others);
         String timestamp = formatRecordTimestamp(record);
-
-        return KafkaMessageTableItemFXModel.builder()
+        String schema = pollingOptions.schema();
+        List<SchemaMetadataFromRegistry> schemaTableItems  = new ArrayList<>();
+        int schemaId = others.containsKey(Config.SCHEMA_ID) ? Integer.parseInt(others.get(Config.SCHEMA_ID)) : -1;
+        if (schemaId >= 0) {
+            try {
+                schemaTableItems = schemaRegistryManager.getSchemasById(pollingOptions.kafkaTopic().cluster().getName(), schemaId);
+                schema = schemaTableItems.get(0).schemaMetadata().getSchema();
+            } catch (Exception e) {
+                throw new DeserializationException("Error during fetching schema by id {}", schemaId, e);
+            }
+        }
+        KafkaMessageTableItem kafkaMessageTableItem =  KafkaMessageTableItemFXModel.builder()
                 .partition(record.partition())
                 .offset(record.offset())
                 .key(key)
@@ -262,9 +276,11 @@ public class KafkaConsumerService {
                 .serializedValueSize(record.serializedValueSize())
                 .valueContentType(pollingOptions.valueContentType())
                 .headers(record.headers())
-                .schema(pollingOptions.schema())
+                .schema(schema)
                 .isErrorItem(false)
                 .build();
+        kafkaMessageTableItem.setSchemaList(schemaTableItems);
+        return kafkaMessageTableItem;
     }
 
     private KafkaMessageTableItem createErrorMessageItem
@@ -328,7 +344,7 @@ public class KafkaConsumerService {
     public record PollingOptions(Integer pollTime, Integer noMessages, Long startTimestamp, Long endTimestamp,
                                  MessagePollingPosition pollingPosition, String valueContentType,
                                  String schema,
-                                 java.util.function.Supplier<PollCallback> pollCallback, boolean isLiveUpdate) {
+                                 java.util.function.Supplier<PollCallback> pollCallback, boolean isLiveUpdate, KafkaTopic kafkaTopic) {
     }
 
     public record PollCallback(ObservableList<KafkaMessageTableItem> resultObservableList,

@@ -68,6 +68,7 @@ public class AddOrViewMessageModalController extends ModalController {
     private StringProperty valueTemplate;
     private KafkaTopic kafkaTopic;
     private KafkaPartition kafkaPartition;
+    private List<SchemaMetadataFromRegistry> schemaList;
 
     @FXML
     private TextArea keyTextArea;
@@ -127,7 +128,7 @@ public class AddOrViewMessageModalController extends ModalController {
     private SearchableComboBox<SchemaMetadataFromRegistry> schemaComboBox;
 
     @FXML
-    private Button refreshSchema;
+    private Button refreshSchemaBtn;
 
     @FXML
     private HBox schemaSelectionHBox;
@@ -229,8 +230,10 @@ public class AddOrViewMessageModalController extends ModalController {
                 }
             }
         });
-        refreshSchema.setOnAction(event -> {
-            refreshSchema(false);
+        refreshSchemaBtn.setOnAction(event -> {
+            if (editable.get()){
+                refreshAllSchemas(false);
+            }
         });
     }
 
@@ -359,6 +362,14 @@ public class AddOrViewMessageModalController extends ModalController {
                 displayType = serDesHelper.getPluggableDeserialize(valueContentType).getDisplayType();
             }
             enableDisableSchemaTextArea();
+            refreshAllSchemas(true);
+            if (schemaList != null && !schemaList.isEmpty()){
+                int index = schemaComboBox.getItems().stream().map(SchemaMetadataFromRegistry::subjectName).toList().indexOf(schemaList.get(0).subjectName());
+                if (index >= 0) {
+                    schemaComboBox.getSelectionModel().select(index);
+                }
+            }
+            refreshSchemaBtn.setVisible(true);
         } else { // For View Message Modal
 //            choiceButtonContainer.setVisible(false);
 //            choiceButtonContainer.setMinHeight(0);
@@ -376,7 +387,15 @@ public class AddOrViewMessageModalController extends ModalController {
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(Event::consume);
             schemaTextArea.setEditable(false);
-            schemaSelectionHBox.setDisable(true);
+//            schemaSelectionHBox.setDisable(true);
+            if (schemaList.isEmpty()){
+                schemaComboBox.setItems(FXCollections.observableArrayList(new SchemaMetadataFromRegistry(CUSTOM_SUBJECT_PLACEHOLDER,null,null,null)));
+            }
+            else {
+                schemaComboBox.setItems(FXCollections.observableArrayList(schemaList));
+                schemaComboBox.getSelectionModel().selectFirst();
+            }
+            refreshSchemaBtn.setVisible(false);
         }
         valueDisplayTypeComboBox.getSelectionModel().select(displayType);
         valueDisplayTypeToggleEventAction(true, initValue);
@@ -384,10 +403,10 @@ public class AddOrViewMessageModalController extends ModalController {
                 "Cluster: %s - Topic: %s - Partition: %s".formatted(kafkaTopic.cluster().getName(), kafkaTopic.name(), kafkaPartition.id()) :
                 "Cluster: %s - Topic: %s".formatted(kafkaTopic.cluster().getName(), kafkaTopic.name());
         this.clusterTopicAndPartitionInfo.setText(text);
-        refreshSchema(true);
+        refreshDisplayedValue(schemaTextArea.getText(), schemaTextArea, DisplayType.JSON, true);
     }
 
-    private void refreshSchema(boolean useCache) {
+    private void refreshAllSchemas(boolean useCache) {
         SchemaMetadataFromRegistry customSchemaPlaceholder = new SchemaMetadataFromRegistry(CUSTOM_SUBJECT_PLACEHOLDER,null,null,null);
         try {
             ObservableList<SchemaMetadataFromRegistry> schemas = FXCollections.observableArrayList(schemaRegistryManager.getAllSubjectMetadata(kafkaTopic.cluster().getName(),false, useCache));

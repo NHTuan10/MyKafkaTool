@@ -152,7 +152,7 @@
                                     <HBox fx:id="schemaSelectionHBox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                        <children>
                                                       <SearchableComboBox fx:id="schemaComboBox" maxHeight="25.0" prefHeight="25.0" prefWidth="550.0" />
-                                          <Button fx:id="refreshSchema" mnemonicParsing="false" text="↻">
+                                          <Button fx:id="refreshSchemaBtn" mnemonicParsing="false" text="↻">
                                               <tooltip><Tooltip text="Refresh" /></tooltip>
                                           </Button>
                                        </children>
