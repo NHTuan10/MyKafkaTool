@@ -3,7 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui.messageview;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
 import io.github.nhtuan10.mykafkatool.annotationprocessor.FXModel;
 import io.github.nhtuan10.mykafkatool.annotationprocessor.FXModelIgnore;
-import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
+import io.github.nhtuan10.mykafkatool.api.model.SchemaMetadataFromRegistry;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.StringProperty;

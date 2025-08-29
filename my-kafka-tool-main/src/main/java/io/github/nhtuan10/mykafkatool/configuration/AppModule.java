@@ -7,7 +7,9 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import io.github.nhtuan10.modular.api.Modular;
+import io.github.nhtuan10.modular.api.annotation.ModularService;
 import io.github.nhtuan10.mykafkatool.api.Config;
+import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
@@ -19,6 +21,7 @@ import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMappe
 import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedPrettyPrintObjectMapper;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
+import io.github.nhtuan10.mykafkatool.schemaregistry.SchemaRegistryManagerImpl;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.serdes.deserializer.ByteArrayDeserializer;
 import io.github.nhtuan10.mykafkatool.serdes.deserializer.SchemaRegistryAvroDeserializer;
@@ -143,6 +146,13 @@ public abstract class AppModule {
             extAuthProviders.forEach(authProvider -> authProviderMap.put(authProvider.getName(), authProvider));
         }
         return Collections.unmodifiableMap(authProviderMap);
+    }
+
+    @Provides
+    @ModularService
+    @AppScoped
+    static SchemaRegistryManager schemaRegistryManager(){
+        return new SchemaRegistryManagerImpl();
     }
 //    @Provides
 //    @IntoMap

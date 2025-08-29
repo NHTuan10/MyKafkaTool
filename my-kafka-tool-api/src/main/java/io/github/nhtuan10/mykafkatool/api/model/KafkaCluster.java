@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.model.kafka;
+package io.github.nhtuan10.mykafkatool.api.model;
 
 import com.fasterxml.jackson.annotation.*;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;

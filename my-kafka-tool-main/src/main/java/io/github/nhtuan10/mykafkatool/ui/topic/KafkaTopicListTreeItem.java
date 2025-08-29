@@ -1,8 +1,8 @@
 package io.github.nhtuan10.mykafkatool.ui.topic;
 
+import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
-import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.ui.control.FilterableTreeItem;
 import javafx.collections.FXCollections;

@@ -1,14 +1,14 @@
 package io.github.nhtuan10.mykafkatool.consumer;
 
 import io.github.nhtuan10.mykafkatool.api.Config;
+import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
+import io.github.nhtuan10.mykafkatool.api.exception.DeserializationException;
+import io.github.nhtuan10.mykafkatool.api.model.SchemaMetadataFromRegistry;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
-import io.github.nhtuan10.mykafkatool.exception.DeserializationException;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
-import io.github.nhtuan10.mykafkatool.schemaregistry.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
@@ -258,13 +258,13 @@ public class KafkaConsumerService {
         String timestamp = formatRecordTimestamp(record);
         String schema = pollingOptions.schema();
         List<SchemaMetadataFromRegistry> schemaTableItems  = new ArrayList<>();
-        int schemaId = others.containsKey(Config.SCHEMA_ID) ? Integer.parseInt(others.get(Config.SCHEMA_ID)) : -1;
+        int schemaId = others.containsKey(Config.SCHEMA_ID_PROP) ? Integer.parseInt(others.get(Config.SCHEMA_ID_PROP)) : -1;
         if (schemaId >= 0) {
             try {
                 schemaTableItems = schemaRegistryManager.getSchemasById(pollingOptions.kafkaTopic().cluster().getName(), schemaId);
                 schema = schemaTableItems.get(0).schemaMetadata().getSchema();
             } catch (Exception e) {
-                throw new DeserializationException("Error during fetching schema by id {}", schemaId, e);
+                throw new DeserializationException("Error during fetching schema by id %s".formatted(schemaId), schemaId, e);
             }
         }
         KafkaMessageTableItem kafkaMessageTableItem =  KafkaMessageTableItemFXModel.builder()

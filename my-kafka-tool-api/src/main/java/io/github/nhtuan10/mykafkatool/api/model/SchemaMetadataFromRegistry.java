@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.model.kafka;
+package io.github.nhtuan10.mykafkatool.api.model;
 
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 

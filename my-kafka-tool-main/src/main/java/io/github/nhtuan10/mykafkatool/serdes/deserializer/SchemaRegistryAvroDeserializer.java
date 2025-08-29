@@ -46,7 +46,7 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
         }
         Headers headers = new RecordHeaders(headerMap.entrySet().stream().map(entry -> (Header) new RecordHeader(entry.getKey(), entry.getValue())).toList());
         Object deserializedObject = kafkaAvroDeserializer.deserialize(topic, headers, payload);
-        others.put(Config.SCHEMA_ID, String.valueOf(extractSchemaId(payload)));
+        others.put(Config.SCHEMA_ID_PROP, String.valueOf(extractSchemaId(payload)));
         return AvroUtil.convertObjectToJsonString(deserializedObject);
     }
 

@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.exception;
+package io.github.nhtuan10.mykafkatool.api.exception;
 
 public class ClusterNameExistedException extends Exception {
 

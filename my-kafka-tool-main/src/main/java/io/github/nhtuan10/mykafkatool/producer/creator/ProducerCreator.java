@@ -2,10 +2,10 @@ package io.github.nhtuan10.mykafkatool.producer.creator;
 
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
-import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import jakarta.inject.Inject;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;

@@ -1,6 +1,6 @@
 package io.github.nhtuan10.mykafkatool.ui.event;
 
-import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
+import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 
 public record SchemaRegistryUIEvent(KafkaCluster cluster,  Action action) implements UIEvent {
     public static boolean isBackgroundRefreshEvent(SchemaRegistryUIEvent event) {

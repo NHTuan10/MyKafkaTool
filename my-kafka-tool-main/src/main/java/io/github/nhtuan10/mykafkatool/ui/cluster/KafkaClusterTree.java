@@ -1,13 +1,13 @@
 package io.github.nhtuan10.mykafkatool.ui.cluster;
 
+import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
+import io.github.nhtuan10.mykafkatool.api.exception.ClusterNameExistedException;
+import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
-import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
-import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
-import io.github.nhtuan10.mykafkatool.schemaregistry.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;

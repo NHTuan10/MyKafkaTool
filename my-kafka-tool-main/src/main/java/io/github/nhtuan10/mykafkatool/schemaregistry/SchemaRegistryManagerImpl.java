@@ -1,16 +1,16 @@
 package io.github.nhtuan10.mykafkatool.schemaregistry;
 
-import io.confluent.kafka.schemaregistry.CompatibilityLevel;
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.entities.SubjectVersion;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
+import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
+import io.github.nhtuan10.mykafkatool.api.exception.ClusterNameExistedException;
+import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
+import io.github.nhtuan10.mykafkatool.api.model.SchemaMetadataFromRegistry;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
-import io.github.nhtuan10.mykafkatool.exception.ClusterNameExistedException;
-import io.github.nhtuan10.mykafkatool.model.kafka.KafkaCluster;
-import io.github.nhtuan10.mykafkatool.model.kafka.SchemaMetadataFromRegistry;
 import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 @AppScoped
-public class SchemaRegistryManager {
+public class SchemaRegistryManagerImpl implements SchemaRegistryManager {
 
-    public static final String DEFAULT_SCHEMA_COMPATIBILITY_LEVEL = CompatibilityLevel.BACKWARD.toString();
-
-//    private static class InstanceHolder {
+    //    private static class InstanceHolder {
 //        private static final SchemaRegistryManager INSTANCE = new SchemaRegistryManager();
 //    }
 //
@@ -40,14 +38,17 @@ public class SchemaRegistryManager {
 
     private final Map<String, List<SchemaMetadataFromRegistry>> schemaStore = new ConcurrentHashMap<>();
 
+    @Override
     public Collection<String> getAllSubjects(String clusterName) throws RestClientException, IOException {
         return schemaRegistryClientMap.get(clusterName).getAllSubjects();
     }
 
+    @Override
     public SchemaMetadata getSubjectMetadata(String clusterName, String subjectName) throws RestClientException, IOException {
         return schemaRegistryClientMap.get(clusterName).getLatestSchemaMetadata(subjectName);
     }
 
+    @Override
     public String getCompatibility(String clusterName, String subjectName) {
         String compatibility = DEFAULT_SCHEMA_COMPATIBILITY_LEVEL;
         try {
@@ -58,14 +59,17 @@ public class SchemaRegistryManager {
         return compatibility;
     }
 
+    @Override
     public List<Integer> getAllVersions(String clusterName, String subject) throws RestClientException, IOException {
         return schemaRegistryClientMap.get(clusterName).getAllVersions(subject);
     }
 
+    @Override
     public SchemaMetadata getSubjectMetadata(String clusterName, String subject, Integer version) throws RestClientException, IOException {
         return schemaRegistryClientMap.get(clusterName).getSchemaMetadata(subject, version);
     }
 
+    @Override
     public SchemaMetadataFromRegistry getSubjectMetadataFromRegistry(String clusterName, String subject, Integer version) throws RestClientException, IOException {
         SchemaMetadata schemaMetadata = getSubjectMetadata(clusterName, subject, version);
         String compatibility = getCompatibility(clusterName, subject);
@@ -73,6 +77,7 @@ public class SchemaRegistryManager {
         return new SchemaMetadataFromRegistry(subject, schemaMetadata, compatibility, allVersions);
     }
 
+    @Override
     public List<SchemaMetadataFromRegistry> getAllSubjectMetadata(String clusterName, boolean isOnlySubjectLoaded, boolean useCache) throws RestClientException, IOException {
         if (useCache) {
             return schemaStore.computeIfAbsent(clusterName, cluster -> {
@@ -89,6 +94,7 @@ public class SchemaRegistryManager {
         }
     }
 
+    @Override
     public boolean isSchemaCachedForCluster(String clusterName) {
         return schemaStore.containsKey(clusterName);
     }
@@ -114,10 +120,12 @@ public class SchemaRegistryManager {
         return result;
     }
 
+    @Override
     public List<Integer> deleteSubject(String clusterName, String subject) throws RestClientException, IOException {
         return schemaRegistryClientMap.get(clusterName).deleteSubject(subject);
     }
 
+    @Override
     public void connectToSchemaRegistry(KafkaCluster cluster) throws ClusterNameExistedException {
         String clusterName = cluster.getName();
         if (schemaRegistryClientMap.containsKey(clusterName)) {
@@ -127,6 +135,7 @@ public class SchemaRegistryManager {
         schemaRegistryClientMap.put(clusterName, client);
     }
 
+    @Override
     public void disconnectFromSchemaRegistry(String clusterName) {
         SchemaRegistryClient client = schemaRegistryClientMap.remove(clusterName);
         if (client != null) {
@@ -138,6 +147,7 @@ public class SchemaRegistryManager {
         }
     }
 
+    @Override
     public List<SchemaMetadataFromRegistry> getSchemasById(String clusterName, int id) throws RestClientException, IOException {
 //        Collection<String> subjects = schemaRegistryClientMap.get(clusterName).getAllSubjectsById(id);
         Collection<SubjectVersion> subjectVersions = schemaRegistryClientMap.get(clusterName).getAllVersionsById(id);
