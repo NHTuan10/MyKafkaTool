@@ -202,26 +202,13 @@ public class TableViewConfigurer {
         copyRowItem.setOnAction(event -> copySelectedInTableViewToClipboard(tableView, tableViewConfiguration.isCellSelectionEnabled(), tableViewConfiguration.isHeadersIncludedInRowCopy(), tableViewConfiguration.extraFieldsToCopyAndExport()));
 
         MenuItem exportTableItem = new MenuItem("Export Table");
-        boolean isHeadersIncludedInRowExport = tableViewConfiguration.isHeadersIncludedInRowExport();
         exportTableItem.setOnAction(event -> {
-            String data = getTableDataInCSV(tableView, isHeadersIncludedInRowExport, tableViewConfiguration.extraFieldsToCopyAndExport());
-            try {
-                ViewUtils.saveDataToFile("Export", data, stage, new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
-                        new FileChooser.ExtensionFilter("All Files", "*.*"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            exportTable(tableView, stage, tableViewConfiguration.isHeadersIncludedInRowExport(), tableViewConfiguration.extraFieldsToCopyAndExport());
         });
 
         MenuItem exportSelectedItem = new MenuItem("Export Selected");
         exportSelectedItem.setOnAction(event -> {
-            String selectedData = getSelectedRowsData(tableView, isHeadersIncludedInRowExport, tableViewConfiguration.extraFieldsToCopyAndExport());
-            try {
-                ViewUtils.saveDataToFile("Export Selected Data", selectedData, stage, new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
-                        new FileChooser.ExtensionFilter("All Files", "*.*"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            exportSelectedRows(tableView, stage,  tableViewConfiguration.isHeadersIncludedInRowExport(), tableViewConfiguration.extraFieldsToCopyAndExport());
         });
 
         String truncatedText = cellText.length() > 21 ? cellText.substring(0, 21) + "..." : cellText;
@@ -229,6 +216,26 @@ public class TableViewConfigurer {
         copyHoverCell.setOnAction(event -> ViewUtils.copyTextToClipboard(cellText));
 
         return List.of(copyRowItem, exportTableItem, exportSelectedItem, copyHoverCell);
+    }
+
+    public static <S> void exportSelectedRows(TableView<S> tableView, StageHolder stage, boolean isHeadersIncludedInRowExport, TableViewConfiguration.ExtraFieldsToCopyAndExport<S> extraFieldsToCopyAndExport) {
+        String selectedData = getSelectedRowsData(tableView, isHeadersIncludedInRowExport, extraFieldsToCopyAndExport);
+        try {
+            ViewUtils.saveDataToFile("Export Selected Data", selectedData, stage, new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
+                    new FileChooser.ExtensionFilter("All Files", "*.*"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <S> void exportTable(TableView<S> tableView, StageHolder stage, boolean isHeadersIncludedInRowExport, TableViewConfiguration.ExtraFieldsToCopyAndExport<S> extraFieldsToCopyAndExport) {
+        String data = getTableDataInCSV(tableView, isHeadersIncludedInRowExport, extraFieldsToCopyAndExport);
+        try {
+            ViewUtils.saveDataToFile("Export", data, stage, new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
+                    new FileChooser.ExtensionFilter("All Files", "*.*"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static <S> void copySelectedInTableViewToClipboard(TableView<S> tableView, boolean isCellSelectionEnabled, boolean isHeaderIncluded, TableViewConfiguration.ExtraFieldsToCopyAndExport<S> extraFieldsToCopyAndExport) {

@@ -5,15 +5,14 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<fx:root prefHeight="437.0" prefWidth="730.0" type="AnchorPane" xmlns="http://javafx.com/javafx/17.0.12"
-         xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="437.0" prefWidth="730.0" type="AnchorPane" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
    <children>
 
-                                    <SplitPane dividerPositions="0.12440944881889764" minHeight="200.0" orientation="VERTICAL" prefHeight="473.0" prefWidth="876.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <SplitPane dividerPositions="0.12440944881889764" minHeight="200.0" orientation="VERTICAL" prefHeight="437.0" prefWidth="730.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane maxHeight="50.0" minHeight="50.0" minWidth="-Infinity">
                <children>
-                  <HBox prefHeight="31.0" prefWidth="728.0">
+                  <HBox prefHeight="50.0" prefWidth="728.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <Button fx:id="refreshBtn" mnemonicParsing="false" onAction="#refresh" text="↻">
                            <HBox.margin>
@@ -31,6 +30,15 @@
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </Button>
+                         <MenuButton mnemonicParsing="false" text="⬇">
+                             <items>
+                                 <MenuItem mnemonicParsing="false" onAction="#exportTable" text="Export Table " />
+                                 <MenuItem mnemonicParsing="false" onAction="#exportSelectedRows" text="Export Selected" />
+                             </items>
+                             <HBox.margin>
+                                 <Insets left="5.0" top="5.0" />
+                             </HBox.margin>
+                         </MenuButton>
                          <HBox prefHeight="36.0" prefWidth="423.0" styleClass="bordered-container">
                            <children>
                               <Label fx:id="filterLabel" text="Filter">
@@ -43,21 +51,20 @@
                                     <Insets left="10.0" />
                                  </HBox.margin>
                               </TextField>
-                               <ToggleButton fx:id="caseSensitiveFilterToggleBtn" mnemonicParsing="false"
-                                             prefHeight="26.0" prefWidth="41.0" text="Cc">
+                               <ToggleButton fx:id="caseSensitiveFilterToggleBtn" mnemonicParsing="false" prefHeight="26.0" prefWidth="41.0" text="Cc">
                                    <HBox.margin>
-                                       <Insets left="10.0"/>
+                                       <Insets left="10.0" />
                                    </HBox.margin>
                                    <tooltip>
-                                       <Tooltip text="Case Sensitive"/>
+                                       <Tooltip text="Case Sensitive" />
                                    </tooltip>
                                </ToggleButton>
                                <ToggleButton fx:id="negativeFilterToggleBtn" mnemonicParsing="false" text="-">
                                    <HBox.margin>
-                                       <Insets left="10.0"/>
+                                       <Insets left="10.0" />
                                    </HBox.margin>
                                    <tooltip>
-                                       <Tooltip text="NOT"/>
+                                       <Tooltip text="NOT" />
                                    </tooltip>
                                </ToggleButton>
                               <ToggleButton fx:id="regexFilterToggleBtn" mnemonicParsing="false" text=".*">
@@ -74,7 +81,7 @@
                               <Insets bottom="5.0" left="5.0" top="5.0" />
                            </padding>
                         </HBox>
-                         <Label fx:id="numberOfRowsLabel" text="0 Rows">
+                         <Label fx:id="numberOfRowsLabel" maxWidth="300.0" prefHeight="17.0" prefWidth="126.0" text="0 Rows">
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
@@ -83,7 +90,7 @@
                   </HBox>
                </children>
             </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="337.0" prefWidth="862.0">
+          <AnchorPane minHeight="100.0" minWidth="-Infinity">
                <children>
                   <TableView fx:id="table" minHeight="100.0" prefHeight="341.0" prefWidth="940.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <columns>

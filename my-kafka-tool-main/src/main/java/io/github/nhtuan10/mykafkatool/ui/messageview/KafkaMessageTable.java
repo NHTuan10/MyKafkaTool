@@ -65,7 +65,14 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
                 , false
                 , true
                 , true
-                , new TableViewConfigurer.TableViewConfiguration.ExtraFieldsToCopyAndExport<>(List.of("Headers")
+                , getExtraFieldsToCopyAndExport(), menuItems);
+        configureTableView(configuration);
+        TableViewConfigurer.getTableColumnById(table, KafkaMessageTableItem.SERIALIZED_VALUE_SIZE).ifPresent(column ->
+                column.setText("Serialized Value Size (Bytes)"));
+    }
+
+    private TableViewConfigurer.TableViewConfiguration.ExtraFieldsToCopyAndExport<KafkaMessageTableItem> getExtraFieldsToCopyAndExport(){
+        return new TableViewConfigurer.TableViewConfiguration.ExtraFieldsToCopyAndExport<>(List.of("Headers")
                 , item -> {
             String headers;
             try {
@@ -76,10 +83,7 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
             }
             return List.of(headers);
         }
-        ), menuItems);
-        configureTableView(configuration);
-        TableViewConfigurer.getTableColumnById(table, KafkaMessageTableItem.SERIALIZED_VALUE_SIZE).ifPresent(column ->
-                column.setText("Serialized Value Size (Bytes)"));
+        );
     }
 
     private MenuItem createViewOrReproduceMenuItem(String text, boolean isReproduceMenuItem, boolean withHeaders) {
@@ -206,5 +210,17 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
                         runnable.accept(this.filterProperty.get().copy());
                     }
                 }));
+    }
+
+    @Override
+    @FXML
+    public void exportTable() {
+        exportTable(true, getExtraFieldsToCopyAndExport());
+    }
+
+    @Override
+    @FXML
+    public void exportSelectedRows() {
+        exportSelectedRows(true, getExtraFieldsToCopyAndExport());
     }
 }

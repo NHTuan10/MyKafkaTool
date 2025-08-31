@@ -30,6 +30,7 @@ import java.util.function.Predicate;
 @Slf4j
 public class EditableTableControl<T> extends AnchorPane {
 
+    public final TableViewConfigurer.TableViewConfiguration.ExtraFieldsToCopyAndExport<T> EMPTY_EXTRA_FIELDS_TO_COPY_AND_EXPORT = new TableViewConfigurer.TableViewConfiguration.ExtraFieldsToCopyAndExport<>(List.of(), (item) -> List.of());
     protected ObservableList<T> tableItems;
 
     protected Class<T> itemClass;
@@ -264,5 +265,23 @@ public class EditableTableControl<T> extends AnchorPane {
 
     public void clear() {
         tableItems.clear();
+    }
+
+    @FXML
+    public void exportTable() {
+        exportTable(true, EMPTY_EXTRA_FIELDS_TO_COPY_AND_EXPORT);
+    }
+
+    protected void exportTable(boolean isHeadersIncludedInRowExport, TableViewConfigurer.TableViewConfiguration.ExtraFieldsToCopyAndExport<T> extraFieldsToCopyAndExport) {
+        TableViewConfigurer.exportTable(table, stageHolder, isHeadersIncludedInRowExport, extraFieldsToCopyAndExport);
+    }
+
+    @FXML
+    public void exportSelectedRows() {
+        exportSelectedRows(true, EMPTY_EXTRA_FIELDS_TO_COPY_AND_EXPORT);
+    }
+
+    public void exportSelectedRows(boolean isHeadersIncludedInRowExport, TableViewConfigurer.TableViewConfiguration.ExtraFieldsToCopyAndExport<T> extraFieldsToCopyAndExport) {
+        TableViewConfigurer.exportSelectedRows(table, stageHolder, isHeadersIncludedInRowExport, extraFieldsToCopyAndExport);
     }
 }
