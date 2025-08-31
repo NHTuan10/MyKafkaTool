@@ -12,6 +12,8 @@ public class Config {
     public static final String AUTH_CONFIG_PROP = "authConfig";
     public static final String SCHEMA_REGISTRY_URL_PROP = "schema.registry.url";
     public static final String SCHEMA_ID_PROP = "schemaId";
+    public static final String SCHEMA_SUBJECT = "schemaSubject";
+    public static final String SCHEMA_VERSION = "schemaVersion";
 
     private Config() {
     }

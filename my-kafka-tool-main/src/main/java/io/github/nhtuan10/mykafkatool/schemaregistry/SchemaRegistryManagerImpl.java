@@ -61,7 +61,7 @@ public class SchemaRegistryManagerImpl implements SchemaRegistryManager {
 
     @Override
     public List<Integer> getAllVersions(String clusterName, String subject) throws RestClientException, IOException {
-        return schemaRegistryClientMap.get(clusterName).getAllVersions(subject);
+        return schemaRegistryClientMap.get(clusterName).getAllVersions(subject).stream().sorted(Collections.reverseOrder()).toList();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.consumer;
 
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.api.exception.DeserializationException;
@@ -266,6 +267,19 @@ public class KafkaConsumerService {
             } catch (Exception e) {
                 throw new DeserializationException("Error during fetching schema by id %s".formatted(schemaId), schemaId, e);
             }
+        }
+        else if (others.containsKey(Config.SCHEMA_SUBJECT) && others.containsKey(Config.SCHEMA_VERSION)) {
+            String schemaSubject = others.get(Config.SCHEMA_SUBJECT);
+            Integer schemaVersion = Integer.valueOf(others.get(Config.SCHEMA_VERSION));
+            try {
+                schemaTableItems.add(schemaRegistryManager.getSubjectMetadataFromRegistry(pollingOptions.kafkaTopic().cluster().getName(), schemaSubject, schemaVersion));
+            } catch (RestClientException | IOException e) {
+                throw new DeserializationException("Error during fetching schema by subject %s and version %s".formatted(schemaSubject, schemaVersion), schemaId, e);
+            }
+            schema = schemaTableItems.get(0).schemaMetadata().getSchema();
+        }
+        else if (others.containsKey(Config.SCHEMA_PROP)) {
+            schema = others.get(Config.SCHEMA_PROP);
         }
         KafkaMessageTableItem kafkaMessageTableItem =  KafkaMessageTableItemFXModel.builder()
                 .partition(record.partition())

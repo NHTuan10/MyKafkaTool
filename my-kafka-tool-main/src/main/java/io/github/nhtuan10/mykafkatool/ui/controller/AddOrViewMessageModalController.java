@@ -1,6 +1,7 @@
 package io.github.nhtuan10.mykafkatool.ui.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
@@ -53,7 +54,8 @@ import java.util.stream.IntStream;
 @Slf4j
 public class AddOrViewMessageModalController extends ModalController {
 
-    public static final String CUSTOM_SUBJECT_PLACEHOLDER = "<Custom>";
+    public static final SchemaMetadataFromRegistry CUSTOM_SUBJECT_PLACEHOLDER_ITEM = new SchemaMetadataFromRegistry("<Custom>",null,null,List.of());
+
     private final SerDesHelper serDesHelper;
     private final JsonHighlighter jsonHighlighter;
     private final ObjectMapper objectMapper;
@@ -125,7 +127,10 @@ public class AddOrViewMessageModalController extends ModalController {
     private Label clusterTopicAndPartitionInfo;
 
     @FXML
-    private SearchableComboBox<SchemaMetadataFromRegistry> schemaComboBox;
+    private SearchableComboBox<SchemaMetadataFromRegistry> schemaSubjectComboBox;
+
+    @FXML
+    private ComboBox<Integer> schemaVersionComboBox;
 
     @FXML
     private Button refreshSchemaBtn;
@@ -219,16 +224,47 @@ public class AddOrViewMessageModalController extends ModalController {
         multipleSendOptionContainer.managedProperty().bind(editable);
 //        progressIndicator.setIndeterminate(true);
         progressIndicator.visibleProperty().bind(isBusy);
-        schemaComboBox.setOnAction(event -> {
-            SchemaMetadataFromRegistry selectedSchema = schemaComboBox.getValue();
+        schemaVersionComboBox.disableProperty().bind(schemaSubjectComboBox.valueProperty().isNull().or(schemaSubjectComboBox.valueProperty().isEqualTo(CUSTOM_SUBJECT_PLACEHOLDER_ITEM)));
+        schemaVersionComboBox.itemsProperty().bind(schemaSubjectComboBox.valueProperty().map((schemaMetadataFromRegistry) -> FXCollections.observableArrayList(schemaMetadataFromRegistry.allVersions())));
+
+        //        schemaSubjectComboBox.selectionModelProperty().addListener((obs, oldVal, newVal) -> {
+//            if (newVal != null && newVal.getSelectedItem() != null) {
+//                schemaVersionComboBox.setItems(FXCollections.observableArrayList(newVal.getSelectedItem().allVersions()));
+//                if (!schemaVersionComboBox.getItems().isEmpty()) {
+//                    schemaVersionComboBox.getSelectionModel().selectFirst();
+//                }
+//            }
+//        });
+        schemaSubjectComboBox.setOnAction(event -> {
+            SchemaMetadataFromRegistry selectedSchema = schemaSubjectComboBox.getValue();
             if (selectedSchema != null) {
-                if (selectedSchema.subjectName().equals(CUSTOM_SUBJECT_PLACEHOLDER)){
+                if (selectedSchema.equals(CUSTOM_SUBJECT_PLACEHOLDER_ITEM)){
+                    schemaVersionComboBox.getItems().clear();
+//                    schemaVersionComboBox.setDisable(true);
                     schemaTextArea.setEditable(true);
                 } else {
+//                    schemaVersionComboBox.setItems(FXCollections.observableArrayList(selectedSchema.allVersions()));
+                    if (!schemaVersionComboBox.getItems().isEmpty()) {
+                        schemaVersionComboBox.getSelectionModel().selectFirst();
+                    }
                     schemaTextArea.setEditable(false);
                     refreshDisplayedValue(selectedSchema.schemaMetadata().getSchema(), schemaTextArea, DisplayType.JSON, true);
                 }
             }
+        });
+        schemaVersionComboBox.setOnAction(event -> {
+            SchemaMetadataFromRegistry selectedSchema = schemaSubjectComboBox.getValue();
+
+            try {
+                if (selectedSchema != null && schemaVersionComboBox.getValue() != null) {
+                    SchemaMetadata schemaMetadata = schemaRegistryManager.getSubjectMetadata(kafkaTopic.cluster().getName(), selectedSchema.subjectName(), schemaVersionComboBox.getValue());
+                    schemaTextArea.setEditable(false);
+                    refreshDisplayedValue(schemaMetadata.getSchema(), schemaTextArea, DisplayType.JSON, true);
+                }
+            } catch (RestClientException | IOException e) {
+                throw new RuntimeException(e);
+            }
+
         });
         refreshSchemaBtn.setOnAction(event -> {
             if (editable.get()){
@@ -364,9 +400,9 @@ public class AddOrViewMessageModalController extends ModalController {
             enableDisableSchemaTextArea();
             refreshAllSchemas(true);
             if (schemaList != null && !schemaList.isEmpty()){
-                int index = schemaComboBox.getItems().stream().map(SchemaMetadataFromRegistry::subjectName).toList().indexOf(schemaList.get(0).subjectName());
+                int index = schemaSubjectComboBox.getItems().stream().map(SchemaMetadataFromRegistry::subjectName).toList().indexOf(schemaList.get(0).subjectName());
                 if (index >= 0) {
-                    schemaComboBox.getSelectionModel().select(index);
+                    schemaSubjectComboBox.getSelectionModel().select(index);
                 }
             }
             refreshSchemaBtn.setVisible(true);
@@ -389,13 +425,16 @@ public class AddOrViewMessageModalController extends ModalController {
             schemaTextArea.setEditable(false);
 //            schemaSelectionHBox.setDisable(true);
             if (schemaList.isEmpty()){
-                schemaComboBox.setItems(FXCollections.observableArrayList(new SchemaMetadataFromRegistry(CUSTOM_SUBJECT_PLACEHOLDER,null,null,null)));
+                schemaSubjectComboBox.setItems(FXCollections.observableArrayList(CUSTOM_SUBJECT_PLACEHOLDER_ITEM));
             }
             else {
-                schemaComboBox.setItems(FXCollections.observableArrayList(schemaList));
-                schemaComboBox.getSelectionModel().selectFirst();
+                schemaSubjectComboBox.setItems(FXCollections.observableArrayList(schemaList));
+                schemaSubjectComboBox.getSelectionModel().selectFirst();
             }
             refreshSchemaBtn.setVisible(false);
+        }
+        if (schemaVersionComboBox.getItems() != null && !schemaVersionComboBox.getItems().isEmpty()) {
+            schemaVersionComboBox.getSelectionModel().selectFirst();
         }
         valueDisplayTypeComboBox.getSelectionModel().select(displayType);
         valueDisplayTypeToggleEventAction(true, initValue);
@@ -407,11 +446,10 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     private void refreshAllSchemas(boolean useCache) {
-        SchemaMetadataFromRegistry customSchemaPlaceholder = new SchemaMetadataFromRegistry(CUSTOM_SUBJECT_PLACEHOLDER,null,null,null);
         try {
             ObservableList<SchemaMetadataFromRegistry> schemas = FXCollections.observableArrayList(schemaRegistryManager.getAllSubjectMetadata(kafkaTopic.cluster().getName(),false, useCache));
-            schemas.add(0, customSchemaPlaceholder);
-            schemaComboBox.setItems(schemas);
+            schemas.add(0, CUSTOM_SUBJECT_PLACEHOLDER_ITEM);
+            schemaSubjectComboBox.setItems(schemas);
         } catch (RestClientException | IOException e) {
             throw new RuntimeException(e);
         }
