@@ -2,6 +2,7 @@ package io.github.nhtuan10.mykafkatool.api.serdes;
 
 import io.github.nhtuan10.modular.api.annotation.ModularService;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
+import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 
 import java.util.Map;
 
@@ -28,5 +29,9 @@ public interface PluggableDeserializer {
 
     default DisplayType getDisplayType() {
         return DisplayType.TEXT;
+    }
+
+    default String getCorrespondingSerializerName(KafkaMessage kafkaMessage) {
+        return getName();
     }
 }

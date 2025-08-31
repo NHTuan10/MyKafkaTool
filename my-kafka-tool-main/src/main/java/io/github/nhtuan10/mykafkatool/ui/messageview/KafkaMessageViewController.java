@@ -20,6 +20,7 @@ import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import io.github.nhtuan10.mykafkatool.util.Utils;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -181,22 +182,28 @@ public class KafkaMessageViewController {
 
     public void viewOrReproduceMessage(SerDesHelper serDesHelper, KafkaMessageTableItem rowData, boolean reproduce, boolean withHeaders) {
 //        TreeItem selectedTreeItemBeforeAdding = this.selectedTreeItem;
+        String valueContentType = rowData.getValueContentType();
         Map<String, Object> msgModalFieldMap = new HashMap<>();
         msgModalFieldMap.put("serDesHelper", serDesHelper);
         msgModalFieldMap.put("keyTextArea", rowData.getKey());
         msgModalFieldMap.put("valueTextArea", rowData.getValue());
         // TODO: choose serializer depends on the deserializer
-        msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
-        if (!reproduce) {
-            msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
-        }
+        msgModalFieldMap.put("valueContentType", valueContentType);
         msgModalFieldMap.put("schemaTextArea", rowData.getSchema());
         msgModalFieldMap.put("schemaList", rowData.getSchemaList());
-        if (!reproduce || withHeaders) {
-            msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
-        }
         msgModalFieldMap.put("kafkaTopic", kafkaTopic);
         msgModalFieldMap.put("kafkaPartition", kafkaPartition);
+        if (reproduce) {
+            msgModalFieldMap.put("valueContentType", serDesHelper.getPluggableDeserialize(valueContentType).getCorrespondingSerializerName(Utils.convertKafkaMessage(rowData)));
+            if ( withHeaders) {
+                msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
+            }
+        }
+        else {
+            msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
+            msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
+        }
+
         try {
             AtomicReference<Object> count = new AtomicReference<>(0);
             ModalUtils.showPopUpModal(AppConstant.ADD_MESSAGE_MODAL_FXML, reproduce ? "Add Message" : "View Message", count, msgModalFieldMap, reproduce, true, stageHolder.getStage(), false);
