@@ -268,9 +268,9 @@ public class KafkaConsumerService {
                 throw new DeserializationException("Error during fetching schema by id %s".formatted(schemaId), schemaId, e);
             }
         }
-        else if (others.containsKey(Config.SCHEMA_SUBJECT) && others.containsKey(Config.SCHEMA_VERSION)) {
-            String schemaSubject = others.get(Config.SCHEMA_SUBJECT);
-            Integer schemaVersion = Integer.valueOf(others.get(Config.SCHEMA_VERSION));
+        else if (others.containsKey(Config.SCHEMA_SUBJECT_PROP) && others.containsKey(Config.SCHEMA_VERSION_PROP)) {
+            String schemaSubject = others.get(Config.SCHEMA_SUBJECT_PROP);
+            Integer schemaVersion = Integer.valueOf(others.get(Config.SCHEMA_VERSION_PROP));
             try {
                 schemaTableItems.add(schemaRegistryManager.getSubjectMetadataFromRegistry(pollingOptions.kafkaTopic().cluster().getName(), schemaSubject, schemaVersion));
             } catch (RestClientException | IOException e) {

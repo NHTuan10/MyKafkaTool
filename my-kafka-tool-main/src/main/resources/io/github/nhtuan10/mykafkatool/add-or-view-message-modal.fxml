@@ -9,11 +9,11 @@
 <?import org.controlsfx.control.SearchableComboBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
-<AnchorPane prefHeight="522.0" prefWidth="779.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController">
+<AnchorPane prefHeight="522.0" prefWidth="842.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nhtuan10.mykafkatool.ui.controller.AddOrViewMessageModalController">
     <children>
-        <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="522.0" prefWidth="779.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="522.0" prefWidth="802.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <items>
-                <TabPane prefHeight="509.0" prefWidth="816.0" tabClosingPolicy="UNAVAILABLE">
+                <TabPane minHeight="510.0" minWidth="820.0" prefHeight="510.0" prefWidth="820.0" tabClosingPolicy="UNAVAILABLE">
                     <tabs>
                         <Tab text="Contents">
                             <content>
@@ -25,7 +25,7 @@
                                                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="556.0" minWidth="10.0" percentWidth="80.0" prefWidth="556.0" />
                                             </columnConstraints>
                                             <rowConstraints>
-                                                <RowConstraints maxHeight="104.0" minHeight="1.0" percentHeight="5.0" prefHeight="1.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="104.0" minHeight="1.0" percentHeight="10.0" prefHeight="1.0" vgrow="SOMETIMES" />
                                                 <RowConstraints maxHeight="104.0" minHeight="0.0" percentHeight="10.0" prefHeight="66.0" vgrow="SOMETIMES" />
                                                 <RowConstraints maxHeight="216.0" minHeight="10.0" percentHeight="60.0" prefHeight="118.0" vgrow="SOMETIMES" />
                                     <RowConstraints maxHeight="178.0" minHeight="10.0" percentHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
@@ -141,23 +141,37 @@
                                                         <Insets top="10.0" />
                                                     </GridPane.margin>
                                                 </HBox>
-                                                <Label fx:id="clusterTopicAndPartitionInfo" text="Topic " GridPane.columnSpan="2">
-                                                    <GridPane.margin>
-                                                        <Insets left="10.0" />
-                                                    </GridPane.margin>
-                                                    <font>
-                                                        <Font size="15.0" />
-                                                    </font>
-                                                </Label>
                                     <HBox fx:id="schemaSelectionHBox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                        <children>
                                            <SearchableComboBox fx:id="schemaSubjectComboBox" maxHeight="26.0" prefHeight="26.0" prefWidth="488.0" />
                                            <ComboBox fx:id="schemaVersionComboBox" maxHeight="26.0" prefHeight="26.0" prefWidth="72.0" />
-                                          <Button fx:id="refreshSchemaBtn" mnemonicParsing="false" text="↻">
+                                          <Button fx:id="refreshSchemaBtn" mnemonicParsing="false" onAction="#refreshAllSchemas" text="↻">
                                               <tooltip><Tooltip text="Refresh" /></tooltip>
                                           </Button>
                                        </children>
                                     </HBox>
+                                    <Label fx:id="clusterTopicAndPartitionInfoLabel" text="Topic " GridPane.columnSpan="2">
+                                        <font>
+                                            <Font size="15.0" />
+                                        </font>
+                                    </Label>
+                                        <Label fx:id="sendToLabel" prefHeight="19.0" prefWidth="61.0" text="Send to: " GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                       <GridPane.margin>
+                                          <Insets left="10.0" />
+                                       </GridPane.margin>
+                                        </Label>
+                                        <HBox fx:id="clusterTopicAndPartitionToSendHbox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+    <!--                                    <HBox fx:id="clusterTopicAndPartitionToSendHbox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" >-->
+                                           <children>
+
+                                                   <SearchableComboBox fx:id="clusterComboBox" prefHeight="30.0" prefWidth="120.0" />
+                                                   <SearchableComboBox fx:id="topicComboBox" prefHeight="30.0" prefWidth="357.0" />
+                                                   <SearchableComboBox fx:id="partitionComboBox" prefHeight="30.0" prefWidth="177.0" />
+                                               <Button fx:id="refreshAllClustersBtn" mnemonicParsing="false" prefHeight="26.0" prefWidth="53.0" text="↻">
+                                                   <tooltip><Tooltip text="Refresh" /></tooltip>
+                                               </Button>
+                                           </children>
+                                        </HBox>
                                             </children>
                                             <padding>
                                                 <Insets bottom="10.0" />

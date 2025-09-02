@@ -5,11 +5,13 @@ import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
+import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.api.model.SchemaMetadataFromRegistry;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
+import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
@@ -61,6 +63,7 @@ public class AddOrViewMessageModalController extends ModalController {
     private final ObjectMapper objectMapper;
     private final ProducerUtil producerUtil;
     private final SchemaRegistryManager schemaRegistryManager;
+    private final ClusterManager clusterManager;
     private final Alert helpDialog;
     private final EventDispatcher eventDispatcher;
     private final BooleanProperty editable;
@@ -124,10 +127,10 @@ public class AddOrViewMessageModalController extends ModalController {
     private ProgressIndicator progressIndicator;
 
     @FXML
-    private Label clusterTopicAndPartitionInfo;
+    private Label clusterTopicAndPartitionInfoLabel;
 
     @FXML
-    private SearchableComboBox<SchemaMetadataFromRegistry> schemaSubjectComboBox;
+    private ComboBox<SchemaMetadataFromRegistry> schemaSubjectComboBox;
 
     @FXML
     private ComboBox<Integer> schemaVersionComboBox;
@@ -138,14 +141,33 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private HBox schemaSelectionHBox;
 
+    @FXML
+    private HBox clusterTopicAndPartitionToSendHbox;
+
+    @FXML
+    private SearchableComboBox<KafkaCluster> clusterComboBox;
+
+    @FXML
+    private SearchableComboBox<KafkaTopic> topicComboBox;
+
+    @FXML
+    private SearchableComboBox<KafkaPartition> partitionComboBox;
+
+    @FXML
+    private Button refreshAllClustersBtn;
+
+    @FXML
+    private Label sendToLabel;
+
     @Inject
     public AddOrViewMessageModalController(SerDesHelper serDesHelper, JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper,
-                                           ProducerUtil producerUtil, EventDispatcher eventDispatcher, SchemaRegistryManager schemaRegistryManager) {
+                                           ProducerUtil producerUtil, EventDispatcher eventDispatcher, SchemaRegistryManager schemaRegistryManager, ClusterManager clusterManager) {
         this.serDesHelper = serDesHelper;
         this.jsonHighlighter = jsonHighlighter;
         this.objectMapper = objectMapper;
         this.producerUtil = producerUtil;
         this.schemaRegistryManager = schemaRegistryManager;
+        this.clusterManager = clusterManager;
         try {
             this.helpDialog = ModalUtils.buildHelpDialog("handlebars-help.txt", "Handlebars Expression Help");
         } catch (IOException e) {
@@ -266,11 +288,60 @@ public class AddOrViewMessageModalController extends ModalController {
             }
 
         });
-        refreshSchemaBtn.setOnAction(event -> {
-            if (editable.get()){
-                refreshAllSchemas(false);
+        sendToLabel.visibleProperty().bind(editable);
+        sendToLabel.managedProperty().bind(editable);
+        clusterTopicAndPartitionToSendHbox.visibleProperty().bind(editable);
+        clusterTopicAndPartitionToSendHbox.managedProperty().bind(editable);
+        clusterTopicAndPartitionInfoLabel.visibleProperty().bind(editable.not());
+        clusterTopicAndPartitionInfoLabel.managedProperty().bind(editable.not());
+
+//        topicComboBox.itemsProperty().bind(clusterComboBox.valueProperty()
+//                .map(cluster -> FXCollections.observableArrayList(clusterManager.getClusterTopicCache().get(cluster))));
+//        partitionComboBox.itemsProperty().bind(topicComboBox.valueProperty().map(topic -> FXCollections.observableArrayList(topic.partitions())));
+        clusterComboBox.setOnAction(event -> {
+            KafkaCluster cluster = clusterComboBox.getValue();
+            if (cluster != null) {
+                setTopicComboBoxItemsForCluster(cluster, null);
+                kafkaTopic = null;
+                kafkaPartition = null;
             }
         });
+        topicComboBox.setOnAction(event -> {
+            KafkaTopic topic = topicComboBox.getValue();
+            if (topic != null) {
+                setPartitionComboBoxItemsForTopic(topic, null);
+                kafkaTopic = topicComboBox.getValue();
+                kafkaPartition = null;
+            }
+        });
+        partitionComboBox.setOnAction(event -> {
+            KafkaPartition partition = partitionComboBox.getValue();
+            if (partition != null && partition.id() >=0 ) {
+                kafkaPartition = partitionComboBox.getValue();
+            }
+        });
+
+    }
+
+    private void setPartitionComboBoxItemsForTopic(KafkaTopic topic, KafkaPartition partition) {
+        partitionComboBox.setItems(FXCollections.observableArrayList(topic.partitions()));
+        partitionComboBox.getItems().add(0, new KafkaPartition(-1, topic));
+        if (partition != null) {
+            partitionComboBox.getSelectionModel().select(partition);
+        }
+        else {
+            partitionComboBox.getSelectionModel().selectFirst();
+        }
+    }
+
+    private void setTopicComboBoxItemsForCluster(KafkaCluster cluster, KafkaTopic topic) {
+        topicComboBox.setItems(FXCollections.observableArrayList(clusterManager.getClusterTopicCache().get(cluster)));
+        if (topic != null) {
+            topicComboBox.getSelectionModel().select(topic);
+        }
+        else {
+            topicComboBox.getSelectionModel().selectFirst();
+        }
     }
 
     private void previewKeyAndValueHandlebars(int n, String keyTemplate, String valueTemplate) {
@@ -379,7 +450,6 @@ public class AddOrViewMessageModalController extends ModalController {
         valueDisplayTypeComboBox.setOnAction(event -> {
             valueDisplayTypeToggleEventAction(editable, initValue);
         });
-        //TODO:[Low Priority] Set value on below combox box based on the valueContentTypeComboBox
         valueContentTypeComboBox.getSelectionModel().selectFirst();
         headerTable.setEditable(editable);
 
@@ -406,6 +476,22 @@ public class AddOrViewMessageModalController extends ModalController {
                 }
             }
             refreshSchemaBtn.setVisible(true);
+            clusterComboBox.setItems(FXCollections.observableArrayList(clusterManager.getClusterTopicCache().keySet()));
+            if (kafkaPartition != null) {
+                KafkaTopic topic = kafkaPartition.topic();
+                KafkaCluster cluster = topic.cluster();
+                clusterComboBox.getSelectionModel().select(cluster);
+                setTopicComboBoxItemsForCluster(cluster, topic);
+                setPartitionComboBoxItemsForTopic(topic, kafkaPartition);
+            } else if (kafkaTopic != null) {
+                KafkaCluster cluster = kafkaTopic.cluster();
+                clusterComboBox.getSelectionModel().select(cluster);
+                setTopicComboBoxItemsForCluster(cluster, kafkaTopic);
+                setPartitionComboBoxItemsForTopic(kafkaTopic, null);
+            }
+            else {
+                clusterComboBox.getSelectionModel().selectFirst();
+            }
         } else { // For View Message Modal
 //            choiceButtonContainer.setVisible(false);
 //            choiceButtonContainer.setMinHeight(0);
@@ -441,10 +527,16 @@ public class AddOrViewMessageModalController extends ModalController {
         String text = kafkaPartition != null ?
                 "Cluster: %s - Topic: %s - Partition: %s".formatted(kafkaTopic.cluster().getName(), kafkaTopic.name(), kafkaPartition.id()) :
                 "Cluster: %s - Topic: %s".formatted(kafkaTopic.cluster().getName(), kafkaTopic.name());
-        this.clusterTopicAndPartitionInfo.setText(text);
+        this.clusterTopicAndPartitionInfoLabel.setText(text);
         refreshDisplayedValue(schemaTextArea.getText(), schemaTextArea, DisplayType.JSON, true);
     }
 
+    @FXML
+    private void refreshAllSchemas() {
+        if (editable.get()){
+            refreshAllSchemas(false);
+        }
+    }
     private void refreshAllSchemas(boolean useCache) {
         try {
             ObservableList<SchemaMetadataFromRegistry> schemas = FXCollections.observableArrayList(schemaRegistryManager.getAllSubjectMetadata(kafkaTopic.cluster().getName(),false, useCache));

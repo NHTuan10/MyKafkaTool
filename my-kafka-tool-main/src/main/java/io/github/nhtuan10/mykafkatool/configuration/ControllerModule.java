@@ -11,6 +11,7 @@ import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.ViewControllerMap;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.WindowControllerMap;
+import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
@@ -89,7 +90,7 @@ abstract class ControllerModule {
 //    static Callback<Class<?>, Object> controllerFactory(@WindowControllerMap Map<Class<?>, Object> controllerMap, AddOrViewMessageModalController addOrViewMessageModalController) {
     static Callback<Class<?>, Object> controllerFactory(@WindowControllerMap Map<Class<?>, Object> controllerMap, SerDesHelper serDesHelper,
                                                         JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper,
-                                                        ProducerUtil producerUtil, EventDispatcher eventDispatcher, SchemaRegistryManager schemaRegistryManager) {
+                                                        ProducerUtil producerUtil, EventDispatcher eventDispatcher, SchemaRegistryManager schemaRegistryManager, ClusterManager clusterManager) {
 //        return new DaggerCallback() {
 //            @Override
 //            public Object call(Class<?> clazz) {
@@ -101,7 +102,7 @@ abstract class ControllerModule {
             if (controllerMap.containsKey(clazz)) {
                 return controllerMap.get(clazz);
             } else if (clazz.equals(AddOrViewMessageModalController.class)) {
-                return new AddOrViewMessageModalController(serDesHelper, jsonHighlighter, objectMapper, producerUtil, eventDispatcher, schemaRegistryManager);
+                return new AddOrViewMessageModalController(serDesHelper, jsonHighlighter, objectMapper, producerUtil, eventDispatcher, schemaRegistryManager, clusterManager);
             } else {
                 try {
                     return clazz.getConstructor().newInstance();

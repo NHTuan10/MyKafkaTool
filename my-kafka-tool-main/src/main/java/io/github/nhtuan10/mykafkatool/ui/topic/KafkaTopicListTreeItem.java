@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -62,11 +63,11 @@ public class KafkaTopicListTreeItem<T> extends FilterableTreeItem<T> {
         if (value instanceof KafkaTopicListTreeItemValue conn) {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();
             try {
-                List<String> topics = clusterManager.getAllTopics(conn.getCluster().getName()).stream().sorted().toList();
-                topics.forEach(topicName -> {
-                    KafkaTopicTreeItem<T> topic = new KafkaTopicTreeItem<>((T) new KafkaTopic(topicName, conn.getCluster()), clusterManager);
-                    children.add(topic);
-                    topic.getChildren();
+                List<KafkaTopic> topics = clusterManager.getAllTopics(conn.getCluster()).stream().sorted(Comparator.comparing(KafkaTopic::name)).toList();
+                topics.forEach(kafkaTopic -> {
+                    KafkaTopicTreeItem<T> topicTreeIten = new KafkaTopicTreeItem<>( (T) kafkaTopic, clusterManager);
+                    children.add(topicTreeIten);
+                    topicTreeIten.getChildren();
                 });
                 return children;
             } catch (ExecutionException | InterruptedException | TimeoutException e) {

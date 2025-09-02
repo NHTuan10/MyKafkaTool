@@ -1,7 +1,6 @@
 package io.github.nhtuan10.mykafkatool.manager;
 
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
-import io.github.nhtuan10.mykafkatool.api.exception.ClusterNameExistedException;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
@@ -13,7 +12,9 @@ import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupTableItem;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupTableItemFXModel;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerTableItem;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerTableItemFXModel;
+import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import jakarta.inject.Inject;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +40,8 @@ public class ClusterManager {
     private final AuthProviderManager authProviderManager;
     private final ProducerCreator producerCreator;
     private final ConsumerCreator consumerCreator;
+    @Getter
+    private final Map<KafkaCluster, List<KafkaTopic>> clusterTopicCache = new ConcurrentHashMap<>();
 
     //    private static class InstanceHolder {
 //        private static  ClusterManager INSTANCE = new ClusterManager(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
@@ -67,7 +70,7 @@ public class ClusterManager {
 //    }
 
     @SneakyThrows
-    public void connectToCluster(KafkaCluster cluster) throws ClusterNameExistedException {
+    public void connectToCluster(KafkaCluster cluster) {
         String clusterName = cluster.getName();
 //        if (adminMap.containsKey(clusterName)) {
 //            throw new ClusterNameExistedException(clusterName, "Cluster already exists");
@@ -85,6 +88,7 @@ public class ClusterManager {
         ProducerCreator.ProducerCreatorConfig producerCreatorConfig = ProducerCreator.ProducerCreatorConfig.builder().cluster(cluster).build();
         KafkaProducer producer = producerCreator.createProducer(producerCreatorConfig);
         producerMap.put(producerCreatorConfig, producer);
+        ViewUtils.runBackgroundTask(() ->  this.getAllTopics(cluster), (e) -> log.info("Background loaded all topics from cluster {} successfully", clusterName), (e) -> log.error("Error when background get all topics from cluster {}", clusterName, e));
     }
 
     public void closeClusterConnection(String clusterName) {
@@ -104,16 +108,34 @@ public class ClusterManager {
         adminMap.remove(clusterName);
     }
 
-    public Set<String> getAllTopics(String clusterName) throws ExecutionException, InterruptedException, TimeoutException {
-        Admin adminClient = adminMap.get(clusterName);
+    public List<KafkaTopic> getAllTopics(KafkaCluster kafkaCluster) throws ExecutionException, InterruptedException, TimeoutException {
+        Admin adminClient = adminMap.get(kafkaCluster.getName());
         ListTopicsResult result = adminClient.listTopics();
-        return result.names().get(10, TimeUnit.SECONDS);
+        Set<String> topicNames = result.names().get(10, TimeUnit.SECONDS);
+        List<KafkaTopic> topics = getTopicDesc(kafkaCluster.getName(), topicNames).values().stream()
+                .map(topicDescription -> {
+                    KafkaTopic topic = new KafkaTopic(topicDescription.name(), kafkaCluster, new ArrayList<>());
+                    topic.partitions().addAll(topicDescription.partitions().stream().map(topicPartInfo -> new KafkaPartition(topicPartInfo.partition(), topic)).toList());
+                    return topic;
+                }).toList();
+        clusterTopicCache.put(kafkaCluster, topics);
+        return topics;
     }
 
     public TopicDescription getTopicDesc(String clusterName, String topic) throws ExecutionException, InterruptedException {
+        return getTopicDesc(clusterName, Set.of(topic)).get(topic);
+    }
+
+    public Map<String, TopicDescription> getTopicDesc(String clusterName, Set<String> topics) {
         Admin adminClient = adminMap.get(clusterName);
-        DescribeTopicsResult result = adminClient.describeTopics(Set.of(topic));
-        return result.topicNameValues().get(topic).get();
+        DescribeTopicsResult result = adminClient.describeTopics(topics);
+        return result.topicNameValues().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
+            try {
+                return e.getValue().get();
+            } catch (InterruptedException | ExecutionException ex) {
+                throw new RuntimeException(ex);
+            }
+        }));
     }
 
     public List<TopicPartitionInfo> getTopicPartitions(String clusterName, String topic) throws ExecutionException, InterruptedException, TimeoutException {

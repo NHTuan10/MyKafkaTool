@@ -7,6 +7,11 @@ public record KafkaPartition(int id, KafkaTopic topic) {
 
     @Override
     public String toString() {
-        return "Partition " + id;
+        if (id == -1){
+            return "<AUTO>";
+        }
+        else {
+            return "Partition " + id;
+        }
     }
 }
