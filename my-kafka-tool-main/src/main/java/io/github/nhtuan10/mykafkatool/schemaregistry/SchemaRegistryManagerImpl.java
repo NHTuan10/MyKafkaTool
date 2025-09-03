@@ -73,7 +73,13 @@ public class SchemaRegistryManagerImpl implements SchemaRegistryManager {
     public SchemaMetadataFromRegistry getSubjectMetadataFromRegistry(String clusterName, String subject, Integer version) throws RestClientException, IOException {
         SchemaMetadata schemaMetadata = getSubjectMetadata(clusterName, subject, version);
         String compatibility = getCompatibility(clusterName, subject);
-        List<Integer> allVersions = List.of(version);
+        List<Integer> allVersions;
+        if (version < 0){
+            allVersions = List.of(schemaMetadata.getVersion());
+        }
+        else {
+            allVersions = List.of(version);
+        }
         return new SchemaMetadataFromRegistry(subject, schemaMetadata, compatibility, allVersions);
     }
 
