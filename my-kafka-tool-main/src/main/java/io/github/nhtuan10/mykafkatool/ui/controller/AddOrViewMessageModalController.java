@@ -178,7 +178,7 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     void initialize() {
         valueContentTypeComboBox.setOnAction(event -> {
-            enableDisableSchemaTextArea();
+            enableDisableSchemaInput();
             DisplayType displayType = serDesHelper.getPluggableSerialize(valueContentTypeComboBox.getValue()).getDisplayType();
             valueDisplayTypeComboBox.getSelectionModel().select(displayType);
         });
@@ -369,9 +369,10 @@ public class AddOrViewMessageModalController extends ModalController {
         }
     }
 
-    private void enableDisableSchemaTextArea() {
+    private void enableDisableSchemaInput() {
         PluggableSerializer serializer = serDesHelper.getPluggableSerialize(valueContentTypeComboBox.getValue());
         schemaTextArea.setDisable(!serializer.mayNeedUserInputForSchema());
+        schemaSubjectComboBox.setDisable(!serializer.mayNeedUserInputForSchema());
     }
 
     @FXML
@@ -478,13 +479,14 @@ public class AddOrViewMessageModalController extends ModalController {
             } else if (serDesHelper.getPluggableDeserialize(valueContentType) != null) {
                 displayType = serDesHelper.getPluggableDeserialize(valueContentType).getDisplayType();
             }
-            enableDisableSchemaTextArea();
             refreshAllSchemas(true);
             if (schemaList != null && !schemaList.isEmpty()) {
                 int index = schemaSubjectComboBox.getItems().stream().map(SchemaMetadataFromRegistry::subjectName).toList().indexOf(schemaList.get(0).subjectName());
                 if (index >= 0) {
                     schemaSubjectComboBox.getSelectionModel().select(index);
                 }
+            } else {
+                schemaSubjectComboBox.getSelectionModel().select(CUSTOM_SUBJECT_PLACEHOLDER_ITEM);
             }
             refreshSchemaBtn.setVisible(true);
             setClusterComboBoxesValues(kafkaPartition, kafkaTopic, false);
@@ -517,6 +519,7 @@ public class AddOrViewMessageModalController extends ModalController {
             }
             refreshSchemaBtn.setVisible(false);
         }
+        enableDisableSchemaInput();
         if (schemaVersionComboBox.getItems() != null && !schemaVersionComboBox.getItems().isEmpty()) {
             schemaVersionComboBox.getSelectionModel().selectFirst();
         }

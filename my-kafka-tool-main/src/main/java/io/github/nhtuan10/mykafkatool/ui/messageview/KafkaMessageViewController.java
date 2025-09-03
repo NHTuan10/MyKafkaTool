@@ -188,13 +188,13 @@ public class KafkaMessageViewController {
         msgModalFieldMap.put("keyTextArea", rowData.getKey());
         msgModalFieldMap.put("valueTextArea", rowData.getValue());
         // TODO: choose serializer depends on the deserializer
-        msgModalFieldMap.put("valueContentType", valueContentType);
+//        msgModalFieldMap.put("valueContentType", valueContentType);
         msgModalFieldMap.put("schemaTextArea", rowData.getSchema());
         msgModalFieldMap.put("schemaList", rowData.getSchemaList());
         msgModalFieldMap.put("kafkaTopic", kafkaTopic);
         msgModalFieldMap.put("kafkaPartition", kafkaPartition);
+        msgModalFieldMap.put("valueContentType", serDesHelper.getPluggableDeserialize(valueContentType).getCorrespondingSerializerName(Utils.convertKafkaMessage(rowData)));
         if (reproduce) {
-            msgModalFieldMap.put("valueContentType", serDesHelper.getPluggableDeserialize(valueContentType).getCorrespondingSerializerName(Utils.convertKafkaMessage(rowData)));
             if ( withHeaders) {
                 msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
             }

@@ -12,7 +12,7 @@
          type="SplitPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
          AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
     <items>
-        <AnchorPane maxHeight="200.0" minHeight="40.0" minWidth="0.0" prefHeight="139.0" prefWidth="993.0">
+        <AnchorPane minHeight="40.0" minWidth="0.0" prefHeight="139.0" prefWidth="993.0">
             <children>
                 <!--                <FlowPane minHeight="40.0" prefHeight="101.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"-->
                 <!--                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
@@ -45,16 +45,16 @@
 
                 <!--                    </children>-->
                 <!--                </FlowPane>-->
-                <GridPane prefHeight="101.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <GridPane prefHeight="101.0" prefWidth="993.0" vgap="5" AnchorPane.bottomAnchor="0.0"
+                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <columnConstraints>
                         <ColumnConstraints maxWidth="988.0" minWidth="10.0" percentWidth="70.0" prefWidth="853.0"/>
                         <ColumnConstraints maxWidth="1097.0" minWidth="312.0" percentWidth="30.0" prefWidth="1097.0"/>
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints maxHeight="40.0" minHeight="40.0" percentHeight="40.0" prefHeight="40.0"
+                        <RowConstraints maxHeight="40.0" minHeight="40.0" percentHeight="30.0" prefHeight="40.0"
                                         vgrow="SOMETIMES"/>
-                        <RowConstraints maxHeight="100.0" minHeight="40.0" percentHeight="60.0" prefHeight="100.0"
+                        <RowConstraints maxHeight="100.0" minHeight="40.0" percentHeight="70.0" prefHeight="100.0"
                                         vgrow="ALWAYS"/>
                     </rowConstraints>
                     <children>
@@ -187,8 +187,7 @@
         <!--                </HBox>-->
         <!--            </children>-->
         <!--        </AnchorPane>-->
-        <AnchorPane maxHeight="1.7976931348623157E308" minHeight="50.0" minWidth="0.0" prefHeight="461.0"
-                    prefWidth="993.0">
+        <AnchorPane maxHeight="1.7976931348623157E308" minHeight="50.0" minWidth="0.0" prefWidth="993.0">
             <children>
                 <StackPane AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="6.0"
                            AnchorPane.topAnchor="0.0">
