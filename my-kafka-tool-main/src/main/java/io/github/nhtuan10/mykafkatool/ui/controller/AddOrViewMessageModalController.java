@@ -376,7 +376,7 @@ public class AddOrViewMessageModalController extends ModalController {
                 this.isBusy.set(true);
                 progressIndicator.setProgress(-1);
             });
-            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getKey, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8)));
+            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getKey, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8), (h1,h2) -> h2));
             List<String> keys, values;
             if (isHandlebarsEnabled.isSelected()) {
                 try {

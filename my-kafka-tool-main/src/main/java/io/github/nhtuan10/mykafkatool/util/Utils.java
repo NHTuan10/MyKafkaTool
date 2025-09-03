@@ -5,6 +5,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
+import org.apache.kafka.common.header.Header;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -62,7 +63,7 @@ public class Utils {
     }
 
     public static KafkaMessage convertKafkaMessage(KafkaMessageTableItem rowData) {
-        Map<String, byte[]> headers = Arrays.stream(rowData.getHeaders().toArray()).collect(Collectors.toMap(h -> h.key(), h -> h.value()));
+        Map<String, byte[]> headers = Arrays.stream(rowData.getHeaders().toArray()).collect(Collectors.toMap(Header::key, Header::value, (v1, v2) -> v2));
         return new KafkaMessage(rowData.getKey(), rowData.getValue(), rowData.getValueContentType(), rowData.getSchema(), headers);
     }
 
