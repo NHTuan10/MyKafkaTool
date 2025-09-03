@@ -29,7 +29,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.NonNull;
@@ -143,7 +143,7 @@ public class KafkaMessageViewController {
     private CodeArea valueTextArea;
 
     @FXML
-    private HBox valueSchemaContainer;
+    private Pane valueSchemaContainer;
 
     //    @Inject
 

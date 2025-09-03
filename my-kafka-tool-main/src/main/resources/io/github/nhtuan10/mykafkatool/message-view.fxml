@@ -52,8 +52,10 @@
                         <ColumnConstraints maxWidth="1097.0" minWidth="312.0" percentWidth="30.0" prefWidth="1097.0"/>
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES"/>
-                        <RowConstraints maxHeight="100.0" minHeight="40.0" prefHeight="100.0" vgrow="ALWAYS"/>
+                        <RowConstraints maxHeight="40.0" minHeight="40.0" percentHeight="40.0" prefHeight="40.0"
+                                        vgrow="SOMETIMES"/>
+                        <RowConstraints maxHeight="100.0" minHeight="40.0" percentHeight="60.0" prefHeight="100.0"
+                                        vgrow="ALWAYS"/>
                     </rowConstraints>
                     <children>
 
@@ -147,18 +149,31 @@
                             <Label prefHeight="17.0" prefWidth="72.0" text="Value Type"/>
                             <ComboBox fx:id="valueContentType" prefHeight="26.0"/>
                         </HBox>
-                        <HBox fx:id="valueSchemaContainer" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
-                              GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                        <!--                        <HBox fx:id="valueSchemaContainer" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"-->
+                        <!--                              GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">-->
+                        <!--                            <children>-->
+                        <GridPane fx:id="valueSchemaContainer" hgap="5" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
+                                  GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                             <children>
                                 <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema"/>
-                                <VirtualizedScrollPane>
+                                <VirtualizedScrollPane GridPane.columnIndex="1">
                                     <content>
-                                        <CodeArea fx:id="schemaTextArea" prefWidth="220.0" wrapText="true">
+                                        <CodeArea fx:id="schemaTextArea" wrapText="true">
                                         </CodeArea>
                                     </content>
                                 </VirtualizedScrollPane>
                             </children>
-                        </HBox>
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="30.0"/>
+                                <ColumnConstraints hgrow="ALWAYS" percentWidth="70.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints vgrow="ALWAYS"/>
+                            </rowConstraints>
+                        </GridPane>
+
+                        <!--                            </children>-->
+                        <!--                        </HBox>-->
                     </children>
                 </GridPane>
             </children>
