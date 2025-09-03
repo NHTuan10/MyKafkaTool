@@ -38,6 +38,9 @@
                              <HBox.margin>
                                  <Insets left="5.0" top="5.0" />
                              </HBox.margin>
+                             <tooltip>
+                                 <Tooltip text="Export" />
+                             </tooltip>
                          </MenuButton>
                          <HBox prefHeight="36.0" prefWidth="423.0" styleClass="bordered-container">
                            <children>

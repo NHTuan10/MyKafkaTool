@@ -141,15 +141,24 @@
                                                         <Insets top="10.0" />
                                                     </GridPane.margin>
                                                 </HBox>
-                                    <HBox fx:id="schemaSelectionHBox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+<!--                                    <HBox fx:id="schemaSelectionPane" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">-->
+                                    <GridPane fx:id="schemaSelectionPane" hgap="5.0" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                        <children>
                                            <SearchableComboBox fx:id="schemaSubjectComboBox" maxHeight="26.0" prefHeight="26.0" prefWidth="488.0" />
-                                           <ComboBox fx:id="schemaVersionComboBox" maxHeight="26.0" prefHeight="26.0" prefWidth="72.0" />
-                                          <Button fx:id="refreshSchemaBtn" mnemonicParsing="false" onAction="#refreshAllSchemas" text="↻">
+                                           <ComboBox fx:id="schemaVersionComboBox" GridPane.columnIndex="1" />
+                                          <Button fx:id="refreshSchemaBtn" mnemonicParsing="false" onAction="#refreshAllSchemas" prefWidth="50.0" text="↻" GridPane.columnIndex="2">
                                               <tooltip><Tooltip text="Refresh" /></tooltip>
                                           </Button>
                                        </children>
-                                    </HBox>
+                                       <columnConstraints>
+                                          <ColumnConstraints percentWidth="80.0" />
+                                          <ColumnConstraints percentWidth="10.0" />
+                                          <ColumnConstraints percentWidth="10.0" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                    </GridPane>
                                     <Label fx:id="clusterTopicAndPartitionInfoLabel" text="Topic " GridPane.columnSpan="2">
                                         <font>
                                             <Font size="15.0" />
@@ -160,18 +169,30 @@
                                           <Insets left="10.0" />
                                        </GridPane.margin>
                                         </Label>
-                                        <HBox fx:id="clusterTopicAndPartitionToSendHbox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+<!--                                        <HBox fx:id="clusterTopicAndPartitionToSendHbox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="0">-->
     <!--                                    <HBox fx:id="clusterTopicAndPartitionToSendHbox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" >-->
-                                           <children>
-
-                                                   <SearchableComboBox fx:id="clusterComboBox" prefHeight="30.0" prefWidth="120.0" />
-                                                   <SearchableComboBox fx:id="topicComboBox" prefHeight="30.0" prefWidth="357.0" />
-                                                   <SearchableComboBox fx:id="partitionComboBox" prefHeight="30.0" prefWidth="177.0" />
-                                               <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="53.0" text="↻" onAction="#refreshAllClusters">
-                                                   <tooltip><Tooltip text="Refresh" /></tooltip>
-                                               </Button>
-                                           </children>
-                                        </HBox>
+<!--                                           <children>-->
+                                               <GridPane fx:id="clusterTopicAndPartitionToSendPane" hgap="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                                   <children>
+                                                       <SearchableComboBox fx:id="clusterComboBox" prefHeight="30.0" prefWidth="120.0" />
+                                                       <SearchableComboBox fx:id="topicComboBox" prefHeight="30.0" prefWidth="357.0" GridPane.columnIndex="1" />
+                                                       <SearchableComboBox fx:id="partitionComboBox" prefHeight="30.0" prefWidth="177.0" GridPane.columnIndex="2" />
+                                                       <Button mnemonicParsing="false" onAction="#refreshAllClusters" prefHeight="26.0" prefWidth="50.0" text="↻" GridPane.columnIndex="3">
+                                                           <tooltip><Tooltip text="Refresh" /></tooltip>
+                                                       </Button>
+                                                   </children>
+                                       <columnConstraints>
+                                          <ColumnConstraints percentWidth="20.0" />
+                                          <ColumnConstraints percentWidth="60.0" />
+                                          <ColumnConstraints percentWidth="20.0" />
+                                          <ColumnConstraints percentWidth="10.0" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                               </GridPane>
+<!--                                           </children>-->
+<!--                                        </HBox>-->
                                             </children>
                                             <padding>
                                                 <Insets bottom="10.0" />

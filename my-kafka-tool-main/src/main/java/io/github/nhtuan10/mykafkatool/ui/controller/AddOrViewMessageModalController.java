@@ -139,10 +139,10 @@ public class AddOrViewMessageModalController extends ModalController {
     private Button refreshSchemaBtn;
 
     @FXML
-    private HBox schemaSelectionHBox;
+    private Pane schemaSelectionPane;
 
     @FXML
-    private HBox clusterTopicAndPartitionToSendHbox;
+    private Pane clusterTopicAndPartitionToSendPane;
 
     @FXML
     private SearchableComboBox<KafkaCluster> clusterComboBox;
@@ -287,8 +287,8 @@ public class AddOrViewMessageModalController extends ModalController {
         });
         sendToLabel.visibleProperty().bind(editable);
         sendToLabel.managedProperty().bind(editable);
-        clusterTopicAndPartitionToSendHbox.visibleProperty().bind(editable);
-        clusterTopicAndPartitionToSendHbox.managedProperty().bind(editable);
+        clusterTopicAndPartitionToSendPane.visibleProperty().bind(editable);
+        clusterTopicAndPartitionToSendPane.managedProperty().bind(editable);
         clusterTopicAndPartitionInfoLabel.visibleProperty().bind(editable.not());
         clusterTopicAndPartitionInfoLabel.managedProperty().bind(editable.not());
 
