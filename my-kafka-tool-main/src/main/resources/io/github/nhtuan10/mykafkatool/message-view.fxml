@@ -45,10 +45,11 @@
 
                 <!--                    </children>-->
                 <!--                </FlowPane>-->
-                <GridPane prefHeight="156.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                <GridPane prefHeight="101.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="100.0"/>
+                        <ColumnConstraints maxWidth="988.0" minWidth="10.0" percentWidth="70.0" prefWidth="853.0"/>
+                        <ColumnConstraints maxWidth="1097.0" minWidth="312.0" percentWidth="30.0" prefWidth="1097.0"/>
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints maxHeight="40.0" minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES"/>
@@ -56,7 +57,7 @@
                     </rowConstraints>
                     <children>
 
-                        <HBox prefHeight="29.0" prefWidth="993.0">
+                        <HBox prefHeight="29.0" prefWidth="993.0" GridPane.columnSpan="2">
                             <ProgressIndicator fx:id="isPollingMsgProgressIndicator" prefHeight="31.0" prefWidth="26.0"
                                                visible="false">
                                 <HBox.margin>
@@ -145,17 +146,18 @@
                             <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="120.0"/>
                             <Label prefHeight="17.0" prefWidth="72.0" text="Value Type"/>
                             <ComboBox fx:id="valueContentType" prefHeight="26.0"/>
-                            <HBox fx:id="valueSchemaContainer">
-                                <children>
-                                    <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema"/>
-                                    <VirtualizedScrollPane>
-                                        <content>
-                                            <CodeArea fx:id="schemaTextArea" prefWidth="220.0" wrapText="true">
-                                            </CodeArea>
-                                        </content>
-                                    </VirtualizedScrollPane>
-                                </children>
-                            </HBox>
+                        </HBox>
+                        <HBox fx:id="valueSchemaContainer" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
+                              GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                            <children>
+                                <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema"/>
+                                <VirtualizedScrollPane>
+                                    <content>
+                                        <CodeArea fx:id="schemaTextArea" prefWidth="220.0" wrapText="true">
+                                        </CodeArea>
+                                    </content>
+                                </VirtualizedScrollPane>
+                            </children>
                         </HBox>
                     </children>
                 </GridPane>

@@ -56,7 +56,7 @@ import java.util.stream.IntStream;
 @Slf4j
 public class AddOrViewMessageModalController extends ModalController {
 
-    public static final SchemaMetadataFromRegistry CUSTOM_SUBJECT_PLACEHOLDER_ITEM = new SchemaMetadataFromRegistry("<Custom>",null,null,List.of());
+    public static final SchemaMetadataFromRegistry CUSTOM_SUBJECT_PLACEHOLDER_ITEM = new SchemaMetadataFromRegistry("<Custom>", null, null, List.of());
 
     private final SerDesHelper serDesHelper;
     private final JsonHighlighter jsonHighlighter;
@@ -257,7 +257,7 @@ public class AddOrViewMessageModalController extends ModalController {
         schemaSubjectComboBox.setOnAction(event -> {
             SchemaMetadataFromRegistry selectedSchema = schemaSubjectComboBox.getValue();
             if (selectedSchema != null) {
-                if (selectedSchema.equals(CUSTOM_SUBJECT_PLACEHOLDER_ITEM)){
+                if (selectedSchema.equals(CUSTOM_SUBJECT_PLACEHOLDER_ITEM)) {
                     schemaVersionComboBox.getItems().clear();
 //                    schemaVersionComboBox.setDisable(true);
                     schemaTextArea.setEditable(editable.getValue());
@@ -311,12 +311,26 @@ public class AddOrViewMessageModalController extends ModalController {
                 kafkaPartition = null;
             }
         });
+//        topicComboBox.setOnAction(event -> {
+//                    if (topicComboBox.getValue() != null) {
+//                        topicComboBox.setTooltip(new Tooltip(topicComboBox.getValue().toString()));
+//                    }
+//                }
+//        );
         partitionComboBox.setOnAction(event -> {
             KafkaPartition partition = partitionComboBox.getValue();
-            if (partition != null && partition.id() >=0 ) {
+            if (partition != null && partition.id() >= 0) {
                 kafkaPartition = partitionComboBox.getValue();
             }
         });
+
+//        topicComboBox.setCellFactory((param) -> new ListCell<>() {
+//            @Override
+//            protected void updateItem(KafkaTopic item, boolean empty) {
+//                super.updateItem(item, empty);
+//                setTooltip(new Tooltip(item != null ? item.toString() : null));
+//            }
+//        });
 
     }
 
@@ -325,8 +339,7 @@ public class AddOrViewMessageModalController extends ModalController {
         partitionComboBox.getItems().add(0, new KafkaPartition(-1, topic));
         if (partition != null) {
             partitionComboBox.getSelectionModel().select(partition);
-        }
-        else {
+        } else {
             partitionComboBox.getSelectionModel().selectFirst();
         }
     }
@@ -335,8 +348,7 @@ public class AddOrViewMessageModalController extends ModalController {
         topicComboBox.setItems(FXCollections.observableArrayList(clusterManager.getClusterTopicCache(false).get(cluster)));
         if (topic != null) {
             topicComboBox.getSelectionModel().select(topic);
-        }
-        else {
+        } else {
             topicComboBox.getSelectionModel().selectFirst();
         }
     }
@@ -376,7 +388,7 @@ public class AddOrViewMessageModalController extends ModalController {
                 this.isBusy.set(true);
                 progressIndicator.setProgress(-1);
             });
-            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getKey, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8), (h1,h2) -> h2));
+            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getKey, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8), (h1, h2) -> h2));
             List<String> keys, values;
             if (isHandlebarsEnabled.isSelected()) {
                 try {
@@ -397,7 +409,7 @@ public class AddOrViewMessageModalController extends ModalController {
                 SerDesHelper.ValidationResult valueValidationResult = serDesHelper.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
                 if (!valueValidationResult.isValid()) {
                     log.warn("The message is invalid against the schema", valueValidationResult.exception());
-                    Platform.runLater( ()->ModalUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema"));
+                    Platform.runLater(() -> ModalUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema"));
                     return 0;
                 }
                 kafkaMessages.add(new KafkaMessage(keys.get(i), values.get(i), valueContentTypeText, schemaText, headers));
@@ -468,7 +480,7 @@ public class AddOrViewMessageModalController extends ModalController {
             }
             enableDisableSchemaTextArea();
             refreshAllSchemas(true);
-            if (schemaList != null && !schemaList.isEmpty()){
+            if (schemaList != null && !schemaList.isEmpty()) {
                 int index = schemaSubjectComboBox.getItems().stream().map(SchemaMetadataFromRegistry::subjectName).toList().indexOf(schemaList.get(0).subjectName());
                 if (index >= 0) {
                     schemaSubjectComboBox.getSelectionModel().select(index);
@@ -497,9 +509,9 @@ public class AddOrViewMessageModalController extends ModalController {
             if (schemaList == null || schemaList.isEmpty()) {
                 if (StringUtils.isNotBlank(schemaTextArea.getText())) {
                     schemaSubjectComboBox.setItems(FXCollections.observableArrayList(CUSTOM_SUBJECT_PLACEHOLDER_ITEM));
+                    schemaSubjectComboBox.getSelectionModel().selectFirst();
                 }
-            }
-            else {
+            } else {
                 schemaSubjectComboBox.setItems(FXCollections.observableArrayList(schemaList));
                 schemaSubjectComboBox.getSelectionModel().selectFirst();
             }
@@ -530,8 +542,7 @@ public class AddOrViewMessageModalController extends ModalController {
             clusterComboBox.getSelectionModel().select(cluster);
             setTopicComboBoxItemsForCluster(cluster, kafkaTopic);
             setPartitionComboBoxItemsForTopic(kafkaTopic, null);
-        }
-        else {
+        } else {
             clusterComboBox.getSelectionModel().selectFirst();
         }
     }
@@ -540,15 +551,17 @@ public class AddOrViewMessageModalController extends ModalController {
     private void refreshAllClusters() {
         setClusterComboBoxesValues(kafkaPartition, kafkaTopic, true);
     }
+
     @FXML
     private void refreshAllSchemas() {
-        if (editable.get()){
+        if (editable.get()) {
             refreshAllSchemas(false);
         }
     }
+
     private void refreshAllSchemas(boolean useCache) {
         try {
-            ObservableList<SchemaMetadataFromRegistry> schemas = FXCollections.observableArrayList(schemaRegistryManager.getAllSubjectMetadata(kafkaTopic.cluster().getName(),false, useCache));
+            ObservableList<SchemaMetadataFromRegistry> schemas = FXCollections.observableArrayList(schemaRegistryManager.getAllSubjectMetadata(kafkaTopic.cluster().getName(), false, useCache));
             schemas.add(0, CUSTOM_SUBJECT_PLACEHOLDER_ITEM);
             schemaSubjectComboBox.setItems(schemas);
         } catch (RestClientException | IOException e) {
