@@ -144,14 +144,13 @@
                             </Label>
                             <ComboBox fx:id="keyContentType" prefHeight="26.0" prefWidth="120.0"/>
                             <Label prefHeight="17.0" prefWidth="72.0" text="Value Type"/>
-                            <ComboBox fx:id="valueContentType" prefHeight="26.0" prefWidth="120.0"/>
+                            <ComboBox fx:id="valueContentType" prefHeight="26.0"/>
                             <HBox fx:id="valueSchemaContainer">
                                 <children>
                                     <Label prefHeight="17.0" prefWidth="87.0" text="Value Schema"/>
                                     <VirtualizedScrollPane>
                                         <content>
-                                            <CodeArea fx:id="schemaTextArea" prefWidth="220.0"
-                                                      wrapText="true">
+                                            <CodeArea fx:id="schemaTextArea" prefWidth="220.0" wrapText="true">
                                             </CodeArea>
                                         </content>
                                     </VirtualizedScrollPane>

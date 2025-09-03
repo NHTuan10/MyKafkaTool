@@ -494,7 +494,7 @@ public class AddOrViewMessageModalController extends ModalController {
             valueContentTypeComboBox.setOnShowing(Event::consume);
             schemaTextArea.setEditable(false);
 //            schemaSelectionHBox.setDisable(true);
-            if (schemaList.isEmpty()){
+            if (schemaList == null || schemaList.isEmpty()) {
                 if (StringUtils.isNotBlank(schemaTextArea.getText())) {
                     schemaSubjectComboBox.setItems(FXCollections.observableArrayList(CUSTOM_SUBJECT_PLACEHOLDER_ITEM));
                 }
