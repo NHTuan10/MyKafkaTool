@@ -167,7 +167,7 @@
                                                    <SearchableComboBox fx:id="clusterComboBox" prefHeight="30.0" prefWidth="120.0" />
                                                    <SearchableComboBox fx:id="topicComboBox" prefHeight="30.0" prefWidth="357.0" />
                                                    <SearchableComboBox fx:id="partitionComboBox" prefHeight="30.0" prefWidth="177.0" />
-                                               <Button fx:id="refreshAllClustersBtn" mnemonicParsing="false" prefHeight="26.0" prefWidth="53.0" text="↻">
+                                               <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="53.0" text="↻" onAction="#refreshAllClusters">
                                                    <tooltip><Tooltip text="Refresh" /></tooltip>
                                                </Button>
                                            </children>

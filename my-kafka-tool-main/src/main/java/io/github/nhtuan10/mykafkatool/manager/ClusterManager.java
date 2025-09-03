@@ -14,7 +14,6 @@ import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerTableItem;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerTableItemFXModel;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import jakarta.inject.Inject;
-import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +39,6 @@ public class ClusterManager {
     private final AuthProviderManager authProviderManager;
     private final ProducerCreator producerCreator;
     private final ConsumerCreator consumerCreator;
-    @Getter
     private final Map<KafkaCluster, List<KafkaTopic>> clusterTopicCache = new ConcurrentHashMap<>();
 
     //    private static class InstanceHolder {
@@ -394,5 +392,17 @@ public class ClusterManager {
         adminMap.get(clusterName).alterConsumerGroupOffsets(groupId, offsets).all().get();
     }
 
+    public  Map<KafkaCluster, List<KafkaTopic>> getClusterTopicCache(boolean refresh) {
+        if (refresh) {
+                clusterTopicCache.keySet().parallelStream().forEach(cluster -> {
+                    try {
+                        this.getAllTopics(cluster);
+                    } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                        log.error("Error when get all topics from cluster {}", cluster.getName(), e);
+                    }
+                });
+        }
+        return clusterTopicCache;
+    }
 }
 

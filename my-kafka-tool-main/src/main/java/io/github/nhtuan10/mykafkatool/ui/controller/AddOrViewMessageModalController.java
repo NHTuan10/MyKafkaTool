@@ -154,9 +154,6 @@ public class AddOrViewMessageModalController extends ModalController {
     private SearchableComboBox<KafkaPartition> partitionComboBox;
 
     @FXML
-    private Button refreshAllClustersBtn;
-
-    @FXML
     private Label sendToLabel;
 
     @Inject
@@ -263,7 +260,7 @@ public class AddOrViewMessageModalController extends ModalController {
                 if (selectedSchema.equals(CUSTOM_SUBJECT_PLACEHOLDER_ITEM)){
                     schemaVersionComboBox.getItems().clear();
 //                    schemaVersionComboBox.setDisable(true);
-                    schemaTextArea.setEditable(true);
+                    schemaTextArea.setEditable(editable.getValue());
                 } else {
 //                    schemaVersionComboBox.setItems(FXCollections.observableArrayList(selectedSchema.allVersions()));
                     if (!schemaVersionComboBox.getItems().isEmpty()) {
@@ -335,7 +332,7 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     private void setTopicComboBoxItemsForCluster(KafkaCluster cluster, KafkaTopic topic) {
-        topicComboBox.setItems(FXCollections.observableArrayList(clusterManager.getClusterTopicCache().get(cluster)));
+        topicComboBox.setItems(FXCollections.observableArrayList(clusterManager.getClusterTopicCache(false).get(cluster)));
         if (topic != null) {
             topicComboBox.getSelectionModel().select(topic);
         }
@@ -400,7 +397,7 @@ public class AddOrViewMessageModalController extends ModalController {
                 SerDesHelper.ValidationResult valueValidationResult = serDesHelper.validateMessageAgainstSchema(valueContentTypeText, valueText, schemaText);
                 if (!valueValidationResult.isValid()) {
                     log.warn("The message is invalid against the schema", valueValidationResult.exception());
-                    ModalUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema");
+                    Platform.runLater( ()->ModalUtils.showAlertDialog(Alert.AlertType.WARNING, valueValidationResult.exception().getMessage(), "The message is invalid against the schema"));
                     return 0;
                 }
                 kafkaMessages.add(new KafkaMessage(keys.get(i), values.get(i), valueContentTypeText, schemaText, headers));
@@ -419,7 +416,9 @@ public class AddOrViewMessageModalController extends ModalController {
                 eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(kafkaPartition));
             }
             modelRef.set(modelRef.get() != null ? (Integer) modelRef.get() + count : count);
-            ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Added %s message successfully!".formatted(count), "Successfully Added!", ButtonType.OK);
+            if (count > 0) {
+                ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Added %s message successfully!".formatted(count), "Successfully Added!", ButtonType.OK);
+            }
         }, (ex) -> {
             this.isBusy.set(false);
             UIErrorHandler.showError(Thread.currentThread(), ex);
@@ -476,22 +475,7 @@ public class AddOrViewMessageModalController extends ModalController {
                 }
             }
             refreshSchemaBtn.setVisible(true);
-            clusterComboBox.setItems(FXCollections.observableArrayList(clusterManager.getClusterTopicCache().keySet()));
-            if (kafkaPartition != null) {
-                KafkaTopic topic = kafkaPartition.topic();
-                KafkaCluster cluster = topic.cluster();
-                clusterComboBox.getSelectionModel().select(cluster);
-                setTopicComboBoxItemsForCluster(cluster, topic);
-                setPartitionComboBoxItemsForTopic(topic, kafkaPartition);
-            } else if (kafkaTopic != null) {
-                KafkaCluster cluster = kafkaTopic.cluster();
-                clusterComboBox.getSelectionModel().select(cluster);
-                setTopicComboBoxItemsForCluster(cluster, kafkaTopic);
-                setPartitionComboBoxItemsForTopic(kafkaTopic, null);
-            }
-            else {
-                clusterComboBox.getSelectionModel().selectFirst();
-            }
+            setClusterComboBoxesValues(kafkaPartition, kafkaTopic, false);
         } else { // For View Message Modal
 //            choiceButtonContainer.setVisible(false);
 //            choiceButtonContainer.setMinHeight(0);
@@ -511,7 +495,9 @@ public class AddOrViewMessageModalController extends ModalController {
             schemaTextArea.setEditable(false);
 //            schemaSelectionHBox.setDisable(true);
             if (schemaList.isEmpty()){
-                schemaSubjectComboBox.setItems(FXCollections.observableArrayList(CUSTOM_SUBJECT_PLACEHOLDER_ITEM));
+                if (StringUtils.isNotBlank(schemaTextArea.getText())) {
+                    schemaSubjectComboBox.setItems(FXCollections.observableArrayList(CUSTOM_SUBJECT_PLACEHOLDER_ITEM));
+                }
             }
             else {
                 schemaSubjectComboBox.setItems(FXCollections.observableArrayList(schemaList));
@@ -531,6 +517,29 @@ public class AddOrViewMessageModalController extends ModalController {
         refreshDisplayedValue(schemaTextArea.getText(), schemaTextArea, DisplayType.JSON, true);
     }
 
+    private void setClusterComboBoxesValues(KafkaPartition kafkaPartition, KafkaTopic kafkaTopic, boolean refresh) {
+        clusterComboBox.setItems(FXCollections.observableArrayList(clusterManager.getClusterTopicCache(refresh).keySet()));
+        if (kafkaPartition != null) {
+            KafkaTopic topic = kafkaPartition.topic();
+            KafkaCluster cluster = topic.cluster();
+            clusterComboBox.getSelectionModel().select(cluster);
+            setTopicComboBoxItemsForCluster(cluster, topic);
+            setPartitionComboBoxItemsForTopic(topic, kafkaPartition);
+        } else if (kafkaTopic != null) {
+            KafkaCluster cluster = kafkaTopic.cluster();
+            clusterComboBox.getSelectionModel().select(cluster);
+            setTopicComboBoxItemsForCluster(cluster, kafkaTopic);
+            setPartitionComboBoxItemsForTopic(kafkaTopic, null);
+        }
+        else {
+            clusterComboBox.getSelectionModel().selectFirst();
+        }
+    }
+
+    @FXML
+    private void refreshAllClusters() {
+        setClusterComboBoxesValues(kafkaPartition, kafkaTopic, true);
+    }
     @FXML
     private void refreshAllSchemas() {
         if (editable.get()){
