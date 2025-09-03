@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.serdes;
+package io.github.nhtuan10.mykafkatool.api.serdes;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;

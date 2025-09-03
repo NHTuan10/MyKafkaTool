@@ -2,8 +2,8 @@ package io.github.nhtuan10.mykafkatool.serdes.serializer;
 
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
+import io.github.nhtuan10.mykafkatool.api.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
-import io.github.nhtuan10.mykafkatool.serdes.AvroUtil;
 
 import java.io.IOException;
 import java.util.Map;
