@@ -12,7 +12,7 @@
         <items>
           <AnchorPane maxHeight="50.0" minHeight="50.0" minWidth="-Infinity">
                <children>
-                  <HBox prefHeight="50.0" prefWidth="728.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <HBox prefHeight="50.0" prefWidth="940.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <Button fx:id="refreshBtn" mnemonicParsing="false" onAction="#refresh" text="↻">
                            <HBox.margin>
@@ -93,9 +93,9 @@
                   </HBox>
                </children>
             </AnchorPane>
-          <AnchorPane minHeight="100.0" minWidth="-Infinity">
+          <AnchorPane minHeight="100.0" minWidth="0.0">
                <children>
-                  <TableView fx:id="table" minHeight="100.0" prefHeight="341.0" prefWidth="940.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <TableView fx:id="table" minHeight="100.0" prefHeight="378.0" prefWidth="940.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <columns>
                       <TableColumn prefWidth="180.0" text="Name" />
                       <TableColumn prefWidth="413.0" text="Value" />

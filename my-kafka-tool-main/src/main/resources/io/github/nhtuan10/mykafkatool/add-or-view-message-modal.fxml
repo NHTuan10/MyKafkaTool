@@ -206,7 +206,7 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                     <children>
-                                        <KafkaMessageHeaderTable fx:id="headerTable" layoutY="7.0" minHeight="200.0" prefHeight="297.0" prefWidth="924.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                        <KafkaMessageHeaderTable fx:id="headerTable" layoutY="7.0" minHeight="200.0" prefHeight="478.5" prefWidth="840.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 
                                         <!--                               <SplitPane dividerPositions="0.12440944881889764" orientation="VERTICAL" prefHeight="319.5" prefWidth="598.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"> -->
                                         <!--                                 <items> -->
