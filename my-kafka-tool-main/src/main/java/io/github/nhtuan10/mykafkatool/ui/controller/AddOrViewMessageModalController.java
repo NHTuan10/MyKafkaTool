@@ -8,7 +8,6 @@ import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.api.model.SchemaMetadataFromRegistry;
-import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
@@ -476,9 +475,10 @@ public class AddOrViewMessageModalController extends ModalController {
             }
             if (serDesHelper.getPluggableSerialize(valueContentType) != null) {
                 displayType = serDesHelper.getPluggableSerialize(valueContentType).getDisplayType();
-            } else if (serDesHelper.getPluggableDeserialize(valueContentType) != null) {
-                displayType = serDesHelper.getPluggableDeserialize(valueContentType).getDisplayType();
             }
+//            else if (serDesHelper.getPluggableDeserialize(valueContentType) != null) {
+//                displayType = serDesHelper.getPluggableDeserialize(valueContentType).getDisplayType();
+//            }
             refreshAllSchemas(true);
             if (schemaList != null && !schemaList.isEmpty()) {
                 int index = schemaSubjectComboBox.getItems().stream().map(SchemaMetadataFromRegistry::subjectName).toList().indexOf(schemaList.get(0).subjectName());
@@ -498,11 +498,11 @@ public class AddOrViewMessageModalController extends ModalController {
 //            multipleSendOptionContainer.setManaged(false);
             splitPane.getItems().remove(choiceButtonContainer);
 //            ( (SplitPane) choiceButtonContainer.getParent()).getItems().remove(choiceButtonContainer);
-            if (valueContentType != null && serDesHelper.getPluggableDeserialize(valueContentType) != null) {
+            if (valueContentType != null && serDesHelper.getPluggableSerialize(valueContentType) != null) {
                 valueContentTypeComboBox.getSelectionModel().select(valueContentType);
             }
-            displayType = Optional.ofNullable(serDesHelper.getPluggableDeserialize(valueContentType))
-                    .map(PluggableDeserializer::getDisplayType).orElse(DisplayType.TEXT);
+            displayType = Optional.ofNullable(serDesHelper.getPluggableSerialize(valueContentType))
+                    .map(PluggableSerializer::getDisplayType).orElse(DisplayType.TEXT);
             valueDisplayTypeComboBox.getSelectionModel().select(displayType);
             //suppress combox box drop down
             valueContentTypeComboBox.setOnShowing(Event::consume);
