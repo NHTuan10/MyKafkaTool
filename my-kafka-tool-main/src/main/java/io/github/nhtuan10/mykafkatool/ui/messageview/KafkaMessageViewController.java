@@ -182,18 +182,19 @@ public class KafkaMessageViewController {
 
     public void viewOrReproduceMessage(SerDesHelper serDesHelper, KafkaMessageTableItem rowData, boolean reproduce, boolean withHeaders) {
 //        TreeItem selectedTreeItemBeforeAdding = this.selectedTreeItem;
-        String valueContentType = rowData.getValueContentType();
+//        String valueContentType = rowData.getValueContentType();
+        String valueContentType = serDesHelper.getPluggableDeserialize(rowData.getValueContentType()).getCorrespondingSerializerName(Utils.convertKafkaMessage(rowData));
         Map<String, Object> msgModalFieldMap = new HashMap<>();
         msgModalFieldMap.put("serDesHelper", serDesHelper);
         msgModalFieldMap.put("keyTextArea", rowData.getKey());
         msgModalFieldMap.put("valueTextArea", rowData.getValue());
         // TODO: choose serializer depends on the deserializer
-//        msgModalFieldMap.put("valueContentType", valueContentType);
+//        msgModalFieldMap.put("valueContentType", rowData.getValueContentType());
         msgModalFieldMap.put("schemaTextArea", rowData.getSchema());
         msgModalFieldMap.put("schemaList", rowData.getSchemaList());
         msgModalFieldMap.put("kafkaTopic", kafkaTopic);
         msgModalFieldMap.put("kafkaPartition", kafkaPartition);
-        msgModalFieldMap.put("valueContentType", serDesHelper.getPluggableDeserialize(valueContentType).getCorrespondingSerializerName(Utils.convertKafkaMessage(rowData)));
+        msgModalFieldMap.put("valueContentType", valueContentType);
         if (reproduce) {
             if ( withHeaders) {
                 msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
@@ -201,7 +202,7 @@ public class KafkaMessageViewController {
         }
         else {
             msgModalFieldMap.put("headerTable", FXCollections.observableArrayList(KafkaMessageTable.mapToMsgHeaderTableItem(rowData.getHeaders())));
-            msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(rowData.getValueContentType()));
+            msgModalFieldMap.put("valueContentTypeComboBox", FXCollections.observableArrayList(valueContentType));
         }
 
         try {
