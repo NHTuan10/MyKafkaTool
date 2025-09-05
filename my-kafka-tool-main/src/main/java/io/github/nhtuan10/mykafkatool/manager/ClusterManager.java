@@ -388,7 +388,19 @@ public class ClusterManager {
 
     public void resetConsumerGroupOffset(String clusterName, String groupId, List<TopicPartition> topicPartitionList, OffsetSpec offsetSpec) throws InterruptedException, ExecutionException {
         Map<TopicPartition, OffsetAndMetadata> offsets = getPartitionOffsetsBySpec(topicPartitionList, adminMap.get(clusterName), offsetSpec).entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> new OffsetAndMetadata(entry.getValue())));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+                    Long offset = entry.getValue();
+                    if (offset < 0) {
+                        try {
+                            TopicPartition partition = entry.getKey();
+                            return new OffsetAndMetadata(getPartitionOffsetsBySpec(List.of(partition), adminMap.get(clusterName), OffsetSpec.latest()).get(partition));
+                        } catch (InterruptedException | ExecutionException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        return new OffsetAndMetadata(offset);
+                    }
+                }));
         adminMap.get(clusterName).alterConsumerGroupOffsets(groupId, offsets).all().get();
     }
 

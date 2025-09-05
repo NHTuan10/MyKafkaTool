@@ -61,6 +61,7 @@ public class ConsumerGroupTable extends AbstractConsumerGroupTable<ConsumerGroup
                     var topicPartitionList = clusterManager.getTopicPartitions(clusterName, item.getTopic()).stream().map(tpi -> new TopicPartition(item.getTopic(), tpi.partition())).toList();
                     resetCG(resetOption, item.getGroupID(), topicPartitionList, startTimestamp);
                     ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Reset offset successfully", "Reset offset successfully", ButtonType.OK);
+                    refresh();
                 } catch (ExecutionException | InterruptedException | TimeoutException e) {
                     throw new RuntimeException(e);
                 }

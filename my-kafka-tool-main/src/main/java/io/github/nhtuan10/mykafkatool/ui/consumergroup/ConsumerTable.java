@@ -85,6 +85,7 @@ public class ConsumerTable extends AbstractConsumerGroupTable<ConsumerTableItem>
                 try {
                     resetCG(resetOption, cg, topicPartitionMap.get(cg), startTimestamp);
                     ModalUtils.showAlertDialog(Alert.AlertType.INFORMATION, "Reset offset successfully for consumer group %s".formatted(cg), "Reset offset successfully", ButtonType.OK);
+                    refresh();
                 } catch (ExecutionException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
