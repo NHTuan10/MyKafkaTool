@@ -84,7 +84,7 @@
                               <Insets bottom="5.0" left="5.0" top="5.0" />
                            </padding>
                         </HBox>
-                         <Label fx:id="numberOfRowsLabel" maxWidth="300.0" prefHeight="17.0" prefWidth="126.0" text="0 Rows">
+                         <Label fx:id="numberOfRowsLabel" prefHeight="17.0" text="0 Rows">
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
