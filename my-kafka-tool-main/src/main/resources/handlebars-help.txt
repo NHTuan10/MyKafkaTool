@@ -5,9 +5,9 @@ You can use Handlebars (extensions of Mustache) templates for message keys and v
 {{randomInt}} : no bound random integer values, example result - 1341
 {{randomInt 375}} : random integer values < 375, example result - 233
 {{randomInt 10 100}} : random integer values >= 10 and < 100, example result - 40
-{{randomDouble}} : no bound random integer values, example result - 1341
-{{randomDouble 23.4}} : random integer values < 23.4, example result - 12.34
-{{randomDouble 10.65 100.65}} : random integer values >= 10.65 and < 100.65, example result - 68.44
+{{randomDouble}} : no bound random double values, example result - 1341.23
+{{randomDouble 23.4}} : random double values < 23.4, example result - 12.34
+{{randomDouble 10.65 100.65}} : random double values >= 10.65 and < 100.65, example result - 68.44
 {{randomString}} : random alphanumeric string, 36 characters max, example result - az2x23ore
 {{randomString 5}} : random alphanumeric with 5 characters, example result - rNZP2
 {{currentDate}} : only date, example result - 2025-06-18
