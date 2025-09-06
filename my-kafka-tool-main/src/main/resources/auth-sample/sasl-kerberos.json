@@ -1,0 +1,5 @@
+{
+  "sasl.mechanism": "GSSAPI",
+  "sasl.kerberos.service.name": "",
+  "sasl.jaas.config": "com.sun.security.auth.module.Krb5LoginModule required storeKey=false useTicketCache=true ticketCache=\"/path/to/ticket/cache\" principal=\"kafkaclient1@example.com\";"
+}

@@ -5,9 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
-import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
-import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedPrettyPrintObjectMapper;
-import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
@@ -16,33 +13,35 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@AppScoped
 @Slf4j
-public class SaslProvider implements AuthProvider {
-    public static final String SASL = "SASL";
+public abstract class SaslProvider implements AuthProvider {
     protected final ObjectMapper objectMapper;
+    public static final String SASL_PLAIN_JSON_FILE = "auth-sample/sasl-plain.json";
+    public static final String SASL_KERBEROS_JSON_FILE = "auth-sample/sasl-kerberos.json";
 
-    @Inject
-    public SaslProvider(@SharedPrettyPrintObjectMapper ObjectMapper objectMapper) {
+    public SaslProvider(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
     @Override
     public String getName() {
-        return SASL;
+        return getSecurityProtocol();
     }
 
     @Override
     public AuthConfig fromConfigText(String configText) throws JsonProcessingException {
-        Map<String, Object> properties = objectMapper.readValue(configText, new TypeReference<>() {
+        Map<String, Object> properties = Map.of(SECURITY_PROTOCOL, getSecurityProtocol());
+        Map<String, Object> extraProperties = objectMapper.readValue(configText, new TypeReference<>() {
         });
-        return new AuthConfig(getName(), properties, null);
+        return new AuthConfig(getName(), properties, extraProperties);
     }
 
     @Override
     public String toConfigText(AuthConfig authConfig) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(authConfig.properties());
+        return objectMapper.writeValueAsString(authConfig.extraConfig());
     }
 
     @Override
@@ -50,12 +49,25 @@ public class SaslProvider implements AuthProvider {
         return getName();
     }
 
+    protected abstract String getSecurityProtocol();
+
+    @Override
+    public Map<String, Object> getKafkaProperties(AuthConfig authConfig) throws Exception {
+        return Stream.concat(authConfig.properties().entrySet().stream(), ((Map<String, Object>) authConfig.extraConfig()).entrySet().stream())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> newValue
+                ));
+    }
+
     @Override
     public List<SampleAuthConfig> getSampleConfig() {
         try {
-            return List.of(new SampleAuthConfig("PLAIN", IOUtils.toString(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("sasl-plain.json")), StandardCharsets.UTF_8)));
+            return List.of(new SampleAuthConfig("PLAIN", IOUtils.toString(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream(SASL_PLAIN_JSON_FILE)), StandardCharsets.UTF_8)),
+                    new SampleAuthConfig("GSSAPI(Kerberos)", new String(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream(SASL_KERBEROS_JSON_FILE)).readAllBytes(), StandardCharsets.UTF_8)));
         } catch (IOException e) {
-            log.error("Failed to load sasl-plain.json", e);
+            log.error("Failed to load SASL sample configurations", e);
             return List.of(new SampleAuthConfig("", ""));
         }
     }

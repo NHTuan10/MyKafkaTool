@@ -14,7 +14,8 @@ import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.auth.NoAuthProvider;
-import io.github.nhtuan10.mykafkatool.auth.SaslProvider;
+import io.github.nhtuan10.mykafkatool.auth.SaslPlaintextProvider;
+import io.github.nhtuan10.mykafkatool.auth.SaslSslProvider;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedObjectMapper;
@@ -132,15 +133,26 @@ public abstract class AppModule {
 //    @IntoMap
 //    @StringKey(SaslProvider.SASL)
     @AppScoped
-    @Named("saslProvider")
-    abstract AuthProvider saslProvider(SaslProvider provider);
+    @Named("saslPlaintextProvider")
+    abstract AuthProvider saslPlaintextProvider(SaslPlaintextProvider provider);
+
+
+    @Binds
+//    @IntoMap
+//    @StringKey(SaslProvider.SASL)
+    @AppScoped
+    @Named("saslSslProvider")
+    abstract AuthProvider saslSslProvider(SaslSslProvider provider);
 
     @Provides
     @AppScoped
-    static Map<String, AuthProvider> authProviderMap(@Named("noAuthProvider") AuthProvider noAuthProvide, @Named("saslProvider") AuthProvider saslProvide) {
+    static Map<String, AuthProvider> authProviderMap(@Named("noAuthProvider") AuthProvider noAuthProvide,
+                                                     @Named("saslPlaintextProvider") AuthProvider saslPlaintextProvider,
+                                                     @Named("saslSslProvider") AuthProvider saslSslProvider) {
         Map<String, AuthProvider> authProviderMap = new LinkedHashMap<>();
         authProviderMap.put(noAuthProvide.getName(), noAuthProvide);
-        authProviderMap.put(saslProvide.getName(), saslProvide);
+        authProviderMap.put(saslPlaintextProvider.getName(), saslPlaintextProvider);
+        authProviderMap.put(saslSslProvider.getName(), saslSslProvider);
         if (Modular.isManaged(AppModule.class)) {
             List<AuthProvider> extAuthProviders = Modular.getModularServices(AuthProvider.class);
             extAuthProviders.forEach(authProvider -> authProviderMap.put(authProvider.getName(), authProvider));

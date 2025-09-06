@@ -10,6 +10,8 @@ import java.util.Map;
 public interface AuthProvider {
     String NO_AUTH = "No Auth";
 
+    String SECURITY_PROTOCOL = "security.protocol";
+
     String getName();
 
     AuthConfig fromConfigText(String configText) throws Exception;

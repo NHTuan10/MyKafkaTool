@@ -114,7 +114,7 @@
                                                         <Label text="Sample" GridPane.rowIndex="2"/>
                                                         <HBox fx:id="sampleSecurityConfigContainer" prefHeight="100.0"
                                                               prefWidth="200.0" GridPane.columnIndex="1"
-                                                              GridPane.rowIndex="2">
+                                                              GridPane.rowIndex="2" spacing="10">
                                                             <padding>
                                                                 <Insets top="5.0"/>
                                                             </padding>
