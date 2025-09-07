@@ -1,0 +1,35 @@
+Unit tests for below classes:
+KafkaConsumerService
+ClusterManager
+SchemaRegistryManagerImpl
+SchemaRegistryAvroDeserializer
+SchemaRegistryAvroSerializer
+SerDesHelper
+KafkaClusterTree
+KafkaClusterTreeItem
+JsonHighlighter
+AbstractConsumerGroupTable
+ConsumerGroupListTreeItem
+ConsumerGroupTable
+ConsumerGroupView
+ConsumerTable
+BaseTableCell
+NonNegativeIntTextField
+all ui.controller except AddSchemaModalController
+
+event.EventDispatcher
+all ui.messageview classes except TableItems and KafkaMessageView
+SchemaEditableTable & SchemaRegistryViewController
+
+KafkaTopicListTreeItem
+KafkaTopicTreeItem
+PartitionsTable
+TopicAndPartitionPropertyTable
+TopicAndPartitionPropertyView
+all util & ui.util classes
+Filter
+UIErrorHandler
+UserPreferenceRepoImpl
+UserPreferenceManager
+MyKafkaToolApplication
+FXModelAnnotationProcessor
