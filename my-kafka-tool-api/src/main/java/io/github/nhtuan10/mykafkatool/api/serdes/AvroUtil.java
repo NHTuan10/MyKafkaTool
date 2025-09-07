@@ -27,18 +27,18 @@ public class AvroUtil {
                 log.error("Error parse schema {}", schema, e);
             }
         }
-        if (schema != null) {
+        if (schema != null && json != null) {
             DatumReader<GenericRecord> reader = new GenericDatumReader<>(schema);
             Decoder decoder = DecoderFactory.get().jsonDecoder(schema, json);
             return reader.read(null, decoder);
-        } else {
+        }
 //            try {
 //                return objectMapper.readValue(json, Object.class);
 //            } catch (JsonProcessingException e) {
 //                return json;
 //            }
-            return json;
-        }
+        return json;
+
     }
 
     //  Deserialized Methods

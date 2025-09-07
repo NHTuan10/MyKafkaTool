@@ -121,6 +121,7 @@ public class KafkaClusterTree {
         }).toList();
         l.forEach(filterableTreeItem -> filterableTreeItem.predicateProperty().set(predicate));
     }
+
     public void addAllConnectionsFromUserPreference(UserPreference userPreference) {
         userPreference.connections().forEach((cluster -> {
             try {
