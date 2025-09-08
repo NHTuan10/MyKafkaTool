@@ -2,8 +2,6 @@ Unit tests for below classes:
 KafkaConsumerService
 ClusterManager
 SchemaRegistryManagerImpl
-SchemaRegistryAvroDeserializer
-SchemaRegistryAvroSerializer
 SerDesHelper
 KafkaClusterTree
 KafkaClusterTreeItem

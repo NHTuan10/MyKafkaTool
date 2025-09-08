@@ -1,5 +1,6 @@
 package io.github.nhtuan10.mykafkatool.serdes.deserializer;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
@@ -34,12 +35,10 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
     @Override
     public String deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
         KafkaAvroDeserializer kafkaAvroDeserializer;
-        boolean isKey = Boolean.getBoolean(others.getOrDefault(Config.IS_KEY_PROP, "false"));
-        Map<String, Object> serializerMapKey = new HashMap<>();
-        serializerMapKey.putAll(Map.of(Config.IS_KEY_PROP, isKey));
+        boolean isKey = Boolean.parseBoolean(others.getOrDefault(Config.IS_KEY_PROP, "false"));
+        Map<String, Object> serializerMapKey = new HashMap<>(Map.of(Config.IS_KEY_PROP, isKey));
         if (!kafkaAvroDeserializerMap.containsKey(serializerMapKey)) {
-            kafkaAvroDeserializer = new KafkaAvroDeserializer();
-            kafkaAvroDeserializer.configure(consumerProps, isKey);
+            kafkaAvroDeserializer = createKafkaAvroDeserializer(consumerProps, isKey);
             kafkaAvroDeserializerMap.put(serializerMapKey, kafkaAvroDeserializer);
         } else {
             kafkaAvroDeserializer = kafkaAvroDeserializerMap.get(serializerMapKey);
@@ -48,6 +47,14 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
         Object deserializedObject = kafkaAvroDeserializer.deserialize(topic, headers, payload);
         others.put(Config.SCHEMA_ID_PROP, String.valueOf(extractSchemaId(payload)));
         return AvroUtil.convertObjectToJsonString(deserializedObject);
+    }
+
+    @VisibleForTesting
+    KafkaAvroDeserializer createKafkaAvroDeserializer(Map<String, Object> consumerProps, boolean isKey) {
+        KafkaAvroDeserializer kafkaAvroDeserializer;
+        kafkaAvroDeserializer = new KafkaAvroDeserializer();
+        kafkaAvroDeserializer.configure(consumerProps, isKey);
+        return kafkaAvroDeserializer;
     }
 
     @Override
