@@ -218,7 +218,7 @@ public class MainController {
                 schemaRegistryView.setVisible(true);
                 kafkaMessageView.setVisible(false);
                 KafkaCluster cluster = (KafkaCluster) selectedItem.getParent().getValue();
-                this.eventDispatcher.publishEvent(new SchemaRegistryUIEvent(cluster, UIEvent.Action.REFRESH_SCHEMA_REGISTRY));
+                this.eventDispatcher.publishEvent(SchemaRegistryUIEvent.newRefreshEvent(cluster, true));
 //                try {
 //                    schemaRegistryControl.loadAllSchema(cluster, isBlockingAppUINeeded);
 

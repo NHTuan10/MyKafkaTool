@@ -9,7 +9,6 @@ import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.EventSubscriber;
 import io.github.nhtuan10.mykafkatool.ui.event.SchemaRegistryUIEvent;
-import io.github.nhtuan10.mykafkatool.ui.event.UIEvent;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
@@ -85,13 +84,13 @@ public class SchemaRegistryViewController extends SplitPane {
                 (event) -> ViewUtils.setValueAndHighlightJsonInCodeArea(event.getData().getValue(), schemaRegistryTextArea, true, objectMapper, jsonHighlighter));
     }
 
-    public void loadAllSchema(KafkaCluster cluster) throws ExecutionException, InterruptedException {
-        schemaEditableTable.loadAllSchemas(cluster,
-                (e) -> isBlockingAppUINeeded.set(false),
+    public void loadAllSchema(KafkaCluster cluster, boolean useCache) throws ExecutionException, InterruptedException {
+        schemaEditableTable.loadAllSchemas(cluster, useCache,
+                isBlockingAppUINeeded, (e) -> isBlockingAppUINeeded.set(false),
                 (e) -> {
                     isBlockingAppUINeeded.set(false);
                     throw ((RuntimeException) e);
-                }, isBlockingAppUINeeded);
+                });
     }
 
     public void refresh() throws RestClientException, IOException, ExecutionException, InterruptedException {
@@ -133,10 +132,10 @@ public class SchemaRegistryViewController extends SplitPane {
 
         @Override
         public void handleOnNext(SchemaRegistryUIEvent item) {
-            if (item.action() == UIEvent.Action.REFRESH_SCHEMA_REGISTRY) {
+            if (SchemaRegistryUIEvent.isRefreshEvent(item)) {
                 Platform.runLater(() -> {
                     try {
-                        schemaRegistryViewController.loadAllSchema(item.cluster());
+                        schemaRegistryViewController.loadAllSchema(item.cluster(), item.useCache());
                     } catch (ExecutionException | InterruptedException ex) {
                         onFailure.accept(ex);
                     }

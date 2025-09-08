@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
+//TODO: refactor this class
 public class AddOrViewMessageModalController extends ModalController {
 
     public static final SchemaMetadataFromRegistry CUSTOM_SUBJECT_PLACEHOLDER_ITEM = new SchemaMetadataFromRegistry("<Custom>", null, null, List.of());

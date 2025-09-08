@@ -60,6 +60,7 @@ import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_MAX_PO
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
+//TODO: consider to refactor this class
 public class KafkaMessageViewController {
     //    @Inject
     private final ClusterManager clusterManager;

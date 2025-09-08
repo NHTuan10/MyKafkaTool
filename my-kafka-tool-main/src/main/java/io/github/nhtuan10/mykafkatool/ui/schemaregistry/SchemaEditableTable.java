@@ -179,7 +179,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
     @FXML
     public void refresh() throws RestClientException, IOException, ExecutionException, InterruptedException {
         if (this.selectedClusterName != null) {
-            ObservableList<SchemaTableItem> items = refresh((e) -> isBlockingUINeeded.set(false), (e) -> {
+            ObservableList<SchemaTableItem> items = refresh(false, (e) -> isBlockingUINeeded.set(false), (e) -> {
                 isBlockingUINeeded.set(false);
                 throw ((RuntimeException) e);
             });
@@ -187,11 +187,11 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
         }
     }
 
-    public void loadAllSchemas(KafkaCluster kafkaCluster, Consumer<ObservableList<SchemaTableItem>> onSuccess, Consumer<Throwable> onError, BooleanProperty isBusy) throws ExecutionException, InterruptedException {
+    public void loadAllSchemas(KafkaCluster kafkaCluster, boolean useCache, BooleanProperty isBusy, Consumer<ObservableList<SchemaTableItem>> onSuccess, Consumer<Throwable> onError) throws ExecutionException, InterruptedException {
         this.selectedClusterName = kafkaCluster;
         this.isBlockingUINeeded = isBusy;
         if (!clusterNameToSchemaTableItemsCache.containsKey(this.selectedClusterName)) {
-            setTableItemsAndFilter(refresh(onSuccess, onError), new Filter());
+            setTableItemsAndFilter(refresh(useCache, onSuccess, onError), new Filter());
         } else {
             SchemaTableItemsAndFilter schemaTableItemsAndFilter = clusterNameToSchemaTableItemsCache.get(this.selectedClusterName);
             setTableItemsAndFilter(schemaTableItemsAndFilter.getItems(), schemaTableItemsAndFilter.getFilter());
@@ -203,13 +203,13 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
         applyFilter(filter);
     }
 
-    private ObservableList<SchemaTableItem> refresh(Consumer<ObservableList<SchemaTableItem>> onSuccess, Consumer<Throwable> onError) throws ExecutionException, InterruptedException {
+    private ObservableList<SchemaTableItem> refresh(boolean useCache, Consumer<ObservableList<SchemaTableItem>> onSuccess, Consumer<Throwable> onError) throws ExecutionException, InterruptedException {
         ObservableList<SchemaTableItem> schemaItems;
         Callable<ObservableList<SchemaTableItem>> getSchemaTask = () -> {
             ObservableList<SchemaTableItem> items;
             try {
                 Platform.runLater(() -> this.isBlockingUINeeded.set(true));
-                List<SchemaMetadataFromRegistry> schemaMetadataList = schemaRegistryManager.getAllSubjectMetadata(this.selectedClusterName.getName(), this.selectedClusterName.isOnlySubjectLoaded(), false);
+                List<SchemaMetadataFromRegistry> schemaMetadataList = schemaRegistryManager.getAllSubjectMetadata(this.selectedClusterName.getName(), this.selectedClusterName.isOnlySubjectLoaded(), useCache);
                 items = FXCollections.observableArrayList(
                         schemaMetadataList
                                 .stream()

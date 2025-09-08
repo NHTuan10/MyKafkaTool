@@ -36,6 +36,7 @@ public class ModalUtils {
         showPopUpModal(modalFxml, title, modelRef, inputVarMap, true, false, parentWindow, true);
     }
 
+    //TODO: consider to refactor this method, use method calls rather than using reflection to pass fields to modal ontroller
     public static void showPopUpModal(final String modalFxml, final String title, final AtomicReference<Object> modelRef, final Map<String, Object> inputVarMap, final boolean editable, final boolean resizable, Window parentWindow, final boolean showAndWait) throws IOException {
         Stage stage = new Stage();
         AppComponent appComponent = MyKafkaToolApplication.DAGGER_APP_COMPONENT;
