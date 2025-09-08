@@ -5,7 +5,6 @@ import com.github.jknack.handlebars.Options;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -25,7 +24,7 @@ import java.util.stream.Stream;
 public enum HandleBarsHelpers implements Helper<Object> {
     randomInt {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             if (context instanceof Number) {
                 int i = ((Number) context).intValue();
                 if (options.params.length > 0) {
@@ -40,7 +39,7 @@ public enum HandleBarsHelpers implements Helper<Object> {
     },
     randomDouble {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             if (context instanceof Number) {
                 double i = ((Number) context).doubleValue();
                 if (options.params.length > 0) {
@@ -55,13 +54,13 @@ public enum HandleBarsHelpers implements Helper<Object> {
     },
     uuid {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             return UUID.randomUUID().toString();
         }
     },
     randomString {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             Random random = new Random();
             if (context instanceof Number) {
                 int i = ((Number) context).intValue();
@@ -78,7 +77,7 @@ public enum HandleBarsHelpers implements Helper<Object> {
 
     currentDate {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             if (context instanceof String fmt) {
                 return LocalDate.now().format(DateTimeFormatter.ofPattern(fmt));
             } else {
@@ -88,7 +87,7 @@ public enum HandleBarsHelpers implements Helper<Object> {
     },
     currentTime {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             if (context instanceof String fmt) {
                 return LocalTime.now().format(DateTimeFormatter.ofPattern(fmt));
             } else {
@@ -99,7 +98,7 @@ public enum HandleBarsHelpers implements Helper<Object> {
     },
     currentDateTime {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             if (context instanceof String fmt) {
                 return LocalDateTime.now().format(DateTimeFormatter.ofPattern(fmt));
             } else {
@@ -110,64 +109,39 @@ public enum HandleBarsHelpers implements Helper<Object> {
     },
     epochMillis {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             return Instant.now().toEpochMilli();
         }
     },
     epochSeconds {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
 
             return Instant.now().getEpochSecond();
         }
     },
     round {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             return roundNumber(context, options, RoundingMode.HALF_UP);
         }
     },
     ceil {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             return roundNumber(context, options, RoundingMode.CEILING);
         }
     },
     floor {
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             return roundNumber(context, options, RoundingMode.FLOOR);
         }
     },
     math {
-        @RequiredArgsConstructor
-        @Getter
-        enum BiOp {
-            add("+", (a, b) -> BigDecimal.valueOf(a.doubleValue()).add(BigDecimal.valueOf(b.doubleValue()))), sub("-", (a, b) -> BigDecimal.valueOf(a.doubleValue()).add(BigDecimal.valueOf(b.doubleValue()).negate())), mul("*", (a, b) -> BigDecimal.valueOf(a.doubleValue()).multiply(BigDecimal.valueOf(b.doubleValue()))), div("/", (a, b) -> BigDecimal.valueOf(a.doubleValue()).divide(BigDecimal.valueOf(b.doubleValue()), 10, RoundingMode.HALF_UP)), mod("%", (a, b) -> a.longValue() % b.longValue());
-            private final String symbol;
-            private final BiFunction<Number, Number, Number> function;
-
-            public static BiOp fromSymbol(String symbol) {
-                return Arrays.stream(BiOp.values()).filter(biOp -> biOp.symbol.equals(symbol))
-                        .findFirst().orElse(null);
-            }
-        }
-        @RequiredArgsConstructor
-        @Getter
-        enum TriOp {
-            div("/", (a, b, c) -> BigDecimal.valueOf(a.doubleValue()).divide(BigDecimal.valueOf(b.doubleValue()), c.intValue(), RoundingMode.HALF_UP));
-
-            private final String symbol;
-            private final TriFunction<Number, Number, Number, Number> function;
-
-            public static TriOp fromSymbol(String symbol) {
-                return Arrays.stream(TriOp.values()).filter(biOp -> biOp.symbol.equals(symbol))
-                        .findFirst().orElse(null);
-            }
-        }
 
         @Override
-        public Object apply(Object context, Options options) throws IOException {
+        public Object apply(Object context, Options options) {
             if (context instanceof Number) {
                 double d = ((Number) context).doubleValue();
                 BiOp biOp;
@@ -227,7 +201,32 @@ public enum HandleBarsHelpers implements Helper<Object> {
                 .collect(Collectors.joining());
     }
 
+    @RequiredArgsConstructor
+    @Getter
+    enum BiOp {
+        add("+", (a, b) -> BigDecimal.valueOf(a.doubleValue()).add(BigDecimal.valueOf(b.doubleValue()))), sub("-", (a, b) -> BigDecimal.valueOf(a.doubleValue()).add(BigDecimal.valueOf(b.doubleValue()).negate())), mul("*", (a, b) -> BigDecimal.valueOf(a.doubleValue()).multiply(BigDecimal.valueOf(b.doubleValue()))), div("/", (a, b) -> BigDecimal.valueOf(a.doubleValue()).divide(BigDecimal.valueOf(b.doubleValue()), 10, RoundingMode.HALF_UP)), mod("%", (a, b) -> a.longValue() % b.longValue());
+        private final String symbol;
+        private final BiFunction<Number, Number, Number> function;
 
+        public static BiOp fromSymbol(String symbol) {
+            return Arrays.stream(BiOp.values()).filter(biOp -> biOp.symbol.equals(symbol))
+                    .findFirst().orElse(null);
+        }
+    }
+
+    @RequiredArgsConstructor
+    @Getter
+    enum TriOp {
+        div("/", (a, b, c) -> BigDecimal.valueOf(a.doubleValue()).divide(BigDecimal.valueOf(b.doubleValue()), c.intValue(), RoundingMode.HALF_UP));
+
+        private final String symbol;
+        private final TriFunction<Number, Number, Number, Number> function;
+
+        public static TriOp fromSymbol(String symbol) {
+            return Arrays.stream(TriOp.values()).filter(biOp -> biOp.symbol.equals(symbol))
+                    .findFirst().orElse(null);
+        }
+    }
     @FunctionalInterface
     interface TriFunction<T, U, V, R> {
         R apply(T t, U u, V v);
