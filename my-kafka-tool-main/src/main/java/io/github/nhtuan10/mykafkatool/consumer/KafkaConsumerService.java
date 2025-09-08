@@ -48,7 +48,6 @@ public class KafkaConsumerService {
     private final ClusterManager clusterManager;
     private final ConsumerCreator consumerCreator;
     private final SchemaRegistryManager schemaRegistryManager;
-
     private List<Consumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
     @Inject
@@ -65,7 +64,6 @@ public class KafkaConsumerService {
     public List<KafkaMessageTableItem> consumeMessages(KafkaPartition partition, PollingOptions pollingOptions) {
         Set<TopicPartition> topicPartitions = Set.of(new TopicPartition(partition.topic().name(), partition.id()));
         return consumeMessagesFromPartitions(partition.topic(), topicPartitions, pollingOptions);
-
     }
 
     public List<KafkaMessageTableItem> consumeMessages(KafkaTopic kafkaTopic, PollingOptions pollingOptions) throws ExecutionException, InterruptedException, TimeoutException {
@@ -194,27 +192,7 @@ public class KafkaConsumerService {
 //                    firstPoll = false;
 //                }
                 if (!consumerRecords.isEmpty()) {
-                    List<KafkaMessageTableItem> messages = new ArrayList<>();
-                    for (ConsumerRecord<String, Object> record : consumerRecords) {
-                        TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
-                        long endOffset = partitionOffsetsToPoll.get(topicPartition).getRight();
-                        if (record.offset() >= endOffset) {
-                            isAllMsgPulled.put(topicPartition, true);
-                        } else {
-                            try {
-                                KafkaMessageTableItem message = createMessageItem(record, pollingOptions, consumerProps);
-                                messages.add(message);
-                            } catch (DeserializationException e) {
-                                log.error("Error processing record: key={}, partition={}, offset={}",
-                                        record.key(), record.partition(), record.offset(), e);
-                                KafkaMessageTableItem message = createErrorMessageItem(record, pollingOptions);
-                                messages.add(message);
-                            }
-                            if (record.offset() == endOffset - 1) {
-                                isAllMsgPulled.put(topicPartition, true);
-                            }
-                        }
-                    }
+                    List<KafkaMessageTableItem> messages = processConsumerRecords(consumerProps, pollingOptions, partitionOffsetsToPoll, consumerRecords, isAllMsgPulled);
                     if (!messages.isEmpty()) {
                         Platform.runLater(() -> messageObservableList.addAll(messages));
 //                        messageObservableList.addAll(messages);
@@ -227,6 +205,31 @@ public class KafkaConsumerService {
             }
         }
         return messageObservableList;
+    }
+
+    private List<KafkaMessageTableItem> processConsumerRecords(Map<String, Object> consumerProps, PollingOptions pollingOptions, Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll, ConsumerRecords<String, Object> consumerRecords, Map<TopicPartition, Boolean> isAllMsgPulled) {
+        List<KafkaMessageTableItem> messages = new ArrayList<>();
+        for (ConsumerRecord<String, Object> record : consumerRecords) {
+            TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
+            long endOffset = partitionOffsetsToPoll.get(topicPartition).getRight();
+            if (record.offset() >= endOffset) {
+                isAllMsgPulled.put(topicPartition, true);
+            } else {
+                try {
+                    KafkaMessageTableItem message = createMessageItem(record, pollingOptions, consumerProps);
+                    messages.add(message);
+                } catch (DeserializationException e) {
+                    log.error("Error processing record: key={}, partition={}, offset={}",
+                            record.key(), record.partition(), record.offset(), e);
+                    KafkaMessageTableItem message = createErrorMessageItem(record, pollingOptions);
+                    messages.add(message);
+                }
+                if (record.offset() == endOffset - 1) {
+                    isAllMsgPulled.put(topicPartition, true);
+                }
+            }
+        }
+        return messages;
     }
 
     private List<KafkaMessageTableItem> handleConsumerRecords(PollingOptions pollingOptions, ConsumerRecords<String, Object> consumerRecords, Map<String, Object> consumerProps, Map<TopicPartition, Pair<Long, Long>> partitionOffsetsToPoll) {
