@@ -12,10 +12,7 @@ import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupListTreeItem
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;
 import io.github.nhtuan10.mykafkatool.ui.control.FilterableTreeItem;
-import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
-import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
-import io.github.nhtuan10.mykafkatool.ui.event.SchemaRegistryUIEvent;
-import io.github.nhtuan10.mykafkatool.ui.event.TopicUIEvent;
+import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
@@ -71,7 +68,8 @@ public class KafkaClusterTree {
         clusterTree.setRoot(clustersItem);
 
         addAllConnectionsFromUserPreference(userPreferenceManager.loadUserPreference());
-        //TODO: add  search topic, cluster, consumer groups function. Also show brokers & topic table, in-sync replicas, total topics, partitions
+        this.eventDispatcher.publishEvent(ApplicationUIEvent.newApplicationReadyEvent());
+        //TODO: Also show brokers & topic table, in-sync replicas, total topics, partitions
 
 
 //        TreeView<String> tree = new TreeView<String> (rootItem);

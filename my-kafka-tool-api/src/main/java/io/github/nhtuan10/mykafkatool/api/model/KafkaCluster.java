@@ -88,4 +88,8 @@ public class KafkaCluster {
     public static enum ClusterStatus {
         CONNECTED, DISCONNECTED
     }
+
+    public String getId() {
+        return getName();
+    }
 }

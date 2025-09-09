@@ -20,6 +20,8 @@ import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
+import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepo;
+import io.github.nhtuan10.mykafkatool.util.PersistableConcurrentHashMap;
 import io.github.nhtuan10.mykafkatool.util.Utils;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
@@ -49,7 +51,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -77,9 +78,9 @@ public class KafkaMessageViewController {
 
     private final StageHolder stageHolder;
 
-    private final BooleanProperty isPolling = new SimpleBooleanProperty(false);
+    private final BooleanProperty isPolling;
 
-    private final BooleanProperty isBlockingAppUINeeded = new SimpleBooleanProperty(false);
+    private final BooleanProperty isBlockingAppUINeeded;
 
     private TreeItem selectedTreeItem;
 
@@ -95,7 +96,12 @@ public class KafkaMessageViewController {
     @Getter
     private PartitionEventSubscriber partitionEventSubscriber;
 
-    private Map<TreeItem, KafkaMessageView.MessageTableState> treeMsgTableItemCache = new ConcurrentHashMap<>();
+    @Getter
+    private EventSubscriber<ApplicationUIEvent> appReadyEventSubscriber;
+
+    private final Map<String, KafkaMessageView.MessageTableState> treeItemToMessageTableStateMap;
+
+//    private final Map<String, KafkaMessageView.MessageTableState> persitableMsgTableStateMap;
 
     @Getter
     private MessageEventSubscriber messageEventSubscriber;
@@ -178,7 +184,22 @@ public class KafkaMessageViewController {
                 }
             }
         };
+
+        this.appReadyEventSubscriber = new EventSubscriber<>() {
+            @Override
+            protected void handleOnNext(ApplicationUIEvent item) {
+                if (ApplicationUIEvent.isApplicationReadyEvent(item)) {
+                    log.info("Application is ready");
+                }
+            }
+        };
+
         this.eventDispatcher = eventDispatcher;
+        isPolling = new SimpleBooleanProperty(false);
+        isBlockingAppUINeeded = new SimpleBooleanProperty(false);
+        treeItemToMessageTableStateMap = new PersistableConcurrentHashMap<>(UserPreferenceRepo.getDefaultUserPrefDir() + "/message-view-user-pref.data");
+//        treeItemToMessageTableStateMap = new ConcurrentHashMap<>();
+//        persitableMsgTableStateMap = new PersistableConcurrentHashMap<>(UserPreferenceRepo.getDefaultUserPrefDir() + "/message-view-user-pref.data");
     }
 
     public void viewOrReproduceMessage(SerDesHelper serDesHelper, KafkaMessageTableItem rowData, boolean reproduce, boolean withHeaders) {
@@ -245,9 +266,9 @@ public class KafkaMessageViewController {
             pollMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
         });
         kafkaMessageTable.addFilterListener((filter) -> {
-            if (selectedTreeItem instanceof KafkaTopicTreeItem<?>) {
-                treeMsgTableItemCache.forEach((treeItem, state) -> {
-                    if (treeItem instanceof KafkaPartitionTreeItem<?> && treeItem.getParent() == selectedTreeItem) {
+            if (selectedTreeItem instanceof KafkaTopicTreeItem<?> topicTreeItem) {
+                treeItemToMessageTableStateMap.forEach((treeItem, state) -> {
+                    if (isChildPartition(treeItem, topicTreeItem)) {
                         state.setFilter(filter);
                     }
                 });
@@ -256,6 +277,15 @@ public class KafkaMessageViewController {
         this.messageEventSubscriber = new MessageEventSubscriber(valueTextArea, objectMapper, jsonHighlighter);
     }
 
+    private boolean isChildPartition(String partitionTreeItemKey, KafkaTopicTreeItem<?> topicTreeItem) {
+        for (Object child : topicTreeItem.getChildren()) {
+            String childKey = buildKeyForState((TreeItem<?>) child);
+            if (child instanceof KafkaPartitionTreeItem<?> && childKey != null && childKey.equals(partitionTreeItemKey)) {
+                return true;
+            }
+        }
+        return false;
+    }
     private void initPollingOptionsUI() {
         maxMessagesTextField.setText(String.valueOf(DEFAULT_MAX_POLL_RECORDS));
         List.of(startTimestampPicker, endTimestampPicker).forEach(picker -> picker.setDayCellFactory(param -> new DateCell() {
@@ -305,11 +335,26 @@ public class KafkaMessageViewController {
     }
 
     public void cacheMessages(TreeItem oldValue) {
-        treeMsgTableItemCache.put(oldValue, KafkaMessageView.MessageTableState.builder()
-                .items(kafkaMessageTable.getItems())
-                .filter(kafkaMessageTable.getFilter().copy())
-                .pollingOptions(getPollingOptionsBuilder().build())
-                .build());
+        String key = buildKeyForState(oldValue);
+        if (key != null) {
+            treeItemToMessageTableStateMap.put(key, KafkaMessageView.MessageTableState.builder()
+                    .items(kafkaMessageTable.getItems())
+                    .filter(kafkaMessageTable.getFilter().copy())
+                    .pollingOptions(getPollingOptionsBuilder().build())
+                    .build());
+        }
+    }
+
+    public String buildKeyForState(TreeItem treeItem) {
+        if (treeItem instanceof KafkaTopicTreeItem<?>) {
+            KafkaTopic topic = (KafkaTopic) treeItem.getValue();
+            return "topic:" + topic.cluster().getId() + ":" + topic.name();
+        } else if (treeItem instanceof KafkaPartitionTreeItem<?>) {
+            KafkaPartition partition = (KafkaPartition) treeItem.getValue();
+            KafkaTopic topic = partition.topic();
+            return "partition:" + topic.cluster().getId() + topic.name() + partition.id();
+        }
+        return null;
     }
 
     public void switchTopicOrPartition(TreeItem newValue) {
@@ -320,12 +365,15 @@ public class KafkaMessageViewController {
         this.selectedTreeItem = newValue;
         KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
         isPolling.set(false);
+        String key = buildKeyForState(newValue);
         if (newValue instanceof KafkaTopicTreeItem<?>) {
             this.kafkaTopic = (KafkaTopic) newValue.getValue();
             this.kafkaPartition = null;
             // if some clear msg table
-            if (treeMsgTableItemCache.containsKey(newValue)) {
-                KafkaMessageView.MessageTableState messageTableState = treeMsgTableItemCache.get(newValue);
+            if (treeItemToMessageTableStateMap.containsKey(key)) {
+                KafkaMessageView.MessageTableState messageTableState = treeItemToMessageTableStateMap.get(key);
+                if (messageTableState.getItems() == null)
+                    messageTableState.setItems(FXCollections.observableArrayList());
                 ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList(messageTableState.getItems());
                 kafkaMessageTable.setItems(msgItems, false);
                 kafkaMessageTable.configureSortAndFilterForMessageTable(messageTableState.getFilter(), messagePollingPosition);
@@ -344,12 +392,17 @@ public class KafkaMessageViewController {
             TreeItem<?> topicTreeItem = newValue.getParent();
             ObservableList<KafkaMessageTableItem> msgItems = FXCollections.observableArrayList();
             KafkaMessageView.MessageTableState messageTableState = null;
-            if (treeMsgTableItemCache.containsKey(newValue)) {
-                messageTableState = treeMsgTableItemCache.get(newValue);
+            if (treeItemToMessageTableStateMap.containsKey(key)) {
+                messageTableState = treeItemToMessageTableStateMap.get(key);
+                if (messageTableState.getItems() == null)
+                    messageTableState.setItems(FXCollections.observableArrayList());
                 msgItems = FXCollections.observableArrayList(messageTableState.getItems());
-            } else if (treeMsgTableItemCache.containsKey(topicTreeItem)) {
-                messageTableState = treeMsgTableItemCache.get(topicTreeItem);
-                msgItems = FXCollections.observableArrayList(treeMsgTableItemCache.get(topicTreeItem).getItems());
+            } else if (treeItemToMessageTableStateMap.containsKey(buildKeyForState(topicTreeItem))) {
+                String topicKey = buildKeyForState(topicTreeItem);
+                messageTableState = treeItemToMessageTableStateMap.get(topicKey);
+                if (messageTableState.getItems() == null)
+                    messageTableState.setItems(FXCollections.observableArrayList());
+                msgItems = FXCollections.observableArrayList(messageTableState.getItems());
             }
             Filter filter = new Filter();
             kafkaMessageTable.setItems(msgItems, false);
@@ -370,6 +423,7 @@ public class KafkaMessageViewController {
             isPolling.set(false);
             return;
         }
+        cacheMessages(this.selectedTreeItem);
         if (!(selectedTreeItem instanceof KafkaTopicTreeItem<?>)
                 && !(selectedTreeItem instanceof KafkaPartitionTreeItem<?>)) {
             ModalUtils.showAlertDialog(Alert.AlertType.WARNING, "Please choose a topic or partition to poll messages", null, ButtonType.OK);
@@ -379,9 +433,10 @@ public class KafkaMessageViewController {
         ObservableList<KafkaMessageTableItem> list = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
         kafkaMessageTable.setItems(list);
         // clear message cache for partitions
-        treeMsgTableItemCache.forEach((treeItem, state) -> {
-            if (treeItem instanceof KafkaPartitionTreeItem<?> && treeItem.getParent() == selectedTreeItem) {
-                treeMsgTableItemCache.remove(treeItem);
+        treeItemToMessageTableStateMap.forEach((treeItem, state) -> {
+            if (selectedTreeItem instanceof KafkaTopicTreeItem<?> kafkaTopicTreeItem && isChildPartition(treeItem, kafkaTopicTreeItem)) {
+//            if (treeItem instanceof KafkaPartitionTreeItem<?> && treeItem.getParent() == selectedTreeItem) {
+                treeItemToMessageTableStateMap.remove(treeItem);
             }
         });
 //        BooleanProperty firstPoll = new SimpleBooleanProperty(true);

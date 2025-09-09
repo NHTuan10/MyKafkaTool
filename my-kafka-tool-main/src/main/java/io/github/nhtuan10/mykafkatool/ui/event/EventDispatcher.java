@@ -15,6 +15,7 @@ public class EventDispatcher {
     final SubmissionPublisher<SchemaRegistryUIEvent> schemaRegistryEventPublisher;
     final SubmissionPublisher<ConsumerGroupUIEvent> consumerGroupUIEventPublisher;
     final SubmissionPublisher<MessageUIEvent> messageUIEventPublisher;
+    final SubmissionPublisher<ApplicationUIEvent> applicationUIEventPublisher;
 
     public void addTopicEventSubscriber(TopicEventSubscriber subscriber) {
         topicEventPublisher.subscribe(subscriber);
@@ -41,6 +42,11 @@ public class EventDispatcher {
         subscriber.setEventDispatcher(this);
     }
 
+    public void addAppEventSubscriber(EventSubscriber<ApplicationUIEvent> subscriber) {
+        applicationUIEventPublisher.subscribe(subscriber);
+        subscriber.setEventDispatcher(this);
+    }
+
     public <T> BiPredicate<Flow.Subscriber<? super T>, ? super T> getErrorHandler() {
         return (subscriber, e) -> {
             subscriber.onError(new RuntimeException(e.getClass().getSimpleName() + " event is not accepted by subscriber"));
@@ -59,6 +65,8 @@ public class EventDispatcher {
             this.consumerGroupUIEventPublisher.offer(event, this.getErrorHandler());
         } else if (uiEvent instanceof MessageUIEvent event) {
             this.messageUIEventPublisher.offer(event, this.getErrorHandler());
+        } else if (uiEvent instanceof ApplicationUIEvent event) {
+            this.applicationUIEventPublisher.offer(event, this.getErrorHandler());
         } else {
             throw new IllegalStateException("Unexpected value: " + uiEvent);
         }

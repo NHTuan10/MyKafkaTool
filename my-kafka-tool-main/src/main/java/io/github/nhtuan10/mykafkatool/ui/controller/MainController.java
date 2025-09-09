@@ -136,6 +136,7 @@ public class MainController {
         schemaRegistryView.setIsBlockingAppUINeeded(isBlockingAppUINeeded);
         this.eventDispatcher.addSchemaRegistryEventSubscriber(schemaRegistryView.getSchemaRegistryEventSubscriber());
 
+        this.eventDispatcher.addAppEventSubscriber(kafkaMessageView.getAppReadyEventSubscriber());
         EventSubscriber<SchemaRegistryUIEvent> backgroundSchemaRegistrySub = new EventSubscriber<>() {
 
             @Override

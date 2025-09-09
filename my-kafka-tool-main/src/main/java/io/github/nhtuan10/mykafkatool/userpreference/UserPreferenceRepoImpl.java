@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
 import static io.github.nhtuan10.mykafkatool.constant.AppConstant.USER_PREF_FILENAME;
 
 @AppScoped
@@ -56,8 +55,7 @@ public class UserPreferenceRepoImpl implements UserPreferenceRepo {
     }
 
     public static String getDefaultUserPreferenceFilePath() {
-        String userHome = System.getProperty("user.home");
-        return MessageFormat.format("{0}/{1}/config/{2}", userHome, APP_NAME, USER_PREF_FILENAME);
+        return MessageFormat.format("{0}/{1}", UserPreferenceRepo.getDefaultUserPrefDir(), USER_PREF_FILENAME);
     }
 
     public UserPreference parseUserPreference(String data) throws JsonProcessingException {

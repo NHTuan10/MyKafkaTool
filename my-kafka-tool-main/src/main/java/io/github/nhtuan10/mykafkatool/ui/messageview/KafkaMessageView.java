@@ -93,7 +93,7 @@ public class KafkaMessageView extends SplitPane {
     @AllArgsConstructor
     @Builder
     public static class MessageTableState {
-        ObservableList<KafkaMessageTableItem> items;
+        transient ObservableList<KafkaMessageTableItem> items;
         Filter filter;
         //        Comparator<KafkaMessageTableItem> comparator;
         KafkaConsumerService.PollingOptions pollingOptions;
