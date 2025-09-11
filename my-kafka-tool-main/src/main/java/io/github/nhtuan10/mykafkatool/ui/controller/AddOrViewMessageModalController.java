@@ -297,17 +297,15 @@ public class AddOrViewMessageModalController extends ModalController {
 //        partitionComboBox.itemsProperty().bind(topicComboBox.valueProperty().map(topic -> FXCollections.observableArrayList(topic.partitions())));
         clusterComboBox.setOnAction(event -> {
             KafkaCluster cluster = clusterComboBox.getValue();
-            if (cluster != null) {
+            if (cluster != null && (kafkaTopic == null || cluster != kafkaTopic.cluster())) {
                 setTopicComboBoxItemsForCluster(cluster, null);
-                kafkaTopic = null;
                 kafkaPartition = null;
             }
         });
         topicComboBox.setOnAction(event -> {
             KafkaTopic topic = topicComboBox.getValue();
-            if (topic != null) {
+            if (topic != null && (topic != kafkaTopic)) {
                 setPartitionComboBoxItemsForTopic(topic, null);
-                kafkaTopic = topicComboBox.getValue();
                 kafkaPartition = null;
             }
         });
@@ -321,6 +319,8 @@ public class AddOrViewMessageModalController extends ModalController {
             KafkaPartition partition = partitionComboBox.getValue();
             if (partition != null && partition.id() >= 0) {
                 kafkaPartition = partitionComboBox.getValue();
+            } else {
+                kafkaPartition = null;
             }
         });
 
@@ -337,10 +337,15 @@ public class AddOrViewMessageModalController extends ModalController {
     private void setPartitionComboBoxItemsForTopic(KafkaTopic topic, KafkaPartition partition) {
         partitionComboBox.setItems(FXCollections.observableArrayList(topic.partitions()));
         partitionComboBox.getItems().add(0, new KafkaPartition(-1, topic));
+        kafkaTopic = topicComboBox.getValue();
         if (partition != null) {
             partitionComboBox.getSelectionModel().select(partition);
+            if (partition.id() >= 0) {
+                kafkaPartition = partitionComboBox.getValue();
+            }
         } else {
             partitionComboBox.getSelectionModel().selectFirst();
+            kafkaPartition = null;
         }
     }
 
@@ -351,6 +356,7 @@ public class AddOrViewMessageModalController extends ModalController {
         } else {
             topicComboBox.getSelectionModel().selectFirst();
         }
+        kafkaTopic = topicComboBox.getValue();
     }
 
     private void previewKeyAndValueHandlebars(int n, String keyTemplate, String valueTemplate) {
@@ -418,6 +424,7 @@ public class AddOrViewMessageModalController extends ModalController {
 //        }).toList();
 
             for (var msg : kafkaMessages) {
+                if (kafkaPartition != null && kafkaPartition.id() < 0) kafkaPartition = null;
                 producerUtil.sendMessage(kafkaTopic, kafkaPartition, msg);
             }
             return kafkaMessages.size();
