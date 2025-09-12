@@ -10,4 +10,12 @@ public record PartitionUIEvent(KafkaPartition partition, Action action) implemen
     public static PartitionUIEvent newRefreshPartitionEven(KafkaPartition partition) {
         return new PartitionUIEvent(partition, Action.REFRESH_PARTITION);
     }
+
+    public static boolean isMessagePollingEvent(PartitionUIEvent event) {
+        return event.action() == Action.MESSAGE_POLLING;
+    }
+
+    public static PartitionUIEvent newMessagePollingEvent(KafkaPartition partition) {
+        return new PartitionUIEvent(partition, Action.MESSAGE_POLLING);
+    }
 }

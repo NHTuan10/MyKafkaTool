@@ -196,7 +196,7 @@ public class MainController {
                 setVisibleTabs(dataTab, propertiesTab, cgOffsetsTab);
                 schemaRegistryView.setVisible(false);
                 kafkaMessageView.setVisible(true);
-                eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
+                eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEvent(topic));
 //                this.consumerGroupView.loadCG(topic);
                 this.eventDispatcher.publishEvent(ConsumerGroupUIEvent.newRefreshConsumerGroupEven(topic.cluster().getName(), null, topic));
                 if (!schemaRegistryManager.isSchemaCachedForCluster(topic.cluster().getName())){

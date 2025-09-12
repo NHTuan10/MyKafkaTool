@@ -238,6 +238,7 @@ public class KafkaClusterTree {
                 try {
                     clusterManager.purgePartition(partition);
                     this.eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(partition));
+                    this.eventDispatcher.publishEvent(PartitionUIEvent.newMessagePollingEvent(partition));
                 } catch (ExecutionException | InterruptedException e) {
                     log.error("Error when purge partition", e);
                     throw new RuntimeException(e);
@@ -256,7 +257,8 @@ public class KafkaClusterTree {
                 if (ModalUtils.confirmAlert("Purge Topic", "Are you sure to delete all data in the topic " + topic.name() + " ?", "Yes", "Cancel")) {
                     try {
                         clusterManager.purgeTopic(topic);
-                        eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
+                        eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEvent(topic));
+                        eventDispatcher.publishEvent(TopicUIEvent.newMessagePollingEvent(topic));
                     } catch (ExecutionException | InterruptedException | TimeoutException e) {
                         log.error("Error when purge topic", e);
                         throw new RuntimeException(e);
@@ -273,7 +275,7 @@ public class KafkaClusterTree {
             if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicTreeItem<?> selectedTopicTreeItem) {
                 KafkaTopic topic = (KafkaTopic) selectedTopicTreeItem.getValue();
                 selectedTopicTreeItem.reloadChildren();
-                eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(topic));
+                eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEvent(topic));
                 eventDispatcher.publishEvent(SchemaRegistryUIEvent.newBackgroundRefreshEven(topic.cluster()));
             }
         });

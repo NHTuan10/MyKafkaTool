@@ -172,6 +172,14 @@ public class KafkaMessageViewController {
             public void handleOnNext(TopicUIEvent item) {
                 if (TopicUIEvent.isRefreshTopicEvent(item)) {
                     Platform.runLater(() -> countMessages());
+                } else if (TopicUIEvent.isMessagePollingEvent(item)) {
+                    Platform.runLater(() -> {
+                        countMessages();
+                        if (selectedTreeItem instanceof KafkaTopicTreeItem<?> kafkaTopicTreeItem &&
+                                kafkaTopicTreeItem.getValue().equals(item.topic())) {
+                            pollMessages();
+                        }
+                    });
                 }
             }
         };
@@ -181,6 +189,14 @@ public class KafkaMessageViewController {
             public void handleOnNext(PartitionUIEvent item) {
                 if (PartitionUIEvent.isRefreshPartitionEvent(item)) {
                     Platform.runLater(() -> countMessages());
+                } else if (PartitionUIEvent.isMessagePollingEvent(item)) {
+                    Platform.runLater(() -> {
+                        countMessages();
+                        if ((selectedTreeItem instanceof KafkaPartitionTreeItem<?> kafkaPartitionTreeItem &&
+                                kafkaPartitionTreeItem.getValue().equals(item.partition()))) {
+                            pollMessages();
+                        }
+                    });
                 }
             }
         };
@@ -507,7 +523,7 @@ public class KafkaMessageViewController {
             isBlockingAppUINeeded.set(false);
             isPolling.set(false);
             kafkaMessageTable.handleNumOfMsgChanged(kafkaMessageTable.getShownItems().size());
-            getTopicEventDispatcher().publishEvent(TopicUIEvent.newRefreshTopicEven(getTopic()));
+            getTopicEventDispatcher().publishEvent(TopicUIEvent.newRefreshTopicEvent(getTopic()));
         };
         Consumer<Throwable> onFailure = (exception) -> {
             isBlockingAppUINeeded.set(false);

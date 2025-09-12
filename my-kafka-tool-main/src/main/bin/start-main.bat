@@ -1,1 +1,1 @@
-java -jar -XX:+UseZGC my-kafka-tool-main-0.1.1.6-SNAPSHOT.jar
+java -jar -XX:+UseZGC my-kafka-tool-main-0.1.1.7-SNAPSHOT.jar

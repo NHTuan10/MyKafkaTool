@@ -431,7 +431,7 @@ public class AddOrViewMessageModalController extends ModalController {
         };
         ViewUtils.runBackgroundTask(task, (count) -> {
             this.isBusy.set(false);
-            eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEven(kafkaTopic));
+            eventDispatcher.publishEvent(TopicUIEvent.newRefreshTopicEvent(kafkaTopic));
             if (kafkaPartition != null) {
                 eventDispatcher.publishEvent(PartitionUIEvent.newRefreshPartitionEven(kafkaPartition));
             }

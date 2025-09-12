@@ -34,8 +34,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class ModularLauncher {
-    public static final String MINIMUM_VERSION = "0.1.1.6-SNAPSHOT";
     public static final String ARTIFACT = "io.github.nhtuan10:my-kafka-tool-main";
+
+    public static final String MINIMUM_VERSION = "0.1.1.7-SNAPSHOT";
     public static final String ARTIFACT_URI_PROP_KEY = "artifact.override.uri";
     public static final String ARTIFACT_VERSION_PROP_KEY = "artifact.version";
     public static final String MAVEN_METADATA_FILE_NAME_PROP_KEY = "artifact.maven-metadata-fileName";
@@ -142,8 +143,8 @@ public class ModularLauncher {
                         .mainClass("io.github.nhtuan10.mykafkatool.MyKafkaToolApplication")
                         .build());
 //        Modular.startModuleSyncWithMainClass("my-kafka-tool-main", uris, "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", List.of("*"));
-//        Modular.startModuleSync("my-kafka-tool-ext", List.of("mvn://io.github.nhtuan10/my-kafka-tool-ext/0.1.1.6-SNAPSHOT"), List.of("io.github.nhtuan10.mykafkatool.ext"));
-//        Modular.startModuleSync("my-kafka-tool-ext", List.of("file:///Users/tuan/Library/CloudStorage/OneDrive-Personal/CS/Java/MyKafkaTool/my-kafka-tool-launcher/target/my-kafka-tool-launcher-0.1.1.6-SNAPSHOT/lib/my-kafka-tool-ext-0.1.1.6-SNAPSHOT.jar"), List.of("io.github.nhtuan10.mykafkatool.ext"));
+//        Modular.startModuleSync("my-kafka-tool-ext", List.of("mvn://io.github.nhtuan10/my-kafka-tool-ext/0.1.1.7-SNAPSHOT"), List.of("io.github.nhtuan10.mykafkatool.ext"));
+//        Modular.startModuleSync("my-kafka-tool-ext", List.of("file:///Users/tuan/Library/CloudStorage/OneDrive-Personal/CS/Java/MyKafkaTool/my-kafka-tool-launcher/target/my-kafka-tool-launcher-0.1.1.7-SNAPSHOT/lib/my-kafka-tool-ext-0.1.1.7-SNAPSHOT.jar"), List.of("io.github.nhtuan10.mykafkatool.ext"));
 //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
         waitForUpgrade.countDown();
 
