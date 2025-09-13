@@ -8,6 +8,7 @@ import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
+import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupListTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;
@@ -29,11 +30,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.admin.TopicDescription;
 
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -186,7 +189,7 @@ public class KafkaClusterTree {
                 // TODO: create a view with topic table or have a search topic function in topic list tree item
                 MenuItem refreshItem = new MenuItem("Refresh");
                 refreshItem.setOnAction(actionEvent -> topicListTreeItem.reloadChildren());
-                clusterTreeContextMenu.getItems().setAll(createAddingTopicActionMenuItem(), refreshItem);
+                clusterTreeContextMenu.getItems().setAll(createAddingTopicActionMenuItem(), createOpeningTopicActionMenuItem(), refreshItem);
             } else if (treeItem instanceof KafkaTopicTreeItem<?>) {
                 // TODO:  edit topic menu item
                 clusterTreeContextMenu.getItems().setAll(getTopicActionMenuItems());
@@ -294,6 +297,51 @@ public class KafkaClusterTree {
             }
         });
         return addNewTopicItem;
+    }
+
+    private MenuItem createOpeningTopicActionMenuItem() {
+        MenuItem addNewTopicItem = new MenuItem("Open Topic");
+        addNewTopicItem.setOnAction(ae -> {
+            openTopic();
+        });
+        return addNewTopicItem;
+    }
+
+    private void openTopic() {
+        if (clusterTree.getSelectionModel().getSelectedItem() instanceof KafkaTopicListTreeItem<?> topicListTreeItem) {
+            String clusterName = ((KafkaTopicListTreeItem.KafkaTopicListTreeItemValue) topicListTreeItem.getValue()).getCluster().getName();
+
+            Optional<String> result = showTopicNameDialog();
+            result.ifPresent(topicName -> {
+                // Handle the entered topic name
+                log.info("Topic name entered: " + topicName);
+                if (!topicName.trim().isEmpty()) {
+                    // Check if topic already exists
+                    String topic = topicName.trim();
+                    try {
+                        TopicDescription topicDesc = clusterManager.getTopicDesc(clusterName, topic);
+                        log.info("Open topic {}, description: {}", topic, topicDesc);
+                    } catch (Exception e) {
+                        log.error("Error when get topic description from cluster {} and topic {}", clusterName, topic, e);
+                        UIErrorHandler.showErrorDialog("Topic '" + topicName + "' doesn't exist!", "Topic doesn't exist!");
+                    }
+                } else {
+                    UIErrorHandler.showErrorDialog("Topic name cannot be empty!", "Topic name cannot be empty!");
+                }
+            });
+        }
+    }
+
+    public Optional<String> showTopicNameDialog() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Topic Name Input");
+        dialog.setHeaderText("Enter Topic Name");
+        dialog.setContentText("Topic Name:");
+
+        // Show the dialog and capture the result
+        Optional<String> result = dialog.showAndWait();
+        return result;
+
     }
 
     private MenuItem createDeleteTopicActionMenuItem() {

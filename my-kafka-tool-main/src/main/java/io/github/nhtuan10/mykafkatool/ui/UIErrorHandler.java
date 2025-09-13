@@ -2,10 +2,13 @@ package io.github.nhtuan10.mykafkatool.ui;
 
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.ui.controller.ErrorController;
+import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,10 @@ public class UIErrorHandler {
             log.error("An unexpected error occurred in {}", t, e);
 
         }
+    }
+
+    public static void showErrorDialog(String message, String title) {
+        ModalUtils.showAlertDialog(Alert.AlertType.WARNING, message, title, ButtonType.OK);
     }
 
     private static void showErrorDialog(Throwable e) {

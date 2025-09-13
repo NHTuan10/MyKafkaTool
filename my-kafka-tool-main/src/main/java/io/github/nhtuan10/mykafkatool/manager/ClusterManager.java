@@ -120,7 +120,7 @@ public class ClusterManager {
         return topics;
     }
 
-    public TopicDescription getTopicDesc(String clusterName, String topic) throws ExecutionException, InterruptedException {
+    public TopicDescription getTopicDesc(String clusterName, String topic) {
         return getTopicDesc(clusterName, Set.of(topic)).get(topic);
     }
 
