@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
+import io.github.nhtuan10.mykafkatool.api.exception.SchemaRegistryException;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
@@ -487,7 +488,11 @@ public class AddOrViewMessageModalController extends ModalController {
 //            else if (serDesHelper.getPluggableDeserialize(valueContentType) != null) {
 //                displayType = serDesHelper.getPluggableDeserialize(valueContentType).getDisplayType();
 //            }
-            refreshAllSchemas(true);
+            try {
+                refreshAllSchemas(true);
+            } catch (SchemaRegistryException e) {
+                log.error("Error refreshing the schema registry while trying to launch the dialog", e);
+            }
             if (schemaList != null && !schemaList.isEmpty()) {
                 int index = schemaSubjectComboBox.getItems().stream().map(SchemaMetadataFromRegistry::subjectName).toList().indexOf(schemaList.get(0).subjectName());
                 if (index >= 0) {
@@ -564,19 +569,19 @@ public class AddOrViewMessageModalController extends ModalController {
     }
 
     @FXML
-    private void refreshAllSchemas() {
+    private void refreshAllSchemas() throws SchemaRegistryException {
         if (editable.get()) {
             refreshAllSchemas(false);
         }
     }
 
-    private void refreshAllSchemas(boolean useCache) {
+    private void refreshAllSchemas(boolean useCache) throws SchemaRegistryException {
         try {
             ObservableList<SchemaMetadataFromRegistry> schemas = FXCollections.observableArrayList(schemaRegistryManager.getAllSubjectMetadata(kafkaTopic.cluster().getName(), false, useCache));
             schemas.add(0, CUSTOM_SUBJECT_PLACEHOLDER_ITEM);
             schemaSubjectComboBox.setItems(schemas);
-        } catch (RestClientException | IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new SchemaRegistryException("Failed to refresh schema", e);
         }
     }
 
