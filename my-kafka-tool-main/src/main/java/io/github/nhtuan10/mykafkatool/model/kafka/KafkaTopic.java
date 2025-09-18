@@ -9,7 +9,8 @@ import java.util.Objects;
 public record KafkaTopic(String name, KafkaCluster cluster, List<KafkaPartition> partitions) {
     @Override
     public String toString() {
-        return "▤ " + name;
+//        return "▤ " + name;
+        return name;
     }
 
     @Override

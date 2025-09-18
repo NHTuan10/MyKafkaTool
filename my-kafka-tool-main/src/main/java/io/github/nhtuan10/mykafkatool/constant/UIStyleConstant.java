@@ -11,6 +11,8 @@ public class UIStyleConstant {
     public static final String LIGHT_MODE = "Light Mode";
     public static final String CLUSTER_TREE_ROOT_CLASS = "cluster-tree-root";
     public static final String CLUSTER_TREE_ITEM_CLASS = "cluster-tree-item";
+    public static final String POLL_MSG_BTN_CLASS = "success";
+    public static final String STOP_POLLING_MSG_BTN_CLASS = "danger";
 
     public static String getCssThemeFile() {
         return LIGHT_STYLE_CSS_FILE;

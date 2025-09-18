@@ -77,7 +77,7 @@
                                     <Insets left="10.0" top="5.0"/>
                                 </HBox.margin>
                             </CheckBox>
-                            <Button mnemonicParsing="false" onAction="#addMessage" text="Add Msg">
+                            <Button mnemonicParsing="false" onAction="#addMessage" text="Add Msg" styleClass="accent">
                                 <HBox.margin>
                                     <Insets left="10.0" top="5.0"/>
                                 </HBox.margin>

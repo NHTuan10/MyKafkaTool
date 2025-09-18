@@ -21,8 +21,6 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 public class KafkaTopicListTreeItem<T> extends FilterableTreeItem<T> {
     private final ClusterManager clusterManager;
-//    @FXML
-//    Image icon = new Image(getClass().getResourceAsStream("/image/green-circle.png"));
 
     public KafkaTopicListTreeItem(T value, ClusterManager clusterManager) {
         super(value);
@@ -60,12 +58,6 @@ public class KafkaTopicListTreeItem<T> extends FilterableTreeItem<T> {
     }
 
     private ObservableList<TreeItem<T>> buildChildren(TreeItem<T> TreeItem) {
-//        ImageView iv2 =new ImageView(icon);
-//        iv2.setFitHeight(18);
-//        iv2.setFitWidth(18);
-//        iv2.setPreserveRatio(true);
-//        iv2.setSmooth(true);
-//        iv2.setCache(true);
         T value = TreeItem.getValue();
         if (value instanceof KafkaTopicListTreeItemValue conn) {
             ObservableList<TreeItem<T>> children = FXCollections.observableArrayList();

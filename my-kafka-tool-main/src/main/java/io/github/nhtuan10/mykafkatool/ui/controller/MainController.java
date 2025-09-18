@@ -278,12 +278,16 @@ public class MainController {
     void switchToDarkMode() {
         if (MyKafkaToolApplication.getCurrentTheme() != Theme.DARK) {
             MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.DARK);
+//            kafkaClusterTree.refreshTree();
         }
     }
 
     @FXML
     void switchToLightMode() {
-        MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.LIGHT);
+        if (MyKafkaToolApplication.getCurrentTheme() != Theme.LIGHT) {
+            MyKafkaToolApplication.changeTheme(this.menuBar.getScene(), Theme.LIGHT);
+//            kafkaClusterTree.refreshTree();
+        }
     }
 
     @FXML

@@ -4,6 +4,8 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <fx:root prefHeight="437.0" prefWidth="730.0" type="AnchorPane" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
    <children>
@@ -30,7 +32,14 @@
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </Button>
-                         <MenuButton mnemonicParsing="false" text="⬇">
+                         <MenuButton mnemonicParsing="false">
+                             <graphic>
+                                 <ImageView fitWidth="20" fitHeight="20">
+                                     <image>
+                                         <Image url="/icon/download.png"/>
+                                     </image>
+                                 </ImageView>
+                             </graphic>
                              <items>
                                  <MenuItem mnemonicParsing="false" onAction="#exportTable" text="Export Table " />
                                  <MenuItem mnemonicParsing="false" onAction="#exportSelectedRows" text="Export Selected" />

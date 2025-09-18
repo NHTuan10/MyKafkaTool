@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
@@ -278,7 +279,10 @@ public class KafkaMessageViewController {
         kafkaMessageTable.configureMessageTable(serDesHelper);
         isPollingMsgProgressIndicator.visibleProperty().bindBidirectional(isPolling);
         isPollingMsgProgressIndicator.managedProperty().bindBidirectional(isPolling);
+        pollMessagesBtn.getStyleClass().add(UIStyleConstant.POLL_MSG_BTN_CLASS);
         isPolling.addListener((observable, oldValue, newValue) -> {
+            pollMessagesBtn.getStyleClass().removeAll(UIStyleConstant.POLL_MSG_BTN_CLASS, UIStyleConstant.STOP_POLLING_MSG_BTN_CLASS);
+            pollMessagesBtn.getStyleClass().add(newValue ? UIStyleConstant.STOP_POLLING_MSG_BTN_CLASS : UIStyleConstant.POLL_MSG_BTN_CLASS);
             pollMessagesBtn.setText(newValue ? AppConstant.STOP_POLLING_TEXT : AppConstant.POLL_MESSAGES_TEXT);
         });
         kafkaMessageTable.addFilterListener((filter) -> {

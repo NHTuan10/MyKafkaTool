@@ -118,10 +118,21 @@ public class PersistableConcurrentHashMap<K, V> extends ConcurrentHashMap<K, V> 
         V result = super.put(key, value);
         try {
             write();
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Error when write to file {}", filePath, e);
         }
         return result;
+    }
+
+    @Override
+    @Locked.Write
+    public void putAll(Map<? extends K, ? extends V> m) {
+        super.putAll(m);
+        try {
+            write();
+        } catch (Exception e) {
+            log.warn("Error when write to file {}", filePath, e);
+        }
     }
 
     //    @Locked.Read

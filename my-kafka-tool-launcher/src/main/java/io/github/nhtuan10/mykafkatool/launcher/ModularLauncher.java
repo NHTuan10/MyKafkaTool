@@ -59,6 +59,7 @@ public class ModularLauncher {
 
     //    private static CountDownLatch waitForConfirmation = new CountDownLatch(1);
     public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
+        long startTime = System.currentTimeMillis();
         String userHome = System.getProperty("user.home");
 //        String configLocation = MessageFormat.format("{0}/{1}/config/{2}", userHome, "MyKafkaTool", "config.properties");
         String configLocation = getArtifactDirectory(new Properties()) + "/config.properties";
@@ -71,15 +72,16 @@ public class ModularLauncher {
         } catch (Exception e) {
             log.error("Cannot load config.properties file", e);
         }
+
+        boolean isUpgraded = false;
+        Map<String, String> uris = new HashMap<>();
         String newVersion = installedVer;
         try {
             newVersion = getLatestVersionFromMaven(MAIN_ARTIFACT_NAME, properties);
         } catch (IOException | InterruptedException e) {
             log.error("Cannot get latest version from maven", e);
         }
-        Map<String, String> uris = new HashMap<>();
         String versionToUpgrade = installedVer;
-        boolean isUpgraded;
         if (newVersion.compareTo(installedVer) > 0) {
 
             boolean agreeToUpgrade = showDialog(newVersion);
@@ -147,6 +149,8 @@ public class ModularLauncher {
 //        Modular.startModuleSync("my-kafka-tool-ext", List.of("file:///Users/tuan/Library/CloudStorage/OneDrive-Personal/CS/Java/MyKafkaTool/my-kafka-tool-launcher/target/my-kafka-tool-launcher-0.1.1.7-SNAPSHOT/lib/my-kafka-tool-ext-0.1.1.7-SNAPSHOT.jar"), List.of("io.github.nhtuan10.mykafkatool.ext"));
 //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "http://localhost:8080/my-kafka-tool-main-%s-jar-with-dependencies.jar".formatted(versionToUpgrade), "io.github.nhtuan10.mykafkatool.MyKafkaToolApplication", "");
         waitForUpgrade.countDown();
+        long endTime = System.currentTimeMillis();
+        log.info("App start time: {} ms", endTime - startTime);
 
         //        moduleLoader.startModuleSyncWithMainClass("my-kafka-tool", "mvn://io.github.nhtuan10/my-kafka-tool-main/0.1.0-SNAPSHOT", "io.github.nhtuan10.mykafkatool.MyKafkaToolLauncher", "*");
 

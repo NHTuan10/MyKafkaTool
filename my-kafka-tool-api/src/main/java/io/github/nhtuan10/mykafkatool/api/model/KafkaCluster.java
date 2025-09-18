@@ -68,9 +68,10 @@ public class KafkaCluster {
     @Override
     public String toString() {
         String name = Optional.ofNullable(this.name.get()).orElse("");
-        return status.get() == ClusterStatus.CONNECTED ?
-                "\uD83D\uDFE2 " + name :
-                "\uD83D\uDD34 " + name;
+//        return status.get() == ClusterStatus.CONNECTED ?
+//                "\uD83D\uDFE2 " + name :
+//                "\uD83D\uDD34 " + name;
+        return name;
     }
 
     @JsonCreator

@@ -1,9 +1,11 @@
 package io.github.nhtuan10.mykafkatool.ui.cluster;
 
+import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.api.exception.ClusterNameExistedException;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.constant.Theme;
 import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
@@ -21,6 +23,8 @@ import io.github.nhtuan10.mykafkatool.userpreference.UserPreference;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
@@ -34,6 +38,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -82,9 +87,10 @@ public class KafkaClusterTree {
                 super.updateItem(item, empty);
                 TreeItem treeItem = getTreeItem();
                 addStyle(item);
-                if (empty) {
+                if (empty || item == null) {
                     setText(null);
                     setTooltip(null);
+                    setGraphic(null);
                 } else {
                     setText(item.toString());
                     if (item instanceof KafkaCluster cluster) {
@@ -94,6 +100,7 @@ public class KafkaClusterTree {
                     } else {
                         setTooltip(new Tooltip(item.toString()));
                     }
+                    setTreeItemIcon(item);
                 }
             }
 
@@ -111,7 +118,55 @@ public class KafkaClusterTree {
                 }
 
             }
+
+            private void setTreeItemIcon(Object item) {
+                setGraphic(null);
+                ImageView iv2 = getKafkaClusterIcon(item, MyKafkaToolApplication.getCurrentTheme());
+                if (iv2 != null) {
+                    setGraphic(iv2);
+                }
+            }
         });
+    }
+
+    private static ImageView getKafkaClusterIcon(Object item, Theme theme) {
+        Icon icon = getImage(item, theme);
+        if (icon != null) {
+            ImageView iv2 = new ImageView(icon.image());
+            iv2.setFitHeight(icon.size());
+            iv2.setFitWidth(icon.size());
+            iv2.setPreserveRatio(true);
+            iv2.setSmooth(true);
+            iv2.setCache(true);
+            return iv2;
+        } else
+            return null;
+    }
+
+    private static Icon getImage(Object item, Theme theme) {
+        if (item instanceof KafkaCluster kafkaCluster) {
+            Image image;
+            if (kafkaCluster.getStatus() == KafkaCluster.ClusterStatus.CONNECTED) {
+                image = new Image(Objects.requireNonNull(KafkaClusterTree.class.getResourceAsStream("/icon/green-circle.png")));
+            } else {
+                image = new Image(KafkaClusterTree.class.getResourceAsStream("/icon/red-circle.png"));
+            }
+            return new Icon(image, 20);
+        } else if (item instanceof String rootItemVal && AppConstant.CLUSTERS_TREE_ITEM_DISPLAY_NAME.equalsIgnoreCase(rootItemVal)) {
+//            Image i= (theme == Theme.LIGHT ) ? new Image(KafkaClusterTree.class.getResourceAsStream("/icon/cluster-black.png")) :
+//                    new Image(KafkaClusterTree.class.getResourceAsStream("/icon/cluster-white.png"));
+//            return new Icon(i, 30);
+            return new Icon(new Image(KafkaClusterTree.class.getResourceAsStream("/icon/cluster-blue.png")), 30);
+        } else if (item instanceof KafkaTopic) {
+            return new Icon(new Image(KafkaClusterTree.class.getResourceAsStream("/icon/topic.png")), 16);
+        } else
+            return null;
+    }
+
+    public void refreshTree() {
+        clusterTree.refresh();
+//        clusterTree.getRoot().setGraphic(getKafkaClusterIcon(clusterTree.getRoot().getValue(), MyKafkaToolApplication.getCurrentTheme()));
+//        clusterTree.refresh();
     }
 
     public void setTreeItemFilterPredicate(Predicate<Object> predicate) {
@@ -529,5 +584,7 @@ public class KafkaClusterTree {
         return cloneItem;
     }
 
+    private static record Icon(Image image, double size) {
+    }
 }
 
