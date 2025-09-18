@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool.api.serdes;
 import io.github.nhtuan10.modular.api.annotation.ModularService;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
+import org.apache.kafka.common.header.Headers;
 
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public interface PluggableDeserializer {
     }
 
     // TODO: return object with value, schema and extra info if needed
-    default String deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
+    default String deserialize(String topic, Integer partition, byte[] payload, Headers headerMap, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
         return new String(payload);
     }
 

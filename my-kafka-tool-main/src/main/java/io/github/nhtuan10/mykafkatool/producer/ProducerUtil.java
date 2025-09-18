@@ -16,12 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.header.Header;
-import org.apache.kafka.common.header.internals.RecordHeader;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @AppScoped
@@ -65,9 +61,8 @@ public class ProducerUtil {
         String key = StringUtils.isBlank(kafkaMessage.key()) ? null : kafkaMessage.key();
         Map<String, Object> others = Map.of(Config.IS_KEY_PROP, false, Config.AUTH_CONFIG_PROP, kafkaTopic.cluster().getAuthConfig());
         Object value = serDesHelper.convertStringToObjectBeforeSerialize(kafkaTopic.name(), partitionId, kafkaMessage, others);
+//        List<Header> headers = kafkaMessage.headers().entrySet().stream().map(entry -> new RecordHeader(entry.getKey(), entry.getValue())).collect(Collectors.toList());
 
-        List<Header> headers = kafkaMessage.headers().entrySet().stream().map(entry -> new RecordHeader(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-
-        return new ProducerRecord<>(kafkaTopic.name(), partitionId, key, value, headers);
+        return new ProducerRecord<>(kafkaTopic.name(), partitionId, key, value, kafkaMessage.headers());
     }
 }

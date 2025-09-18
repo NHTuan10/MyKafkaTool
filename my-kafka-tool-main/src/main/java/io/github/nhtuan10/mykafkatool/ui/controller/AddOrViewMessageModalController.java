@@ -22,7 +22,6 @@ import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.event.TopicUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTable;
-import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageHeaderTableItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import io.github.nhtuan10.mykafkatool.util.Utils;
@@ -42,15 +41,20 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeader;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.controlsfx.control.SearchableComboBox;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -396,7 +400,11 @@ public class AddOrViewMessageModalController extends ModalController {
                 this.isBusy.set(true);
                 progressIndicator.setProgress(-1);
             });
-            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getKey, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8), (h1, h2) -> h2));
+//            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getKey, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8), (h1, h2) -> h2));
+            Headers headers = headerTable.getItems().stream()
+                    .map(item -> new RecordHeader(item.getKey(), item.getValue().getBytes(StandardCharsets.UTF_8)))
+                    .collect(RecordHeaders::new, RecordHeaders::add, (l1, l2) -> l2.forEach(l1::add));
+//            Map<String, byte[]> headers = headerTable.getItems().stream().collect(Collectors.toMap(KafkaMessageHeaderTableItem::getKey, (item) -> item.getValue().getBytes(StandardCharsets.UTF_8), (h1, h2) -> h2));
             List<String> keys, values;
             if (isHandlebarsEnabled.isSelected()) {
                 try {

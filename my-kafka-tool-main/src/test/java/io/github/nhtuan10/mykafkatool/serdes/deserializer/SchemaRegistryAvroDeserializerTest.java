@@ -5,6 +5,7 @@ import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.serdes.AvroUtil;
 import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,7 @@ class SchemaRegistryAvroDeserializerTest {
 
     private SchemaRegistryAvroDeserializer deserializer;
     private Map<String, Object> consumerProps;
-    private Map<String, byte[]> headerMap;
+    private Headers headerMap;
     private Map<String, String> others;
 
     @BeforeEach
@@ -38,8 +39,8 @@ class SchemaRegistryAvroDeserializerTest {
         consumerProps.put("bootstrap.servers", "localhost:9092");
         consumerProps.put("schema.registry.url", "http://localhost:8081");
 
-        headerMap = new HashMap<>();
-        headerMap.put("content-type", "application/avro".getBytes());
+        headerMap = new RecordHeaders();
+        headerMap.add("content-type", "application/avro".getBytes());
 
         others = new HashMap<>();
     }
@@ -229,7 +230,7 @@ class SchemaRegistryAvroDeserializerTest {
         String topic = "test-topic";
         Integer partition = 0;
         byte[] payload = createMockAvroPayload(789);
-        Map<String, byte[]> emptyHeaders = new HashMap<>();
+        Headers emptyHeaders = new RecordHeaders();
         Object mockObject = Map.of("key", "value");
 
         try (MockedStatic<AvroUtil> avroUtilMock = mockStatic(AvroUtil.class)) {

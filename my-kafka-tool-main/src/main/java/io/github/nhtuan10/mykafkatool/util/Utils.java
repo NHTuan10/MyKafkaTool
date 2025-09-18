@@ -5,7 +5,6 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
-import org.apache.kafka.common.header.Header;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -14,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Utils {
@@ -63,8 +61,8 @@ public class Utils {
     }
 
     public static KafkaMessage convertKafkaMessage(KafkaMessageTableItem rowData) {
-        Map<String, byte[]> headers = Arrays.stream(rowData.getHeaders().toArray()).collect(Collectors.toMap(Header::key, Header::value, (v1, v2) -> v2));
-        return new KafkaMessage(rowData.getKey(), rowData.getValue(), rowData.getValueContentType(), rowData.getSchema(), headers);
+//        Map<String, byte[]> headers = Arrays.stream(rowData.getHeaders().toArray()).collect(Collectors.toMap(Header::key, Header::value, (v1, v2) -> v2));
+        return new KafkaMessage(rowData.getKey(), rowData.getValue(), rowData.getValueContentType(), rowData.getSchema(), rowData.getHeaders());
     }
 
     public static class HandleBarsHelpersNotWorking {

@@ -6,10 +6,7 @@ import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.serdes.AvroUtil;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
-import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
-import org.apache.kafka.common.header.internals.RecordHeader;
-import org.apache.kafka.common.header.internals.RecordHeaders;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -33,7 +30,7 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
     }
 
     @Override
-    public String deserialize(String topic, Integer partition, byte[] payload, Map<String, byte[]> headerMap, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
+    public String deserialize(String topic, Integer partition, byte[] payload, Headers headers, Map<String, Object> consumerProps, Map<String, String> others) throws Exception {
         KafkaAvroDeserializer kafkaAvroDeserializer;
         boolean isKey = Boolean.parseBoolean(others.getOrDefault(Config.IS_KEY_PROP, "false"));
         Map<String, Object> serializerMapKey = new HashMap<>(Map.of(Config.IS_KEY_PROP, isKey));
@@ -43,7 +40,7 @@ public class SchemaRegistryAvroDeserializer implements PluggableDeserializer {
         } else {
             kafkaAvroDeserializer = kafkaAvroDeserializerMap.get(serializerMapKey);
         }
-        Headers headers = new RecordHeaders(headerMap.entrySet().stream().map(entry -> (Header) new RecordHeader(entry.getKey(), entry.getValue())).toList());
+//        Headers headers = new RecordHeaders(headerMap.entrySet().stream().map(entry -> (Header) new RecordHeader(entry.getKey(), entry.getValue())).toList());
         Object deserializedObject = kafkaAvroDeserializer.deserialize(topic, headers, payload);
         others.put(Config.SCHEMA_ID_PROP, String.valueOf(extractSchemaId(payload)));
         return AvroUtil.convertObjectToJsonString(deserializedObject);

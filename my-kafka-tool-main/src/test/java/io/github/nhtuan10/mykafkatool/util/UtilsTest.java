@@ -198,9 +198,9 @@ class UtilsTest {
         assertEquals(value, result.value());
         assertEquals(contentType, result.valueContentType());
         assertEquals(schema, result.schema());
-        assertEquals(2, result.headers().size());
-        assertArrayEquals("value1".getBytes(StandardCharsets.UTF_8), result.headers().get("header1"));
-        assertArrayEquals("value2".getBytes(StandardCharsets.UTF_8), result.headers().get("header2"));
+        assertEquals(2, result.headers().toArray().length);
+        assertArrayEquals("value1".getBytes(StandardCharsets.UTF_8), result.headers().headers("header1").iterator().next().value());
+        assertArrayEquals("value2".getBytes(StandardCharsets.UTF_8), result.headers().headers("header2").iterator().next().value());
     }
 
     @Test
@@ -225,9 +225,9 @@ class UtilsTest {
         KafkaMessage result = Utils.convertKafkaMessage(mockTableItem);
 
         // Then
-        assertEquals(1, result.headers().size());
+        assertEquals(2, result.headers().toArray().length);
         // Should keep the last value (v2) when there are duplicates
-        assertArrayEquals("value2".getBytes(StandardCharsets.UTF_8), result.headers().get("duplicate"));
+        assertArrayEquals("value1".getBytes(StandardCharsets.UTF_8), result.headers().headers("duplicate").iterator().next().value());
     }
 
     @Test
@@ -253,7 +253,7 @@ class UtilsTest {
         assertEquals(value, result.value());
         assertEquals(contentType, result.valueContentType());
         assertEquals(schema, result.schema());
-        assertEquals(0, result.headers().size());
+        assertEquals(0, result.headers().toArray().length);
     }
 
     @Test
@@ -273,7 +273,7 @@ class UtilsTest {
         assertNull(result.value());
         assertNull(result.valueContentType());
         assertNull(result.schema());
-        assertEquals(0, result.headers().size());
+        assertEquals(0, result.headers().toArray().length);
     }
 
     @Test

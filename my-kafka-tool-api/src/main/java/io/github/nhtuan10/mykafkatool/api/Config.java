@@ -3,7 +3,10 @@ package io.github.nhtuan10.mykafkatool.api;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.github.nhtuan10.mykafkatool.api.serdes.KafkaHeaderSerializer;
+import org.apache.kafka.common.header.Headers;
 
 public class Config {
     public static final String IS_KEY_PROP = "isKey";
@@ -19,10 +22,16 @@ public class Config {
     }
 
     public static ObjectMapper constructPrettyPrintObjectMapper() {
-        return new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-//                .findAndRegisterModules()
+        return constructObjectMapper()
                 .configure(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS, false)
                 .enable(SerializationFeature.INDENT_OUTPUT);
+    }
+
+    public static ObjectMapper constructObjectMapper() {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Headers.class, new KafkaHeaderSerializer());
+        return new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .registerModule(module);
     }
 }

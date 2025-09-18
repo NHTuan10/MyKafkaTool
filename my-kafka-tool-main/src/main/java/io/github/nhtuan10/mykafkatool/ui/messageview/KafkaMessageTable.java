@@ -20,14 +20,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableItem> {
@@ -76,7 +74,7 @@ public class KafkaMessageTable extends EditableTableControl<KafkaMessageTableIte
                 , item -> {
             String headers;
             try {
-                headers = objectMapper.writeValueAsString(Arrays.stream(item.getHeaders().toArray()).collect(Collectors.toMap(Header::key, Header::value)));
+                headers = objectMapper.writeValueAsString(item.getHeaders());
             } catch (JsonProcessingException e) {
                 log.error("Error when serializing headers", e);
                 headers = "Error when serializing headers";

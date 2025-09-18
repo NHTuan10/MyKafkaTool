@@ -14,6 +14,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -384,7 +385,7 @@ class ProducerUtilTest {
         return new KafkaMessage("test-key", "test-value"
                 , "String"
                 , "String"
-                , Map.of());
+                , new RecordHeaders());
 
     }
 
@@ -392,9 +393,7 @@ class ProducerUtilTest {
         return new KafkaMessage("test-key", "test-value"
                 , "String"
                 , "String"
-                , Map.of(
-                "header1", "value1".getBytes(),
-                "header2", "value2".getBytes()
+                , new RecordHeaders().add("header1", "value1".getBytes()).add("header2", "value2".getBytes()
         ));
     }
 
@@ -402,10 +401,8 @@ class ProducerUtilTest {
         return new KafkaMessage("", "test-value"
                 , "String"
                 , "String"
-                , Map.of(
-                "header1", "value1".getBytes(),
-                "header2", "value2".getBytes()
-        ));
+                , new RecordHeaders().add("header1", "value1".getBytes()).add("header2", "value2".getBytes())
+        );
     }
 
     private KafkaMessage createTestMessageWithDifferentContentTypes() {
@@ -413,10 +410,8 @@ class ProducerUtilTest {
                 , "test-value"
                 , "Schema Registry Avro"
                 , "String"
-                , Map.of(
-                "header1", "value1".getBytes(),
-                "header2", "value2".getBytes()
-        ));
+                , new RecordHeaders().add("header1", "value1".getBytes()).add("header2", "value2".getBytes())
+        );
     }
 
     private KafkaMessage createTestMessageWithoutHeaders() {
@@ -424,6 +419,6 @@ class ProducerUtilTest {
                 , "String"
                 , "Schema Registry Avro"
                 , "String"
-                , Map.of());
+                , new RecordHeaders());
     }
 }

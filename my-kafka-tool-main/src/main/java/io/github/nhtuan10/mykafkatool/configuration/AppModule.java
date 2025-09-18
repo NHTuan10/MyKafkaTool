@@ -98,8 +98,9 @@ public abstract class AppModule {
     @Provides
     @SharedObjectMapper
     static ObjectMapper sharedObjectMapper() {
-        return new ObjectMapper()
-                .findAndRegisterModules();
+        return Config.constructObjectMapper();
+//        return new ObjectMapper()
+//                .findAndRegisterModules();
     }
 
     @AppScoped

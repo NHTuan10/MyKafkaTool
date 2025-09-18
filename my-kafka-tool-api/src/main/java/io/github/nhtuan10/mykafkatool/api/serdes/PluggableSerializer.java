@@ -3,6 +3,7 @@ package io.github.nhtuan10.mykafkatool.api.serdes;
 import io.github.nhtuan10.modular.api.annotation.ModularService;
 import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
+import org.apache.kafka.common.header.Headers;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -32,7 +33,7 @@ public interface PluggableSerializer {
 //          return new ProducerRecord<>(topic, partition, kafkaMessage.key(), kafkaMessage.value(), headers);
 //     }
 
-    default byte[] serialize(String topic, Integer partition, KafkaMessage kafkaMessage, Map<String, byte[]> headerMap, Map<String, Object> others) throws Exception {
+    default byte[] serialize(String topic, Integer partition, KafkaMessage kafkaMessage, Headers headerMap, Map<String, Object> others) throws Exception {
         return kafkaMessage.value().getBytes(StandardCharsets.UTF_8);
     }
 
