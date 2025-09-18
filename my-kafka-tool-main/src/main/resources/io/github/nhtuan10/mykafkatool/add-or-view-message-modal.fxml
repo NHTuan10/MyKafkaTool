@@ -248,7 +248,8 @@
                 </TabPane>
                 <AnchorPane fx:id="choiceButtonContainer" maxHeight="40.0" minHeight="38.0" minWidth="593.0" prefHeight="40.0" prefWidth="789.0">
                     <HBox prefHeight="40.0" prefWidth="598.0" spacing="10.0">
-                        <Button mnemonicParsing="false" onAction="#send" prefHeight="26.0" prefWidth="80.0" text="Send">
+                        <Button mnemonicParsing="false" onAction="#send" prefHeight="26.0" prefWidth="80.0" text="Send"
+                                styleClass="accent">
                             <HBox.margin>
                                 <Insets left="5.0" top="5.0" />
                             </HBox.margin>

@@ -117,7 +117,7 @@
                             <!--                                                                        <Label fx:id="endTimestampLabel" text="Before" visible="false" />-->
                             <!--                                                                        <DateTimePicker fx:id="endTimestampPicker" disable="true" prefWidth="180.0" visible="false" />-->
                             <Button fx:id="countMessagesBtn" mnemonicParsing="false" onAction="#countMessages"
-                                    text="Count: 0">
+                                    text="Count: 0" styleClass="accent, button-outlined">
                                 <HBox.margin>
                                     <Insets left="10.0" top="5.0"/>
                                 </HBox.margin>

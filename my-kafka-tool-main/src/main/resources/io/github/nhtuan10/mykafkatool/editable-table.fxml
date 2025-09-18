@@ -22,12 +22,14 @@
                            </HBox.margin>
                            <tooltip><Tooltip text="Refresh" /></tooltip>
                         </Button>
-                        <Button fx:id="addItemBtn" mnemonicParsing="false" onAction="#addItem" text="+">
+                         <Button fx:id="addItemBtn" mnemonicParsing="false" onAction="#addItem" text="+"
+                                 styleClass="success, button-outlined">
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button fx:id="removeItemsBtn" mnemonicParsing="false" onAction="#removeItems" text="-">
+                         <Button fx:id="removeItemsBtn" mnemonicParsing="false" onAction="#removeItems" text="-"
+                                 styleClass="danger, button-outlined">
                            <HBox.margin>
                               <Insets left="10.0" top="5.0" />
                            </HBox.margin>

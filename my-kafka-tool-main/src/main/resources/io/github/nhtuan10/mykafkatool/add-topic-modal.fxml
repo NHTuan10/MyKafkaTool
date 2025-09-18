@@ -43,7 +43,7 @@
                                               GridPane.columnIndex="1" GridPane.rowIndex="3">
                                             <children>
                                                 <Button fx:id="addBtn" mnemonicParsing="false" onAction="#add"
-                                                        text="Add"/>
+                                                        text="Add" styleClass="accent"/>
                                                 <Button fx:id="cancelBtn" mnemonicParsing="false" onAction="#cancel"
                                                         text="Cancel"/>
                                             </children>
