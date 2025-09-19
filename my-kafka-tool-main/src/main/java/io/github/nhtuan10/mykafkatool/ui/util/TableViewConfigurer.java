@@ -25,6 +25,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -189,7 +190,12 @@ public class TableViewConfigurer {
     }
 
     private static <S> void enableCopyDataFromTableByShortcutKeys(TableView<S> tableView, boolean isHeadersIncludedInRowCopy, TableViewConfigurer.TableViewConfiguration<S> tableViewConfiguration) {
-        final KeyCodeCombination keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN);
+        final KeyCodeCombination keyCodeCopy;
+        if (SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_LINUX) {
+            keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
+        } else {
+            keyCodeCopy = new KeyCodeCombination(KeyCode.C, KeyCombination.META_DOWN);
+        }
         tableView.setOnKeyPressed(event -> {
             if (keyCodeCopy.match(event)) {
                 copySelectedInTableViewToClipboard(tableView, false, isHeadersIncludedInRowCopy, tableViewConfiguration.extraFieldsToCopyAndExport());
