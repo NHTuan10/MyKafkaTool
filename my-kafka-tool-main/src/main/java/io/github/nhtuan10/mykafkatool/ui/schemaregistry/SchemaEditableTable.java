@@ -125,13 +125,13 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                 fireEvent(selectedSchemaEvent);
             }
         });
-        List.of(filterTextField.textProperty(), regexFilterToggleBtn.selectedProperty(), caseSensitiveFilterToggleBtn.selectedProperty(), negativeFilterToggleBtn.selectedProperty()).forEach(property -> {
-            property.addListener((observable, oldValue, newValue) -> {
-//                filterItems();
-                Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
-                        .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.setFilter(this.filterProperty.get().copy()));
-            });
-        });
+//        List.of(filterTextField.textProperty(), regexFilterToggleBtn.selectedProperty(), caseSensitiveFilterToggleBtn.selectedProperty(), negativeFilterToggleBtn.selectedProperty()).forEach(property -> {
+//            property.addListener((observable, oldValue, newValue) -> {
+////                filterItems();
+//                Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
+//                        .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.setFilter(this.filterProperty.get().copy()));
+//            });
+//        });
 //        this.filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
 //            filterItems();
 //            Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
@@ -155,6 +155,12 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
         // TODO: functionality to add a new schema
     }
 
+    @Override
+    protected void filterChangeListener() {
+        Optional.ofNullable(clusterNameToSchemaTableItemsCache.get(this.selectedClusterName))
+                .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.setFilter(this.filterProperty.get().copy()));
+        filterItems();
+    }
 //    @Override
 //    protected Predicate<SchemaTableItem> filterPredicate(Filter filter) {
 //        return Filter.buildFilterPredicate(filter,
@@ -199,7 +205,7 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
     }
 
     private void setTableItemsAndFilter(ObservableList<SchemaTableItem> items, Filter filter) {
-        setItems(items);
+        setItems(items, false);
         applyFilter(filter);
     }
 

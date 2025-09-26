@@ -123,9 +123,10 @@ public class EditableTableControl<T> extends AnchorPane {
         configureTableView();
         tableItems = FXCollections.observableArrayList();
         applyFilter(new Filter());
-//        List.of(filterProperty.get().filterTextProperty(), filterProperty.get().isRegexFilterProperty(),filterProperty.get().isCaseSensitiveProperty(), filterProperty.get().isNegativeProperty() )
-        List.of(filterTextField.textProperty(), regexFilterToggleBtn.selectedProperty(), caseSensitiveFilterToggleBtn.selectedProperty(), negativeFilterToggleBtn.selectedProperty())
-                .forEach(property -> property.addListener((observable, oldValue, newValue) -> filterItems()));
+        List.of(filterProperty.get().filterTextProperty(), filterProperty.get().isRegexFilterProperty(), filterProperty.get().isCaseSensitiveProperty(), filterProperty.get().isNegativeProperty())
+//        List.of(filterTextField.textProperty(), regexFilterToggleBtn.selectedProperty(), caseSensitiveFilterToggleBtn.selectedProperty(), negativeFilterToggleBtn.selectedProperty())
+                .forEach(property -> property.addListener((observable, oldValue, newValue) -> filterChangeListener()));
+//                .forEach(property -> property.addListener((observable, oldValue, newValue) -> filterItems2()));
 
 //        filterProperty.get().filterTextProperty().addListener((observable, oldValue, newValue) -> {
 //            filterItems();
@@ -179,6 +180,11 @@ public class EditableTableControl<T> extends AnchorPane {
         filterProp.setIsNegative(filter.getIsNegative());
         filterProp.setIsCaseSensitive(filter.getIsCaseSensitive());
 
+//        filterProp.filterTextProperty().bind(filterTextField.textProperty());
+//        filterProp.isRegexFilterProperty().bind(regexFilterToggleBtn.selectedProperty());
+//        filterProp.isNegativeProperty().bind(negativeFilterToggleBtn.selectedProperty());
+//        filterProp.isCaseSensitiveProperty().bind(caseSensitiveFilterToggleBtn.selectedProperty());
+
         filterTextField.textProperty().bindBidirectional(filterProp.filterTextProperty());
         regexFilterToggleBtn.selectedProperty().bindBidirectional(filterProp.isRegexFilterProperty());
         negativeFilterToggleBtn.selectedProperty().bindBidirectional(filterProp.isNegativeProperty());
@@ -189,6 +195,10 @@ public class EditableTableControl<T> extends AnchorPane {
 
     protected void filterItems() {
         filterItems(this.filterProperty.get());
+    }
+
+    protected void filterChangeListener() {
+        filterItems();
     }
 
     protected void filterItems(Filter filter, Predicate<T>... extraPredicates) {
