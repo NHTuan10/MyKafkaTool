@@ -123,8 +123,8 @@ public class EditableTableControl<T> extends AnchorPane {
         configureTableView();
         tableItems = FXCollections.observableArrayList();
         applyFilter(new Filter());
-        List.of(filterProperty.get().filterTextProperty(), filterProperty.get().isRegexFilterProperty(), filterProperty.get().isCaseSensitiveProperty(), filterProperty.get().isNegativeProperty())
-//        List.of(filterTextField.textProperty(), regexFilterToggleBtn.selectedProperty(), caseSensitiveFilterToggleBtn.selectedProperty(), negativeFilterToggleBtn.selectedProperty())
+//        List.of(filterProperty.get().filterTextProperty(), filterProperty.get().isRegexFilterProperty(), filterProperty.get().isCaseSensitiveProperty(), filterProperty.get().isNegativeProperty())
+        List.of(filterTextField.textProperty(), regexFilterToggleBtn.selectedProperty(), caseSensitiveFilterToggleBtn.selectedProperty(), negativeFilterToggleBtn.selectedProperty())
                 .forEach(property -> property.addListener((observable, oldValue, newValue) -> filterChangeListener()));
 //                .forEach(property -> property.addListener((observable, oldValue, newValue) -> filterItems2()));
 
@@ -169,21 +169,17 @@ public class EditableTableControl<T> extends AnchorPane {
     }
 
     public void applyFilter(Filter filter, Predicate<T>... extraPredicates) {
-//        filterTextField.textProperty().unbindBidirectional(filterProperty.get().filterTextProperty());
-//        regexFilterToggleBtn.selectedProperty().unbindBidirectional(filterProperty.get().isRegexFilterProperty());
-//        negativeFilterToggleBtn.selectedProperty().unbindBidirectional(filterProperty.get().isNegativeProperty());
-//        caseSensitiveFilterToggleBtn.selectedProperty().unbindBidirectional(filterProperty.get().isCaseSensitiveProperty());
+        // Unbind bidirectional first to avoid issues with undo/redo stacks
+        filterTextField.textProperty().unbindBidirectional(filterProperty.get().filterTextProperty());
+        regexFilterToggleBtn.selectedProperty().unbindBidirectional(filterProperty.get().isRegexFilterProperty());
+        negativeFilterToggleBtn.selectedProperty().unbindBidirectional(filterProperty.get().isNegativeProperty());
+        caseSensitiveFilterToggleBtn.selectedProperty().unbindBidirectional(filterProperty.get().isCaseSensitiveProperty());
 
         Filter filterProp = this.filterProperty.get();
         filterProp.setFilterText(filter.getFilterText());
         filterProp.setIsRegexFilter(filter.getIsRegexFilter());
         filterProp.setIsNegative(filter.getIsNegative());
         filterProp.setIsCaseSensitive(filter.getIsCaseSensitive());
-
-//        filterProp.filterTextProperty().bind(filterTextField.textProperty());
-//        filterProp.isRegexFilterProperty().bind(regexFilterToggleBtn.selectedProperty());
-//        filterProp.isNegativeProperty().bind(negativeFilterToggleBtn.selectedProperty());
-//        filterProp.isCaseSensitiveProperty().bind(caseSensitiveFilterToggleBtn.selectedProperty());
 
         filterTextField.textProperty().bindBidirectional(filterProp.filterTextProperty());
         regexFilterToggleBtn.selectedProperty().bindBidirectional(filterProp.isRegexFilterProperty());
