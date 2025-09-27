@@ -1,6 +1,6 @@
 #### jpackage command line:
 
-VERSION=0.1.1.8-SNAPSHOT
+VERSION=0.1.1.9-SNAPSHOT
 
 jpackage --input my-kafka-tool-main/target/my-kafka-tool-main-${VERSION} --name MyKafkaTool --main-jar my-kafka-tool-main-${VERSION}.jar --type dmg
 
