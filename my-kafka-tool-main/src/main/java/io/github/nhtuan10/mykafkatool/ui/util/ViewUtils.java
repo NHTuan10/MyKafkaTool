@@ -3,7 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
-import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
+import io.github.nhtuan10.mykafkatool.ui.codehighlighting.Highlighter;
 import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
 import javafx.concurrent.Task;
 import javafx.scene.input.Clipboard;
@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 @Slf4j
 public final class ViewUtils {
 
-    public static void setValueAndHighlightJsonInCodeArea(String inValue, CodeArea codeArea, boolean prettyPrint, ObjectMapper objectMapper, JsonHighlighter jsonHighlighter) {
+    public static void setValueAndHighlightInCodeArea(String inValue, CodeArea codeArea, boolean prettyPrint, ObjectMapper objectMapper, Highlighter jsonHighlighter) {
         if (StringUtils.isNotBlank(inValue)) {
             String value = inValue;
             try {

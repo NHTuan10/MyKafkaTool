@@ -31,6 +31,7 @@ import io.github.nhtuan10.mykafkatool.serdes.serializer.ByteArraySerializer;
 import io.github.nhtuan10.mykafkatool.serdes.serializer.SchemaRegistryAvroSerializer;
 import io.github.nhtuan10.mykafkatool.serdes.serializer.StringSerializer;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
+import io.github.nhtuan10.mykafkatool.ui.codehighlighting.ProtobufHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepo;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepoImpl;
@@ -85,6 +86,8 @@ public abstract class AppModule {
     }
 
     abstract JsonHighlighter jsonHighlighter(JsonHighlighter jsonHighlighter);
+
+    abstract ProtobufHighlighter protobufHighlighter(ProtobufHighlighter protobufHighlighter);
 
     abstract ProducerUtil producerUtil(ProducerUtil producerUtil);
 

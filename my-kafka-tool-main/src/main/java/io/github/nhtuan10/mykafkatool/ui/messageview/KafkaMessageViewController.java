@@ -329,7 +329,7 @@ public class KafkaMessageViewController {
         });
         valueSchemaContainer.setVisible(serDesHelper.getPluggableDeserialize(valueContentType.getValue()).mayNeedUserInputForSchema());
         schemaTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtils.setValueAndHighlightJsonInCodeArea(newText, schemaTextArea, false, objectMapper, jsonHighlighter);
+            ViewUtils.setValueAndHighlightInCodeArea(newText, schemaTextArea, false, objectMapper, jsonHighlighter);
         });
         isLiveUpdateCheckBox.setOnAction(event -> {
             if (!isLiveUpdateCheckBox.isSelected() && isPolling.get()) {
@@ -381,7 +381,7 @@ public class KafkaMessageViewController {
         if (!(newValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
             return;
         }
-        ViewUtils.setValueAndHighlightJsonInCodeArea("", valueTextArea, false, objectMapper, jsonHighlighter);
+        ViewUtils.setValueAndHighlightInCodeArea("", valueTextArea, false, objectMapper, jsonHighlighter);
         this.selectedTreeItem = newValue;
         KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
         isPolling.set(false);
@@ -557,7 +557,7 @@ public class KafkaMessageViewController {
         msgPollingPosition.setValue(pollingOptions.pollingPosition());
         valueContentType.setValue(pollingOptions.valueContentType());
 //        schemaTextArea.replaceText(pollingOptions.schema());
-        ViewUtils.setValueAndHighlightJsonInCodeArea(pollingOptions.schema(), schemaTextArea, true, objectMapper, jsonHighlighter);
+        ViewUtils.setValueAndHighlightInCodeArea(pollingOptions.schema(), schemaTextArea, true, objectMapper, jsonHighlighter);
         isLiveUpdateCheckBox.setSelected(pollingOptions.isLiveUpdate());
     }
 
@@ -683,7 +683,7 @@ public class KafkaMessageViewController {
         public void handleOnNext(MessageUIEvent item) {
             if (MessageUIEvent.isMessageSelectionEvent(item)) {
                 Platform.runLater(() -> {
-                    ViewUtils.setValueAndHighlightJsonInCodeArea(item.message().getValue(), valueTextArea, true, objectMapper, jsonHighlighter);
+                    ViewUtils.setValueAndHighlightInCodeArea(item.message().getValue(), valueTextArea, true, objectMapper, jsonHighlighter);
                 });
             }
         }

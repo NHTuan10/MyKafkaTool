@@ -4,6 +4,7 @@ import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
 import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
+import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.api.model.SchemaMetadataFromRegistry;
 import io.github.nhtuan10.mykafkatool.ui.Filter;
@@ -13,7 +14,7 @@ import io.github.nhtuan10.mykafkatool.ui.util.TableViewConfigurer;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,6 +25,7 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 import java.util.List;
@@ -72,9 +74,10 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                 try {
                     SchemaMetadata schemaMetadata = schemaRegistryManager.getSubjectMetadata(selectedClusterName.getName(), cellData.getValue().getSubject(), Integer.parseInt(newVal));
                     String schema = schemaMetadata.getSchema();
+                    DisplayType displayType = mapSchemaToDisplayType(schemaMetadata.getSchemaType());
                     cellData.getValue().setSchema(schema);
 //                    cellData.getTableView().refresh();
-                    SchemaRegistryViewController.SelectedSchemaEvent selectedSchemaEvent = new SchemaRegistryViewController.SelectedSchemaEvent(new SimpleStringProperty(schema));
+                    SchemaRegistryViewController.SelectedSchemaEvent selectedSchemaEvent = new SchemaRegistryViewController.SelectedSchemaEvent(new SimpleObjectProperty<>(Pair.of(displayType, schema)));
                     fireEvent(selectedSchemaEvent);
                 } catch (RestClientException | IOException e) {
                     throw new RuntimeException(e);
@@ -102,12 +105,15 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                 log.info("selected item {}", subjectName);
 
                 String schema = newValue.getSchema();
+                String schemaType = newValue.getType();
+
                 if (schema == null) {
                     try {
                         SchemaMetadata schemaMetadata = schemaRegistryManager.getSubjectMetadata(selectedClusterName.getName(), subjectName);
                         List<Integer> allVersions = schemaRegistryManager.getAllVersions(selectedClusterName.getName(), subjectName);
                         String compatibility = schemaRegistryManager.getCompatibility(selectedClusterName.getName(), subjectName);
                         schema = schemaMetadata.getSchema();
+                        schemaType = schemaMetadata.getSchemaType();
                         newValue.setSchemaId(String.valueOf(schemaMetadata.getId()));
                         newValue.setSchema(schema);
                         newValue.setType(schemaMetadata.getSchemaType());
@@ -121,7 +127,8 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
                         throw new RuntimeException("Error when loading subject {} from Schema Registry", e);
                     }
                 }
-                SchemaRegistryViewController.SelectedSchemaEvent selectedSchemaEvent = new SchemaRegistryViewController.SelectedSchemaEvent(new SimpleStringProperty(schema));
+                DisplayType displayType = mapSchemaToDisplayType(schemaType);
+                SchemaRegistryViewController.SelectedSchemaEvent selectedSchemaEvent = new SchemaRegistryViewController.SelectedSchemaEvent(new SimpleObjectProperty<>(Pair.of(displayType, schema)));
                 fireEvent(selectedSchemaEvent);
             }
         });
@@ -153,6 +160,10 @@ public class SchemaEditableTable extends EditableTableControl<SchemaTableItem> {
 //                    .ifPresent(schemaTableItemsAndFilter -> schemaTableItemsAndFilter.getFilter().setIsNegative(newValue));
 //        });
         // TODO: functionality to add a new schema
+    }
+
+    private DisplayType mapSchemaToDisplayType(String schemaType) {
+        return "PROTOBUF".equals(schemaType) ? DisplayType.PROTOBUF : DisplayType.JSON;
     }
 
     @Override

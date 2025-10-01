@@ -7,12 +7,24 @@
     /*    blue*/
 }
 
-.json-number {
+.code-number {
     -fx-fill: blue;
 }
 
-.json-string {
+.code-string {
     -fx-fill: green;
+}
+
+.code-comment {
+    -fx-fill: gray;
+}
+
+.code-keyword {
+    -fx-fill: blue;
+}
+
+.code-type {
+    -fx-fill: purple;
 }
 
 .json-start-or-end-array {

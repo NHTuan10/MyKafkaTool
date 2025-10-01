@@ -17,6 +17,7 @@ import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 import io.github.nhtuan10.mykafkatool.producer.ProducerUtil;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
+import io.github.nhtuan10.mykafkatool.ui.codehighlighting.Highlighter;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
@@ -604,14 +605,14 @@ public class AddOrViewMessageModalController extends ModalController {
         if (StringUtils.isNotBlank(inValue)) {
 
             if (displayType == DisplayType.JSON) {
-                ViewUtils.setValueAndHighlightJsonInCodeArea(inValue, codeArea, prettyPrint, objectMapper, jsonHighlighter);
+                ViewUtils.setValueAndHighlightInCodeArea(inValue, codeArea, prettyPrint, objectMapper, jsonHighlighter);
             } else if (displayType == DisplayType.TEXT) {
 //                if (prettyPrint) {
                 codeArea.replaceText(inValue);
 //                }
                 codeArea.clearStyle(0, inValue.length());
                 StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<Collection<String>>()
-                        .add(List.of(JsonHighlighter.NORMAL_TEXT), inValue.length());
+                        .add(List.of(Highlighter.NORMAL_TEXT), inValue.length());
                 codeArea.setStyleSpans(0, spansBuilder.create());
             }
 
