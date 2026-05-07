@@ -18,6 +18,9 @@ public class UIErrorHandler {
 
         if (Platform.isFxApplicationThread()) {
             log.error("An error occurred in FX application thread", e);
+//            if (e instanceof NullPointerException && e.getMessage() != null && e.getMessage().contains("undoChange")) {
+//                return;
+//            }
             showErrorDialog(e);
         } else {
             log.error("An unexpected error occurred in {}", t, e);

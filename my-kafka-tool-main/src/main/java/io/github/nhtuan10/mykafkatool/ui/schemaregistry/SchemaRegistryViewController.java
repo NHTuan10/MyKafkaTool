@@ -3,17 +3,20 @@ package io.github.nhtuan10.mykafkatool.ui.schemaregistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
+import io.github.nhtuan10.mykafkatool.api.model.DisplayType;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
+import io.github.nhtuan10.mykafkatool.ui.codehighlighting.Highlighter;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
+import io.github.nhtuan10.mykafkatool.ui.codehighlighting.ProtobufHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.EventSubscriber;
 import io.github.nhtuan10.mykafkatool.ui.event.SchemaRegistryUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.Event;
 import javafx.event.EventTarget;
 import javafx.event.EventType;
@@ -25,6 +28,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.IOException;
@@ -36,6 +40,8 @@ public class SchemaRegistryViewController extends SplitPane {
     private final JsonHighlighter jsonHighlighter;
 
     private final ObjectMapper objectMapper;
+
+    private final ProtobufHighlighter protobufHighlighter;
 
     @Setter
     private BooleanProperty isBlockingAppUINeeded;
@@ -53,8 +59,9 @@ public class SchemaRegistryViewController extends SplitPane {
     private CodeArea schemaRegistryTextArea;
 
     @Inject
-    public SchemaRegistryViewController(JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper) {
+    public SchemaRegistryViewController(JsonHighlighter jsonHighlighter, @RichTextFxObjectMapper ObjectMapper objectMapper, ProtobufHighlighter protobufHighlighter) {
         this.jsonHighlighter = jsonHighlighter;
+        this.protobufHighlighter = protobufHighlighter;
         this.objectMapper = objectMapper;
         schemaRegistryEventSubscriber = new SchemaRegistryEventSubscriber(this, (ex) -> UIErrorHandler.showError(Thread.currentThread(), ex)
         );
@@ -77,13 +84,20 @@ public class SchemaRegistryViewController extends SplitPane {
     @FXML
     public void initialize() {
         // TODO: Multiple version for an schema, make the schema table editable
-        schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtils.setValueAndHighlightJsonInCodeArea(newText, schemaRegistryTextArea, true, objectMapper, jsonHighlighter);
-        });
+//        schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
+//            ViewUtils.setValueAndHighlightJsonInCodeArea(newText, schemaRegistryTextArea, true, objectMapper, jsonHighlighter);
+//        });
         schemaEditableTable.addEventHandler(SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
-                (event) -> ViewUtils.setValueAndHighlightJsonInCodeArea(event.getData().getValue(), schemaRegistryTextArea, true, objectMapper, jsonHighlighter));
+                (event) -> {
+                    String schema = event.getData().getValue().getRight();
+                    DisplayType displayType = event.getData().getValue().getLeft();
+                    ViewUtils.setValueAndHighlightInCodeArea(schema, schemaRegistryTextArea, true, objectMapper, getHighlighter(displayType));
+                });
     }
 
+    public Highlighter getHighlighter(DisplayType displayType) {
+        return displayType == DisplayType.PROTOBUF ? protobufHighlighter : jsonHighlighter;
+    }
     public void loadAllSchema(KafkaCluster cluster, boolean useCache) throws ExecutionException, InterruptedException {
         schemaEditableTable.loadAllSchemas(cluster, useCache,
                 isBlockingAppUINeeded, (e) -> isBlockingAppUINeeded.set(false),
@@ -104,9 +118,9 @@ public class SchemaRegistryViewController extends SplitPane {
                 new EventType<>(Event.ANY, "SELECTED_SCHEMA_EVENT_TYPE");
 
         // Getter for custom data
-        private final SimpleStringProperty data;
+        private final SimpleObjectProperty<Pair<DisplayType, String>> data;
 
-        public SelectedSchemaEvent(SimpleStringProperty data) {
+        public SelectedSchemaEvent(SimpleObjectProperty<Pair<DisplayType, String>> data) {
             super(SELECTED_SCHEMA_EVENT_TYPE);
             this.data = data;
         }

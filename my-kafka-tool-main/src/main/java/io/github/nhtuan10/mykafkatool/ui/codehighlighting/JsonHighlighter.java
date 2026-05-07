@@ -6,18 +6,15 @@ import com.fasterxml.jackson.core.JsonToken;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import jakarta.inject.Inject;
 import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @AppScoped
-public class JsonHighlighter {
+public class JsonHighlighter implements Highlighter {
 
-    public static final String NORMAL_TEXT = "normal-text";
     private final JsonFactory jsonFactory;
 
     @Inject
@@ -25,6 +22,7 @@ public class JsonHighlighter {
         jsonFactory = new JsonFactory();
     }
 
+    @Override
     public StyleSpans<Collection<String>> highlight(String code) {
         List<Match> matches = new ArrayList<>();
 
@@ -49,25 +47,7 @@ public class JsonHighlighter {
         } catch (IOException e) {
         }
 
-        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-        int lastPos = 0;
-        for (Match match : matches) {
-            // Fill the gaps, since Style Spans need to be contiguous.
-            if (match.start > lastPos) {
-                int length = match.start - lastPos;
-                spansBuilder.add(List.of(NORMAL_TEXT), length);
-            }
-
-            int length = match.end - match.start;
-            spansBuilder.add(Collections.singleton(match.kind), length);
-            lastPos = match.end;
-        }
-
-        if (lastPos < code.length()) {
-            spansBuilder.add(List.of(NORMAL_TEXT), code.length() - lastPos);
-        }
-
-        return spansBuilder.create();
+        return Highlighter.buildStyleSpans(code, matches);
     }
 
     public static String jsonTokenToClassName(JsonToken jsonToken) {
@@ -84,10 +64,10 @@ public class JsonHighlighter {
             case END_ARRAY:
                 return "json-start-or-end-array";
             case VALUE_STRING:
-                return "json-string";
+                return CODE_STRING;
             case VALUE_NUMBER_FLOAT:
             case VALUE_NUMBER_INT:
-                return "json-number";
+                return CODE_NUMBER;
             default:
                 return NORMAL_TEXT;
         }
