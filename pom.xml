@@ -18,7 +18,7 @@
     <properties>
         <javafx.version>21</javafx.version>
         <handlebars.version>4.4.0</handlebars.version>
-        <modular.version>0.0.1</modular.version>
+        <modular.version>0.0.2</modular.version>
         <my-kafka-tool.version>0.1.1.9-SNAPSHOT</my-kafka-tool.version>
         <lombok.version>1.18.38</lombok.version>
     </properties>
@@ -33,6 +33,20 @@
                         <id>attach-sources</id>
                         <goals>
                             <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-help-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>show-profiles</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>active-profiles</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -59,4 +73,29 @@
     <!--            </dependencies>-->
     <!--        </profile>-->
     <!--    </profiles>-->
+
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <properties>
+                <jpackage.winconsole>true</jpackage.winconsole>
+            </properties>
+        </profile>
+        <profile>
+            <id>macos</id>
+            <activation>
+                <os>
+                    <family>Mac OS X</family>
+                </os>
+            </activation>
+            <properties>
+                <jpackage.winconsole>false</jpackage.winconsole>
+            </properties>
+        </profile>
+    </profiles>
 </project>

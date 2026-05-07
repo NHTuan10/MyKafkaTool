@@ -69,6 +69,7 @@
                         <input>${project.build.directory}/my-kafka-tool-launcher-${my-kafka-tool.version}</input>
                         <mainjar>my-kafka-tool-launcher-${my-kafka-tool.version}.jar</mainjar>
                         <javaoptions>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -XX:+UseZGC</javaoptions>
+                        <winconsole>${jpackage.winconsole}</winconsole>
                     </configuration>
                 </plugin>
             </plugins>
