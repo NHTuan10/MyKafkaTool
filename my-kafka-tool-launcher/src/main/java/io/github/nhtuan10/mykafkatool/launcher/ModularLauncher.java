@@ -74,7 +74,7 @@ public class ModularLauncher {
         }
 
         boolean isUpgraded = false;
-        Map<String, String> uris = new HashMap<>();
+        Map<String, URI> uris = new HashMap<>();
         String newVersion = installedVer;
         try {
             newVersion = getLatestVersionFromMaven(MAIN_ARTIFACT_NAME, properties);
@@ -90,7 +90,7 @@ public class ModularLauncher {
                 versionToUpgrade = newVersion;
                 try {
                     for (String artifactName : List.of(MAIN_ARTIFACT_NAME, EXT_ARTIFACT_NAME)) {
-                        String uri = getJarLocationUri(artifactName, versionToUpgrade, properties);
+                        URI uri = getJarLocationUri(artifactName, versionToUpgrade, properties);
                         uris.put(artifactName, uri);
                     }
                     isUpgraded = true;
@@ -110,16 +110,16 @@ public class ModularLauncher {
         if (!isUpgraded) {
             uris.clear();
             for (String artifactName : List.of(MAIN_ARTIFACT_NAME, EXT_ARTIFACT_NAME)) {
-                String uri;
+                URI uri;
                 Optional<String> uriFromPropertyFileOptional = Optional.ofNullable(properties.getProperty(ARTIFACT_URI_PROP_KEY));
 
                 if (uriFromPropertyFileOptional.isPresent()) {
-                    uri = uriFromPropertyFileOptional.get().replace(VERSION_PLACEHOLDER, installedVer).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName);
+                    uri = URI.create(uriFromPropertyFileOptional.get().replace(VERSION_PLACEHOLDER, installedVer).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName));
                 } else {
                     uri = Paths
                             .get((getArtifactDirectory(properties) + "/" + properties.get(ARTIFACT_FILE_NAME_PREFIX) + ".jar")
                                     .replace(VERSION_PLACEHOLDER, installedVer).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName))
-                            .toUri().toString();
+                            .toUri();
                 }
                 uris.put(artifactName, uri);
             }
@@ -173,7 +173,8 @@ public class ModularLauncher {
         return Optional.ofNullable(System.getProperty(key))
                 .orElse(Optional.ofNullable(properties.getProperty(key)).orElse(defaultValue));
     }
-    private static String getJarLocationUri(String artifactName, String version, Properties properties) throws URISyntaxException, IOException, InterruptedException {
+
+    private static URI getJarLocationUri(String artifactName, String version, Properties properties) throws URISyntaxException, IOException, InterruptedException {
         if (properties.get(ARTIFACT_DOWNLOAD_URL_PROP_KEY) != null) {
             String zipFileVersion = version;
             if (isSnapShotVersion(version)) {
@@ -203,10 +204,10 @@ public class ModularLauncher {
                 }
             }
             Files.deleteIfExists(zipFilePath);
-            return parentPath.resolve(properties.getProperty(ARTIFACT_FILE_NAME_PREFIX).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName).replace(VERSION_PLACEHOLDER, version) + ".jar").toUri().toString();
+            return parentPath.resolve(properties.getProperty(ARTIFACT_FILE_NAME_PREFIX).replace(ARTIFACT_NAME_PLACEHOLDER, artifactName).replace(VERSION_PLACEHOLDER, version) + ".jar").toUri();
 
         } else {
-            return "mvn://" + ARTIFACT.replace(":", "/") + "/" + version;
+            return new URI("mvn", ARTIFACT + ":" + version, null);
         }
     }
 
