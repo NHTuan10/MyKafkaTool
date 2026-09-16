@@ -4,9 +4,10 @@
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${user.home}/${APP_NAME}/logs/${APP_NAME}.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover -->
-            <fileNamePattern>${APP_NAME}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- daily rollover or when file reaches 10 MB -->
+            <fileNamePattern>${user.home}/${APP_NAME}/logs/${APP_NAME}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
 
             <!-- keep 30 days' worth of history capped at 1GB total size -->
             <maxHistory>30</maxHistory>
