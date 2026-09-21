@@ -64,7 +64,7 @@ public class AddConnectionModalController extends ModalController {
                 , authProvider -> authProvider.getSampleConfig().stream().map(sample -> {
                     Hyperlink hyperlink = new Hyperlink(sample.name());
                     hyperlink.setOnAction(event -> {
-                        ViewUtils.setValueAndHighlightJsonInCodeArea(sample.sampleValue(), securityConfigTextArea, true, objectMapper, jsonHighlighter);
+                        ViewUtils.setValueAndHighlightInCodeArea(sample.sampleValue(), securityConfigTextArea, true, objectMapper, jsonHighlighter);
                     });
                     return hyperlink;
                 }).toList()));
@@ -83,7 +83,7 @@ public class AddConnectionModalController extends ModalController {
         securityTypeComboxBox.getItems().addAll(authProviderManager.getAllAuthProviders());
         securityTypeComboxBox.getSelectionModel().select(authProviderManager.getNoAuthProvider());
         securityConfigTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            ViewUtils.setValueAndHighlightJsonInCodeArea(newText, securityConfigTextArea, false, objectMapper, jsonHighlighter);
+            ViewUtils.setValueAndHighlightInCodeArea(newText, securityConfigTextArea, false, objectMapper, jsonHighlighter);
         });
         securityTypeComboxBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
             sampleSecurityConfigContainer.getChildren().setAll(hyperlinks.get(newValue));
@@ -110,7 +110,7 @@ public class AddConnectionModalController extends ModalController {
         AuthProvider authProvider = authProviderManager.getAuthProvider(authConfig.name());
         securityTypeComboxBox.getSelectionModel().select(authProvider);
         try {
-            ViewUtils.setValueAndHighlightJsonInCodeArea(authProvider.toConfigText(authConfig), securityConfigTextArea, true, objectMapper, jsonHighlighter);
+            ViewUtils.setValueAndHighlightInCodeArea(authProvider.toConfigText(authConfig), securityConfigTextArea, true, objectMapper, jsonHighlighter);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

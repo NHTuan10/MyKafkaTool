@@ -7,12 +7,32 @@
     /*    blue*/
 }
 
-.json-number {
+.code-number {
     -fx-fill: cyan;
 }
 
-.json-string {
+.code-string {
     -fx-fill: green;
+}
+
+.code-comment {
+    -fx-fill: gray;
+}
+
+.code-keyword {
+    -fx-fill: cyan;
+}
+
+.code-type {
+    -fx-fill: pink;
+}
+
+.protobuf-field-name {
+    -fx-fill: white;
+}
+
+.protobuf-option-name {
+    -fx-fill: white;
 }
 
 .json-start-or-end-array {
