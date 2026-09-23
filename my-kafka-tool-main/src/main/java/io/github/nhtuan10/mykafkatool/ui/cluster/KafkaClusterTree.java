@@ -503,11 +503,11 @@ public class KafkaClusterTree {
                 throw new RuntimeException("Unexpected error when connecting to cluster");
             }
             clusterTreeItem.setValue(cluster);
-            if (callBackAfterClusterConnected != null) {
-                callBackAfterClusterConnected.run();
-            }
 //            topicListTreeItem = clusterTreeItem.getKafkaTopicListTreeItem();
 //            consumerGroupListTreeItem = clusterTreeItem.getConsumerGroupListTreeItem();
+        }
+        if (callBackAfterClusterConnected != null) {
+            callBackAfterClusterConnected.run();
         }
         clusterTreeItem.removeKafkaTopicListTreeItem();
         clusterTreeItem.removeConsumerGroupListTreeItem();
