@@ -18,6 +18,7 @@ import org.fxmisc.richtext.SelectionImpl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SearchableCodeArea extends StackPane {
     @Getter
@@ -45,11 +46,7 @@ public class SearchableCodeArea extends StackPane {
         // Search logic on text change
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                selectionList.forEach(s -> {
-                    s.deselect();
-                    codeArea.removeSelection(s);
-                });
-                selectionList.clear();
+                clearAllSelections(selectionList);
                 if (!newVal.isEmpty()) {
                     String text = codeArea.getText().toLowerCase();
                     int index = text.indexOf(newVal.toLowerCase());
@@ -73,10 +70,13 @@ public class SearchableCodeArea extends StackPane {
             }
         });
 
+        AtomicInteger noEscapePressed = new AtomicInteger();
+
         // Hide search box on ESC, or go to next on ENTER
         searchField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
                 searchField.setVisible(false);
+                noEscapePressed.incrementAndGet();
                 codeArea.requestFocus();
             }
         });
@@ -85,6 +85,7 @@ public class SearchableCodeArea extends StackPane {
         KeyCombination ctrlF = new KeyCodeCombination(KeyCode.F, KeyCombination.META_DOWN);
         codeArea.setOnKeyPressed(event -> {
             if (ctrlF.match(event)) {
+                noEscapePressed.set(0);
                 searchField.setVisible(!searchField.isVisible());
                 if (searchField.isVisible()) {
                     searchField.requestFocus();
@@ -93,11 +94,26 @@ public class SearchableCodeArea extends StackPane {
                     codeArea.requestFocus();
                 }
                 event.consume();
+            } else if (event.getCode() == KeyCode.ESCAPE) {
+                int n = noEscapePressed.incrementAndGet();
+                searchField.setVisible(false);
+                if (n >= 2) {
+                    noEscapePressed.set(0);
+                    clearAllSelections(selectionList);
+                }
             }
         });
 
         this.getChildren().addAll(new VirtualizedScrollPane<>(codeArea), searchField);
         // Combine into a StackPane root
 //        StackPane root = new StackPane(codeArea, searchField);
+    }
+
+    private void clearAllSelections(List<Selection> selectionList) {
+        selectionList.forEach(s -> {
+            s.deselect();
+            codeArea.removeSelection(s);
+        });
+        selectionList.clear();
     }
 }
