@@ -552,6 +552,7 @@ public class KafkaClusterTree {
         selectedItem.getParent().getChildren().remove(selectedItem);
         try {
             userPreferenceManager.removeClusterFromUserPreference(cluster.getName());
+            Utils.removeClusterFromStateMap(treeItemToMessageTableStateMap, cluster.getName());
         } catch (IOException e) {
             log.error("Error when removing connection", e);
             throw new RuntimeException(e);

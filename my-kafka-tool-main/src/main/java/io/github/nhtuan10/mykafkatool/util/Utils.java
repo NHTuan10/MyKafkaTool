@@ -149,4 +149,12 @@ public class Utils {
             }
         }
     }
+
+    public static void removeClusterFromStateMap(Map<String, KafkaMessageView.MessageTableState> treeItemToMessageTableStateMap, String clusterName) {
+        treeItemToMessageTableStateMap.entrySet().removeIf(entry -> {
+            String key = entry.getKey();
+            String[] arr = key.split(":");
+            return ("topic".equals(arr[0]) && clusterName.equals(arr[1]) && arr.length == 3) || ("partition".equals(arr[0]) && clusterName.equals(arr[1]) && arr.length == 4);
+        });
+    }
 }
