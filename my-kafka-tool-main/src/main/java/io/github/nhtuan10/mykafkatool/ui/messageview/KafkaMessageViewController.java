@@ -100,6 +100,7 @@ public class KafkaMessageViewController {
     @Getter
     private EventSubscriber<ApplicationUIEvent> appReadyEventSubscriber;
 
+    @Getter
     private final Map<String, KafkaMessageView.MessageTableState> treeItemToMessageTableStateMap;
 
 //    private final Map<String, KafkaMessageView.MessageTableState> persitableMsgTableStateMap;
@@ -372,7 +373,7 @@ public class KafkaMessageViewController {
         } else if (treeItem instanceof KafkaPartitionTreeItem<?>) {
             KafkaPartition partition = (KafkaPartition) treeItem.getValue();
             KafkaTopic topic = partition.topic();
-            return "partition:" + topic.cluster().getId() + topic.name() + partition.id();
+            return "partition:" + topic.cluster().getId() + ":" + topic.name() + ":" + partition.id();
         }
         return null;
     }

@@ -168,7 +168,7 @@ public class MainController {
         this.eventDispatcher.addMessageEventSubscriber(kafkaMessageView.getMessageEventSubscriber());
 
         blockAppProgressInd.visibleProperty().bindBidirectional(isBlockingAppUINeeded);
-        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaRegistryManager, eventDispatcher, userPreferenceManager);
+        this.kafkaClusterTree = new KafkaClusterTree(clusterManager, clusterTree, schemaRegistryManager, eventDispatcher, userPreferenceManager, kafkaMessageView.getTreeItemToMessageTableStateMap());
 
         allTabs = Set.of(dataTab, propertiesTab, cgOffsetsTab);
 

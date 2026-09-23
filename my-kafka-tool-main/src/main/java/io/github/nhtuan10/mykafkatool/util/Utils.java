@@ -5,6 +5,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaMessage;
 import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTableItem;
+import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageView;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -133,4 +134,19 @@ public class Utils {
 //        }
     }
 
+    public static void updateStateMap(Map<String, KafkaMessageView.MessageTableState> treeItemToMessageTableStateMap, String oldClusterName, String newClusterName) {
+        for (Map.Entry<String, KafkaMessageView.MessageTableState> entry : treeItemToMessageTableStateMap.entrySet()) {
+            String key = entry.getKey();
+            String[] arr = key.split(":");
+            if ("topic".equals(arr[0]) && oldClusterName.equals(arr[1]) && arr.length == 3) {
+                String newKey = "topic:" + newClusterName + ":" + arr[2];
+                treeItemToMessageTableStateMap.put(newKey, entry.getValue());
+                treeItemToMessageTableStateMap.remove(key);
+            } else if ("partition".equals(arr[0]) && oldClusterName.equals(arr[1]) && arr.length == 4) {
+                String newKey = "partition:" + newClusterName + ":" + arr[2] + ":" + arr[3];
+                treeItemToMessageTableStateMap.put(newKey, entry.getValue());
+                treeItemToMessageTableStateMap.remove(key);
+            }
+        }
+    }
 }
