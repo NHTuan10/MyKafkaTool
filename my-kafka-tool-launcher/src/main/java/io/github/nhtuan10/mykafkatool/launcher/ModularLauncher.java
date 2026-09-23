@@ -82,7 +82,7 @@ public class ModularLauncher {
             log.error("Cannot get latest version from maven", e);
         }
         String versionToUpgrade = installedVer;
-        if (newVersion.compareTo(installedVer) > 0) {
+        if (Runtime.Version.parse(newVersion).compareTo(Runtime.Version.parse(installedVer)) > 0) {
 
             boolean agreeToUpgrade = showDialog(newVersion);
 //            UpgradeDialog.main(new String[]{newVersion});
