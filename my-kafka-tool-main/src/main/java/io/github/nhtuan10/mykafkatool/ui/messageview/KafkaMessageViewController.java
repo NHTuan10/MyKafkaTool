@@ -16,6 +16,7 @@ import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker;
+import io.github.nhtuan10.mykafkatool.ui.control.SearchableCodeArea;
 import io.github.nhtuan10.mykafkatool.ui.event.*;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
@@ -149,7 +150,7 @@ public class KafkaMessageViewController {
     private KafkaMessageTable kafkaMessageTable;
 
     @FXML
-    private CodeArea valueTextArea;
+    private SearchableCodeArea valueSearchableCodeArea;
 
     @FXML
     private Pane valueSchemaContainer;
@@ -295,7 +296,7 @@ public class KafkaMessageViewController {
                 });
             }
         });
-        this.messageEventSubscriber = new MessageEventSubscriber(valueTextArea, objectMapper, jsonHighlighter);
+        this.messageEventSubscriber = new MessageEventSubscriber(valueSearchableCodeArea.getCodeArea(), objectMapper, jsonHighlighter);
     }
 
     private boolean isChildPartition(String partitionTreeItemKey, KafkaTopicTreeItem<?> topicTreeItem) {
@@ -382,7 +383,7 @@ public class KafkaMessageViewController {
         if (!(newValue instanceof KafkaTopicTreeItem<?> || newValue instanceof KafkaPartitionTreeItem<?>)) {
             return;
         }
-        ViewUtils.setValueAndHighlightInCodeArea("", valueTextArea, false, objectMapper, jsonHighlighter);
+        ViewUtils.setValueAndHighlightInCodeArea("", valueSearchableCodeArea.getCodeArea(), false, objectMapper, jsonHighlighter);
         this.selectedTreeItem = newValue;
         KafkaConsumerService.MessagePollingPosition messagePollingPosition = msgPollingPosition.getValue();
         isPolling.set(false);

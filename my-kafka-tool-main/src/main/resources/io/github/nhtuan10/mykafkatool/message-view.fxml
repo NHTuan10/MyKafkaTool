@@ -2,6 +2,7 @@
 
 <?import io.github.nhtuan10.mykafkatool.ui.control.DateTimePicker?>
 <?import io.github.nhtuan10.mykafkatool.ui.control.NonNegativeIntTextField?>
+<?import io.github.nhtuan10.mykafkatool.ui.control.SearchableCodeArea?>
 <?import io.github.nhtuan10.mykafkatool.ui.messageview.KafkaMessageTable?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -207,13 +208,17 @@
             </children>
         </AnchorPane>
         <AnchorPane minHeight="50" prefHeight="150.0" prefWidth="993.0">
-            <VirtualizedScrollPane prefHeight="200.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"
-                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                <content>
-                    <CodeArea fx:id="valueTextArea" editable="false" wrapText="true">
-                    </CodeArea>
-                </content>
-            </VirtualizedScrollPane>
+            <!--            <VirtualizedScrollPane prefHeight="200.0" prefWidth="993.0" AnchorPane.bottomAnchor="0.0"-->
+            <!--                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
+            <!--                <content>-->
+            <!--                    <CodeArea fx:id="valueTextArea" editable="false" wrapText="true">-->
+            <!--                    </CodeArea>-->
+            <SearchableCodeArea prefHeight="200.0" prefWidth="993.0" AnchorPane.bottomAnchor="5.0"
+                                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+                                fx:id="valueSearchableCodeArea" editable="false" wrapText="true">
+            </SearchableCodeArea>
+            <!--                </content>-->
+            <!--            </VirtualizedScrollPane>-->
         </AnchorPane>
     </items>
 
