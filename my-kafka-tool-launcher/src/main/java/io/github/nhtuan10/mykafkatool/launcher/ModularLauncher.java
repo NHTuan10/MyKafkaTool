@@ -7,6 +7,7 @@ import io.github.nhtuan10.modular.api.module.ModuleLoadConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenArtifactInfo;
 import org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinate;
@@ -82,7 +83,7 @@ public class ModularLauncher {
             log.error("Cannot get latest version from maven", e);
         }
         String versionToUpgrade = installedVer;
-        if (Runtime.Version.parse(newVersion).compareTo(Runtime.Version.parse(installedVer)) > 0) {
+        if (new ComparableVersion(newVersion).compareTo(new ComparableVersion(installedVer)) > 0) {
 
             boolean agreeToUpgrade = showDialog(newVersion);
 //            UpgradeDialog.main(new String[]{newVersion});
