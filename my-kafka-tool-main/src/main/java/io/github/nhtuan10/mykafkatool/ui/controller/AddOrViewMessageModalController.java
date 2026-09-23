@@ -19,6 +19,7 @@ import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.Highlighter;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
+import io.github.nhtuan10.mykafkatool.ui.control.SearchableCodeArea;
 import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 import io.github.nhtuan10.mykafkatool.ui.event.PartitionUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.event.TopicUIEvent;
@@ -84,9 +85,14 @@ public class AddOrViewMessageModalController extends ModalController {
     @FXML
     private TextArea keyTextArea;
     @FXML
-    private CodeArea valueTextArea;
+    private SearchableCodeArea valueSearchableCodeArea;
     @FXML
+    private SearchableCodeArea schemaSearchableCodeArea;
+
+    private CodeArea valueTextArea;
+
     private CodeArea schemaTextArea;
+
     @FXML
     private Button closeBtn;
     @FXML
@@ -183,6 +189,8 @@ public class AddOrViewMessageModalController extends ModalController {
 
     @FXML
     void initialize() {
+        valueTextArea = valueSearchableCodeArea.getCodeArea();
+        schemaTextArea = schemaSearchableCodeArea.getCodeArea();
         valueContentTypeComboBox.setOnAction(event -> {
             enableDisableSchemaInput();
             DisplayType displayType = serDesHelper.getPluggableSerialize(valueContentTypeComboBox.getValue()).getDisplayType();

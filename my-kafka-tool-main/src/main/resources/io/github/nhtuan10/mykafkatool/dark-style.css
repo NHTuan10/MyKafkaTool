@@ -107,3 +107,9 @@
     -fx-text-fill: white;
 /*!important;*/
 }
+
+.search-result-label {
+    -fx-text-fill: white;
+    -fx-background-color: -color-bg-default;
+
+}

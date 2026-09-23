@@ -91,3 +91,9 @@
 .cg-info-label {
     -fx-font-size: 15;
 }
+
+
+.search-result-label {
+    -fx-text-fill: black;
+    -fx-background-color: -color-bg-default;
+}

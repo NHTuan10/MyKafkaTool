@@ -3,10 +3,12 @@ package io.github.nhtuan10.mykafkatool.ui.control;
 
 import javafx.beans.NamedArg;
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import lombok.Getter;
 import org.fxmisc.flowless.VirtualizedScrollPane;
@@ -31,7 +33,7 @@ public class SearchableCodeArea extends StackPane {
         codeArea.setEditable(editable);
         codeArea.setWrapText(wrapText);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-        codeArea.replaceText(0, 0, "Hello world!\nThis is a RichTextFX CodeArea search example.");
+//        codeArea.replaceText(0, 0, "Hello world!\nThis is a RichTextFX CodeArea search example.");
 
         // Create search text field
         searchField = new TextField();
@@ -39,18 +41,49 @@ public class SearchableCodeArea extends StackPane {
         searchField.setMaxWidth(200);
         searchField.setVisible(false); // Hidden by default
 
+        Label label = new Label("");
+        label.setVisible(false); // Hidden by default
+        label.getStyleClass().add("search-result-label");
+//        label.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 5px;");
+//        label.setBackground(new Background(new BackgroundFill(Color.WHITE, null, Insets.EMPTY)));
+
+//        Background defaultSearchFieldBackground = searchField.get
+//        Color color;
+//        searchField.applyCss();
+//
+//        Paint textPaint = (Paint) searchField.queryAccessibleAttribute(AccessibleAttribute.TEXT);
+//        if (textPaint instanceof Color) {
+//            color = (Color) textPaint;
+//        }
+        HBox hBox = new HBox(searchField, label);
+        hBox.setSpacing(10);
+        hBox.setMaxHeight(30);
+        hBox.setPrefHeight(30);
+        hBox.setAlignment(Pos.TOP_RIGHT);
+//        hBox.setPadding(new Insets(0, 5, 0, 0));
         // Position it inside the StackPane at the top right
-        StackPane.setAlignment(searchField, Pos.TOP_RIGHT);
-        StackPane.setMargin(searchField, new javafx.geometry.Insets(10));
+//        StackPane.setAlignment(searchField, Pos.TOP_RIGHT);
+//        StackPane.setMargin(searchField, new javafx.geometry.Insets(10));
+        StackPane.setAlignment(hBox, Pos.TOP_RIGHT);
+        StackPane.setMargin(hBox, new javafx.geometry.Insets(10));
         List<Selection> selectionList = new ArrayList<>();
         // Search logic on text change
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 clearAllSelections(selectionList);
+                label.setText("");
+//                searchField.setBackground(defaultSearchFieldBackground);
                 if (!newVal.isEmpty()) {
                     String text = codeArea.getText().toLowerCase();
                     int index = text.indexOf(newVal.toLowerCase());
+                    if (index < 0) {
+                        label.setText("0 Match");
+//                        searchField.setBackground(Background.fill(javafx.scene.paint.Color.RED));
+                        return;
+                    }
+                    int noMatch = 0;
                     while (index >= 0) {
+                        noMatch++;
                         int endIndex = index + newVal.length();
                         //                    codeArea.selectRange(index, endIndex);
                         Selection<Collection<String>, String, Collection<String>> selection = new SelectionImpl<>(newVal + "@" + index, codeArea
@@ -63,9 +96,12 @@ public class SearchableCodeArea extends StackPane {
                         selectionList.add(selection);
                         codeArea.addSelection(selection);
                         selection.selectRange(index, endIndex);
-                        codeArea.requestFollowCaret();
+                        if (selectionList.size() == 1) {
+                            codeArea.requestFollowCaret();
+                        }
                         index = text.indexOf(newVal.toLowerCase(), endIndex);
                     }
+                    label.setText(noMatch + " Match");
                 }
             }
         });
@@ -76,6 +112,7 @@ public class SearchableCodeArea extends StackPane {
         searchField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
                 searchField.setVisible(false);
+                label.setVisible(false);
                 noEscapePressed.incrementAndGet();
                 codeArea.requestFocus();
             }
@@ -87,6 +124,7 @@ public class SearchableCodeArea extends StackPane {
             if (ctrlF.match(event)) {
                 noEscapePressed.set(0);
                 searchField.setVisible(!searchField.isVisible());
+                label.setVisible(!label.isVisible());
                 if (searchField.isVisible()) {
                     searchField.requestFocus();
                     searchField.selectAll();
@@ -104,7 +142,7 @@ public class SearchableCodeArea extends StackPane {
             }
         });
 
-        this.getChildren().addAll(new VirtualizedScrollPane<>(codeArea), searchField);
+        this.getChildren().addAll(new VirtualizedScrollPane<>(codeArea), hBox);
         // Combine into a StackPane root
 //        StackPane root = new StackPane(codeArea, searchField);
     }
