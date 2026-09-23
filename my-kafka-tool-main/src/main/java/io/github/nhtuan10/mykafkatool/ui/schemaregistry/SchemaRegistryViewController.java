@@ -10,6 +10,7 @@ import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.Highlighter;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.ProtobufHighlighter;
+import io.github.nhtuan10.mykafkatool.ui.control.SearchableCodeArea;
 import io.github.nhtuan10.mykafkatool.ui.event.EventSubscriber;
 import io.github.nhtuan10.mykafkatool.ui.event.SchemaRegistryUIEvent;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
@@ -56,6 +57,8 @@ public class SchemaRegistryViewController extends SplitPane {
     private SchemaEditableTable schemaEditableTable;
 
     @FXML
+    private SearchableCodeArea schemaRegistrySearchableCodeArea;
+
     private CodeArea schemaRegistryTextArea;
 
     @Inject
@@ -87,6 +90,7 @@ public class SchemaRegistryViewController extends SplitPane {
 //        schemaRegistryTextArea.textProperty().addListener((obs, oldText, newText) -> {
 //            ViewUtils.setValueAndHighlightJsonInCodeArea(newText, schemaRegistryTextArea, true, objectMapper, jsonHighlighter);
 //        });
+        schemaRegistryTextArea = schemaRegistrySearchableCodeArea.getCodeArea();
         schemaEditableTable.addEventHandler(SelectedSchemaEvent.SELECTED_SCHEMA_EVENT_TYPE,
                 (event) -> {
                     String schema = event.getData().getValue().getRight();
