@@ -9,8 +9,15 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.StackPane;
 import lombok.Getter;
+import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.Selection;
+import org.fxmisc.richtext.SelectionImpl;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class SearchableCodeArea extends StackPane {
     @Getter
@@ -34,15 +41,34 @@ public class SearchableCodeArea extends StackPane {
         // Position it inside the StackPane at the top right
         StackPane.setAlignment(searchField, Pos.TOP_RIGHT);
         StackPane.setMargin(searchField, new javafx.geometry.Insets(10));
-
+        List<Selection> selectionList = new ArrayList<>();
         // Search logic on text change
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && !newVal.isEmpty()) {
-                String text = codeArea.getText();
-                int index = text.toLowerCase().indexOf(newVal.toLowerCase());
-                if (index >= 0) {
-                    codeArea.selectRange(index, index + newVal.length());
-                    codeArea.requestFollowCaret();
+            if (newVal != null) {
+                selectionList.forEach(s -> {
+                    s.deselect();
+                    codeArea.removeSelection(s);
+                });
+                selectionList.clear();
+                if (!newVal.isEmpty()) {
+                    String text = codeArea.getText().toLowerCase();
+                    int index = text.indexOf(newVal.toLowerCase());
+                    while (index >= 0) {
+                        int endIndex = index + newVal.length();
+                        //                    codeArea.selectRange(index, endIndex);
+                        Selection<Collection<String>, String, Collection<String>> selection = new SelectionImpl<>(newVal + "@" + index, codeArea
+                                //                            ,path -> {
+                                //                        // make rendered selection path look like a yellow highlighter
+                                //                        path.setStrokeWidth(0);
+                                //                        path.setFill(Color.YELLOW);
+                                //                    }
+                        );
+                        selectionList.add(selection);
+                        codeArea.addSelection(selection);
+                        selection.selectRange(index, endIndex);
+                        codeArea.requestFollowCaret();
+                        index = text.indexOf(newVal.toLowerCase(), endIndex);
+                    }
                 }
             }
         });
@@ -70,7 +96,7 @@ public class SearchableCodeArea extends StackPane {
             }
         });
 
-        this.getChildren().addAll(codeArea, searchField);
+        this.getChildren().addAll(new VirtualizedScrollPane<>(codeArea), searchField);
         // Combine into a StackPane root
 //        StackPane root = new StackPane(codeArea, searchField);
     }
