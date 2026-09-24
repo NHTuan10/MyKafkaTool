@@ -59,6 +59,7 @@ public class SearchableCodeArea extends StackPane {
         hBox.setMaxHeight(30);
         hBox.setPrefHeight(30);
         hBox.setAlignment(Pos.TOP_RIGHT);
+        hBox.setVisible(false);
         StackPane.setAlignment(hBox, Pos.TOP_RIGHT);
         StackPane.setMargin(hBox, new javafx.geometry.Insets(10));
 
@@ -108,6 +109,7 @@ public class SearchableCodeArea extends StackPane {
             prevButton.setVisible(true);
             nextButton.setVisible(true);
             selectAllCheckBox.setVisible(true);
+            hBox.setVisible(true);
         };
 
         Runnable hideSearchBar = () -> {
@@ -116,6 +118,7 @@ public class SearchableCodeArea extends StackPane {
             prevButton.setVisible(false);
             nextButton.setVisible(false);
             selectAllCheckBox.setVisible(false);
+            hBox.setVisible(false);
         };
 
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
