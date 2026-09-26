@@ -3,7 +3,7 @@ package io.github.nhtuan10.mykafkatool.ui.messageview;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.nhtuan10.mykafkatool.MyKafkaToolApplication;
-import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
+import io.github.nhtuan10.mykafkatool.api.model.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.serdes.SerDesHelper;
 import io.github.nhtuan10.mykafkatool.ui.Filter;

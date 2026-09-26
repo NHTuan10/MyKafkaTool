@@ -2,6 +2,7 @@ package io.github.nhtuan10.mykafkatool.userpreference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.nhtuan10.mykafkatool.api.model.UserPreference;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.SharedPrettyPrintObjectMapper;
 import jakarta.inject.Inject;
@@ -13,10 +14,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.USER_PREF_FILENAME;
+import static io.github.nhtuan10.mykafkatool.api.constant.AppConstant.USER_PREF_FILENAME;
 
 @AppScoped
-public class UserPreferenceRepoImpl implements UserPreferenceRepo {
+public class UserPreferenceRepoImpl implements io.github.nhtuan10.mykafkatool.api.model.UserPreferenceRepo {
     @Getter
     private final String userPrefFilePath = getDefaultUserPreferenceFilePath();
     //    private final String filePath;
@@ -55,7 +56,7 @@ public class UserPreferenceRepoImpl implements UserPreferenceRepo {
     }
 
     public static String getDefaultUserPreferenceFilePath() {
-        return MessageFormat.format("{0}/{1}", UserPreferenceRepo.getDefaultUserPrefDir(), USER_PREF_FILENAME);
+        return MessageFormat.format("{0}/{1}", io.github.nhtuan10.mykafkatool.api.model.UserPreferenceRepo.getDefaultUserPrefDir(), USER_PREF_FILENAME);
     }
 
     public UserPreference parseUserPreference(String data) throws JsonProcessingException {

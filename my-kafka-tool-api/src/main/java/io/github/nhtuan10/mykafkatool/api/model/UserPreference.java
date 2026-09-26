@@ -1,7 +1,4 @@
-package io.github.nhtuan10.mykafkatool.userpreference;
-
-import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
-import io.github.nhtuan10.mykafkatool.constant.Theme;
+package io.github.nhtuan10.mykafkatool.api.model;
 
 import java.util.List;
 

@@ -2,13 +2,13 @@ package io.github.nhtuan10.mykafkatool;
 
 import io.github.nhtuan10.modular.api.Modular;
 import io.github.nhtuan10.modular.context.ModularContext;
+import io.github.nhtuan10.mykafkatool.api.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.api.model.Theme;
+import io.github.nhtuan10.mykafkatool.api.model.UserPreference;
 import io.github.nhtuan10.mykafkatool.configuration.AppComponent;
 import io.github.nhtuan10.mykafkatool.configuration.DaggerAppComponent;
-import io.github.nhtuan10.mykafkatool.constant.AppConstant;
-import io.github.nhtuan10.mykafkatool.constant.Theme;
 import io.github.nhtuan10.mykafkatool.ui.UIErrorHandler;
 import io.github.nhtuan10.mykafkatool.ui.controller.MainController;
-import io.github.nhtuan10.mykafkatool.userpreference.UserPreference;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -25,7 +25,7 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.util.List;
 
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
+import static io.github.nhtuan10.mykafkatool.api.constant.AppConstant.APP_NAME;
 
 @Slf4j
 public class MyKafkaToolApplication extends javafx.application.Application {

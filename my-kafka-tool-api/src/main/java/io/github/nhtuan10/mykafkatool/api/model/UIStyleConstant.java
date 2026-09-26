@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.constant;
+package io.github.nhtuan10.mykafkatool.api.model;
 
 public class UIStyleConstant {
     public static final String ERROR_ROW_CLASS = "error-row";

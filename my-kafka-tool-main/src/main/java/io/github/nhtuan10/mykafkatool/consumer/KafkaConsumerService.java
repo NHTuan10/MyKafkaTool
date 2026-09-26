@@ -39,7 +39,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
+import static io.github.nhtuan10.mykafkatool.api.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
 @AppScoped

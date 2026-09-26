@@ -1,10 +1,11 @@
 package io.github.nhtuan10.mykafkatool.ui.messageview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.nhtuan10.mykafkatool.api.constant.AppConstant;
+import io.github.nhtuan10.mykafkatool.api.model.UIStyleConstant;
+import io.github.nhtuan10.mykafkatool.api.model.UserPreferenceRepo;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.RichTextFxObjectMapper;
-import io.github.nhtuan10.mykafkatool.constant.AppConstant;
-import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.consumer.KafkaConsumerService;
 import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
@@ -22,7 +23,6 @@ import io.github.nhtuan10.mykafkatool.ui.topic.KafkaPartitionTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicTreeItem;
 import io.github.nhtuan10.mykafkatool.ui.util.ModalUtils;
 import io.github.nhtuan10.mykafkatool.ui.util.ViewUtils;
-import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepo;
 import io.github.nhtuan10.mykafkatool.util.PersistableConcurrentHashMap;
 import io.github.nhtuan10.mykafkatool.util.Utils;
 import jakarta.inject.Inject;
@@ -59,8 +59,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_POLL_TIME_MS;
+import static io.github.nhtuan10.mykafkatool.api.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
+import static io.github.nhtuan10.mykafkatool.api.constant.AppConstant.DEFAULT_POLL_TIME_MS;
 
 @Slf4j
 //TODO: consider to refactor this class

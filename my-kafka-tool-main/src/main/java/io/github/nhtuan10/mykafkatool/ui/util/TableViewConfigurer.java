@@ -5,7 +5,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import io.github.nhtuan10.mykafkatool.annotation.FilterableTableItemField;
 import io.github.nhtuan10.mykafkatool.annotation.TableViewColumn;
-import io.github.nhtuan10.mykafkatool.constant.UIStyleConstant;
+import io.github.nhtuan10.mykafkatool.api.model.UIStyleConstant;
 import io.github.nhtuan10.mykafkatool.ui.StageHolder;
 import io.github.nhtuan10.mykafkatool.ui.control.BaseTableCell;
 import io.github.nhtuan10.mykafkatool.ui.control.CopyTextMenuItem;

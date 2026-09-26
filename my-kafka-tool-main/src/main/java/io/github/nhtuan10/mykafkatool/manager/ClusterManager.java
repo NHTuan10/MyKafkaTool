@@ -1,9 +1,9 @@
 package io.github.nhtuan10.mykafkatool.manager;
 
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.api.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
-import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.consumer.creator.ConsumerCreator;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;

@@ -19,7 +19,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.OFFSET_RESET_LATEST;
+import static io.github.nhtuan10.mykafkatool.api.constant.AppConstant.OFFSET_RESET_LATEST;
 
 @Slf4j
 public class ConsumerTest {

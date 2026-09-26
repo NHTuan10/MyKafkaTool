@@ -11,6 +11,7 @@ import io.github.nhtuan10.modular.api.annotation.ModularService;
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthProvider;
+import io.github.nhtuan10.mykafkatool.api.model.UserPreferenceRepo;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableDeserializer;
 import io.github.nhtuan10.mykafkatool.api.serdes.PluggableSerializer;
 import io.github.nhtuan10.mykafkatool.auth.NoAuthProvider;
@@ -33,7 +34,6 @@ import io.github.nhtuan10.mykafkatool.serdes.serializer.StringSerializer;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.JsonHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.codehighlighting.ProtobufHighlighter;
 import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
-import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepo;
 import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceRepoImpl;
 import jakarta.inject.Named;
 

@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.constant;
+package io.github.nhtuan10.mykafkatool.api.model;
 
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;

@@ -1,8 +1,9 @@
 package io.github.nhtuan10.mykafkatool.userpreference;
 
 import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
+import io.github.nhtuan10.mykafkatool.api.model.Theme;
+import io.github.nhtuan10.mykafkatool.api.model.UserPreference;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
-import io.github.nhtuan10.mykafkatool.constant.Theme;
 import jakarta.inject.Inject;
 import lombok.Locked;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 @AppScoped
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class UserPreferenceManager {
-    private final UserPreferenceRepo userPreferenceRepo;
+    private final io.github.nhtuan10.mykafkatool.api.model.UserPreferenceRepo userPreferenceRepo;
 
     @Locked.Write
     public void saveUserPreference(UserPreference userPreference) throws IOException {

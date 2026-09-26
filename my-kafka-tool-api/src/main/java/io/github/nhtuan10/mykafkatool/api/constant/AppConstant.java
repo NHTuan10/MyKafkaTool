@@ -1,4 +1,4 @@
-package io.github.nhtuan10.mykafkatool.constant;
+package io.github.nhtuan10.mykafkatool.api.constant;
 
 public class AppConstant {
     public static final String APP_NAME = "MyKafkaTool";

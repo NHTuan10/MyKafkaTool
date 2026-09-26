@@ -3,14 +3,14 @@
 //import io.github.nhtuan10.mykafkatool.api.SchemaRegistryManager;
 //import io.github.nhtuan10.mykafkatool.api.exception.ClusterNameExistedException;
 //import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
-//import io.github.nhtuan10.mykafkatool.constant.AppConstant;
+//import io.github.nhtuan10.mykafkatool.api.constant.AppConstant;
 //import io.github.nhtuan10.mykafkatool.manager.ClusterManager;
 //import io.github.nhtuan10.mykafkatool.model.kafka.KafkaPartition;
 //import io.github.nhtuan10.mykafkatool.model.kafka.KafkaTopic;
 //import io.github.nhtuan10.mykafkatool.ui.consumergroup.ConsumerGroupListTreeItem;
 //import io.github.nhtuan10.mykafkatool.ui.event.EventDispatcher;
 //import io.github.nhtuan10.mykafkatool.ui.topic.KafkaTopicListTreeItem;
-//import io.github.nhtuan10.mykafkatool.userpreference.UserPreference;
+//import io.github.nhtuan10.mykafkatool.api.model.UserPreference;
 //import io.github.nhtuan10.mykafkatool.userpreference.UserPreferenceManager;
 //import javafx.collections.FXCollections;
 //import javafx.collections.ObservableList;

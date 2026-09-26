@@ -1,11 +1,12 @@
-package io.github.nhtuan10.mykafkatool.userpreference;
+package io.github.nhtuan10.mykafkatool.api.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.io.IOException;
 import java.text.MessageFormat;
 
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.APP_NAME;
+import static io.github.nhtuan10.mykafkatool.api.constant.AppConstant.APP_NAME;
+
 
 public interface UserPreferenceRepo {
     UserPreference loadUserPreference() throws IOException;

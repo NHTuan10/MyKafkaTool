@@ -2,9 +2,9 @@ package io.github.nhtuan10.mykafkatool.consumer.creator;
 
 import io.github.nhtuan10.mykafkatool.api.Config;
 import io.github.nhtuan10.mykafkatool.api.auth.AuthConfig;
+import io.github.nhtuan10.mykafkatool.api.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.api.model.KafkaCluster;
 import io.github.nhtuan10.mykafkatool.configuration.annotation.AppScoped;
-import io.github.nhtuan10.mykafkatool.constant.AppConstant;
 import io.github.nhtuan10.mykafkatool.manager.AuthProviderManager;
 import jakarta.inject.Inject;
 import lombok.*;
@@ -18,8 +18,8 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
-import static io.github.nhtuan10.mykafkatool.constant.AppConstant.OFFSET_RESET_EARLIER;
+import static io.github.nhtuan10.mykafkatool.api.constant.AppConstant.DEFAULT_MAX_POLL_RECORDS;
+import static io.github.nhtuan10.mykafkatool.api.constant.AppConstant.OFFSET_RESET_EARLIER;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 @AppScoped
