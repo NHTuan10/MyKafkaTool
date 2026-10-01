@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @AppScoped
@@ -73,6 +74,14 @@ public class UserPreferenceManager {
         userPreference.connections().removeIf(cluster -> cluster.getName().equals(clusterName));
         saveUserPreference(userPreference);
 
+    }
+
+    @Locked.Write
+    public void reorderClustersInUserPreference(List<KafkaCluster> orderedClusters) throws IOException {
+        UserPreference userPreference = loadUserPreference();
+        userPreference.connections().clear();
+        userPreference.connections().addAll(orderedClusters);
+        saveUserPreference(userPreference);
     }
 
     public String getUserPrefFilePath() {

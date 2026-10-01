@@ -29,6 +29,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.stage.Stage;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -87,6 +89,70 @@ public class KafkaClusterTree {
 //        clusterTree.setEditable(true);
 //        clusterTree.setCellFactory((Callback<TreeView<String>, TreeCell<String>>) p -> new TextFieldTreeCellImpl());
         clusterTree.setCellFactory(param -> new TreeCell<>() {
+            {
+                setOnDragDetected(event -> {
+                    if (getItem() instanceof KafkaCluster cluster) {
+                        Dragboard db = startDragAndDrop(TransferMode.MOVE);
+                        ClipboardContent content = new ClipboardContent();
+                        content.putString(cluster.getName());
+                        db.setContent(content);
+                        setOpacity(0.5);
+                        event.consume();
+                    }
+                });
+
+                setOnDragOver(event -> {
+                    if (event.getGestureSource() != this
+                            && event.getDragboard().hasString()
+                            && getItem() instanceof KafkaCluster) {
+                        event.acceptTransferModes(TransferMode.MOVE);
+                    }
+                    event.consume();
+                });
+
+                setOnDragEntered(event -> {
+                    if (event.getGestureSource() != this
+                            && event.getDragboard().hasString()
+                            && getItem() instanceof KafkaCluster) {
+                        setStyle("-fx-border-color: dodgerblue transparent transparent transparent; -fx-border-width: 2 0 0 0;");
+                    }
+                });
+
+                setOnDragExited(event -> setStyle(null));
+
+                setOnDragDropped(event -> {
+                    Dragboard db = event.getDragboard();
+                    boolean success = false;
+                    if (db.hasString() && getItem() instanceof KafkaCluster) {
+                        String draggedName = db.getString();
+                        ObservableList<TreeItem<Object>> children = getTreeView().getRoot().getChildren();
+                        TreeItem<Object> draggedItem = children.stream()
+                                .filter(ti -> ((KafkaCluster) ti.getValue()).getName().equals(draggedName))
+                                .findFirst().orElse(null);
+                        if (draggedItem != null && draggedItem != getTreeItem()) {
+                            int draggedIndex = children.indexOf(draggedItem);
+                            int targetIndex = children.indexOf(getTreeItem());
+                            children.remove(draggedIndex);
+                            if (draggedIndex < targetIndex) targetIndex--;
+                            children.add(targetIndex, draggedItem);
+                            List<KafkaCluster> orderedClusters = children.stream()
+                                    .map(ti -> (KafkaCluster) ti.getValue())
+                                    .toList();
+                            try {
+                                userPreferenceManager.reorderClustersInUserPreference(orderedClusters);
+                            } catch (IOException e) {
+                                log.error("Error when reordering clusters", e);
+                            }
+                            success = true;
+                        }
+                    }
+                    event.setDropCompleted(success);
+                    event.consume();
+                });
+
+                setOnDragDone(event -> setOpacity(1.0));
+            }
+
             @Override
             protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
