@@ -102,17 +102,19 @@ public class KafkaClusterTree {
                 setOnDragOver(event -> {
                     if (event.getGestureSource() != this
                             && event.getDragboard().hasString()
-                            && getItem() instanceof KafkaCluster) {
+                            && (getItem() instanceof KafkaCluster || isEmpty())) {
                         event.acceptTransferModes(TransferMode.MOVE);
                     }
                     event.consume();
                 });
 
                 setOnDragEntered(event -> {
-                    if (event.getGestureSource() != this
-                            && event.getDragboard().hasString()
-                            && getItem() instanceof KafkaCluster) {
-                        setStyle("-fx-border-color: dodgerblue transparent transparent transparent; -fx-border-width: 2 0 0 0;");
+                    if (event.getGestureSource() != this && event.getDragboard().hasString()) {
+                        if (getItem() instanceof KafkaCluster) {
+                            setStyle("-fx-border-color: dodgerblue transparent transparent transparent; -fx-border-width: 2 0 0 0;");
+                        } else if (isEmpty()) {
+                            setStyle("-fx-border-color: dodgerblue transparent transparent transparent; -fx-border-width: 2 0 0 0;");
+                        }
                     }
                 });
 
@@ -121,18 +123,20 @@ public class KafkaClusterTree {
                 setOnDragDropped(event -> {
                     Dragboard db = event.getDragboard();
                     boolean success = false;
-                    if (db.hasString() && getItem() instanceof KafkaCluster) {
+                    if (db.hasString() && (getItem() instanceof KafkaCluster || isEmpty())) {
                         String draggedName = db.getString();
                         ObservableList<TreeItem<Object>> children = getTreeView().getRoot().getChildren();
                         TreeItem<Object> draggedItem = children.stream()
                                 .filter(ti -> ((KafkaCluster) ti.getValue()).getName().equals(draggedName))
                                 .findFirst().orElse(null);
-                        if (draggedItem != null && draggedItem != getTreeItem()) {
-                            int draggedIndex = children.indexOf(draggedItem);
-                            int targetIndex = children.indexOf(getTreeItem());
-                            children.remove(draggedIndex);
-                            if (draggedIndex < targetIndex) targetIndex--;
-                            children.add(targetIndex, draggedItem);
+                        if (draggedItem != null) {
+                            children.remove(draggedItem);
+                            if (isEmpty() || !children.contains(getTreeItem())) {
+                                children.add(draggedItem);
+                            } else {
+                                int targetIndex = children.indexOf(getTreeItem());
+                                children.add(targetIndex, draggedItem);
+                            }
                             List<KafkaCluster> orderedClusters = children.stream()
                                     .map(ti -> (KafkaCluster) ti.getValue())
                                     .toList();
