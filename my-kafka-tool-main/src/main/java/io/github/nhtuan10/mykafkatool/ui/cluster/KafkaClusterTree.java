@@ -27,10 +27,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.stage.Stage;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +37,7 @@ import org.apache.kafka.clients.admin.NewTopic;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -93,8 +91,8 @@ public class KafkaClusterTree {
                 setOnDragDetected(event -> {
                     if (getItem() instanceof KafkaCluster cluster) {
                         Dragboard db = startDragAndDrop(TransferMode.MOVE);
-                        ClipboardContent content = new ClipboardContent();
-                        content.putString(cluster.getName());
+                        Map<DataFormat, Object> content = new HashMap<>();
+                        content.put(DataFormat.PLAIN_TEXT, cluster.getName());
                         db.setContent(content);
                         setOpacity(0.5);
                         event.consume();
